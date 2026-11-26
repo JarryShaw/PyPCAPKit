@@ -484,6 +484,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -828,6 +829,20 @@ read; otherwise no payload is buffered and <code class="docutils literal notrans
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._parse_keywords">
+<span class="sig-name descname"><span class="pre">_parse_keywords</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._parse_keywords" title="Link to this definition">¶</a></dt>
+<dd><p>Keyword arguments a reassembled payload’s parse takes
+under <code class="docutils literal notranslate"><span class="pre">analyze</span></code>: the stops and context the engine parses its frames
+with, as <a class="reference internal" href="../engines/engine.html#pcapkit.foundation.engines.engine.EngineBase._setup_traceflow" title="pcapkit.foundation.engines.engine.EngineBase._setup_traceflow"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EngineBase._setup_traceflow</span></code></a> hands
+them over (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2946">#2946</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)">dict</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>, Any]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1276,7 +1291,7 @@ its flow’s next frame.</p>
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

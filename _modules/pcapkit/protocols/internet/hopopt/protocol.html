@@ -477,6 +477,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -977,17 +978,17 @@
         <span class="k">if</span> <span class="n">extension</span><span class="p">:</span>
             <span class="c1"># NOTE: As an IPv6 extension header the upper layer belongs to the enclosing</span>
             <span class="c1"># IPv6 header, so hold NoPayload here so that membership does not raise (#2487).</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="n">NoPayload</span><span class="p">()</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="n">NoPayload</span><span class="o">.</span><span class="n">from_fields</span><span class="p">()</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
             <span class="k">return</span> <span class="n">hopopt</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">hopopt</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">hopopt</span><span class="o">.</span><span class="n">length</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="HOPOPT.make">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.protocol.HOPOPT.make">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
              <span class="nb">next</span><span class="p">:</span> <span class="s1">'Enum_TransType | int'</span> <span class="o">=</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">UDP</span><span class="p">,</span>
              <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes] | Option]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
-             <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+             <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
              <span class="nb">len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_HOPOPT'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
@@ -3081,7 +3082,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

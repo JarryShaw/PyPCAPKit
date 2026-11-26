@@ -477,6 +477,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -889,21 +890,41 @@
             <span class="n">ext</span><span class="o">.</span><span class="n">_reasm</span> <span class="o">=</span> <span class="n">ReassemblyManager</span><span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="n">reasm</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">reasm</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ext</span><span class="o">.</span><span class="n">_reasm</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                                            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">adapters</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: Only as the extraction's engine: a third-party one runs this one's ``run`` for the</span>
-        <span class="c1"># global header alone (``Extractor.record_header``), and parses no frame with them.</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">parse</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ext</span><span class="p">,</span> <span class="s1">'_exeng'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="n">keywords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame_keywords</span><span class="p">()</span> <span class="k">if</span> <span class="n">parse</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">keywords</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
-        <span class="c1"># NOTE: Only those set, so an ``analyze`` taking no keywords, as a custom</span>
-        <span class="c1"># ``__protocol_type__``'s may, is called as before when the extraction sets none.</span>
-        <span class="n">keywords</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Any]</span>
-        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span> <span class="o">!=</span> <span class="s1">'none'</span><span class="p">:</span>
-            <span class="n">keywords</span><span class="p">[</span><span class="s1">'layer'</span><span class="p">]</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span>
-        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span> <span class="o">!=</span> <span class="s1">'null'</span><span class="p">:</span>
-            <span class="n">keywords</span><span class="p">[</span><span class="s1">'protocol'</span><span class="p">]</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span>
-        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exctx</span><span class="p">:</span>
-            <span class="n">keywords</span><span class="p">[</span><span class="s1">'__context__'</span><span class="p">]</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exctx</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">reasm</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ext</span><span class="o">.</span><span class="n">_reasm</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">reasm</span><span class="o">.</span><span class="n">_parse_keywords</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">keywords</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EngineBase._frame_keywords">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.EngineBase._frame_keywords">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_frame_keywords</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[dict[str, Any]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The stops and context this engine parses its frames with, those set.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The extraction's ``layer``, ``protocol`` and ``context`` keywords,</span>
+<span class="sd">            only those set, so an ``analyze`` taking no keywords, as a custom</span>
+<span class="sd">            ``__protocol_type__``'s may, is called as before when the extraction</span>
+<span class="sd">            sets none; :data:`None` unless this engine is the extraction's, since a</span>
+<span class="sd">            third-party one runs this one's ``run`` for the global header alone</span>
+<span class="sd">            (:meth:`Extractor.record_header</span>
+<span class="sd">            &lt;pcapkit.foundation.extraction.Extractor.record_header&gt;`) and parses</span>
+<span class="sd">            no frame with them.</span>
+
+<span class="sd">        """</span>
+        <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ext</span><span class="p">,</span> <span class="s1">'_exeng'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">keywords</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Any]</span>
+        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">keywords</span><span class="p">[</span><span class="s1">'layer'</span><span class="p">]</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span>
+        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">keywords</span><span class="p">[</span><span class="s1">'protocol'</span><span class="p">]</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span>
+        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exctx</span><span class="p">:</span>
+            <span class="n">keywords</span><span class="p">[</span><span class="s1">'context'</span><span class="p">]</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exctx</span>
+        <span class="k">return</span> <span class="n">keywords</span></div>
 
 
 <div class="viewcode-block" id="EngineBase._reassemble">
@@ -974,8 +995,15 @@
 
 <div class="viewcode-block" id="EngineBase._setup_traceflow">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.EngineBase._setup_traceflow">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_traceflow</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_traceflow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parse</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Drop each enabled flow tracer this engine has no adapter for.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            parse: whether this engine parses its frames with the extraction's</span>
+<span class="sd">                stops and context; as the extraction's engine, it then hands them</span>
+<span class="sd">                to each flow tracer kept, whose ``analyze`` reassemblers parse</span>
+<span class="sd">                their payloads with them as the frames' next layers are</span>
+<span class="sd">                (:issue:`2946`)</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            AttributeWarning: For each flow tracer dropped; once, naming them</span>
@@ -991,6 +1019,12 @@
         <span class="n">held</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tracer</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ext</span><span class="o">.</span><span class="n">_trace</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">tracer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
         <span class="n">adapters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__traceflow__</span>
         <span class="n">unsupported</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">held</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">adapters</span><span class="p">]</span>
+
+        <span class="n">keywords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame_keywords</span><span class="p">()</span> <span class="k">if</span> <span class="n">parse</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">keywords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tracer</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ext</span><span class="o">.</span><span class="n">_trace</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">tracer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unsupported</span><span class="p">:</span>
+                    <span class="n">tracer</span><span class="o">.</span><span class="n">_parse_keywords</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">keywords</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">unsupported</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -1243,7 +1277,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

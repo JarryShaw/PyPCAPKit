@@ -9,8 +9,8 @@ and flow tracer, not the built-ins alone. Its breaking changes, each marked
 signatures: extraction takes grouped options, and the reassembly, flow-tracing
 and registry interfaces take keyword-only parameters, one name per concept.
 
-pcapkit.corekit
----------------
+:mod:`pcapkit.corekit`
+----------------------
 
 Added
 ~~~~~
@@ -74,8 +74,8 @@ Fixed
   :data:`~pcapkit.utilities.importlib.import_lock`, which every first import
   already holds (:issue:`2870`, :pr:`2917`).
 
-pcapkit.dumpkit
----------------
+:mod:`pcapkit.dumpkit`
+----------------------
 
 Added
 ~~~~~
@@ -93,8 +93,8 @@ Added
   format beside ``PCAP``, since ``PCAPNG`` already names the protocol class
   (:issue:`3047`, :pr:`3051`).
 
-pcapkit.foundation
-------------------
+:mod:`pcapkit.foundation`
+-------------------------
 
 Changed
 ~~~~~~~
@@ -332,8 +332,8 @@ Fixed
   payload kept :class:`~pcapkit.protocols.misc.raw.protocol.Raw` now records
   its port as ``protocol`` rather than ``None`` (:issue:`2933`, :pr:`2940`).
 
-pcapkit.protocols
------------------
+:mod:`pcapkit.protocols`
+------------------------
 
 Added
 ~~~~~
@@ -580,8 +580,8 @@ Fixed
   resizing it raised :exc:`BufferError`. It is copied through a view released
   at once (:issue:`2807`, :pr:`2808`).
 
-pcapkit.vendor
---------------
+:mod:`pcapkit.vendor`
+---------------------
 
 Fixed
 ~~~~~

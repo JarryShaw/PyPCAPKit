@@ -477,6 +477,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -714,6 +715,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.extension_header</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionHeader</span> <span class="k">as</span> <span class="n">Enum_ExtensionHeader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.extlen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ext_len_to_octets</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_VALUE</span><span class="p">,</span> <span class="n">NoValueType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Internet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_ext.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span> <span class="k">as</span> <span class="n">Data_IPv6_Ext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_ext.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span> <span class="k">as</span> <span class="n">Schema_IPv6_Ext</span>
@@ -724,10 +726,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Protocol</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextRegistry</span><span class="p">,</span> <span class="n">ProtocolContext</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">_NextHeaderData</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
@@ -1090,7 +1093,7 @@
         <span class="k">if</span> <span class="n">extension</span><span class="p">:</span>
             <span class="c1"># NOTE: As an IPv6 extension header the upper layer belongs to the enclosing</span>
             <span class="c1"># IPv6 header, so hold NoPayload here so that membership does not raise (#2487).</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="n">NoPayload</span><span class="p">()</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="n">NoPayload</span><span class="o">.</span><span class="n">from_fields</span><span class="p">()</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
             <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_PT'</span><span class="p">,</span> <span class="n">generic_ext</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'_PT'</span><span class="p">,</span> <span class="n">generic_ext</span><span class="p">),</span> <span class="n">next_header</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">ext_len</span><span class="p">,</span>
                                        <span class="n">payload</span><span class="o">=</span><span class="n">rest</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">ext_len</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">):])</span></div>
@@ -1125,16 +1128,14 @@
 <span class="sd">                or code that does not fit in one octet.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            **Declared, and keyword-only**, each for its own reason.</span>
-
 <span class="sd">            These keywords stay *declared*, unlike :meth:`read`'s own,</span>
 <span class="sd">            because ``_check_construction_keywords()`` builds its allowlist</span>
 <span class="sd">            from the :func:`inspect.signature` of ``make`` and the other</span>
 <span class="sd">            construction methods of every class in the MRO, plus any</span>
 <span class="sd">            ``__keywords__``. Hiding them in ``**kwargs`` **breaks</span>
 <span class="sd">            construction**: a plain</span>
-<span class="sd">            ``IPv6_Ext(next=..., len=..., data=..., payload=...)`` raises</span>
-<span class="sd">            ``UnsupportedCall: IPv6_Ext: unexpected keyword(s)``. The</span>
+<span class="sd">            ``IPv6_Ext.from_fields(next=..., len=..., data=..., payload=...)``</span>
+<span class="sd">            raises ``UnexpectedKeyword: IPv6_Ext: unexpected keyword(s)``. The</span>
 <span class="sd">            ``__keywords__`` escape hatch would cover that too, but a set</span>
 <span class="sd">            there is unioned down the MRO, so every subclass would accept</span>
 <span class="sd">            these names and drop them. A ``make`` signature can be kept from</span>
@@ -1144,21 +1145,8 @@
 <span class="sd">            so a subclass that overrides ``make`` accepts ``len`` or ``data``</span>
 <span class="sd">            only where its own ``make`` declares it (:issue:`2286`).</span>
 
-<span class="sd">            They are keyword-*only* because this class is also a base and each</span>
-<span class="sd">            subclass's ``make`` puts different names in the same positions. As</span>
-<span class="sd">            positional parameters they draw pylint ``arguments-renamed``</span>
-<span class="sd">            warnings (:meth:`ESP.make &lt;pcapkit.protocols.internet.esp.protocol.ESP.make&gt;` has ``spi``, ``seq`` and</span>
-<span class="sd">            ``next`` where these have ``next``, ``len`` and ``data``) and mypy</span>
-<span class="sd">            ``[override]`` errors. With no positional parameters there is no</span>
-<span class="sd">            position to disagree about, and the allowlist is unaffected because</span>
-<span class="sd">            :func:`~pcapkit.protocols.protocol._declared_keywords` collects ``KEYWORD_ONLY``</span>
-<span class="sd">            parameters too.</span>
-<span class="sd">            Nothing calls a protocol's ``make`` positionally; ``__init__``</span>
-<span class="sd">            spreads ``**kwargs`` into it.</span>
-
 <span class="sd">            ``read`` needs none of this for ``error``: it arrives on the</span>
-<span class="sd">            *parse* path alone, which ``__init__`` exempts from the</span>
-<span class="sd">            construction check. ``alias`` arrives on a rebuild too, from</span>
+<span class="sd">            *parse* path alone, which has no construction check. ``alias`` arrives on a rebuild too, from</span>
 <span class="sd">            :meth:`_make_data`, so this class lists it in</span>
 <span class="sd">            :attr:`~pcapkit.protocols.protocol.Protocol.__keywords__`</span>
 <span class="sd">            (:issue:`2768`).</span>
@@ -1183,6 +1171,61 @@
     <span class="c1">##########################################################################</span>
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
+
+    <span class="nd">@overload</span>  <span class="c1"># pragma: no cover</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes] | bytes'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                 <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+                 <span class="n">layer</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+                 <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[str | ProtocolBase | Type[ProtocolBase]]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+                 <span class="n">context</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
+    <span class="nd">@overload</span>  <span class="c1"># pragma: no cover</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+                 <span class="n">context</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                 <span class="o">**</span><span class="n">fields</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="c1"># NOTE: The ignore is the one on ``Protocol.__init__``, for ``**fields`` against ``/`` (#3081).</span>
+<div class="viewcode-block" id="IPv6_Ext.__init__">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes] | bytes | NoValueType'</span> <span class="o">=</span> <span class="n">NO_VALUE</span><span class="p">,</span>  <span class="c1"># type: ignore[misc] # pylint: disable=super-init-not-called</span>
+                 <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                 <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">layer</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[str | ProtocolBase | Type[ProtocolBase]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">context</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                 <span class="o">**</span><span class="n">fields</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Parse a protocol instance from its octets, or construct one from its fields.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            file: Source packet stream; omitted to construct.</span>
+<span class="sd">            length: Length of packet data.</span>
+<span class="sd">            extension: If the protocol is used as an IPv6 extension header. As</span>
+<span class="sd">                the next layer of an IP header, the one that header hands on.</span>
+<span class="sd">            layer: As :meth:`Protocol.__init__</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;`.</span>
+<span class="sd">            protocol: As :meth:`Protocol.__init__</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;`.</span>
+<span class="sd">            context: As :meth:`Protocol.__init__</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;`.</span>
+<span class="sd">            **fields: As :meth:`Protocol.__init__</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;`.</span>
+
+<span class="sd">        .. versionchanged:: 1.8.0</span>
+
+<span class="sd">           Declares ``extension``, its only parse keyword besides the stops</span>
+<span class="sd">           and the context; the enclosing IP version reaches it from the layer</span>
+<span class="sd">           carrying it alone (:issue:`2840`).</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">NoValueType</span><span class="p">):</span>
+            <span class="n">fields</span><span class="p">[</span><span class="s1">'extension'</span><span class="p">]</span> <span class="o">=</span> <span class="n">extension</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_construct</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_fields</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">fields</span><span class="p">))</span>
+            <span class="k">return</span>
+        <span class="c1"># NOTE: ``_parse``, inline, so a parse adds no frame per layer (#1610).</span>
+        <span class="n">keywords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_parse</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="p">{</span><span class="s1">'extension'</span><span class="p">:</span> <span class="n">extension</span><span class="p">},</span> <span class="n">fields</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">packet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span></div>
+
 
     <span class="nd">@overload</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes] | bytes'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
@@ -1358,7 +1401,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

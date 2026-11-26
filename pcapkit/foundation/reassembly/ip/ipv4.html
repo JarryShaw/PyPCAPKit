@@ -484,6 +484,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -755,9 +756,9 @@ is as follows, with <code class="docutils literal notranslate"><span class="pre"
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><code class="docutils literal notranslate"><span class="pre">packet</span></code> is what <a class="reference internal" href="../../analysis/ip.html#pcapkit.foundation.analysis.ip.ip_datagram" title="pcapkit.foundation.analysis.ip.ip_datagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">ip_datagram()</span></code></a>
-parses <code class="docutils literal notranslate"><span class="pre">payload</span></code> to, unless <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code> names another
-protocol, or the extraction’s engine parses its frames with stops or a
-context, which this parse takes too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2933">#2933</a>). It is analysed on
+parses <code class="docutils literal notranslate"><span class="pre">payload</span></code> to, given the stops and context the extraction’s
+engine parses its frames with (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2933">#2933</a>), unless
+<code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code> names another protocol. It is analysed on
 the first read, not when the datagram is submitted. A datagram is
 submitted for <em>every</em> frame
 whose <strong>DF</strong> flag is clear – an unfragmented one included – and the analysis
@@ -913,7 +914,7 @@ fragments had not arrived yet”. See
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

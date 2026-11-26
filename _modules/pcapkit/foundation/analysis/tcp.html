@@ -477,6 +477,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -599,9 +600,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">AppType_TCP</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextRegistry</span><span class="p">,</span> <span class="n">ProtocolContext</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">TCP_Datagram</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
@@ -610,7 +612,10 @@
 
 <div class="viewcode-block" id="tcp_datagram">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/analysis/tcp.html#pcapkit.foundation.analysis.tcp.tcp_datagram">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">tcp_datagram</span><span class="p">(</span><span class="n">datagram</span><span class="p">:</span> <span class="s1">'TCP_Datagram'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[ProtocolBase]'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tcp_datagram</span><span class="p">(</span><span class="n">datagram</span><span class="p">:</span> <span class="s1">'TCP_Datagram'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                 <span class="n">layer</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[str | ProtocolBase | Type[ProtocolBase]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">context</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[ProtocolBase]'</span><span class="p">:</span>  <span class="c1"># pylint: disable=line-too-long</span>
 <span class="w">    </span><span class="sd">"""Parse the payload of a TCP datagram reassembled by</span>
 <span class="sd">    :class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP`.</span>
 
@@ -626,6 +631,12 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        datagram: Reassembled datagram (:term:`reasm.tcp.datagram`).</span>
+<span class="sd">        layer: Layer to parse until, by name; :data:`None` sets no stop.</span>
+<span class="sd">        protocol: Protocol to parse until, by name, class or instance;</span>
+<span class="sd">            :data:`None` sets no stop.</span>
+<span class="sd">        context: Caller supplied parsing context, in any shape</span>
+<span class="sd">            :func:`~pcapkit.interface.core.extract` takes (cf.</span>
+<span class="sd">            :mod:`pcapkit.corekit.context`); :data:`None` supplies none.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The parsed payload. A payload reported as one contiguous run is parsed</span>
@@ -635,10 +646,17 @@
 
 <span class="sd">    Note:</span>
 <span class="sd">        :attr:`Datagram.packet &lt;pcapkit.foundation.reassembly.tcp.data.Datagram.packet&gt;`</span>
-<span class="sd">        holds the same result, parsed on its first read, unless the</span>
-<span class="sd">        reassembly's ``__protocol_type__`` names another protocol, which then</span>
-<span class="sd">        parses it instead, or the engine parsed its frames with stops or a</span>
-<span class="sd">        context, which that parse takes too (:issue:`2933`).</span>
+<span class="sd">        holds what this returns given the stops and context the extraction's</span>
+<span class="sd">        engine parses its frames with (:issue:`2933`), parsed on its first</span>
+<span class="sd">        read, unless the reassembly's ``__protocol_type__`` names another</span>
+<span class="sd">        protocol, which then parses it instead.</span>
+
+<span class="sd">    .. versionchanged:: 1.8.0</span>
+
+<span class="sd">       Takes keyword-only ``layer``, ``protocol`` and ``context``, as the</span>
+<span class="sd">       parse behind :attr:`Datagram.packet</span>
+<span class="sd">       &lt;pcapkit.foundation.reassembly.tcp.data.Datagram.packet&gt;` does</span>
+<span class="sd">       (:issue:`2947`).</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datagram</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
@@ -646,7 +664,10 @@
     <span class="n">transport</span> <span class="o">=</span> <span class="n">Enum_TransportProtocol</span><span class="o">.</span><span class="n">tcp</span>
     <span class="n">ports</span> <span class="o">=</span> <span class="p">(</span><span class="n">TCP</span><span class="o">.</span><span class="n">_make_port</span><span class="p">(</span><span class="n">datagram</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">src</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">transport</span><span class="p">),</span>  <span class="c1"># pylint: disable=protected-access</span>
              <span class="n">TCP</span><span class="o">.</span><span class="n">_make_port</span><span class="p">(</span><span class="n">datagram</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">dst</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">transport</span><span class="p">))</span>  <span class="c1"># pylint: disable=protected-access</span>
-    <span class="k">return</span> <span class="n">_analyze_payload</span><span class="p">(</span><span class="n">TCP</span><span class="p">,</span> <span class="n">ports</span><span class="p">,</span> <span class="n">datagram</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span></div>
+    <span class="c1"># NOTE: Only those set, as the engine hands them (``EngineBase._setup_reassembly``).</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="p">((</span><span class="s1">'layer'</span><span class="p">,</span> <span class="n">layer</span><span class="p">),</span> <span class="p">(</span><span class="s1">'protocol'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">),</span> <span class="p">(</span><span class="s1">'context'</span><span class="p">,</span> <span class="n">context</span><span class="p">))</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">options</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>  <span class="c1"># type: dict[str, Any]</span>
+    <span class="k">return</span> <span class="n">_analyze_payload</span><span class="p">(</span><span class="n">TCP</span><span class="p">,</span> <span class="n">ports</span><span class="p">,</span> <span class="n">datagram</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 
@@ -665,7 +686,8 @@
 <span class="sd">        ports: The datagram's ``(source, destination)`` ports.</span>
 <span class="sd">        payload: The reassembled payload.</span>
 <span class="sd">        **kwargs: Keyword arguments for ``analyze``: the stops and context</span>
-<span class="sd">            the engine parses its frames with, which the reassembly hands on.</span>
+<span class="sd">            the engine parses its frames with, which the reassembly hands on,</span>
+<span class="sd">            or those :func:`tcp_datagram` is given.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The parsed payload.</span>
@@ -704,7 +726,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -477,6 +477,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -622,6 +623,7 @@
     <span class="s1">'InfoError'</span><span class="p">,</span> <span class="s1">'IPError'</span><span class="p">,</span> <span class="s1">'EnumError'</span><span class="p">,</span> <span class="s1">'ComparisonError'</span><span class="p">,</span>         <span class="c1"># TypeError</span>
     <span class="s1">'RegistryError'</span><span class="p">,</span> <span class="s1">'FieldError'</span><span class="p">,</span>                                  <span class="c1"># TypeError</span>
     <span class="s1">'FormatError'</span><span class="p">,</span> <span class="s1">'UnsupportedCall'</span><span class="p">,</span>                               <span class="c1"># AttributeError</span>
+    <span class="s1">'UnexpectedKeyword'</span><span class="p">,</span>                                            <span class="c1"># AttributeError, TypeError</span>
     <span class="s1">'FileError'</span><span class="p">,</span> <span class="s1">'UnsupportedOperation'</span><span class="p">,</span>                            <span class="c1"># IOError</span>
     <span class="s1">'FileExists'</span><span class="p">,</span>                                                   <span class="c1"># FileExistsError</span>
     <span class="s1">'FileNotFound'</span><span class="p">,</span>                                                 <span class="c1"># FileNotFoundError</span>
@@ -1287,6 +1289,21 @@
 
 
 
+<div class="viewcode-block" id="UnexpectedKeyword">
+<a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnexpectedKeyword">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">UnexpectedKeyword</span><span class="p">(</span><span class="n">UnsupportedCall</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Unexpected keyword argument(s).</span>
+
+<span class="sd">    A :exc:`TypeError` as well, as Python's own refusal of an unknown keyword</span>
+<span class="sd">    is, so ``except TypeError`` catches a refused construction keyword</span>
+<span class="sd">    (:issue:`2840`).</span>
+
+<span class="sd">    .. versionadded:: 1.8.0</span>
+
+<span class="sd">    """</span></div>
+
+
+
 <span class="c1">##############################################################################</span>
 <span class="c1"># IOError session.</span>
 <span class="c1">##############################################################################</span>
@@ -1624,7 +1641,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

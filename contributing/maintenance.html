@@ -484,6 +484,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -725,8 +726,8 @@ bodies</p></td>
 <tr class="row-odd"><td><p>Board sweep</p></td>
 <td><p>13 min</p></td>
 <td><p>the same channels, then every open and closed item’s labels, heads,
-mergeability, file lists and check runs; <code class="docutils literal notranslate"><span class="pre">main</span></code>’s CI; the CI reports; the
-Actions queue; host load</p></td>
+mergeability, file lists and check runs; <code class="docutils literal notranslate"><span class="pre">main</span></code>’s CI and <code class="docutils literal notranslate"><span class="pre">develop</span></code>’s Unit
+Tests; the CI reports; the Actions queue; host load</p></td>
 <td><p>the post gate, the queue thresholds, the host guard</p></td>
 <td><p>pushes, labels, verdicts, rebase notes, dispatches, cancelled runs, pruned
 worktrees</p></td>
@@ -816,9 +817,9 @@ milestones are left to their automation.</p></li>
 <li><p><strong>Lead the report with what is ready to merge</strong>: <code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">good-to-go</span></code> at the
 current head, every required check run completed, none failed. Experimental legs
 count against neither condition; a <a class="reference internal" href="workflows.html#ktlo-tier"><span class="std std-ref">KTLO</span></a> leg is left out of the
-tally, but its failing test ids are diffed against <code class="docutils literal notranslate"><span class="pre">main</span></code>’s, because the leg can
-read green while its tests fail. Re-read the checks once they complete: a verdict
-given while CI ran says nothing about how it ended.</p></li>
+tally, but its failing test ids are diffed against the base branch’s, because the
+leg can read green while its tests fail. Re-read the checks once they complete: a
+verdict given while CI ran says nothing about how it ended.</p></li>
 <li><p><strong>Dispatch to fill every gap</strong>: a reviewer for each pull request at
 <code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">pending</span></code> on its head, a worker for each <code class="docutils literal notranslate"><span class="pre">pending</span></code> issue, with the
 label moved in the same pass, and a fix worker for each <code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">good-to-go</span></code> pull
@@ -827,7 +828,8 @@ request whose required check went red. Holds: <a class="reference internal" href
 failing step, never reporting a bare red mark. A timeout kill and a lost runner
 both read <em>the operation was canceled</em>; compare the job’s duration against its cap
 across several runs before deciding which.</p></li>
-<li><p><strong>Watch</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code> (<a class="reference internal" href="#the-post-merge-routine-and-the-main-ci-watch">The Post-Merge Routine and the Main-CI Watch</a>).</p></li>
+<li><p><strong>Watch</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code> (<a class="reference internal" href="#the-post-merge-routine-and-the-main-ci-watch">The Post-Merge Routine and the Main-CI Watch</a>), and
+<code class="docutils literal notranslate"><span class="pre">develop</span></code>’s Unit Tests push runs too.</p></li>
 <li><p><strong>Keep the loops scheduled</strong>, re-creating any that expired.</p></li>
 <li><p><strong>Rebase every conflicting pull request unasked</strong>, and post a rebase note: old and
 new heads, whether the patch id is unchanged, the CI tally on the old head, and the
@@ -935,7 +937,7 @@ reporting the pull request as ready.</p>
     FX --&gt; PU[&quot;Worker pushes at queue under 40,&lt;br/&gt;then the coordinator verifies&lt;br/&gt;review: pending&quot;]
     PU --&gt; R
     VD --&gt;|GOOD TO GO| GG[&quot;One-line verdict&lt;br/&gt;review: good-to-go&quot;]
-    GG --&gt; RDY{&quot;Required checks completed green,&lt;br/&gt;no test failing that main passes?&quot;}
+    GG --&gt; RDY{&quot;Required checks completed green,&lt;br/&gt;no test failing that its base branch passes?&quot;}
     CI --&gt; RDY
     RDY --&gt;|no| FX
     RDY --&gt;|yes| M[&quot;Reported ready; the owner merges&quot;]
@@ -962,10 +964,11 @@ re-derived before it is relayed.</p></li>
 cell, Lint and deploy-pages are green, never held for a slow non-blocking leg.
 Once that leg finishes its failing test ids are re-read, since an experimental or
 KTLO leg ends green whatever its tests did. A merge wave supersedes every GraalPy
-run on <code class="docutils literal notranslate"><span class="pre">main</span></code>, so a pull request’s GraalPy leg may be the only full run there is.</p></li>
-<li><p><strong>A green, conflict-free pull request can still break</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code>: after a merge
-wave, merge it into the current <code class="docutils literal notranslate"><span class="pre">main</span></code> in a scratch tree and run the affected
-tests before calling it ready.</p></li>
+run on the base branch, so a pull request’s GraalPy leg may be the only full run
+there is.</p></li>
+<li><p><strong>A green, conflict-free pull request can still break its base branch</strong>: after a
+merge wave, merge it into the current head of its base (usually <code class="docutils literal notranslate"><span class="pre">develop</span></code>) in a
+scratch tree and run the affected tests before calling it ready.</p></li>
 <li><p><strong>Findings on an unmerged pull request go back to its original worker</strong>, which
 still holds the context, rather than to a new issue; a separate issue is for a
 pull request already merged or a concern genuinely apart from it.</p></li>
@@ -1049,15 +1052,15 @@ keeps its runs. <strong>Never cancelled</strong>: Create Release, Project Status
 Reports, any scheduled run, and the head’s own runs.</p></li>
 <li><p><strong>The latest-tier sweeps, locally</strong>: the project modules that only CI’s
 <code class="docutils literal notranslate"><span class="pre">latest</span></code> leg runs (Test Tiers on <a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a>) are run on a scratch tree of
-the new <code class="docutils literal notranslate"><span class="pre">main</span></code>, because a merge wave supersedes <code class="docutils literal notranslate"><span class="pre">main</span></code>’s runs before they
-finish.</p></li>
+the new head of the branch the merge landed on (usually <code class="docutils literal notranslate"><span class="pre">develop</span></code>), because a
+merge wave supersedes that branch’s runs before they finish.</p></li>
 <li><p><strong>Rebases</strong>: a pull request the merge made conflicting is rebased and noted, as in
-the sweep. One that is only behind is left alone: <code class="docutils literal notranslate"><span class="pre">main</span></code>’s ruleset requires
-branches to be up to date, every push to <code class="docutils literal notranslate"><span class="pre">main</span></code> puts every open pull request
-behind, and the owner merges through the bypass. Sync Develop’s pull request is
-neither rebased nor updated: its head, <code class="docutils literal notranslate"><span class="pre">sync/main</span></code>, is a mirror of <code class="docutils literal notranslate"><span class="pre">main</span></code> that
-each run overwrites, so a conflict is resolved in a pull request into <code class="docutils literal notranslate"><span class="pre">develop</span></code>
-(<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/3075">#3075</a>, <a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a>).</p></li>
+the sweep. One that is only behind is left alone: the <code class="docutils literal notranslate"><span class="pre">main</span></code> and <code class="docutils literal notranslate"><span class="pre">develop</span></code>
+rulesets both require branches to be up to date, so every push to either branch
+puts the open pull requests that target it behind, and the owner merges through
+the bypass. Sync Develop’s pull request is neither rebased nor updated: its head,
+<code class="docutils literal notranslate"><span class="pre">sync/main</span></code>, is a mirror of <code class="docutils literal notranslate"><span class="pre">main</span></code> that each run overwrites, so a conflict is
+resolved in a pull request into <code class="docutils literal notranslate"><span class="pre">develop</span></code> (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/3075">#3075</a>, <a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a>).</p></li>
 <li><p><strong>The changelog fold</strong>: the merged pull request’s entry is written into the
 release’s central changelog pull request (<a class="reference internal" href="releasing.html#release-lines"><span class="std std-ref">Release Lines</span></a>).</p></li>
 <li><p><strong>Worktrees and branch</strong>: the merged pull request’s worktrees become prunable, and
@@ -1079,10 +1082,10 @@ which it skips or stops rather than cancels (<a class="reference internal" href=
     X --&gt;|no| RC[&quot;Root-cause it this tick&quot;]
     RC --&gt; T[&quot;Fix verified: the failing module passes locally&quot;]
     T --&gt; FIX[&quot;Pushed straight to main,&lt;br/&gt;with no queue threshold&quot;]
-    </pre><p><strong>Read</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code> <strong>at job level.</strong> A run stays queued while one job waits, even with a
-job already failed. A non-blocking leg’s red check is a defect as well: such a leg may
-only warn and end green, so a step that can lose its runner is contained – capped,
-bounded, timed out – rather than excused.</p>
+    </pre><p><strong>Read</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code> <strong>at job level</strong>, and <code class="docutils literal notranslate"><span class="pre">develop</span></code>’s Unit Tests push runs too. A run
+stays queued while one job waits, even with a job already failed. A non-blocking leg’s
+red check is a defect as well: such a leg may only warn and end green, so a step that
+can lose its runner is contained – capped, bounded, timed out – rather than excused.</p>
 <p><strong>The scheduled workflows run on</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code> <strong>alone, with no</strong> <code class="docutils literal notranslate"><span class="pre">develop</span></code> <strong>leg</strong>, as
 ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3062">#3062</a>: they catch upstream drift, which both branches share, and
 <code class="docutils literal notranslate"><span class="pre">develop</span></code>’s own push and pull-request CI covers its changes.</p>
@@ -1178,8 +1181,8 @@ conservative:</p>
 elsewhere, which hold reviewers’ baselines and the coordinator’s landing trees.</p></li>
 <li><p><strong>Keep</strong> a locked tree; a live agent’s; one touched in the last 3 hours; one on an
 open pull request’s branch, so its agent can be resumed for the next round; one
-with uncommitted tracked edits not already on <code class="docutils literal notranslate"><span class="pre">main</span></code>; one with commits no merged
-pull request carries.</p></li>
+with uncommitted tracked edits not already on the branch the merges land on; one
+with commits no merged pull request carries.</p></li>
 <li><p><strong>Remove</strong> a clean tree whose head is, or is an earlier round of, a merged pull
 request’s head, and a tree whose every commit is upstream. Save its diff first, and
 never force past a lock: the lock is the signal.</p></li>
@@ -1209,8 +1212,8 @@ Develop owns: deleting it closes the pull request open from it (<a class="extlin
 <ul class="simple">
 <li><p>the conventions pages to read first, to follow over its own inference and to cite
 by name, with unsettled questions brought back as options and a recommendation;</p></li>
-<li><p>an explicit base sha to branch from – never <code class="docutils literal notranslate"><span class="pre">origin/main</span></code> by name, which sibling
-worktrees move – and a sample regeneration in the fresh tree;</p></li>
+<li><p>an explicit base sha to branch from – never <code class="docutils literal notranslate"><span class="pre">origin/develop</span></code> or <code class="docutils literal notranslate"><span class="pre">origin/main</span></code> by
+name, which sibling worktrees move – and a sample regeneration in the fresh tree;</p></li>
 <li><p>the issue, read in full and read-only;</p></li>
 <li><p>the test recipe: one module per process, run from inside the worktree with
 <code class="docutils literal notranslate"><span class="pre">pcapkit.__file__</span></code> asserted to resolve there – an editable install of the shared
@@ -1234,8 +1237,8 @@ anything of doubtful scope, and every <code class="docutils literal notranslate"
 other than the author’s – a worker run without a model override inherits the
 coordinator’s, so its reviewer names another; the load-bearing claims, ranked, with an
 instruction to falsify rather than bless; the pull request’s own diff as the thing
-under review, not <code class="docutils literal notranslate"><span class="pre">main</span></code>; the time budget; and a report that opens and closes with
-<code class="docutils literal notranslate"><span class="pre">GOOD</span> <span class="pre">TO</span> <span class="pre">GO</span></code> or <code class="docutils literal notranslate"><span class="pre">NEEDS</span> <span class="pre">CHANGES</span></code> at the sha, with each claim marked confirmed,
+under review, not its base branch; the time budget; and a report that opens and closes
+with <code class="docutils literal notranslate"><span class="pre">GOOD</span> <span class="pre">TO</span> <span class="pre">GO</span></code> or <code class="docutils literal notranslate"><span class="pre">NEEDS</span> <span class="pre">CHANGES</span></code> at the sha, with each claim marked confirmed,
 refuted or <code class="docutils literal notranslate"><span class="pre">UNVERIFIED</span></code>.</p>
 <p><strong>Everything the automation writes is as short as it can be while staying accurate</strong>
 – docs, docstrings, comments, pull request and issue bodies, verdicts and Discussion
@@ -1299,15 +1302,17 @@ carrying state or <code class="docutils literal notranslate"><span class="pre">r
 <section id="post-merge-sweep-runner">
 <h3>Post-Merge Sweep Runner<a class="headerlink" href="#post-merge-sweep-runner" title="Link to this heading">¶</a></h3>
 <ul class="simple">
-<li><p><strong>Input</strong>: a scratch tree of the new <code class="docutils literal notranslate"><span class="pre">main</span></code>.</p></li>
+<li><p><strong>Input</strong>: a scratch tree of the new head of the branch the merge landed on (usually
+<code class="docutils literal notranslate"><span class="pre">develop</span></code>).</p></li>
 <li><p>Regenerates the sample captures if the tree lacks them, then runs a fixed list of
 latest-tier modules – the RFC-constants, protocol-package, public-API, dead-helper,
 member-order, doc-claims, const-export and shared-context-variable guards, the
 schema and short-read round trips, and the dispatch registry and reachability
 checks – each in its own process with a time limit and the file-size cap.</p></li>
 <li><p>Asserts in each process that <a class="reference internal" href="../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> imports from the scratch tree, and
-prints each module’s summary line with its exit code. A red one is fixed and
-pushed straight to <code class="docutils literal notranslate"><span class="pre">main</span></code>.</p></li>
+prints each module’s summary line with its exit code. A red one is fixed on that
+branch, and pushed straight to it when it is <code class="docutils literal notranslate"><span class="pre">main</span></code>. A red <code class="docutils literal notranslate"><span class="pre">develop</span></code> is fixed
+through a pull request into <code class="docutils literal notranslate"><span class="pre">develop</span></code>, since no ruling allows a direct push there.</p></li>
 </ul>
 </section>
 <section id="worktree-pruner">
@@ -1316,10 +1321,11 @@ pushed straight to <code class="docutils literal notranslate"><span class="pre">
 <li><p>Applies <a class="reference internal" href="#worktree-cleanup">Worktree Cleanup</a>. Its inputs are the ids of live agents, the open pull
 requests’ branches, and a map from every sha a merged pull request ever had – its
 heads, its commits, both sides of each force-push – to that pull request, since
-squash merges and amended heads leave an agent’s own shas off <code class="docutils literal notranslate"><span class="pre">main</span></code>.</p></li>
+squash merges and amended heads leave an agent’s own shas off <code class="docutils literal notranslate"><span class="pre">main</span></code> and
+<code class="docutils literal notranslate"><span class="pre">develop</span></code>.</p></li>
 <li><p>A tree’s commits count as landed when <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">cherry</span></code> shows them upstream, or when
 every one maps to a merged pull request; its uncommitted edits count as landed when
-their diff reverse-applies to <code class="docutils literal notranslate"><span class="pre">main</span></code>’s index.</p></li>
+their diff reverse-applies to <code class="docutils literal notranslate"><span class="pre">main</span></code>’s or <code class="docutils literal notranslate"><span class="pre">develop</span></code>’s index.</p></li>
 <li><p>Has a dry run that only classifies. A real run saves each tree’s diff before the
 removal, never forces past a lock, runs <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">worktree</span> <span class="pre">prune</span></code>, and prints what it
 removed and what it kept, with the reason for each.</p></li>
@@ -1541,7 +1547,7 @@ the Main-CI Watch</a>)</p></td>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../_static/documentation_options.js?v=de230f84"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

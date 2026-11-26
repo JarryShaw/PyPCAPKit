@@ -477,6 +477,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -606,11 +607,12 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportProtocol</span> <span class="k">as</span> <span class="n">Enum_TransportProtocol</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextRegistry</span><span class="p">,</span> <span class="n">ProtocolContext</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Transport'</span><span class="p">]</span>
 
@@ -711,7 +713,11 @@
 <div class="viewcode-block" id="Transport.analyze">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport.analyze">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">analyze</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ports</span><span class="p">:</span> <span class="s1">'tuple[Enum_AppType, Enum_AppType]'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-renamed</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">analyze</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ports</span><span class="p">:</span> <span class="s1">'tuple[Enum_AppType, Enum_AppType]'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-renamed</span>
+                <span class="n">layer</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[str | ProtocolBase | Type[ProtocolBase]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">context</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Analyse packet payload.</span>
 
 <span class="sd">        Args:</span>
@@ -721,22 +727,27 @@
 <span class="sd">                :attr:`TCP.dst &lt;pcapkit.protocols.transport.tcp.protocol.TCP.dst&gt;` read</span>
 <span class="sd">                off a parsed header, resolved the same way.</span>
 <span class="sd">            payload: Packet payload.</span>
-<span class="sd">            **kwargs: Keyword arguments for the payload's constructor, such as</span>
-<span class="sd">                the stops and context a frame's next layer is parsed with.</span>
+<span class="sd">            layer: As :meth:`Protocol.analyze</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.analyze&gt;`.</span>
+<span class="sd">            protocol: As :meth:`Protocol.analyze</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.analyze&gt;`.</span>
+<span class="sd">            context: As :meth:`Protocol.analyze</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.analyze&gt;`.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`</span>
-<span class="sd">            instance. A payload that fails to parse is kept as</span>
+<span class="sd">            instance, looked up by the port :meth:`_decode_next_layer` looks a</span>
+<span class="sd">            frame's next layer up by: the lower one, unless only the higher one is</span>
+<span class="sd">            registered. A payload that fails to parse is kept as</span>
 <span class="sd">            :meth:`Protocol.analyze &lt;pcapkit.protocols.protocol.Protocol.analyze&gt;`</span>
-<span class="sd">            keeps one, its ``protocol`` the port looked up, as an :obj:`int`, as</span>
-<span class="sd">            a frame's fallback records the port :meth:`_decode_next_layer`</span>
-<span class="sd">            looked up. An empty payload is</span>
+<span class="sd">            keeps one, its ``protocol`` that port, as an :obj:`int`, as a frame's</span>
+<span class="sd">            fallback records it. An empty payload is</span>
 <span class="sd">            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, as in a</span>
 <span class="sd">            frame, and one past a stop this class meets is ``Raw``.</span>
 
 <span class="sd">        Important:</span>
-<span class="sd">            The annotation names the **base** registry because every transport</span>
-<span class="sd">            protocol shares this method while resolving its ports in a registry</span>
+<span class="sd">            The annotation names the **base** registry because each port-keyed</span>
+<span class="sd">            transport shares this method while resolving its ports in a registry</span>
 <span class="sd">            of its own, such as :class:`~pcapkit.const.reg.apptype.tcp.TCP`. A</span>
 <span class="sd">            caller that knows its transport gets the narrower type from</span>
 <span class="sd">            whatever handed it the pair, e.g. :meth:`TCP._make_ports</span>
@@ -750,14 +761,19 @@
 <span class="sd">            is tested against :attr:`__proto__` as it arrived, and the chosen</span>
 <span class="sd">            one is unwrapped through :meth:`AppType.__int__</span>
 <span class="sd">            &lt;pcapkit.const.reg.apptype.apptype.AppType.__int__&gt;` only when it</span>
-<span class="sd">            is a member; unwrapping anything else would make :obj:`None` raise</span>
-<span class="sd">            rather than fall back to</span>
-<span class="sd">            :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, and ``'80'``</span>
-<span class="sd">            dispatch as a port.</span>
+<span class="sd">            is a member. A port that is neither, such as :obj:`None` or</span>
+<span class="sd">            ``'80'``, is passed over for the other; where both are, the</span>
+<span class="sd">            destination is kept as it arrived. So a missing port falls back to</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.raw.protocol.Raw` rather than</span>
+<span class="sd">            raising, and ``'80'`` does not dispatch as a port.</span>
 
 <span class="sd">            A miss writes nothing back, so an unregistered port does not grow</span>
 <span class="sd">            the process-wide registry -- see :meth:`Protocol._lookup_registry</span>
 <span class="sd">            &lt;pcapkit.protocols.protocol.Protocol._lookup_registry&gt;`.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FormatError: If ``layer`` names no layer.</span>
+<span class="sd">            RegistryError: If ``protocol`` is no protocol name, class or instance.</span>
 
 <span class="sd">        .. versionchanged:: 1.5.0</span>
 
@@ -779,23 +795,32 @@
 <span class="sd">           A payload past a stop is ``Raw``, and the parse gets the port as</span>
 <span class="sd">           ``alias``, as a frame's next layer does (:issue:`2933`).</span>
 
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-            <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span>
+<span class="sd">        .. versionchanged:: 1.8.0</span>
 
-        <span class="n">port</span> <span class="o">=</span> <span class="n">ports</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">ports</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span> <span class="k">else</span> <span class="n">ports</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">code</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">port</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">)</span> <span class="k">else</span> <span class="n">port</span>
-        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_stops_next_layer</span><span class="p">(</span><span class="n">kwargs</span><span class="p">):</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+<span class="sd">           The port is the one a frame's next layer is looked up by, where it</span>
+<span class="sd">           was the source port unless that was unregistered (:issue:`2945`).</span>
+<span class="sd">           ``ports`` and ``payload`` are positional-only, and the keywords are</span>
+<span class="sd">           ``layer``, ``protocol`` and ``context``, as for</span>
+<span class="sd">           :meth:`Protocol.analyze &lt;pcapkit.protocols.protocol.Protocol.analyze&gt;`</span>
+<span class="sd">           (:issue:`2840`).</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># NOTE: Chosen among the ports that are numbers, so a missing one falls back to ``Raw``.</span>
+        <span class="n">numbers</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">port</span> <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="n">ports</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_next_layer_port</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">protocol</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_dispatch_family</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">code</span><span class="p">),</span> <span class="n">payload</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_analyze_next_layer</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+            <span class="n">port</span> <span class="o">=</span> <span class="n">numbers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">numbers</span> <span class="k">else</span> <span class="n">ports</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">port</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">)</span> <span class="k">else</span> <span class="n">port</span>
+        <span class="n">klass</span> <span class="o">=</span> <span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_analyze_stop</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+                 <span class="ow">or</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_dispatch_family</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">code</span><span class="p">),</span> <span class="n">payload</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_analyze_next_layer</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Transport.from_data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport.from_data">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'_PT | dict[str, Any]'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'_PT | dict[str, Any]'</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Create protocol instance from data.</span>
 
 <span class="sd">        Args:</span>
@@ -870,15 +895,22 @@
         <span class="k">return</span> <span class="n">klass</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_next_layer</span><span class="p">(</span><span class="n">klass</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">,</span> <span class="n">file_</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_next_layer</span><span class="p">(</span><span class="n">klass</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">,</span> <span class="n">file_</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">layer</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[str | ProtocolBase | Type[ProtocolBase]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">context</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="o">**</span><span class="n">state</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Parse the next layer, resolving a family base to its member first.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            klass: next layer protocol class</span>
 <span class="sd">            file\_: payload of the current layer</span>
 <span class="sd">            length: valid (*non-padding*) length</span>
-<span class="sd">            **kwargs: keyword arguments for the next layer's constructor</span>
+<span class="sd">            layer: parse the next layer until such layer</span>
+<span class="sd">            protocol: parse the next layer until such protocol</span>
+<span class="sd">            context: caller supplied parsing context</span>
+<span class="sd">            **state: next-layer state, as for :meth:`Protocol._parse_next_layer</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol._parse_next_layer&gt;`</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            As :meth:`Protocol._parse_next_layer</span>
@@ -887,7 +919,8 @@
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="n">ProtocolBase</span><span class="o">.</span><span class="n">_parse_next_layer</span><span class="p">(</span><span class="n">Transport</span><span class="o">.</span><span class="n">_dispatch_family</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">),</span>
-                                              <span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                                              <span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>
+                                              <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span> <span class="o">**</span><span class="n">state</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Transport._make_port">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport._make_port">[docs]</a>
@@ -971,13 +1004,26 @@
 <span class="sd">            behave the same way for an unregistered PPID and transport type.</span>
 
 <span class="sd">        """</span>
-        <span class="n">sort_port</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ports</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">sort_port</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span> <span class="ow">and</span> <span class="n">sort_port</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">:</span>
-            <span class="n">proto</span> <span class="o">=</span> <span class="n">sort_port</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">proto</span> <span class="o">=</span> <span class="n">sort_port</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">dict_</span><span class="p">,</span> <span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">)</span></div>
-</div>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">dict_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_layer_port</span><span class="p">(</span><span class="n">ports</span><span class="p">),</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">)</span></div>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_next_layer_port</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ports</span><span class="p">:</span> <span class="s1">'tuple[int, int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The port a next layer is looked up by.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            ports: source &amp; destination ports, as port numbers or as</span>
+<span class="sd">                :class:`~pcapkit.const.reg.apptype.apptype.AppType` members</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The lower port, unless only the higher one is in :attr:`__proto__`,</span>
+<span class="sd">            for a frame's next layer and :meth:`analyze` alike (:issue:`2945`).</span>
+
+<span class="sd">        """</span>
+        <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ports</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">low</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span> <span class="ow">and</span> <span class="n">high</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">high</span>
+        <span class="k">return</span> <span class="n">low</span></div>
 
 </pre></div>
         </article>
@@ -1011,7 +1057,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -477,6 +477,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -892,20 +893,29 @@
 <span class="s1">    #: registry has no members and so no collisions.</span>
 <span class="s1">    __canonical__: 'dict[int, str]' = </span><span class="se">{{}}</span>
 
-<span class="s1">    def __new__(cls, value: 'int', name: 'str' = '&lt;null&gt;',</span>
+<span class="s1">    def __new__(cls, value: 'int', name: 'str',</span>
 <span class="s1">                proto: 'TransportProtocol' = TransportProtocol.undefined) -&gt; 'Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]':</span>
 <span class="s1">        """Create a member from a registry row and add it to :attr:`__registry__`.</span>
+
+<span class="s1">        A member declares its port alone where its service name is its own name,</span>
+<span class="s1">        as ``exp2 = 1022`` does, and adds the name only where the two differ, as</span>
+<span class="s1">        in ``ltp_deepspace = 1113, 'ltp-deepspace'``; ``_generate_next_value_``</span>
+<span class="s1">        supplies the name a bare port leaves out.</span>
 
 <span class="s1">        Args:</span>
 <span class="s1">            value: Port number.</span>
 <span class="s1">            name: Service name.</span>
-<span class="s1">            proto: Transport protocol carrying the service.</span>
+<span class="s1">            proto: Transport protocol carrying the service;</span>
+<span class="s1">                :attr:`TransportProtocol.undefined`, the default, takes the</span>
+<span class="s1">                registry's :attr:`__transport__`.</span>
 
 <span class="s1">        Raises:</span>
 <span class="s1">            ValueError: If called on the base registry, which holds no members</span>
 <span class="s1">                of its own, rather than on a per-transport subclass.</span>
 
 <span class="s1">        """</span>
+<span class="s1">        if proto is TransportProtocol.undefined:</span>
+<span class="s1">            proto = cls.__transport__</span>
 <span class="s1">        temp = f'</span><span class="se">{{</span><span class="s1">name</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">value</span><span class="se">}}</span><span class="s1"> - </span><span class="se">{{</span><span class="s1">proto.name</span><span class="se">}}</span><span class="s1">]'</span>
 
 <span class="s1">        obj = str.__new__(cls, temp)</span>
@@ -923,6 +933,29 @@
 <span class="s1">        cls.__registry__.add(value, obj)</span>
 
 <span class="s1">        return obj</span>
+
+<span class="s1">    @staticmethod</span>
+<span class="s1">    def _generate_next_value_(name: 'str', start: 'int', count: 'int', last_values: 'list[Any]',</span>
+<span class="s1">                              *args: 'Any', **kwds: 'Any') -&gt; 'tuple[Any, ...]':</span>
+<span class="s1">        """Take the member's name as the service name of a member declaring its port alone.</span>
+
+<span class="s1">        |aenum|_ calls this for a member declaring fewer values than</span>
+<span class="s1">        :meth:`__new__` requires, passing the values it does declare as ``args``,</span>
+<span class="s1">        and only when the signature takes ``*args`` and ``**kwds``.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            name: Member name.</span>
+<span class="s1">            start: Unused.</span>
+<span class="s1">            count: Unused.</span>
+<span class="s1">            last_values: Unused.</span>
+<span class="s1">            *args: Values the member declares, i.e. its port.</span>
+<span class="s1">            **kwds: Unused.</span>
+
+<span class="s1">        Returns:</span>
+<span class="s1">            The port and the member name, as :meth:`__new__` takes them.</span>
+
+<span class="s1">        """</span>
+<span class="s1">        return (*args, name)</span>
 
 <span class="s1">    @property</span>
 <span class="s1">    def aliases(self) -&gt; 'tuple[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, ...]':</span>
@@ -1795,9 +1828,11 @@
             <span class="k">if</span> <span class="n">keyword</span><span class="o">.</span><span class="n">iskeyword</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
                 <span class="n">key</span> <span class="o">=</span> <span class="s1">'</span><span class="si">%s</span><span class="s1">_'</span> <span class="o">%</span> <span class="n">key</span>
 
-            <span class="c1"># NOTE: ``proto`` is this registry's transport alone (#806); ``record.protos`` would give</span>
-            <span class="c1"># ``TCP.http`` UDP and SCTP too, a drifting multi-bit copy every entry point refuses (#860).</span>
-            <span class="n">pres</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">record</span><span class="o">.</span><span class="n">port</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">record</span><span class="o">.</span><span class="n">svc</span><span class="si">!r}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">TRANSPORT</span><span class="p">])</span><span class="si">}</span><span class="s2">"</span>
+            <span class="c1"># NOTE: ``__new__`` takes ``proto`` from ``__transport__`` and a missing name from the member's</span>
+            <span class="c1"># own (#3055), so a member repeats neither and gives the name only where it differs.</span>
+            <span class="n">pres</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">record</span><span class="o">.</span><span class="n">port</span><span class="si">}</span><span class="s1">'</span>
+            <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">svc</span> <span class="o">!=</span> <span class="n">key</span><span class="p">:</span>
+                <span class="n">pres</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">pres</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">record</span><span class="o">.</span><span class="n">svc</span><span class="si">!r}</span><span class="s1">'</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="c1"># NOTE: a merged entry gets one bullet per registry row; the bullet supplies the hanging</span>
                 <span class="c1"># indent the single-row form re-indents its continuations for.</span>
@@ -1934,7 +1969,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

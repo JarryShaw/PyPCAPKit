@@ -484,6 +484,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -714,7 +715,8 @@ their kind – <code class="docutils literal notranslate"><span class="pre">*</s
 1.6.1 and 1.6.2 do.</p></li>
 </ul>
 <p>Under the module scheme each section names a module except <em>Project infrastructure</em>,
-which is for what belongs to none. The map is one-to-one with the package list below –
+which is for what belongs to none. A module section’s title is a <code class="docutils literal notranslate"><span class="pre">:mod:</span></code> reference,
+<code class="docutils literal notranslate"><span class="pre">:mod:`pcapkit.const`</span></code>, so it links to the module’s page (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3094">#3094</a>). The map is one-to-one with the package list below –
 every package, <a class="reference internal" href="../../pcapkit/interface/index.html#module-pcapkit.interface" title="pcapkit.interface"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface</span></code></a> included, has a section of its own:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>ls<span class="w"> </span>-d<span class="w"> </span>pcapkit/*/<span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">'s|pcapkit/||;s|/||'</span><span class="w">   </span><span class="c1"># const corekit dumpkit foundation</span>
 <span class="w">                                              </span><span class="c1"># interface protocols toolkit</span>
@@ -1161,7 +1163,7 @@ picture.</p>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

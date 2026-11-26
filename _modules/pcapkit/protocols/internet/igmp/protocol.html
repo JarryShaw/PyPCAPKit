@@ -477,6 +477,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -608,24 +609,26 @@
 <span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.igmp.type</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span> <span class="k">as</span> <span class="n">Enum_Type</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_VALUE</span><span class="p">,</span> <span class="n">NoValueType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.igmp.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">IGMP</span> <span class="k">as</span> <span class="n">Data_IGMP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.igmp.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">IGMP</span> <span class="k">as</span> <span class="n">Schema_IGMP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Internet</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">,</span> <span class="n">_nothing_to_parse</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Self</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextRegistry</span><span class="p">,</span> <span class="n">ProtocolContext</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
@@ -665,6 +668,10 @@
 <span class="sd">    one it is not given.</span>
 
 <span class="sd">    """</span>
+
+    <span class="c1">#: ``version``, which names the member and which :meth:`make` does not</span>
+    <span class="c1">#: take, as a construction keyword (:issue:`2840`).</span>
+    <span class="n">__keywords__</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s1">'version'</span><span class="p">})</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -759,7 +766,7 @@
 
 <div class="viewcode-block" id="IGMP.make">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/igmp.html#pcapkit.protocols.internet.igmp.protocol.IGMP.make">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
              <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Type | int'</span> <span class="o">=</span> <span class="n">Enum_Type</span><span class="o">.</span><span class="n">IGMP_Membership_Query</span><span class="p">,</span>
              <span class="n">max_resp_time</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">checksum</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -815,7 +822,7 @@
 <div class="viewcode-block" id="IGMP.from_data">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/igmp.html#pcapkit.protocols.internet.igmp.protocol.IGMP.from_data">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'_PT | dict[str, Any]'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'_PT | dict[str, Any]'</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Create protocol instance from data.</span>
 
 <span class="sd">        Args:</span>
@@ -865,55 +872,82 @@
 <span class="w">        </span><span class="sd">"""Return an estimated length for the object."""</span>
         <span class="k">return</span> <span class="mi">8</span>
 
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1"># NOTE: For the docs' class signature (#1860): mypy rejects each overload of an abstract</span>
+        <span class="c1"># class's ``__init__``, so it reads the one below and refuses this base as ``abstract`` (#3081).</span>
+        <span class="nd">@overload</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes] | bytes'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                     <span class="n">version</span><span class="p">:</span> <span class="s1">'Optional[Literal[1, 2, 3]]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+                     <span class="n">layer</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+                     <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[str | ProtocolBase | Type[ProtocolBase]]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+                     <span class="n">context</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
+        <span class="nd">@overload</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'Optional[Literal[1, 2, 3]]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+                     <span class="n">context</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                     <span class="o">**</span><span class="n">fields</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
+
 <div class="viewcode-block" id="IGMP.__init__">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/igmp.html#pcapkit.protocols.internet.igmp.protocol.IGMP.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'Optional[IO[bytes] | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                 <span class="n">version</span><span class="p">:</span> <span class="s1">'Optional[Literal[1, 2, 3]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Initialisation.</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes] | bytes | NoValueType'</span> <span class="o">=</span> <span class="n">NO_VALUE</span><span class="p">,</span>  <span class="c1"># pylint: disable=super-init-not-called</span>
+                 <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                 <span class="n">version</span><span class="p">:</span> <span class="s1">'Optional[Literal[1, 2, 3]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">layer</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[str | ProtocolBase | Type[ProtocolBase]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">context</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                 <span class="o">**</span><span class="n">fields</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Parse a protocol instance from its octets, or construct one from its fields.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            file: Source packet stream.</span>
+<span class="sd">            file: Source packet stream; omitted to construct.</span>
 <span class="sd">            length: Length of packet data.</span>
-<span class="sd">            version: Version of IGMP, ``1``, ``2`` or ``3``: the class</span>
-<span class="sd">                :meth:`__new__` picks. Building from fields, it must be this</span>
-<span class="sd">                class's :attr:`version`. Parsing, it is handed on unread, as the</span>
-<span class="sd">                enclosing IP layer passes its own version under this name to the</span>
-<span class="sd">                layer it carries.</span>
-<span class="sd">            **kwargs: As :meth:`Protocol.__init__</span>
+<span class="sd">            version: Version of IGMP, ``1``, ``2`` or ``3``: the class :meth:`__new__` picks, which must be this</span>
+<span class="sd">                class's own.</span>
+<span class="sd">            layer: As :meth:`Protocol.__init__</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;`.</span>
+<span class="sd">            protocol: As :meth:`Protocol.__init__</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;`.</span>
+<span class="sd">            context: As :meth:`Protocol.__init__</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;`.</span>
+<span class="sd">            **fields: As :meth:`Protocol.__init__</span>
 <span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;`.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If, building from fields, ``version`` names no version</span>
-<span class="sd">                class, or is not this class's own :attr:`version`, which every</span>
-<span class="sd">                IGMP class states, a subclass outside the members included.</span>
+<span class="sd">            ProtocolError: If ``version`` names no version class, or is not this</span>
+<span class="sd">                class's own :attr:`version`, which every IGMP class states, a</span>
+<span class="sd">                subclass outside the members included.</span>
+
+<span class="sd">        .. versionchanged:: 1.8.0</span>
+
+<span class="sd">           ``version`` is checked against the class, as</span>
+<span class="sd">           :meth:`from_fields` checks it, rather than handed on (:issue:`2840`).</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">NoValueType</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">kwargs</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span> <span class="o">=</span> <span class="n">version</span>
-        <span class="k">elif</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_member_of_version</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">version</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: version=</span><span class="si">{</span><span class="n">version</span><span class="si">!r}</span><span class="s1"> '</span>
-                                    <span class="s1">'names another member'</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span></div>
+                <span class="n">fields</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span> <span class="o">=</span> <span class="n">version</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_construct</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_fields</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">fields</span><span class="p">))</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_construction_member</span><span class="p">({</span><span class="s1">'version'</span><span class="p">:</span> <span class="n">version</span><span class="p">})</span>
+        <span class="c1"># NOTE: ``_parse``, as the base's ``__init__`` takes no ``version`` (#2840).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="IGMP.__new__">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/igmp.html#pcapkit.protocols.internet.igmp.protocol.IGMP.__new__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'Optional[IO[bytes] | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IGMP'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Create the version class a construction of this class describes.</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'Optional[IO[bytes] | bytes] | NoValueType'</span> <span class="o">=</span> <span class="n">NO_VALUE</span><span class="p">,</span>
+                <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IGMP'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Create the version class a parse or a construction of this class describes.</span>
 
-<span class="sd">        The ``version`` keyword names the class, on either path. Without it,</span>
-<span class="sd">        parsing octets gives the class :meth:`_dispatch` picks, and building from</span>
-<span class="sd">        fields is refused, since no field picks a class. That class's</span>
+<span class="sd">        The ``version`` keyword names the class. Without it, the octets give the</span>
+<span class="sd">        class :meth:`_dispatch` picks, and fields are refused. That class's</span>
 <span class="sd">        ``__init__`` then runs with the same arguments. A subclass of this class</span>
 <span class="sd">        is created as itself.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            file: Source packet stream, read here without being consumed.</span>
+<span class="sd">            file: Source packet stream, read here without being consumed;</span>
+<span class="sd">                omitted to construct.</span>
 <span class="sd">            length: Length of packet data.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -921,18 +955,22 @@
 <span class="sd">            An uninitialised instance of the version class.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``version`` names no version class; or, without it,</span>
-<span class="sd">                if building from fields, or if the octets are no version's</span>
-<span class="sd">                message.</span>
+<span class="sd">            TypeError: If ``file`` is :obj:`None`, on this class.</span>
+<span class="sd">            ProtocolError: On this class, if ``version`` names no version class;</span>
+<span class="sd">                if, without it, the octets are no version's message; or if fields</span>
+<span class="sd">                come without it.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">IGMP</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">NoValueType</span><span class="p">):</span>
+            <span class="n">member</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_construction_member</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">member</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">member</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">_nothing_to_parse</span><span class="p">(</span><span class="n">IGMP</span><span class="p">)</span>
         <span class="n">version</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'version'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">member</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_member_of_version</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'IGMP: no version to build with; pass version=1, 2 or 3'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">file</span><span class="p">[:</span><span class="n">length</span><span class="p">]</span>
@@ -1107,6 +1145,44 @@
                 <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="n">number</span><span class="p">:</span>
                     <span class="k">return</span> <span class="n">member</span><span class="o">.</span><span class="n">klass</span>
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IGMP: invalid version: </span><span class="si">{</span><span class="n">version</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="IGMP._construction_member">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/igmp.html#pcapkit.protocols.internet.igmp.protocol.IGMP._construction_member">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_construction_member</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fields</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[Self]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The version class :meth:`from_fields`, :meth:`from_data` and a call given no file construct.</span>
+
+<span class="sd">        On this class, the version class ``version`` names; on another, the class</span>
+<span class="sd">        itself, whose :attr:`version` ``version`` must be. ``version`` is taken out</span>
+<span class="sd">        of ``fields``, as :meth:`make` does not read it.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fields: Construction keywords.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The version class, or the class itself.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If, on this class, ``version`` is missing; if it names</span>
+<span class="sd">                no version class; or if it is not the class's own</span>
+<span class="sd">                :attr:`version`.</span>
+
+<span class="sd">        .. versionadded:: 1.8.0</span>
+
+<span class="sd">        """</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'version'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="n">IGMP</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'IGMP: no version to build with; pass version=1, 2 or 3'</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Type[Self]'</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_member_of_version</span><span class="p">(</span><span class="n">version</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_member_of_version</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+            <span class="c1"># NOTE: ``version`` is a property, read as ``__init__`` reads it, off a bare instance.</span>
+            <span class="k">if</span> <span class="n">version</span> <span class="o">!=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">version</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: version=</span><span class="si">{</span><span class="n">version</span><span class="si">!r}</span><span class="s1"> '</span>
+                                    <span class="s1">'names another member'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span></div>
 </div>
 
 </pre></div>
@@ -1141,7 +1217,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -477,6 +477,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -764,12 +765,14 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span>
+                        <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">)</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">mypy_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultArg</span><span class="p">,</span> <span class="n">KwArg</span><span class="p">,</span> <span class="n">NamedArg</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">AppType</span> <span class="k">as</span> <span class="n">Enum_AppType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextRegistry</span><span class="p">,</span> <span class="n">ProtocolContext</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumRegistry</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
@@ -1326,7 +1329,7 @@
 
 <div class="viewcode-block" id="SCTP.make">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP.make">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
              <span class="n">srcport</span><span class="p">:</span> <span class="s1">'Enum_AppType | int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">dstport</span><span class="p">:</span> <span class="s1">'Enum_AppType | int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">vtag</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -1381,6 +1384,64 @@
         <span class="k">if</span> <span class="n">chksum</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">schema</span><span class="o">.</span><span class="n">chksum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_checksum</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">schema</span></div>
+
+
+<div class="viewcode-block" id="SCTP.analyze">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP.analyze">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">analyze</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ppid</span><span class="p">:</span> <span class="s1">'Optional[Enum_PayloadProtocolIdentifier | int]'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-renamed,line-too-long</span>
+                <span class="n">layer</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[str | ProtocolBase | Type[ProtocolBase]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">context</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Analyse packet payload.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ppid: Payload protocol identifier of the DATA or I-DATA chunk</span>
+<span class="sd">                carrying ``payload``, as :attr:`ppid` reads it off a parsed</span>
+<span class="sd">                packet.</span>
+<span class="sd">            payload: Packet payload, that chunk's user data.</span>
+<span class="sd">            layer: As :meth:`Protocol.analyze</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.analyze&gt;`.</span>
+<span class="sd">            protocol: As :meth:`Protocol.analyze</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.analyze&gt;`.</span>
+<span class="sd">            context: As :meth:`Protocol.analyze</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.analyze&gt;`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`</span>
+<span class="sd">            instance, looked up by ``ppid`` as :meth:`_decode_next_layer` looks a</span>
+<span class="sd">            frame's next layer up. A payload that fails to parse is kept as</span>
+<span class="sd">            :meth:`Protocol.analyze &lt;pcapkit.protocols.protocol.Protocol.analyze&gt;`</span>
+<span class="sd">            keeps one, its ``protocol`` ``ppid``, as a frame's fallback records the</span>
+<span class="sd">            PPID it arrived with. An empty payload is</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, and one</span>
+<span class="sd">            past a stop this class meets is ``Raw``, as in a frame.</span>
+
+<span class="sd">        Important:</span>
+<span class="sd">            This bypasses :meth:`Transport.analyze</span>
+<span class="sd">            &lt;pcapkit.protocols.transport.transport.Transport.analyze&gt;`, which looks</span>
+<span class="sd">            a payload up by port, since :attr:`self.__proto__ &lt;SCTP.__proto__&gt;` is</span>
+<span class="sd">            keyed by PPID.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FormatError: If ``layer`` names no layer.</span>
+<span class="sd">            RegistryError: If ``protocol`` is no protocol name, class or instance.</span>
+
+<span class="sd">        .. versionchanged:: 1.8.0</span>
+
+<span class="sd">           Takes the PPID rather than the port pair :meth:`Transport.analyze</span>
+<span class="sd">           &lt;pcapkit.protocols.transport.transport.Transport.analyze&gt;` takes, whose</span>
+<span class="sd">           ports it looked up as PPIDs (:issue:`3068`). ``ppid`` and ``payload``</span>
+<span class="sd">           are positional-only, and the keywords are ``layer``, ``protocol`` and</span>
+<span class="sd">           ``context``, as for :meth:`Protocol.analyze</span>
+<span class="sd">           &lt;pcapkit.protocols.protocol.Protocol.analyze&gt;` (:issue:`2840`).</span>
+
+<span class="sd">        """</span>
+        <span class="n">klass</span> <span class="o">=</span> <span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_analyze_stop</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+                 <span class="ow">or</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_dispatch_family</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">ppid</span><span class="p">),</span>  <span class="c1"># type: ignore[arg-type]</span>
+                                         <span class="n">payload</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_analyze_next_layer</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">ppid</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SCTP.register">
@@ -5584,7 +5645,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

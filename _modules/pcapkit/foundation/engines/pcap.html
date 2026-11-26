@@ -477,6 +477,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -720,7 +721,7 @@
         <span class="c1"># pylint: disable=attribute-defined-outside-init,protected-access</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_reassembly</span><span class="p">(</span><span class="n">parse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_traceflow</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_traceflow</span><span class="p">(</span><span class="n">parse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span> <span class="o">=</span> <span class="n">Header</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vinfo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span><span class="o">.</span><span class="n">version</span>
@@ -769,8 +770,7 @@
         <span class="c1"># read frame header</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_bound_read_ahead</span><span class="p">()</span>
         <span class="n">frame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
-                      <span class="n">layer</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nnsec</span><span class="p">,</span>
-                      <span class="n">__context__</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_exctx</span><span class="p">)</span>
+                      <span class="n">layer</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_exctx</span><span class="p">)</span>
         <span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="c1"># verbose output</span>
@@ -869,7 +869,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

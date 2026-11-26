@@ -484,6 +484,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -683,8 +684,9 @@ that member alone, so no registry binds <a class="reference internal" href="../.
 either ruling. The asymmetry is deliberate and concerns the registry only; parsing or
 building through a base directly is the rule below.</p>
 <p><strong>A versioned family’s base dispatches on both paths</strong> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2524">#2524</a>). Parsing
-octets through it, constructing it from fields and its <code class="docutils literal notranslate"><span class="pre">from_data</span></code> give a member,
-never an instance of the base, and a subclass of the base is constructed as itself.</p>
+octets through it, building it from fields and its <code class="docutils literal notranslate"><span class="pre">from_data</span></code> give a
+member, never an instance of the base, and a subclass of the base is constructed as
+itself.</p>
 <p><strong>The member is the one the</strong> <code class="docutils literal notranslate"><span class="pre">version</span></code> <strong>keyword names, or else the one the octets
 or the data model carry, and never one a field picks.</strong> <code class="docutils literal notranslate"><span class="pre">version</span></code> names the member
 on either path, unchecked against the octets it is given; where their format carries
@@ -694,11 +696,11 @@ data model’s class or its <code class="docutils literal notranslate"><span cla
 member, not even a field only one member takes, and no member is a default: fields
 without <code class="docutils literal notranslate"><span class="pre">version</span></code> raise <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, and a
 field the member does not take fails that member’s own keyword check. Ruled on
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2574">#2574</a>. A class built directly takes <code class="docutils literal notranslate"><span class="pre">version</span></code> too, which must be its own: a
-member’s, or, for a subclass outside the members, the one an IGMP class states in its
-<code class="docutils literal notranslate"><span class="pre">version</span></code> (a subclass of the other bases has none). While parsing, the keyword is
-handed on unread, since an IP layer passes its own version under that name to the
-layer it carries.</p>
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2574">#2574</a>. A class parsed or built directly takes <code class="docutils literal notranslate"><span class="pre">version</span></code> too, which must be
+its own: a member’s, or, for a subclass outside the members, the one an IGMP class
+states in its <code class="docutils literal notranslate"><span class="pre">version</span></code> (a subclass of the other bases has none). The keyword reaches
+no hook: an IP layer hands its own version to the layer it carries through the private
+next-layer channel, so the check never meets it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2840">#2840</a>).</p>
 <p>The member a call through a versioned base gives, as a decision:</p>
 <pre  class="mermaid">
         flowchart TD
@@ -1177,7 +1179,7 @@ package’s name, and sub-structure classes such as
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

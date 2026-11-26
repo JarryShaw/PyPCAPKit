@@ -477,6 +477,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -645,54 +646,54 @@
     <span class="c1">#: - [UDP] Discard</span>
     <span class="c1">#: - [SCTP] Discard [:rfc:`9260`]</span>
     <span class="c1">#: - [DCCP] Discard [:rfc:`4340`]</span>
-    <span class="n">discard</span> <span class="o">=</span> <span class="mi">9</span><span class="p">,</span> <span class="s1">'discard'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">dccp</span>
+    <span class="n">discard</span> <span class="o">=</span> <span class="mi">9</span>
 
     <span class="c1">#: - [TCP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]</span>
     <span class="c1">#: - [UDP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]</span>
     <span class="c1">#: - [SCTP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]</span>
     <span class="c1">#: - [DCCP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]</span>
-    <span class="n">exp1</span> <span class="o">=</span> <span class="mi">1021</span><span class="p">,</span> <span class="s1">'exp1'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">dccp</span>
+    <span class="n">exp1</span> <span class="o">=</span> <span class="mi">1021</span>
 
     <span class="c1">#: - [TCP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]</span>
     <span class="c1">#: - [UDP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]</span>
     <span class="c1">#: - [SCTP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]</span>
     <span class="c1">#: - [DCCP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]</span>
-    <span class="n">exp2</span> <span class="o">=</span> <span class="mi">1022</span><span class="p">,</span> <span class="s1">'exp2'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">dccp</span>
+    <span class="n">exp2</span> <span class="o">=</span> <span class="mi">1022</span>
 
     <span class="c1">#: - [TCP] Licklider Transmission Protocol [:rfc:`5326`]</span>
     <span class="c1">#: - [UDP] Licklider Transmission Protocol [:rfc:`5326`][:rfc:`7122`]</span>
     <span class="c1">#: - [DCCP] Licklider Transmission Protocol [:rfc:`7122`]</span>
-    <span class="n">ltp_deepspace</span> <span class="o">=</span> <span class="mi">1113</span><span class="p">,</span> <span class="s1">'ltp-deepspace'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">dccp</span>
+    <span class="n">ltp_deepspace</span> <span class="o">=</span> <span class="mi">1113</span><span class="p">,</span> <span class="s1">'ltp-deepspace'</span>
 
     <span class="c1">#: - [TCP] AWS protocol for cloud remoting solution</span>
     <span class="c1">#: - [UDP] AWS protocol for cloud remoting solution</span>
     <span class="c1">#: - [SCTP] AWS protocol for cloud remoting solution</span>
     <span class="c1">#: - [DCCP] AWS protocol for cloud remoting solution</span>
-    <span class="n">aws_wsp</span> <span class="o">=</span> <span class="mi">4195</span><span class="p">,</span> <span class="s1">'aws-wsp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">dccp</span>
+    <span class="n">aws_wsp</span> <span class="o">=</span> <span class="mi">4195</span><span class="p">,</span> <span class="s1">'aws-wsp'</span>
 
     <span class="c1">#: - [TCP] DTN Bundle TCP CL Protocol [:rfc:`9174`]</span>
     <span class="c1">#: - [UDP] DTN Bundle UDP CL Protocol [:rfc:`7122`]</span>
     <span class="c1">#: - [DCCP] DTN Bundle DCCP CL Protocol [:rfc:`7122`]</span>
-    <span class="n">dtn_bundle</span> <span class="o">=</span> <span class="mi">4556</span><span class="p">,</span> <span class="s1">'dtn-bundle'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">dccp</span>
+    <span class="n">dtn_bundle</span> <span class="o">=</span> <span class="mi">4556</span><span class="p">,</span> <span class="s1">'dtn-bundle'</span>
 
     <span class="c1">#: - [TCP] RTP media data [:rfc:`3551`][:rfc:`4571`]</span>
     <span class="c1">#: - [UDP] RTP media data [:rfc:`3551`]</span>
     <span class="c1">#: - [DCCP] RTP media data [:rfc:`3551`][:rfc:`5762`]</span>
-    <span class="n">avt_profile_1</span> <span class="o">=</span> <span class="mi">5004</span><span class="p">,</span> <span class="s1">'avt-profile-1'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">dccp</span>
+    <span class="n">avt_profile_1</span> <span class="o">=</span> <span class="mi">5004</span><span class="p">,</span> <span class="s1">'avt-profile-1'</span>
 
     <span class="c1">#: - [TCP] RTP control protocol [:rfc:`3551`][:rfc:`4571`]</span>
     <span class="c1">#: - [UDP] RTP control protocol [:rfc:`3551`]</span>
     <span class="c1">#: - [DCCP] RTP control protocol [:rfc:`3551`][:rfc:`5762`]</span>
-    <span class="n">avt_profile_2</span> <span class="o">=</span> <span class="mi">5005</span><span class="p">,</span> <span class="s1">'avt-profile-2'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">dccp</span>
+    <span class="n">avt_profile_2</span> <span class="o">=</span> <span class="mi">5005</span><span class="p">,</span> <span class="s1">'avt-profile-2'</span>
 
     <span class="c1">#: - [TCP] Syslog over TLS [:rfc:`5425`]</span>
     <span class="c1">#: - [UDP] syslog over DTLS [:rfc:`6012`]</span>
     <span class="c1">#: - [DCCP] syslog over DTLS [:rfc:`6012`]</span>
-    <span class="n">syslog_tls</span> <span class="o">=</span> <span class="mi">6514</span><span class="p">,</span> <span class="s1">'syslog-tls'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">dccp</span>
+    <span class="n">syslog_tls</span> <span class="o">=</span> <span class="mi">6514</span><span class="p">,</span> <span class="s1">'syslog-tls'</span>
 
     <span class="c1">#: - [SCTP] Reserved</span>
     <span class="c1">#: - [DCCP] Reserved</span>
-    <span class="n">reserved_8282</span> <span class="o">=</span> <span class="mi">8282</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">dccp</span></div>
+    <span class="n">reserved_8282</span> <span class="o">=</span> <span class="mi">8282</span><span class="p">,</span> <span class="s1">'reserved'</span></div>
 
 </pre></div>
         </article>
@@ -726,7 +727,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

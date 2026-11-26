@@ -484,6 +484,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -844,10 +845,10 @@ through <a class="reference internal" href="../../const/reg.html#pcapkit.const.r
 registry, and <code class="docutils literal notranslate"><span class="pre">type(...)</span> <span class="pre">is</span> <span class="pre">TCP</span></code> holds of the member it answers
 with – measured, for a registered port and an unassigned one alike.
 <a class="reference internal" href="../../protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport.analyze" title="pcapkit.protocols.transport.transport.Transport.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport.analyze</span></code></a> keeps the
-base in its own signature, since it is the one method
-<a class="reference internal" href="../../protocols/transport/udp.html#pcapkit.protocols.transport.udp.protocol.UDP" title="pcapkit.protocols.transport.udp.protocol.UDP"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code></a> and
-<a class="reference internal" href="../../protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP" title="pcapkit.protocols.transport.sctp.protocol.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a> share, and each of
-them would name a different registry.</p>
+base in its own signature, since the port-keyed transports share it
+and each would name a different registry;
+<a class="reference internal" href="../../protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP" title="pcapkit.protocols.transport.sctp.protocol.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a> overrides it
+to look up by PPID.</p>
 </dd>
 </dl>
 <div class="admonition important">
@@ -1139,9 +1140,9 @@ both are <strong>inclusive</strong>, so a segment carrying no payload at all has
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">packet</span></code> is what <a class="reference internal" href="../analysis/tcp.html#pcapkit.foundation.analysis.tcp.tcp_datagram" title="pcapkit.foundation.analysis.tcp.tcp_datagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_datagram()</span></code></a>
-parses <code class="docutils literal notranslate"><span class="pre">payload</span></code> to, on its first read, unless <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code>
-names another protocol, or the extraction’s engine parses its frames with
-stops or a context, which this parse takes too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2933">#2933</a>).</p>
+parses <code class="docutils literal notranslate"><span class="pre">payload</span></code> to, on its first read, given the stops and context the
+extraction’s engine parses its frames with (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2933">#2933</a>), unless
+<code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code> names another protocol.</p>
 <p><code class="docutils literal notranslate"><span class="pre">completed</span></code> and <code class="docutils literal notranslate"><span class="pre">conflict</span></code> are independent signals: a datagram can
 be <a class="reference internal" href="index.html#pcapkit.foundation.reassembly.data.Completion.COMPLETE" title="pcapkit.foundation.reassembly.data.Completion.COMPLETE"><code class="xref py py-attr docutils literal notranslate"><span class="pre">COMPLETE</span></code></a>
 and still carry a non-empty <code class="docutils literal notranslate"><span class="pre">conflict</span></code> – the resolution of a
@@ -1414,8 +1415,9 @@ see <a class="reference internal" href="index.html#pcapkit.foundation.reassembly
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.data.Datagram.packet">
 <span class="sig-name descname"><span class="pre">packet</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.data.Datagram.packet" title="Link to this definition">¶</a></dt>
 <dd><p>Parsed TCP payload, as <a class="reference internal" href="../analysis/tcp.html#pcapkit.foundation.analysis.tcp.tcp_datagram" title="pcapkit.foundation.analysis.tcp.tcp_datagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_datagram()</span></code></a>
-returns it unless the reassembly’s <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code> names another
-protocol, which then parses it. Analysed on first read rather than at
+returns it given the extraction’s stops and context, unless the
+reassembly’s <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code> names another protocol, which then
+parses it. Analysed on first read rather than at
 construction; a <a class="reference internal" href="index.html#pcapkit.foundation.reassembly.data.Deferred" title="pcapkit.foundation.reassembly.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a>
 may be passed in its place, and reading this attribute then runs it and
 keeps the result.</p>
@@ -1702,7 +1704,7 @@ revised: a later segment does not extend the deadline.</p>
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

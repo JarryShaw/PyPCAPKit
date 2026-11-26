@@ -484,6 +484,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -1657,10 +1658,10 @@ classifier and the <code class="docutils literal notranslate"><span class="pre">
 </section>
 <section id="required-status-checks">
 <h2>Required Status Checks<a class="headerlink" href="#required-status-checks" title="Link to this heading">¶</a></h2>
-<p>Ruleset <code class="docutils literal notranslate"><span class="pre">23497679</span></code> on <code class="docutils literal notranslate"><span class="pre">main</span></code> requires the contexts below, with
-<code class="docutils literal notranslate"><span class="pre">strict_required_status_checks_policy:</span> <span class="pre">true</span></code> (a branch must be up to date
-with <code class="docutils literal notranslate"><span class="pre">main</span></code> before it can merge, not merely green). Each was found by
-grepping every workflow file for its name:</p>
+<p>Rulesets <code class="docutils literal notranslate"><span class="pre">23497679</span></code> on <code class="docutils literal notranslate"><span class="pre">main</span></code> and <code class="docutils literal notranslate"><span class="pre">28079111</span></code> on <code class="docutils literal notranslate"><span class="pre">develop</span></code> both require the
+contexts below, each with <code class="docutils literal notranslate"><span class="pre">strict_required_status_checks_policy:</span> <span class="pre">true</span></code> (a branch
+must be up to date with the one it targets before it can merge, not merely green).
+Each was found by grepping every workflow file for its name:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -1701,7 +1702,7 @@ grepping every workflow file for its name:</p>
 </tbody>
 </table>
 </div>
-<p>Moving a version between the tiers below means editing the ruleset in the same
+<p>Moving a version between the tiers below means editing both rulesets in the same
 change, as <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1633">#1633</a> did for 3.15 and 3.10.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is defined by exactly one, the <code class="docutils literal notranslate"><span class="pre">name:</span></code> of the
 <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> job in <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>. <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span></code> is defined by
@@ -1711,15 +1712,15 @@ are its supported tier (keys <code class="docutils literal notranslate"><span cl
 (keys <code class="docutils literal notranslate"><span class="pre">&quot;3.8&quot;</span></code> to <code class="docutils literal notranslate"><span class="pre">&quot;3.10&quot;</span></code>) have names ending in <code class="docutils literal notranslate"><span class="pre">(KTLO)</span></code>, so no required
 context matches one. The comment above <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> mentions the string
 without defining it.</p>
-<p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is an aggregate, not a single check run. The ruleset
+<p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is an aggregate, not a single check run. Each ruleset
 requires it and the <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.11</span></code>-<code class="docutils literal notranslate"><span class="pre">3.15</span></code> legs, with <code class="docutils literal notranslate"><span class="pre">Lint</span></code>, and
 nothing else. It <code class="docutils literal notranslate"><span class="pre">needs:</span></code> the gating jobs of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> –
 <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">test-latest-tier</span></code>, <code class="docutils literal notranslate"><span class="pre">coverage</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code>, <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code>
 and <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>, plus <code class="docutils literal notranslate"><span class="pre">project-tests</span></code>, the one run of the project pins,
 and <code class="docutils literal notranslate"><span class="pre">changes</span></code> for the docs-only path – and checks each result explicitly, in its “Check every
 required job succeeded” step. Rulesets match check names literally, with no
-wildcard, so requiring the matrix cells one by one would mean editing the
-ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
+wildcard, so requiring the matrix cells one by one would mean editing both
+rulesets whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the gating jobs as <code class="docutils literal notranslate"><span class="pre">skipped</span></code> only on a docs-only pull request, where
 <code class="docutils literal notranslate"><span class="pre">project-tests</span></code> runs every test that reads <code class="docutils literal notranslate"><span class="pre">docs/</span></code> or Markdown as well, and
 <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> only on a test-only one (see <a class="reference internal" href="#light-pull-requests-2243">Light Pull
@@ -1804,7 +1805,7 @@ versions after CPython’s, and <code class="docutils literal notranslate"><span
 each leg running the <code class="docutils literal notranslate"><span class="pre">ALL</span></code> test tier (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1958">#1958</a>,
 see <a class="reference internal" href="#test-tiers">Test Tiers</a>). A
 supported PyPy leg blocks through <code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code>, which needs its job,
-so it adds no context to the ruleset. No <code class="docutils literal notranslate"><span class="pre">Compat</span></code>, <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> or
+so it adds no context to either ruleset. No <code class="docutils literal notranslate"><span class="pre">Compat</span></code>, <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> or
 <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> leg runs PyPy. On PyPy 8.0, which setup-python’s <code class="docutils literal notranslate"><span class="pre">pypy3.11</span></code>
 is, PyPI has no Linux wheel of <a class="reference external" href="https://cryptography.io"><code class="docutils literal notranslate"><span class="pre">cryptography</span></code></a>, so the install step builds it
 with the image’s Rust and <code class="docutils literal notranslate"><span class="pre">libssl-dev</span></code>, and none of <code class="docutils literal notranslate"><span class="pre">lxml</span></code>, so the <code class="docutils literal notranslate"><span class="pre">test</span></code>
@@ -2570,9 +2571,10 @@ counts as green.</p></li>
 <span class="pre">report</span></code>, and <code class="docutils literal notranslate"><span class="pre">benchmark.yml</span></code> to <code class="docutils literal notranslate"><span class="pre">benchmark:</span> <span class="pre">weekly</span> <span class="pre">engine</span> <span class="pre">benchmark</span> <span class="pre">report</span></code>:
 the ratio table <code class="file docutils literal notranslate"><span class="pre">examples/benchmark/native.sh</span></code> writes, with its
 absolute-time footnote and the runner it ran on, reporting <code class="docutils literal notranslate"><span class="pre">warning</span></code> where a
-Python version was not measured in full (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2125">#2125</a>). <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code>
-posts to <code class="docutils literal notranslate"><span class="pre">cron-vendor:</span> <span class="pre">vendor</span> <span class="pre">constant</span> <span class="pre">update</span> <span class="pre">report</span></code>, as <code class="docutils literal notranslate"><span class="pre">push</span></code> on its
-<code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> and <code class="docutils literal notranslate"><span class="pre">scheduled</span></code> otherwise, and
+Python version was not measured in full (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2125">#2125</a>). The table is Markdown,
+with its reStructuredText folded beneath it for the docs (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3054">#3054</a>).
+<code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code> posts to <code class="docutils literal notranslate"><span class="pre">cron-vendor:</span> <span class="pre">vendor</span> <span class="pre">constant</span> <span class="pre">update</span> <span class="pre">report</span></code>, as
+<code class="docutils literal notranslate"><span class="pre">push</span></code> on its <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> and <code class="docutils literal notranslate"><span class="pre">scheduled</span></code> otherwise, and
 reports <code class="docutils literal notranslate"><span class="pre">warning</span></code> where <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> passed over a failed target or test
 gate. A failed or cancelled <code class="docutils literal notranslate"><span class="pre">head</span></code> skips <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code>, so its
 <code class="docutils literal notranslate"><span class="pre">discussion</span></code> job runs on <code class="docutils literal notranslate"><span class="pre">always()</span></code> and then posts a line of its own with
@@ -2672,10 +2674,15 @@ suite’s order. GitHub serves no job summary through its API, so every step tha
 writes one copies it to the job’s <code class="docutils literal notranslate"><span class="pre">job-summary.md</span></code>: the scripts through
 <code class="file docutils literal notranslate"><span class="pre">util/_actions.py</span></code>, where the step sets <code class="docutils literal notranslate"><span class="pre">JOB_SUMMARY_COPY</span></code>, and the shell
 with <code class="docutils literal notranslate"><span class="pre">tee</span></code>. No step that runs the tests sets it, since a test writing the
-summary through the helper would write into the copy. The job then ends in <code class="docutils literal notranslate"><span class="pre">Name</span>
-<span class="pre">the</span> <span class="pre">job</span> <span class="pre">summary</span></code>, which writes the job’s name beside it, and <code class="docutils literal notranslate"><span class="pre">Upload</span> <span class="pre">the</span> <span class="pre">job</span>
-<span class="pre">summary</span></code>, which uploads both as the <code class="docutils literal notranslate"><span class="pre">job-summary-&lt;job&gt;-&lt;index&gt;</span></code> artifact (7
-days) for the report to download; both run on <code class="docutils literal notranslate"><span class="pre">always()</span></code> and are
+summary through the helper would write into the copy. GitHub renders each step’s
+summary on its own, where the copy joins them, so a step that writes a table’s
+rows writes its header too, as <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code>’ <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">the</span> <span class="pre">supported</span> <span class="pre">cells</span></code> and
+<code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">the</span> <span class="pre">KTLO</span> <span class="pre">cells</span> <span class="pre">(non-blocking)</span></code> each do; and a <code class="docutils literal notranslate"><span class="pre">|</span></code> in a name a cell holds
+is escaped, as <code class="file docutils literal notranslate"><span class="pre">util/ci_timing.py</span></code> does (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3054">#3054</a>). The job then
+ends in <code class="docutils literal notranslate"><span class="pre">Name</span> <span class="pre">the</span> <span class="pre">job</span> <span class="pre">summary</span></code>, which writes the job’s name beside it, and
+<code class="docutils literal notranslate"><span class="pre">Upload</span> <span class="pre">the</span> <span class="pre">job</span> <span class="pre">summary</span></code>, which uploads both as the
+<code class="docutils literal notranslate"><span class="pre">job-summary-&lt;job&gt;-&lt;index&gt;</span></code> artifact (7 days) for the report to download;
+both run on <code class="docutils literal notranslate"><span class="pre">always()</span></code> and are
 <code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code>. The summaries share the room a comment leaves, smallest first,
 and one cut to fit links the run. <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">unit</span> <span class="pre">tests</span></code> in <code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code> sets
 no <code class="docutils literal notranslate"><span class="pre">JOB_SUMMARY_COPY</span></code> either: the line <code class="file docutils literal notranslate"><span class="pre">util/superseded.py</span></code> writes there
@@ -2754,8 +2761,8 @@ it. Dependabot does not read this pin, so a bump changes both. The workflows use
 other steps, this one blocks, by the owner’s ruling on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>: a finding fails
 the job. It runs last and
 on <code class="docutils literal notranslate"><span class="pre">!cancelled()</span></code>, so a finding skips none of the advisory steps and a failed
-Python setup does not skip it. <code class="docutils literal notranslate"><span class="pre">Lint</span></code> is a required check of ruleset 23497679
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>), so a red Lint
+Python setup does not skip it. <code class="docutils literal notranslate"><span class="pre">Lint</span></code> is a required check of both rulesets
+(<a class="reference internal" href="#required-status-checks">Required Status Checks</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>), so a red Lint
 holds a merge. The image’s shellcheck is not pinned, so a runner
 image that adds a check can turn Lint red on unchanged code; the fix is to the
 script it flags. The step’s run summary counts the findings by actionlint rule and
@@ -2813,8 +2820,8 @@ runs it has 3.12 or newer – and writes each matrix as JSON: a <code class="doc
 job in <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> and <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">version_check</span></code> in
 <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> and <code class="docutils literal notranslate"><span class="pre">conda-update</span></code> in <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code> hand theirs on
 through <code class="docutils literal notranslate"><span class="pre">fromJSON</span></code>, and each single-interpreter job reads <code class="docutils literal notranslate"><span class="pre">latest</span></code>.</p>
-<p><strong>A tier change is a one-line edit to that file, plus the matching edit to ruleset
-23497679’s</strong> <code class="docutils literal notranslate"><span class="pre">Compat</span></code> <strong>contexts.</strong> The file’s <code class="docutils literal notranslate"><span class="pre">exemptions</span></code> list each pin kept
+<p><strong>A tier change is a one-line edit to that file, plus the matching edit to both
+rulesets’</strong> <code class="docutils literal notranslate"><span class="pre">Compat</span></code> <strong>contexts.</strong> The file’s <code class="docutils literal notranslate"><span class="pre">exemptions</span></code> list each pin kept
 off <code class="docutils literal notranslate"><span class="pre">latest</span></code>, with its reason in the comment above it, such as the conda
 jobs’ <code class="docutils literal notranslate"><span class="pre">!=</span> <span class="pre">'3.15'</span></code>. <code class="docutils literal notranslate"><span class="pre">tests/project/test_python_versions_1660.py</span></code> fails on a
 pin the file does not list, on an exemption with no comment, and on a
@@ -3125,7 +3132,7 @@ leaves the link out and takes the canonical URL from <code class="docutils liter
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../_static/documentation_options.js?v=de230f84"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

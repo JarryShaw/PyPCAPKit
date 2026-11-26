@@ -484,6 +484,7 @@
 <li class="toctree-l1"><a class="reference internal" href="demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -877,7 +878,7 @@ implementation is <a class="reference internal" href="pcapkit/protocols/internet
 
         <span class="k">return</span> <span class="n">IPv4Data</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv4Schema'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv4Schema'</span><span class="p">:</span>
         <span class="o">...</span>
 
         <span class="k">return</span> <span class="n">IPv4Schema</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
@@ -889,13 +890,17 @@ implementation is <a class="reference internal" href="pcapkit/protocols/internet
 </div>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p><strong>Declare every construction keyword your protocol accepts.</strong> Constructing a
-protocol with a keyword no signature declares raises
-<a class="reference internal" href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a>, so a misspelling fails
-instead of building a wrong field. The accepted set, read by
+<p><strong>Declare every construction keyword your protocol accepts.</strong> Calling the class
+with its fields alone builds a protocol, as
+<a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_fields" title="pcapkit.protocols.protocol.Protocol.from_fields"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_fields</span></code></a>
+does, and a keyword no signature declares raises
+<a class="reference internal" href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnexpectedKeyword" title="pcapkit.utilities.exceptions.UnexpectedKeyword"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnexpectedKeyword</span></code></a>, a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>, so a
+misspelling fails instead of building a wrong field. <code class="docutils literal notranslate"><span class="pre">make</span></code> takes its fields
+as keywords only, ending in <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code>. The accepted set, read by
 <a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.signature" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">inspect.signature()</span></code></a>, is the union of the keyword-taking parameters of
-<code class="docutils literal notranslate"><span class="pre">make</span></code>, <code class="docutils literal notranslate"><span class="pre">read</span></code>, <code class="docutils literal notranslate"><span class="pre">pack</span></code>, <code class="docutils literal notranslate"><span class="pre">unpack</span></code>, <code class="docutils literal notranslate"><span class="pre">__post_init__</span></code> and <code class="docutils literal notranslate"><span class="pre">__init__</span></code>
-across the MRO: <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__post_init__</span></code></a> hands one <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code>
+<code class="docutils literal notranslate"><span class="pre">make</span></code>, <code class="docutils literal notranslate"><span class="pre">read</span></code>, <code class="docutils literal notranslate"><span class="pre">pack</span></code>, <code class="docutils literal notranslate"><span class="pre">unpack</span></code> and <code class="docutils literal notranslate"><span class="pre">__post_init__</span></code> across the MRO,
+the hooks’ <code class="docutils literal notranslate"><span class="pre">file</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> aside, though a <code class="docutils literal notranslate"><span class="pre">make</span></code> field of either
+name counts (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3081">#3081</a>): <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__post_init__</span></code></a> hands one <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code>
 to both construction and parse, so a keyword only <code class="docutils literal notranslate"><span class="pre">read</span></code> declares still
 travels through <code class="docutils literal notranslate"><span class="pre">make</span></code>.</p>
 <p>A keyword no signature can express is listed in <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__keywords__" title="pcapkit.protocols.protocol.Protocol.__keywords__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Protocol.__keywords__</span></code></a> instead:</p>
@@ -917,16 +922,42 @@ signature belongs to a class chosen at call time, such as
 version it is given. Unlike a set, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> is not inherited, so a
 dispatcher’s subclasses stay checked. Prefer a declared parameter to either,
 since it also documents the keyword.</p>
-<p>Parsing is unaffected. <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_data</span></code></a> checks its caller’s keywords
-as strictly, but only warns with
+<p><a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_data</span></code></a>
+checks its caller’s keywords as strictly, <code class="docutils literal notranslate"><span class="pre">context</span></code> aside, but only warns with
 <a class="reference internal" href="pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.UnknownFieldWarning" title="pcapkit.utilities.warnings.UnknownFieldWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnknownFieldWarning</span></code></a> for a key from your
 <code class="docutils literal notranslate"><span class="pre">_make_data</span></code>, a disagreement between two of your own mappings rather than a
 caller’s typo.</p>
+<p>Parsing takes no field: calling the class with a file is <code class="docutils literal notranslate"><span class="pre">Proto(file,</span> <span class="pre">length,</span>
+<span class="pre">/,</span> <span class="pre">*,</span> <span class="pre">layer,</span> <span class="pre">protocol,</span> <span class="pre">context)</span></code>, as
+<a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_file" title="pcapkit.protocols.protocol.Protocol.from_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_file</span></code></a> is, and any
+other keyword is refused. A parse that needs an input of its own declares it on
+an <code class="docutils literal notranslate"><span class="pre">__init__</span></code> override, keyword-only and before the stops, as
+<a class="reference internal" href="pcapkit/protocols/application/dns.html#pcapkit.protocols.application.dns.protocol.DNS.__init__" title="pcapkit.protocols.application.dns.protocol.DNS.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DNS.__init__</span></code></a>
+declares <code class="docutils literal notranslate"><span class="pre">framed</span></code>. Given a file, the override parses through
+<a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._parse" title="pcapkit.protocols.protocol.Protocol._parse"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._parse</span></code></a>, which
+refuses the fields; given none, it constructs (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3081">#3081</a>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_VALUE</span><span class="p">,</span> <span class="n">NoValueType</span>
+
+<span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">NO_VALUE</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">framed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">NoValueType</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">framed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># a field of ``make`` too</span>
+            <span class="n">fields</span><span class="p">[</span><span class="s1">'framed'</span><span class="p">]</span> <span class="o">=</span> <span class="n">framed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_construct</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_fields</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">fields</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>
+                    <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span> <span class="n">framed</span><span class="o">=</span><span class="n">framed</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>What the layer carrying yours hands on, such as <code class="docutils literal notranslate"><span class="pre">alias</span></code> and <code class="docutils literal notranslate"><span class="pre">packet</span></code>,
+reaches your hooks as keywords, never the signature (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2840">#2840</a>).</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>The check lives in <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init__</span></code></a>, where every producer’s
-keywords converge, so it covers <code class="docutils literal notranslate"><span class="pre">SomeProtocol(...)</span></code> and the <code class="docutils literal notranslate"><span class="pre">pack</span></code> it
-leads to, but <strong>not</strong> <code class="docutils literal notranslate"><span class="pre">make</span></code> called on a bare instance, such as
+<p>The check lives in <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_fields" title="pcapkit.protocols.protocol.Protocol.from_fields"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_fields</span></code></a>,
+<a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> and a call of the class
+given no file, which hand the keywords on, so it covers
+<code class="docutils literal notranslate"><span class="pre">SomeProtocol(...)</span></code> and the <code class="docutils literal notranslate"><span class="pre">pack</span></code> it leads to, but <strong>not</strong> <code class="docutils literal notranslate"><span class="pre">make</span></code>
+called on a bare instance, such as
 <code class="docutils literal notranslate"><span class="pre">object.__new__(cls).make(...)</span></code>, which drops an undeclared keyword
 silently. This package’s tests and <a class="reference internal" href="pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.protocol.HTTP.make" title="pcapkit.protocols.application.http.protocol.HTTP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP.make</span></code></a> call <code class="docutils literal notranslate"><span class="pre">make</span></code> that
 way. Covering it would mean interposing on every <code class="docutils literal notranslate"><span class="pre">make</span></code> in the tree, which
@@ -1634,7 +1665,7 @@ class and change its algorithm instead.</p>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="_static/documentation_options.js?v=de230f84"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

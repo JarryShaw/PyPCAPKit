@@ -477,6 +477,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -713,6 +714,13 @@
 <span class="sd">        tracing does not otherwise pay, and tracing's per-packet cost is something</span>
 <span class="sd">        this package deliberately keeps low. Nothing is reassembled, parsed</span>
 <span class="sd">        or retained unless it is asked for.</span>
+
+<span class="sd">    .. versionchanged:: 1.8.0</span>
+
+<span class="sd">       With ``analyze=True``, a datagram's payload is parsed with the ``layer``,</span>
+<span class="sd">       ``protocol`` and ``context`` of a :term:`default engine` extraction feeding</span>
+<span class="sd">       the tracer, as TCP reassembly's are, where it was parsed with none of them</span>
+<span class="sd">       (:issue:`2946`).</span>
 
 <span class="sd">    """</span>
 
@@ -1079,7 +1087,10 @@
 <span class="sd">        as one contiguous payload, which is what an application-layer parse needs,</span>
 <span class="sd">        and it inherits</span>
 <span class="sd">        :attr:`TCP.__timeout__ &lt;pcapkit.foundation.reassembly.tcp.reassembly.TCP.__timeout__&gt;`</span>
-<span class="sd">        -- no timeout -- so nothing here is evicted on a clock.</span>
+<span class="sd">        -- no timeout -- so nothing here is evicted on a clock. It parses its</span>
+<span class="sd">        payloads with :attr:`self._parse_keywords</span>
+<span class="sd">        &lt;pcapkit.foundation.traceflow.traceflow.TraceFlow._parse_keywords&gt;`, as</span>
+<span class="sd">        an engine's TCP reassembler does (:issue:`2946`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_analyze</span><span class="p">:</span>
@@ -1091,7 +1102,9 @@
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Reassembly</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_reasm_packet</span> <span class="o">=</span> <span class="n">Reasm_Packet</span>
-        <span class="k">return</span> <span class="n">TCP_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">reassembly</span> <span class="o">=</span> <span class="n">TCP_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">reassembly</span><span class="o">.</span><span class="n">_parse_keywords</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parse_keywords</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">reassembly</span>
 
 <div class="viewcode-block" id="TCP._make_segment">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.traceflow.TCP._make_segment">[docs]</a>
@@ -1257,7 +1270,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

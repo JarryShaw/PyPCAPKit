@@ -484,6 +484,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -1057,8 +1058,9 @@ against <a class="reference external" href="https://docs.python.org/3/builtins/c
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.data.Datagram.packet">
 <span class="sig-name descname"><span class="pre">packet</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.data.Datagram.packet" title="Link to this definition">¶</a></dt>
 <dd><p>Parsed IP payload, as <a class="reference internal" href="../../analysis/ip.html#pcapkit.foundation.analysis.ip.ip_datagram" title="pcapkit.foundation.analysis.ip.ip_datagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">ip_datagram()</span></code></a>
-returns it unless the reassembly’s <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code> names another
-protocol, which then parses it. Analysed on first read, not at
+returns it given the extraction’s stops and context, unless the
+reassembly’s <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code> names another protocol, which then
+parses it. Analysed on first read, not at
 construction time; a <a class="reference internal" href="../index.html#pcapkit.foundation.reassembly.data.Deferred" title="pcapkit.foundation.reassembly.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a>
 may be passed in its place, and reading this attribute then runs it and
 keeps the result.</p>
@@ -1183,7 +1185,7 @@ that overwrites its octets records no conflict. See
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

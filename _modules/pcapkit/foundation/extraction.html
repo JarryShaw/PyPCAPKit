@@ -477,6 +477,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -886,10 +887,10 @@
         <span class="c1">#: has no adapter for at startup.</span>
         <span class="n">_trace</span><span class="p">:</span> <span class="s1">'TraceFlowManager'</span>
 
-        <span class="c1">#: Extract til protocol.</span>
-        <span class="n">_exptl</span><span class="p">:</span> <span class="s1">'Protocols'</span>
-        <span class="c1">#: Extract til layer.</span>
-        <span class="n">_exlyr</span><span class="p">:</span> <span class="s1">'Layers'</span>
+        <span class="c1">#: Extract til protocol; :obj:`None` sets no stop.</span>
+        <span class="n">_exptl</span><span class="p">:</span> <span class="s1">'Optional[Protocols]'</span>
+        <span class="c1">#: Extract til layer; :obj:`None` sets no stop.</span>
+        <span class="n">_exlyr</span><span class="p">:</span> <span class="s1">'Optional[Layers]'</span>
         <span class="c1">#: Caller supplied parsing context, cf. :mod:`pcapkit.corekit.context`.</span>
         <span class="n">_exctx</span><span class="p">:</span> <span class="s1">'ContextRegistry'</span>
         <span class="c1">#: Extraction engine name.</span>
@@ -1787,7 +1788,8 @@
 <span class="sd">                the channel is honoured by the :term:`default engine`, whose PCAP</span>
 <span class="sd">                and PCAP-NG readers parse with :mod:`pcapkit`'s own protocol</span>
 <span class="sd">                implementations, in its frames and in the payloads IP and TCP</span>
-<span class="sd">                reassembly rebuild from them; the third party engines ignore it.</span>
+<span class="sd">                reassembly, and TCP flow tracing's ``analyze``, rebuild from them;</span>
+<span class="sd">                the third party engines ignore it.</span>
 <span class="sd">            reassembly: reassembly settings, or the names of the reassemblers to</span>
 <span class="sd">                enable with their defaults, each as registered in</span>
 <span class="sd">                :attr:`__reassembly__`; :data:`None`, or no names, reassembles</span>
@@ -1940,8 +1942,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_frnum</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c1"># frame number</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_frame</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># frame record</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_exptl</span> <span class="o">=</span> <span class="n">protocol</span> <span class="ow">or</span> <span class="s1">'null'</span>                      <span class="c1"># extract til protocol</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_exlyr</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Layers'</span><span class="p">,</span> <span class="n">layer_name</span><span class="p">)</span>              <span class="c1"># extract til layer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exptl</span> <span class="o">=</span> <span class="n">protocol</span> <span class="ow">or</span> <span class="kc">None</span>                        <span class="c1"># extract til protocol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exlyr</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">layer_name</span> <span class="o">==</span> <span class="s1">'none'</span> <span class="k">else</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Layers'</span><span class="p">,</span> <span class="n">layer_name</span><span class="p">)</span>  <span class="c1"># extract til layer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exctx</span> <span class="o">=</span> <span class="n">ContextRegistry</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>           <span class="c1"># caller supplied context</span>
 
         <span class="n">reasm_objs</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, ReassemblyBase]</span>
@@ -2748,7 +2750,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

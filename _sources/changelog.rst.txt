@@ -36,6 +36,11 @@ All notable changes to PyPCAPKit are recorded here.
 Releases are listed newest first. :file:`CHANGELOG.md` at the repository root
 carries only the version being released.
 
+* **1.8.0** (2026-11-26) -- Protocol parsing split from construction, with
+  ``from_file`` and ``from_fields`` as the explicit pair and closed parse and
+  build signatures, ``analyze`` dispatching as a frame does, and versioned
+  documentation on Read the Docs. :doc:`Full changelog <changelog/1.8.0>`.
+
 * **1.7.0** (2026-11-25) -- Dissectors for PPP, PPPoE and DNS, MLD, newer SCTP
   chunks and current TLS extensions decoded, a PCAP-NG writer, every registered
   reassembler and flow tracer fed, and grouped, keyword-only extraction and
@@ -184,6 +189,7 @@ carries only the version being released.
    :hidden:
    :maxdepth: 1
 
+   changelog/1.8.0
    changelog/1.7.0
    changelog/1.6.2
    changelog/1.6.1

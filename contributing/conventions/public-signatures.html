@@ -484,6 +484,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -671,6 +672,132 @@ bounds the whole process, as <a class="reference internal" href="../../pcapkit/u
 a <a class="reference internal" href="../../pcapkit/utilities/config.html#module-pcapkit.utilities.config" title="pcapkit.utilities.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.config</span></code></a> tunable. The <code class="docutils literal notranslate"><span class="pre">Options</span></code> suffix keeps the classes
 from reading as those tunables.</p>
 </section>
+<section id="protocols">
+<h2>Protocols<a class="headerlink" href="#protocols" title="Link to this heading">¶</a></h2>
+<p><strong>Calling a protocol class with a file parses, and with keywords alone builds</strong>, ruled
+on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3081">#3081</a> over the parse-only call of <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2840">#2840</a>. Each shape has an explicit
+form, <a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_file" title="pcapkit.protocols.protocol.Protocol.from_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_file()</span></code></a> and
+<a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_fields" title="pcapkit.protocols.protocol.Protocol.from_fields"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_fields()</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Proto</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">Proto</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">)</span>
+<span class="n">Proto</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">Proto</span><span class="o">.</span><span class="n">from_fields</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">length</span></code> is positional beside <code class="docutils literal notranslate"><span class="pre">file</span></code>, as <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2834">#2834</a> specified for the
+protocols: the one exception to rule 1, since it bounds the input rather than
+configuring the call.</p></li>
+<li><p>A parse takes no field and a construction no stop, so each keyword set is
+closed. Given no file, <code class="docutils literal notranslate"><span class="pre">layer</span></code> and <code class="docutils literal notranslate"><span class="pre">protocol</span></code> are fields where the class
+takes one of that name, as
+<a class="reference internal" href="../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.protocol.IPv4" title="pcapkit.protocols.internet.ipv4.protocol.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a>,
+<a class="reference internal" href="../../pcapkit/protocols/link/ppp.html#pcapkit.protocols.link.ppp.protocol.PPP" title="pcapkit.protocols.link.ppp.protocol.PPP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code></a> and
+<a class="reference internal" href="../../pcapkit/protocols/misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo" title="pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP_Pseudo</span></code></a> take
+<code class="docutils literal notranslate"><span class="pre">protocol</span></code>, and are refused otherwise, as <code class="docutils literal notranslate"><span class="pre">length</span></code> is. A keyword is
+always a keyword: <code class="docutils literal notranslate"><span class="pre">file=</span></code> and <code class="docutils literal notranslate"><span class="pre">length=</span></code> are fields too, never the
+positional parameters of their names (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3081">#3081</a>). Each shape is an
+overload, so a type checker reads <code class="docutils literal notranslate"><span class="pre">protocol</span></code> there as the field on a
+construction and as the stop on a parse.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">layer</span></code> is a layer name and <code class="docutils literal notranslate"><span class="pre">protocol</span></code> a protocol name, class or instance,
+and <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> is the only no stop, by rule 4.</p></li>
+<li><p>A parse that needs an input of its own takes it keyword-only, before the stops:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Class, and the classes deriving from it</p></th>
+<th class="head"><p>Keywords</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/protocols/internet/ip.html#pcapkit.protocols.internet.ip.protocol.IP" title="pcapkit.protocols.internet.ip.protocol.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a>,
+<a class="reference internal" href="../../pcapkit/protocols/internet/icmp.html#pcapkit.protocols.internet.icmp.protocol.ICMP" title="pcapkit.protocols.internet.icmp.protocol.ICMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ICMP</span></code></a>,
+<a class="reference internal" href="../../pcapkit/protocols/internet/igmp.html#pcapkit.protocols.internet.igmp.protocol.IGMP" title="pcapkit.protocols.internet.igmp.protocol.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code></a>,
+<a class="reference internal" href="../../pcapkit/protocols/link/linux_sll.html#pcapkit.protocols.link.linux_sll.protocol.LinuxSLL" title="pcapkit.protocols.link.linux_sll.protocol.LinuxSLL"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL</span></code></a>,
+<a class="reference internal" href="../../pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.protocol.HTTP" title="pcapkit.protocols.application.http.protocol.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code></a>,
+<a class="reference internal" href="../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.protocol.L2TP" title="pcapkit.protocols.link.l2tp.protocol.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">version</span></code>, which names the member and must be the class’s own
+(<a class="reference internal" href="protocol-family-grouping.html#protocol-family-dispatch"><span class="std std-ref">Dispatching Bases</span></a>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.protocol.Frame" title="pcapkit.protocols.misc.pcap.frame.protocol.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">num</span></code>, <code class="docutils literal notranslate"><span class="pre">header</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">num</span></code>, <code class="docutils literal notranslate"><span class="pre">sct</span></code>, <code class="docutils literal notranslate"><span class="pre">ctx</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">extension</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/protocols/application/dns.html#pcapkit.protocols.application.dns.protocol.DNS" title="pcapkit.protocols.application.dns.protocol.DNS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DNS</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">framed</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../pcapkit/protocols/link/loopback.html#pcapkit.protocols.link.loopback.protocol.Loopback" title="pcapkit.protocols.link.loopback.protocol.Loopback"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loopback</span></code></a>,
+<a class="reference internal" href="../../pcapkit/protocols/link/netlink.html#pcapkit.protocols.link.netlink.protocol.Netlink" title="pcapkit.protocols.link.netlink.protocol.Netlink"><code class="xref py py-class docutils literal notranslate"><span class="pre">Netlink</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">byteorder</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>A construction takes each as a field where the class’s hooks do, and <code class="docutils literal notranslate"><span class="pre">version</span></code>
+names the member there too.</p>
+</li>
+<li><p>What a layer hands the layer it carries – the code it dispatched on, its
+packet data, its IP version – travels through one private channel,
+<a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._from_parent" title="pcapkit.protocols.protocol.Protocol._from_parent"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_from_parent()</span></code></a>, to the hooks, never
+through a public signature.</p></li>
+<li><p><a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.analyze" title="pcapkit.protocols.protocol.Protocol.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">analyze()</span></code></a>,
+<a class="reference internal" href="../../pcapkit/protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport.analyze" title="pcapkit.protocols.transport.transport.Transport.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">analyze()</span></code></a> and
+<a class="reference internal" href="../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP.analyze" title="pcapkit.protocols.transport.sctp.protocol.SCTP.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">analyze()</span></code></a> take the parse’s
+keywords, by rule 3.</p></li>
+</ul>
+<p>Each misuse raises a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>, or one of the library’s errors where a value
+rather than a keyword is wrong:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Misuse</p></th>
+<th class="head"><p>Raises</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>a field, or an unknown keyword, given a file</p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>, naming each</p></td>
+</tr>
+<tr class="row-odd"><td><p>no octets, as <code class="docutils literal notranslate"><span class="pre">Proto(None)</span></code></p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>, naming <code class="docutils literal notranslate"><span class="pre">from_fields</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>a stop that is no field, or a <code class="docutils literal notranslate"><span class="pre">length</span></code>, given no file</p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>, naming each</p></td>
+</tr>
+<tr class="row-odd"><td><p>a <code class="docutils literal notranslate"><span class="pre">file</span></code> or <code class="docutils literal notranslate"><span class="pre">length</span></code> keyword no field takes</p></td>
+<td><p><a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnexpectedKeyword" title="pcapkit.utilities.exceptions.UnexpectedKeyword"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnexpectedKeyword</span></code></a>, saying to pass
+them positionally to parse</p></td>
+</tr>
+<tr class="row-even"><td><p>an unknown construction keyword</p></td>
+<td><p><a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnexpectedKeyword" title="pcapkit.utilities.exceptions.UnexpectedKeyword"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnexpectedKeyword</span></code></a>, a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>
+and an <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>a <code class="docutils literal notranslate"><span class="pre">layer</span></code> naming no layer</p></td>
+<td><p><a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p>a <code class="docutils literal notranslate"><span class="pre">protocol</span></code> of no stop’s type</p></td>
+<td><p><a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryError</span></code></a>, a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>another member’s <code class="docutils literal notranslate"><span class="pre">version</span></code></p></td>
+<td><p><a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
 <section id="incompatible-changes">
 <h2>Incompatible Changes<a class="headerlink" href="#incompatible-changes" title="Link to this heading">¶</a></h2>
 <p><strong>An incompatible signature change is made outright, with no shim.</strong> A shim taking the
@@ -740,6 +867,7 @@ of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/P
 <li><a class="reference internal" href="#">Public Signatures</a><ul>
 <li><a class="reference internal" href="#the-rules">The Rules</a></li>
 <li><a class="reference internal" href="#feature-options">Feature Options</a></li>
+<li><a class="reference internal" href="#protocols">Protocols</a></li>
 <li><a class="reference internal" href="#incompatible-changes">Incompatible Changes</a></li>
 </ul>
 </li>
@@ -752,7 +880,7 @@ of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/P
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

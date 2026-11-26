@@ -477,6 +477,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -612,24 +613,26 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_VALUE</span><span class="p">,</span> <span class="n">NoValueType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.application</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.http.const</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">_HTTP2_FRAME_RULES</span><span class="p">,</span> <span class="n">_HTTP2_PREFACE</span><span class="p">,</span>
                                                       <span class="n">_HTTP2_PREFACE_HEADER</span><span class="p">,</span> <span class="n">_RE_METHOD</span><span class="p">,</span> <span class="n">_RE_STATUS</span><span class="p">,</span>
                                                       <span class="n">_RE_VERSION</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">,</span> <span class="n">_nothing_to_parse</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">AppType_TCP</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextRegistry</span><span class="p">,</span> <span class="n">ProtocolContext</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv1</span> <span class="k">as</span> <span class="n">Data_HTTPv1</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv1</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv2</span> <span class="k">as</span> <span class="n">Data_HTTPv2</span>
@@ -889,7 +892,8 @@
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP: invalid version: </span><span class="si">{</span><span class="n">version</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">http</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="c1"># pylint: disable-next=protected-access</span>
+                <span class="n">http</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">_from_parent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_next_layer_state</span><span class="p">(</span><span class="n">kwargs</span><span class="p">))</span>
             <span class="k">except</span> <span class="n">ProtocolError</span><span class="p">:</span>
                 <span class="k">raise</span>
             <span class="c1"># NOTE: ``struct.error`` is no ``ValueError``, and a payload too</span>
@@ -918,8 +922,8 @@
 
 <div class="viewcode-block" id="HTTP.make">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.protocol.HTTP.make">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-             <span class="n">version</span><span class="p">:</span> <span class="s1">'Optional[Literal[1, 2]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+             <span class="n">version</span><span class="p">:</span> <span class="s1">'Optional[Literal[1, 2]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">preface</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_ST'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
@@ -969,7 +973,7 @@
 <div class="viewcode-block" id="HTTP.from_data">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.protocol.HTTP.from_data">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'_PT | dict[str, Any]'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'_PT | dict[str, Any]'</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Create protocol instance from data.</span>
 
 <span class="sd">        Args:</span>
@@ -1029,62 +1033,81 @@
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">_TCP</span><span class="o">.</span><span class="n">klass</span><span class="o">.</span><span class="n">http</span><span class="p">)</span>  <span class="c1"># type: ignore[call-overload]</span></div>
 
 
+    <span class="nd">@overload</span>  <span class="c1"># pragma: no cover</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes] | bytes'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                 <span class="n">version</span><span class="p">:</span> <span class="s1">'Optional[Literal[1, 2]]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+                 <span class="n">layer</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+                 <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[str | ProtocolBase | Type[ProtocolBase]]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+                 <span class="n">context</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
+    <span class="nd">@overload</span>  <span class="c1"># pragma: no cover</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'Optional[Literal[1, 2]]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+                 <span class="n">context</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                 <span class="o">**</span><span class="n">fields</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="c1"># NOTE: The ignore is the one on ``Protocol.__init__``, for ``**fields`` against ``/`` (#3081).</span>
 <div class="viewcode-block" id="HTTP.__init__">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.protocol.HTTP.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'Optional[IO[bytes] | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                 <span class="n">version</span><span class="p">:</span> <span class="s1">'Optional[Literal[1, 2]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Initialisation.</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes] | bytes | NoValueType'</span> <span class="o">=</span> <span class="n">NO_VALUE</span><span class="p">,</span>  <span class="c1"># type: ignore[misc] # pylint: disable=super-init-not-called</span>
+                 <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                 <span class="n">version</span><span class="p">:</span> <span class="s1">'Optional[Literal[1, 2]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">layer</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[str | ProtocolBase | Type[ProtocolBase]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">context</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                 <span class="o">**</span><span class="n">fields</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Parse a protocol instance from its octets, or construct one from its fields.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            file: Source packet stream.</span>
+<span class="sd">            file: Source packet stream; omitted to construct.</span>
 <span class="sd">            length: Length of packet data.</span>
-<span class="sd">            version: Version of HTTP, ``1`` or ``2``: the member :meth:`__new__`</span>
-<span class="sd">                picks. Building from fields, it must be this class's own. Parsing,</span>
-<span class="sd">                it is handed on unread.</span>
-<span class="sd">            **kwargs: As :meth:`Protocol.__init__</span>
+<span class="sd">            version: Version of HTTP, ``1`` or ``2``: the member :meth:`__new__` picks, which must be this</span>
+<span class="sd">                class's own.</span>
+<span class="sd">            layer: As :meth:`Protocol.__init__</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;`.</span>
+<span class="sd">            protocol: As :meth:`Protocol.__init__</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;`.</span>
+<span class="sd">            context: As :meth:`Protocol.__init__</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;`.</span>
+<span class="sd">            **fields: As :meth:`Protocol.__init__</span>
 <span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;`.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If, building from fields, ``version`` names neither</span>
-<span class="sd">                member, or is not this class's own version: that of the member</span>
-<span class="sd">                it is or derives from, which a subclass outside the members</span>
-<span class="sd">                does not have; or if ``preface`` is asked of HTTP/1.</span>
+<span class="sd">            ProtocolError: If ``version`` names neither member, or is not this</span>
+<span class="sd">                class's own version: that of the member it is or derives from,</span>
+<span class="sd">                which a subclass outside the members does not have.</span>
+
+<span class="sd">        .. versionchanged:: 1.8.0</span>
+
+<span class="sd">           ``version`` is checked against the member, as</span>
+<span class="sd">           :meth:`from_fields` checks it, rather than handed on (:issue:`2840`).</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">NoValueType</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">kwargs</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span> <span class="o">=</span> <span class="n">version</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">HTTPv1</span><span class="p">,</span> <span class="n">HTTPv2</span> <span class="o">=</span> <span class="n">_HTTPV1</span><span class="o">.</span><span class="n">klass</span><span class="p">,</span> <span class="n">_HTTPV2</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
-
-            <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_member_of_version</span><span class="p">(</span><span class="n">version</span><span class="p">)):</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">(</span><span class="n">HTTPv1</span><span class="p">,</span> <span class="n">HTTPv2</span><span class="p">)):</span>
-                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: no version of its own to match '</span>
-                                        <span class="sa">f</span><span class="s1">'version=</span><span class="si">{</span><span class="n">version</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: version=</span><span class="si">{</span><span class="n">version</span><span class="si">!r}</span><span class="s1"> '</span>
-                                    <span class="s1">'names another member'</span><span class="p">)</span>
-            <span class="c1"># NOTE: ``pack`` writes the preface for any member, so HTTP/1 refuses it here.</span>
-            <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'preface'</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">HTTPv1</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP/1: connection preface is HTTP/2 only'</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span></div>
+                <span class="n">fields</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span> <span class="o">=</span> <span class="n">version</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_construct</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_fields</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">fields</span><span class="p">))</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_construction_member</span><span class="p">({</span><span class="s1">'version'</span><span class="p">:</span> <span class="n">version</span><span class="p">})</span>
+        <span class="c1"># NOTE: ``_parse``, as the base's ``__init__`` takes no ``version`` (#2840).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="HTTP.__new__">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.protocol.HTTP.__new__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'Optional[IO[bytes] | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># type: ignore[misc]</span>
-                <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'HTTP'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Create the member a construction of this class describes.</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'Optional[IO[bytes] | bytes] | NoValueType'</span> <span class="o">=</span> <span class="n">NO_VALUE</span><span class="p">,</span>  <span class="c1"># type: ignore[misc]</span>
+                <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'HTTP'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Create the member a parse or a construction of this class describes.</span>
 
-<span class="sd">        The ``version`` keyword names the member, on either path. Without it,</span>
-<span class="sd">        parsing octets gives the member :meth:`_dispatch_version` identifies,</span>
-<span class="sd">        since HTTP octets carry their own version, and building from fields is</span>
-<span class="sd">        refused, since no field picks a member (:issue:`2574`). That member's</span>
+<span class="sd">        The ``version`` keyword names the member. Without it, the octets give the</span>
+<span class="sd">        member :meth:`_dispatch_version` identifies, since HTTP octets carry their</span>
+<span class="sd">        own version (:issue:`2574`), and fields are refused. That member's</span>
 <span class="sd">        ``__init__`` then runs with the same arguments. A subclass of this class</span>
 <span class="sd">        is created as itself.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            file: Source packet stream, read here without being consumed.</span>
+<span class="sd">            file: Source packet stream, read here without being consumed;</span>
+<span class="sd">                omitted to construct.</span>
 <span class="sd">            length: Length of packet data.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -1092,17 +1115,22 @@
 <span class="sd">            An uninitialised instance of the member.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``version`` names neither member; or, without it,</span>
-<span class="sd">                if building from fields, or if the octets are neither version's,</span>
-<span class="sd">                including an HTTP/2 connection preface with no frame after it.</span>
+<span class="sd">            TypeError: If ``file`` is :obj:`None`, on this class.</span>
+<span class="sd">            ProtocolError: On this class, if ``version`` names neither member; if,</span>
+<span class="sd">                without it, the octets are neither version's, an HTTP/2 connection</span>
+<span class="sd">                preface with no frame after it included; or, given fields, if</span>
+<span class="sd">                ``version`` is missing or ``preface`` is asked of HTTP/1.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">HTTP</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">NoValueType</span><span class="p">):</span>
+            <span class="n">member</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_construction_member</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">member</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">member</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">_nothing_to_parse</span><span class="p">(</span><span class="n">HTTP</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'version'</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">member</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_member_of_version</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">'version'</span><span class="p">])</span>
-        <span class="k">elif</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: no version to build with; pass version=1 or version=2'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">file</span>
@@ -1239,7 +1267,9 @@
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP/2: connection preface with no frame'</span><span class="p">)</span>
 
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">http</span> <span class="o">=</span> <span class="n">HTTPv2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">preface_len</span><span class="p">:</span><span class="n">length</span><span class="p">],</span> <span class="n">length</span> <span class="o">-</span> <span class="n">preface_len</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="c1"># pylint: disable-next=protected-access</span>
+                <span class="n">http</span> <span class="o">=</span> <span class="n">HTTPv2</span><span class="o">.</span><span class="n">_from_parent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">preface_len</span><span class="p">:</span><span class="n">length</span><span class="p">],</span> <span class="n">length</span> <span class="o">-</span> <span class="n">preface_len</span><span class="p">,</span>
+                                           <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_next_layer_state</span><span class="p">(</span><span class="n">kwargs</span><span class="p">))</span>
             <span class="k">except</span> <span class="n">ProtocolError</span><span class="p">:</span>
                 <span class="k">raise</span>
             <span class="c1"># NOTE: Converted, unlike on the HTTP/1 arm, so a bad frame is catchable; only a</span>
@@ -1255,13 +1285,14 @@
 
         <span class="c1"># NOTE: A start line, matched with ``HTTPv1``'s own patterns, identifies HTTP/1; a</span>
         <span class="c1"># malformed one is then reported, not retried as HTTP/2, which would mislabel it.</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_layer_state</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">test_start_line</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[:</span><span class="n">length</span><span class="p">]):</span>
-            <span class="k">return</span> <span class="n">HTTPv1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">HTTPv1</span><span class="o">.</span><span class="n">_from_parent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">state</span><span class="p">)</span>  <span class="c1"># pylint: disable=protected-access</span>
 
         <span class="c1"># NOTE: Trial parse for a mid-stream payload; ``struct.error`` escapes it, since</span>
         <span class="c1"># absorbing its subclass ``StructError`` would hand valid HTTP/1 to the HTTP/2 arm.</span>
         <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">suppress</span><span class="p">(</span><span class="n">ProtocolError</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">HTTPv1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">HTTPv1</span><span class="o">.</span><span class="n">_from_parent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">state</span><span class="p">)</span>  <span class="c1"># pylint: disable=protected-access</span>
 
         <span class="c1"># NOTE: Nine octets with a small Length parse as a frame (RFC 9113, section 4.1), so</span>
         <span class="c1"># this guess, unlike an explicit ``version=2``, first needs ``_test_http2_frame``.</span>
@@ -1269,7 +1300,7 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: unknown version'</span><span class="p">)</span>
 
         <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">suppress</span><span class="p">(</span><span class="n">ProtocolError</span><span class="p">,</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">_HTTPV2</span><span class="o">.</span><span class="n">klass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">_HTTPV2</span><span class="o">.</span><span class="n">klass</span><span class="o">.</span><span class="n">_from_parent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">state</span><span class="p">)</span>  <span class="c1"># pylint: disable=protected-access</span>
 
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: unknown version'</span><span class="p">)</span></div>
 
@@ -1300,6 +1331,50 @@
             <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">HTTPv2</span>
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP: invalid version: </span><span class="si">{</span><span class="n">version</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="HTTP._construction_member">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.protocol.HTTP._construction_member">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_construction_member</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fields</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[Self]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The member :meth:`from_fields`, :meth:`from_data` and a call given no file construct.</span>
+
+<span class="sd">        On this class, the member ``version`` names; on another, the class itself, of</span>
+<span class="sd">        which ``version`` must name the member it is or derives from. ``version`` is</span>
+<span class="sd">        taken out of ``fields``, as the member's :meth:`make` does not read it.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fields: Construction keywords.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The member, or the class itself.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If, on this class, ``version`` is missing; if it names</span>
+<span class="sd">                neither member; if it is not the class's own version, which a</span>
+<span class="sd">                subclass outside the members does not have; or if ``preface`` is</span>
+<span class="sd">                asked of HTTP/1.</span>
+
+<span class="sd">        .. versionadded:: 1.8.0</span>
+
+<span class="sd">        """</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'version'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">klass</span> <span class="o">=</span> <span class="bp">cls</span>  <span class="c1"># type: Type[HTTP]</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="n">HTTP</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: no version to build with; pass version=1 or version=2'</span><span class="p">)</span>
+            <span class="n">klass</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_member_of_version</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+
+        <span class="n">HTTPv1</span><span class="p">,</span> <span class="n">HTTPv2</span> <span class="o">=</span> <span class="n">_HTTPV1</span><span class="o">.</span><span class="n">klass</span><span class="p">,</span> <span class="n">_HTTPV2</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_member_of_version</span><span class="p">(</span><span class="n">version</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="p">(</span><span class="n">HTTPv1</span><span class="p">,</span> <span class="n">HTTPv2</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">klass</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: no version of its own to match '</span>
+                                    <span class="sa">f</span><span class="s1">'version=</span><span class="si">{</span><span class="n">version</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">klass</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: version=</span><span class="si">{</span><span class="n">version</span><span class="si">!r}</span><span class="s1"> names another member'</span><span class="p">)</span>
+        <span class="c1"># NOTE: ``pack`` writes the preface for any member, so HTTP/1 refuses it here.</span>
+        <span class="k">if</span> <span class="n">fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'preface'</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">HTTPv1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP/1: connection preface is HTTP/2 only'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Type[Self]'</span><span class="p">,</span> <span class="n">klass</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="HTTP._dispatch_version">
@@ -1387,7 +1462,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

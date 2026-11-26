@@ -484,6 +484,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -1577,8 +1578,13 @@ than offloading it. Settled at implementation (<a class="extlink-issue reference
 <section id="deterministic-construction-arguments">
 <h2>Deterministic Construction Arguments<a class="headerlink" href="#deterministic-construction-arguments" title="Link to this heading">¶</a></h2>
 <p><strong>Done</strong> in 1.6.0 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2594">#2594</a>): a <code class="docutils literal notranslate"><span class="pre">make()</span></code> call’s argument list is
-deterministic. Further proposals for the construction workflow go under this
-heading.</p>
+deterministic.</p>
+<p><strong>Done</strong> in 1.8.0 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2840">#2840</a>): a protocol parses with
+<a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_file" title="pcapkit.protocols.protocol.Protocol.from_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_file()</span></code></a> and builds with
+<a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_fields" title="pcapkit.protocols.protocol.Protocol.from_fields"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_fields()</span></code></a>, each taking a closed
+keyword set (<a class="reference internal" href="conventions/public-signatures.html#public-signatures"><span class="std std-ref">Public Signatures</span></a>), and calling the class does either
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3081">#3081</a>).</p>
+<p>Further proposals for the construction workflow go under this heading.</p>
 <p>Inferring a namespace from the caller’s frame, for a conventional
 four-argument group – <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">X_default</span></code>, <code class="docutils literal notranslate"><span class="pre">X_namespace</span></code> and
 <code class="docutils literal notranslate"><span class="pre">X_reversed</span></code> – leaves a call’s contract invisible from its signature:
@@ -1872,7 +1878,7 @@ it.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../_static/documentation_options.js?v=de230f84"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

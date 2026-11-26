@@ -484,6 +484,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -702,6 +703,12 @@ holds.</p>
 tracing does not otherwise pay, and tracing’s per-packet cost is something
 this package deliberately keeps low. Nothing is reassembled, parsed
 or retained unless it is asked for.</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.8.0: </span>With <code class="docutils literal notranslate"><span class="pre">analyze=True</span></code>, a datagram’s payload is parsed with the <code class="docutils literal notranslate"><span class="pre">layer</span></code>,
+<code class="docutils literal notranslate"><span class="pre">protocol</span></code> and <code class="docutils literal notranslate"><span class="pre">context</span></code> of a <a class="reference internal" href="../../../glossary.html#term-default-engine"><span class="xref std std-term">default engine</span></a> extraction feeding
+the tracer, as TCP reassembly’s are, where it was parsed with none of them
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2946">#2946</a>).</p>
 </div>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.traceflow.TCP.name">
@@ -1495,7 +1502,7 @@ wanted frame numbers pays for none of it.</p>
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

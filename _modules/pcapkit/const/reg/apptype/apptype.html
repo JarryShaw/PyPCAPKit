@@ -477,6 +477,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
@@ -2943,20 +2944,29 @@
     <span class="c1">#: registry has no members and so no collisions.</span>
     <span class="n">__canonical__</span><span class="p">:</span> <span class="s1">'dict[int, str]'</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="s1">'&lt;null&gt;'</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span>
                 <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransportProtocol'</span> <span class="o">=</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">undefined</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[AppType]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Create a member from a registry row and add it to :attr:`__registry__`.</span>
+
+<span class="sd">        A member declares its port alone where its service name is its own name,</span>
+<span class="sd">        as ``exp2 = 1022`` does, and adds the name only where the two differ, as</span>
+<span class="sd">        in ``ltp_deepspace = 1113, 'ltp-deepspace'``; ``_generate_next_value_``</span>
+<span class="sd">        supplies the name a bare port leaves out.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: Port number.</span>
 <span class="sd">            name: Service name.</span>
-<span class="sd">            proto: Transport protocol carrying the service.</span>
+<span class="sd">            proto: Transport protocol carrying the service;</span>
+<span class="sd">                :attr:`TransportProtocol.undefined`, the default, takes the</span>
+<span class="sd">                registry's :attr:`__transport__`.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: If called on the base registry, which holds no members</span>
 <span class="sd">                of its own, rather than on a per-transport subclass.</span>
 
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">proto</span> <span class="ow">is</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">undefined</span><span class="p">:</span>
+            <span class="n">proto</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__transport__</span>
         <span class="n">temp</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1"> - </span><span class="si">{</span><span class="n">proto</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">]'</span>
 
         <span class="n">obj</span> <span class="o">=</span> <span class="nb">str</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">temp</span><span class="p">)</span>
@@ -2974,6 +2984,32 @@
         <span class="bp">cls</span><span class="o">.</span><span class="n">__registry__</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">obj</span>
+
+<div class="viewcode-block" id="AppType._generate_next_value_">
+<a class="viewcode-back" href="../../../../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType._generate_next_value_">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_next_value_</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">last_values</span><span class="p">:</span> <span class="s1">'list[Any]'</span><span class="p">,</span>
+                              <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Any, ...]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Take the member's name as the service name of a member declaring its port alone.</span>
+
+<span class="sd">        |aenum|_ calls this for a member declaring fewer values than</span>
+<span class="sd">        :meth:`__new__` requires, passing the values it does declare as ``args``,</span>
+<span class="sd">        and only when the signature takes ``*args`` and ``**kwds``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: Member name.</span>
+<span class="sd">            start: Unused.</span>
+<span class="sd">            count: Unused.</span>
+<span class="sd">            last_values: Unused.</span>
+<span class="sd">            *args: Values the member declares, i.e. its port.</span>
+<span class="sd">            **kwds: Unused.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The port and the member name, as :meth:`__new__` takes them.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">aliases</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[AppType, ...]'</span><span class="p">:</span>
@@ -5895,7 +5931,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=aba1b6bb"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=de230f84"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>
