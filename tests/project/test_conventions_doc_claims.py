@@ -1611,6 +1611,9 @@ class ProcessConventionTests(unittest.TestCase):
 
         packages = {f'pcapkit.{d.name}' for d in (ROOT / 'pcapkit').iterdir()
                     if d.is_dir() and not d.name.startswith('__')}
+        # A module title is a ``:mod:`` reference (#3094), so the package is the
+        # role's target; test_every_module_section_title_is_a_mod_role pins the role.
+        sections = [re.sub(r'^:mod:`([^`]+)`$', r'\1', s) for s in sections]
         self.assertEqual(sorted(sections), sorted(packages | {'Project infrastructure'}),
                          'the changelog sections are not one per package plus Project '
                          'infrastructure, which is the map the page says they follow')
@@ -1621,6 +1624,31 @@ class ProcessConventionTests(unittest.TestCase):
         self.assertNotIn('separate runs', self.flat,
                          'the page still describes the entries as kind-label runs, '
                          'which the restructure removed')
+
+    def test_every_module_section_title_is_a_mod_role(self) -> 'None':
+        """A module section title links to its module page (#3094).
+
+        Every changelog page grouped by module titles each section
+        ``:mod:`pcapkit.x```; only *Project infrastructure* stays plain text. The
+        page records the rule.
+
+        """
+        pages = [p for p in sorted((ROOT / 'docs' / 'source' / 'changelog').glob('*.rst'))
+                 if re.search(r'(?m)^(?::mod:`)?pcapkit\.[a-z]+`?\n-{3,}$',
+                              p.read_text(encoding='utf-8'))]
+        self.assertGreaterEqual(len(pages), 3, 'no module-grouped changelog page found')
+        for page in pages:
+            lines = page.read_text(encoding='utf-8').splitlines()
+            for i in range(len(lines) - 1):
+                if re.fullmatch(r'(?::mod:`)?pcapkit\.[a-z]+`?', lines[i]) \
+                        and re.fullmatch(r'-{3,}', lines[i + 1]):
+                    with self.subTest(page=page.name, title=lines[i]):
+                        self.assertRegex(
+                            lines[i], r'^:mod:`pcapkit\.[a-z]+`$',
+                            f'{page.name} titles a module section as plain text')
+                        self.assertGreaterEqual(len(lines[i + 1]), len(lines[i]))
+        self.assertIn('``:mod:`` reference', self.flat,
+                      'the page no longer says module section titles use :mod:')
 
     def test_the_page_keeps_breaking_additive_and_its_coverage_honest(self) -> 'None':
         """``breaking`` stacks on a type label, and its history is uneven.

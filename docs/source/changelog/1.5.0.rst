@@ -17,8 +17,8 @@ dynamic long description. ``1.5.0b2`` reshipped it -- an existing version cannot
 republish -- and ``1.5.0b3`` followed the CI change that stops a TestPyPI outage from
 costing a release its wheels (:pr:`497`, :pr:`498`).
 
-pcapkit.const
--------------
+:mod:`pcapkit.const`
+--------------------
 
 Changed
 ~~~~~~~
@@ -391,8 +391,8 @@ Fixed
   value before it mints. :meth:`.Method.get` stays case-sensitive (:issue:`2284`,
   :pr:`2351`).
 
-pcapkit.corekit
----------------
+:mod:`pcapkit.corekit`
+----------------------
 
 Added
 ~~~~~
@@ -811,8 +811,8 @@ Fixed
   construction range-checks nothing, and name where the checks live (:issue:`2314`,
   :pr:`2335`).
 
-pcapkit.dumpkit
----------------
+:mod:`pcapkit.dumpkit`
+----------------------
 
 Fixed
 ~~~~~
@@ -884,8 +884,8 @@ Fixed
   ``object_hook`` fallback, which called ``super(type(self), self)`` (:issue:`2144`,
   :pr:`2146`).
 
-pcapkit.foundation
-------------------
+:mod:`pcapkit.foundation`
+-------------------------
 
 Added
 ~~~~~
@@ -1290,8 +1290,8 @@ Fixed
   ``object.__reduce_ex__`` unchanged) kept honouring it (:issue:`2433`,
   :pr:`2435`).
 
-pcapkit.interface
------------------
+:mod:`pcapkit.interface`
+------------------------
 
 Added
 ~~~~~
@@ -1312,8 +1312,8 @@ Fixed
   and ``Extractor.make_name`` quotes the format it does not know, where an empty one
   ended the message at the colon with nothing after it (:issue:`2303`, :pr:`2374`).
 
-pcapkit.protocols
------------------
+:mod:`pcapkit.protocols`
+------------------------
 
 Added
 ~~~~~
@@ -3036,8 +3036,8 @@ Fixed
   having no parsed data model to resolve the interface through yet (:issue:`2362`,
   :pr:`2382`).
 
-pcapkit.toolkit
----------------
+:mod:`pcapkit.toolkit`
+----------------------
 
 Added
 ~~~~~
@@ -3158,8 +3158,8 @@ Fixed
   before. Applied to the default engine's PCAP and PCAP-NG adapters and to the
   scapy and dpkt ones, which picked the outermost too (:issue:`2307`, :pr:`2338`).
 
-pcapkit.utilities
------------------
+:mod:`pcapkit.utilities`
+------------------------
 
 Added
 ~~~~~
@@ -3236,8 +3236,8 @@ Fixed
   importer's stack level counted the bootstrap frames GraalPy's ``warnings.warn`` skips,
   attributing the warning to ``<sys>:0`` (:issue:`1963`, :pr:`1996`).
 
-pcapkit.vendor
---------------
+:mod:`pcapkit.vendor`
+---------------------
 
 Fixed
 ~~~~~
