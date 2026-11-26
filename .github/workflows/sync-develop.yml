@@ -1,15 +1,15 @@
 name: Sync Develop
 
 # #2942: main is the released line and develop carries the next minor, so a fix
-# merged to main reaches develop through a pull request from main into develop.
-# `check` compares the two with a read-only token; `pr` opens that pull request,
-# or updates the open one, while develop lacks commits of main.
-# util/sync_develop.py holds the rule. Its head is sync/main, which `pr`
-# force-updates to main's head first, so "Update branch" merges develop into
-# that copy rather than into main (#3075). Nothing here merges, and no other
-# ref is written: the pull request is merged by hand, with a merge commit, so
-# develop keeps main's history. `pr` uses the release App's token, not
-# GITHUB_TOKEN, whose pull requests start no workflow, so its checks run.
+# merged to main reaches develop. `check` compares them with a read-only token;
+# while develop lags, `merge` merges main in with a merge commit and pushes it
+# through the maintenance deploy key, which bypasses develop's ruleset, so no
+# pull request opens (#3102). util/sync_develop.py holds the rule. A conflict is
+# aborted and left to `pr`, for a person: it force-updates sync/main to main's
+# head and opens or updates the pull request from it, so "Update branch" merges
+# develop into that mirror, never into main (#3075). `pr` uses the release
+# App's token, not GITHUB_TOKEN, whose pull requests start no workflow, so its
+# checks run.
 on:
   push:
     branches: [main]
@@ -17,8 +17,8 @@ on:
 
 permissions: {}
 
-# One run at a time, so two pushes cannot both open the pull request. A queued
-# run is kept, not cancelled: it compares the branches afresh.
+# One run at a time, so two pushes cannot both merge or open the pull request. A
+# queued run is kept, not cancelled: it compares the branches afresh.
 concurrency:
   group: sync-develop
   cancel-in-progress: false
@@ -51,21 +51,76 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: python3 util/sync_develop.py --check
 
+  # #1968: a job reading the deploy key names `conda-tag`, as Create Release's
+  # `tag` does. GITHUB_TOKEN only checks out; the key fetches and pushes develop.
+  # The merge needs develop's full history, which a 10-minute cap leaves room for.
+  merge:
+    name: Merge main into develop
+    needs: check
+    if: ${{ needs.check.outputs.behind == 'true' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: conda-tag
+    permissions:
+      contents: read
+    outputs:
+      conflict: ${{ steps.merge.outputs.conflict }}
+
+    steps:
+      - name: Load maintenance deploy key
+        uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555 # v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.PYPCAPKIT_ACTIONS_DEPLOY_KEY }}
+
+      # main's copy of the script, which merges in the checkout of develop
+      # below, so the merge never swaps it for develop's.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: |
+            util/_actions.py
+            util/sync_develop.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Check out develop
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: develop
+          path: develop
+          fetch-depth: 0
+          persist-credentials: false
+
+      # As Create Release's step of this name, in develop's checkout.
+      - name: Configure git for the deploy key
+        working-directory: develop
+        run: |
+          git remote set-url origin git@github.com:JarryShaw/PyPCAPKit.git
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Merge main into develop and push it
+        id: merge
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python3 util/sync_develop.py --merge --work-tree develop --run-url "$RUN_URL"
+
       - name: Say why no pull request opens
-        if: ${{ steps.compare.outputs.behind == 'true' && vars.RELEASE_APP_CLIENT_ID == '' }}
+        if: ${{ steps.merge.outputs.conflict == 'true' && vars.RELEASE_APP_CLIENT_ID == '' }}
         run: >-
           echo "::warning title=No pull request without the release App::vars.RELEASE_APP_CLIENT_ID is unset,
-          so the pr job skips. Set up the App as docs/source/contributing/releasing.rst describes."
+          so the pr job skips and the conflict waits for a person. Set up the App as
+          docs/source/contributing/releasing.rst describes."
 
-  # #2648: the release App's key is a secret of `release-app`, which has no
-  # reviewer and deploys from main alone. The token holds contents and pull
-  # requests write, to move sync/main and open its pull request, and workflows
-  # write, without which a ref cannot move past a change main made to a workflow.
+  # Only on a conflict. #2648: the release App's key is a secret of
+  # `release-app`, which has no reviewer and deploys from main alone. The token
+  # holds contents and pull requests write, to move sync/main and open its pull
+  # request, and workflows write, without which a ref cannot move past a change
+  # main made to a workflow.
   pr:
     name: Open or update the pull request
-    needs: check
+    needs: merge
     if: >-
-      ${{ needs.check.outputs.behind == 'true' && vars.RELEASE_APP_CLIENT_ID != '' &&
+      ${{ needs.merge.outputs.conflict == 'true' && vars.RELEASE_APP_CLIENT_ID != '' &&
       github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5

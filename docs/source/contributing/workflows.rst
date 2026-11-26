@@ -2308,20 +2308,30 @@ Sync Develop (:issue:`2942`)
 fix merged to the released line reaches the next minor, as the owner asked in review of
 :pr:`3056` (:issue:`2942`). On each push to ``main``, and
 on dispatch, its ``check`` job compares the two with a read-only token. Where
-``develop`` lacks commits of ``main``, ``pr`` force-updates ``sync/main`` to ``main``'s
-head, then opens the pull request from ``sync/main`` into ``develop``,
-``chore: merge main into develop``, or updates the open one, never a second. ``pr``
-runs in ``release-app`` and does both with the release App's token, as the Python
-Versions and Issue and PR Kinds ``pr`` jobs do, so the pull request's checks run. Its
-token holds contents and pull requests write, and workflows write, without which the
-mirror could not move past a change ``main`` made to a workflow.
+``develop`` lacks commits of ``main``, ``merge`` merges ``main`` into a checkout of
+``develop`` with a merge commit, ``chore: merge main into develop``, and pushes
+``develop``: **no pull request opens**, as the owner ruled in session, recorded on
+:issue:`3102`. It pushes through the maintenance deploy key, a bypass actor of
+``develop``'s ruleset, as Create Release's ``tag`` job does; the release App is not
+one. A push refused because ``develop`` moved is merged afresh and retried once; a
+second refusal, or one while ``develop`` stayed put, fails the job, and the next push
+to ``main`` merges again. Its step summary says which path ran.
+
+**Only a merge that conflicts opens a pull request.** ``merge`` aborts it and hands
+it to ``pr``, which force-updates ``sync/main`` to ``main``'s head, then opens the pull
+request from ``sync/main`` into ``develop``, or updates the open one, never a second,
+for a person to resolve. ``pr`` runs in ``release-app`` and does both with the release
+App's token, as the Python Versions and Issue and PR Kinds ``pr`` jobs do, so the pull
+request's checks run. Its token holds contents and pull requests write, and workflows
+write, without which the mirror could not move past a change ``main`` made to a
+workflow.
 
 The head is a mirror rather than ``main``, as the owner ruled on :pr:`3075`, which no
 issue holds: "Update branch" merges a pull request's base into its head, so on this
 pull request it writes ``develop`` into ``sync/main``, which the next run overwrites,
 and never into ``main``. A pull request a run finds open from ``main`` itself is
-closed with a comment naming its replacement, since a head cannot be changed. Nothing
-here merges, no ref but ``sync/main`` is written, the body asks for a merge commit
+closed with a comment naming its replacement, since a head cannot be changed. ``pr``
+merges nothing and writes no ref but ``sync/main``, its body asks for a merge commit
 rather than a squash, and a ``develop`` that does not exist yet is a notice.
 :file:`util/sync_develop.py` holds the rule, and
 :file:`tests/project/test_sync_develop_2942.py` pins it.
@@ -2382,7 +2392,9 @@ it, so the scheduled jobs reading them name it too
 * Vendor Update's ``vendor-update`` -- ``environment: conda-tag``
 
 A manual run names neither, except Conda Update's with ``publish``, whose jobs
-name them as the schedule's do (:issue:`2060`).
+name them as the schedule's do (:issue:`2060`). Sync Develop's ``merge`` names
+``conda-tag`` on every run, for the deploy key it pushes ``develop`` with
+(`Sync Develop (#2942)`_).
 
 Both ``conda-dist`` and the release ``conda`` job have a ``windows-latest`` leg,
 which builds, smoke-tests and publishes the ``win-64`` package (:issue:`2060`).
@@ -2393,9 +2405,9 @@ build-only manual run as every upload does.
 :file:`tests/project/test_conda_windows_leg_2060.py` pins the leg.
 
 A required reviewer on ``conda-tag`` or ``anaconda`` would therefore hold every
-scheduled bump for an approval, besides the release-graph reason
-:doc:`releasing` gives for keeping them without one. Each run of these jobs
-also records a deployment to its environment.
+scheduled bump, and every merge Sync Develop pushes, for an approval, besides the
+release-graph reason :doc:`releasing` gives for keeping them without one. Each run
+of these jobs also records a deployment to its environment.
 :file:`tests/project/test_secret_environments_1968.py` checks that every job
 reading one of these secrets names the environment holding it.
 
