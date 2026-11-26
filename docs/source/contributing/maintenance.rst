@@ -480,10 +480,10 @@ which it skips or stops rather than cancels (:doc:`workflows`).
        RC --> T["Fix verified: the failing module passes locally"]
        T --> FIX["Pushed straight to main,<br/>with no queue threshold"]
 
-**Read** ``main`` **at job level.** A run stays queued while one job waits, even with a
-job already failed. A non-blocking leg's red check is a defect as well: such a leg may
-only warn and end green, so a step that can lose its runner is contained -- capped,
-bounded, timed out -- rather than excused.
+**Read** ``main`` **at job level**, and ``develop``'s Unit Tests push runs too. A run
+stays queued while one job waits, even with a job already failed. A non-blocking leg's
+red check is a defect as well: such a leg may only warn and end green, so a step that
+can lose its runner is contained -- capped, bounded, timed out -- rather than excused.
 
 **The scheduled workflows run on** ``main`` **alone, with no** ``develop`` **leg**, as
 ruled on :issue:`3062`: they catch upstream drift, which both branches share, and
@@ -707,10 +707,11 @@ Worktree Pruner
 *  Applies `Worktree Cleanup`_. Its inputs are the ids of live agents, the open pull
    requests' branches, and a map from every sha a merged pull request ever had -- its
    heads, its commits, both sides of each force-push -- to that pull request, since
-   squash merges and amended heads leave an agent's own shas off ``main``.
+   squash merges and amended heads leave an agent's own shas off ``main`` and
+   ``develop``.
 *  A tree's commits count as landed when ``git cherry`` shows them upstream, or when
    every one maps to a merged pull request; its uncommitted edits count as landed when
-   their diff reverse-applies to ``main``'s index.
+   their diff reverse-applies to ``main``'s or ``develop``'s index.
 *  Has a dry run that only classifies. A real run saves each tree's diff before the
    removal, never forces past a lock, runs ``git worktree prune``, and prints what it
    removed and what it kept, with the reason for each.
