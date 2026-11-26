@@ -26,7 +26,7 @@ The built-in families, those bases included, derive from
 
 .. versionchanged:: 1.8.0
 
-   Calling the class parses a positional file, as :meth:`~Protocol.parse` does,
+   Calling the class parses a positional file, as :meth:`~Protocol.from_file` does,
    and constructs from keywords alone, as :meth:`~Protocol.from_fields` does
    (:issue:`3081`). A construction's unknown keyword raises
    :exc:`~pcapkit.utilities.exceptions.UnexpectedKeyword`, a :exc:`TypeError`
@@ -64,7 +64,7 @@ The built-in families, those bases included, derive from
    .. automethod:: analyze
 
    .. automethod:: from_schema
-   .. automethod:: parse
+   .. automethod:: from_file
    .. automethod:: from_fields
    .. automethod:: from_data
 
@@ -177,7 +177,7 @@ The built-in families, those bases included, derive from
 Parsing and Construction
 ------------------------
 
-Parsing and construction, :meth:`~Protocol.from_schema`, :meth:`~Protocol.parse`,
+Parsing and construction, :meth:`~Protocol.from_schema`, :meth:`~Protocol.from_file`,
 :meth:`~Protocol.from_fields` and :meth:`~Protocol.from_data` included, end in one
 path. Calling the class with a file parses, and with keywords alone constructs:
 
@@ -185,7 +185,7 @@ path. Calling the class with a file parses, and with keywords alone constructs:
 
    flowchart TD
        FS["from\_schema(schema)"] -->|"\_\_header\_\_ = schema,<br/>then its octets"| P
-       PA["parse(file, length, ...)"] --> P
+       PA["from\_file(file, length, ...)"] --> P
        P["Proto(file, length, /, *,<br/>layer, protocol, context)"] --> INIT
        PF["Proto(field=value, ..., context)"] --> INIT
        INIT["\_\_init\_\_, or an override taking keywords of its own"] -->|"a file"| START
@@ -210,7 +210,7 @@ path. Calling the class with a file parses, and with keywords alone constructs:
        READ["read(): the data model,<br/>calling \_decode\_next\_layer"] --> INFO["\_info updated with packet"]
 
        click FS "protocol.html#pcapkit.protocols.protocol.Protocol.from_schema"
-       click PA "protocol.html#pcapkit.protocols.protocol.Protocol.parse"
+       click PA "protocol.html#pcapkit.protocols.protocol.Protocol.from_file"
        click CALL "protocol.html#pcapkit.protocols.protocol.Protocol._call_fields"
        click FF "protocol.html#pcapkit.protocols.protocol.Protocol.from_fields"
        click FD "protocol.html#pcapkit.protocols.protocol.Protocol.from_data"
@@ -383,7 +383,7 @@ Internal Definitions
                   register
                   analyze
                   from_schema
-                  parse
+                  from_file
                   from_fields
                   from_data
                   read
@@ -447,7 +447,7 @@ Internal Definitions
       :no-contents-entry:
 
       :meth:`~Protocol.id`, :meth:`~Protocol.register`,
-      :meth:`~Protocol.analyze`, :meth:`~Protocol.from_schema`, :meth:`~Protocol.parse`,
+      :meth:`~Protocol.analyze`, :meth:`~Protocol.from_schema`, :meth:`~Protocol.from_file`,
       :meth:`~Protocol.from_fields`, :meth:`~Protocol.from_data`, :meth:`~Protocol.read`,
       :meth:`~Protocol.make`, :meth:`~Protocol.unpack`, :meth:`~Protocol.pack`,
       :meth:`~Protocol.decode`, :meth:`~Protocol.unquote`,

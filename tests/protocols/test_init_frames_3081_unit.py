@@ -8,7 +8,7 @@ path keeps its frames:
 
 * :class:`FramesPerLayerTests` -- an 802.1Q tag, parsed through the base
   ``__init__``, costs 10 frames, and an IPv4 header, parsed through
-  ``IP.__init__`` and ``_parse``, 13, by the class call and by ``parse`` alike.
+  ``IP.__init__`` and ``_parse``, 13, by the class call and by ``from_file`` alike.
 
 The counts are what ``develop`` measured before #3081, on CPython 3.14 and 3.15
 alike. They follow the interpreter's own Python-level calls, so the module is
@@ -83,13 +83,13 @@ class FramesPerLayerTests(unittest.TestCase):
         from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         for kind, build in (('802.1Q', tagged), ('IPv4', nested)):
-            for form, parse in (('call', Ethernet), ('parse', Ethernet.parse)):
+            for form, read in (('call', Ethernet), ('from_file', Ethernet.from_file)):
                 with self.subTest(kind=kind, form=form), warnings.catch_warnings():
                     warnings.simplefilter('ignore')
                     short, deep = build(10), build(20)
-                    parse(short)
-                    parse(deep)
-                    cost = depth(lambda: parse(deep)) - depth(lambda: parse(short))  # pylint: disable=cell-var-from-loop
+                    read(short)
+                    read(deep)
+                    cost = depth(lambda: read(deep)) - depth(lambda: read(short))  # pylint: disable=cell-var-from-loop
                     self.assertEqual(cost, 10 * FRAMES_PER_LAYER[kind])
 
 
