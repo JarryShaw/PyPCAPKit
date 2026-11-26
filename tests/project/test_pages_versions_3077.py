@@ -68,6 +68,9 @@ RELEASES = ('v0.9.0', 'v1.2.0', 'v1.10.0.dev1', 'v1.10.0a1', 'v1.10.0a2', 'v1.10
             'v1.10.0', 'v1.10.0.post1.dev1', 'v1.10.0.post1', 'v1.10.0.post2', 'v1.10.1')
 #: Tags that name no docs version.
 NOT_RELEASES = ('conda-1.10.0', 'conda-v1.10.0', 'v1.10.0+local', 'vfoo', 'v1.10.0-rc1', '1.10.0')
+#: The versions built from a branch, in the map's order: ``develop`` as ``latest``,
+#: Stable Branch's mirror of ``main`` as ``stable``, and ``develop`` again as ``dev``.
+BRANCHES = ('latest', 'stable', 'dev')
 #: Node.js, which runs the ``404.html`` script.
 NODE = shutil.which('node')
 #: Runs ``404.html``'s script with ``location`` and ``fetch`` stubbed, and prints
@@ -112,12 +115,10 @@ class TestTheVersions(unittest.TestCase):
         tags = list(RELEASES + NOT_RELEASES)
         random.Random(3077).shuffle(tags)
         mapping = self.module.versions(tags)
-        self.assertEqual(list(mapping), ['latest', 'dev', *RELEASES])
-        self.assertEqual(mapping['latest'], f'{READ_THE_DOCS}en/latest/')
-        self.assertEqual(mapping['dev'], f'{READ_THE_DOCS}en/dev/')
-        for tag in RELEASES:
-            with self.subTest(tag=tag):
-                self.assertEqual(mapping[tag], f'{READ_THE_DOCS}en/{tag}/')
+        self.assertEqual(list(mapping), [*BRANCHES, *RELEASES])
+        for name in (*BRANCHES, *RELEASES):
+            with self.subTest(version=name):
+                self.assertEqual(mapping[name], f'{READ_THE_DOCS}en/{name}/')
 
     def test_it_is_deterministic(self) -> None:
         tags = list(RELEASES + NOT_RELEASES)
@@ -128,8 +129,8 @@ class TestTheVersions(unittest.TestCase):
                 self.assertEqual(json.dumps(self.module.versions(tags + tags[:3])), expected)
 
     def test_no_branch_alone_is_a_release(self) -> None:
-        self.assertEqual(self.module.versions(NOT_RELEASES), {'latest': f'{READ_THE_DOCS}en/latest/',
-                                                              'dev': f'{READ_THE_DOCS}en/dev/'})
+        self.assertEqual(list(self.module.versions(NOT_RELEASES).items()),
+                         [(name, f'{READ_THE_DOCS}en/{name}/') for name in BRANCHES])
 
 
 class TestTheScript(unittest.TestCase):
@@ -178,7 +179,7 @@ class TestTheScript(unittest.TestCase):
         self.assertTrue(text.endswith('}\n'))
         self.assertEqual(list(json.loads(text).items()), [
             (name, f'{READ_THE_DOCS}en/{name}/')
-            for name in ('latest', 'dev', 'v1.2.0', 'v1.10.0rc1', 'v1.10.0', 'v1.10.1')])
+            for name in (*BRANCHES, 'v1.2.0', 'v1.10.0rc1', 'v1.10.0', 'v1.10.1')])
         self.assertEqual((self.build / '404.html').read_text(encoding='utf-8'), load_script().page())
 
     def test_it_refuses_to_overwrite_either_file(self) -> None:
@@ -209,13 +210,13 @@ class TestTheScript(unittest.TestCase):
 
 
 class TestTheNotFoundPage(unittest.TestCase):
-
-    VERSIONS = {'latest': f'{READ_THE_DOCS}en/latest/', 'dev': f'{READ_THE_DOCS}en/dev/',
-                'v1.7.0': f'{READ_THE_DOCS}en/v1.7.0/'}
+    """The page against the map the script writes for one release, its branches included."""
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.page = load_script().page()
+        module = load_script()
+        cls.page = module.page()
+        cls.VERSIONS = module.versions(['v1.7.0'])
 
     def run_page(self, pathname: 'str', search: 'str' = '', fragment: 'str' = '',
                  ok: 'bool' = True, offline: 'bool' = False) -> 'dict[str, Any]':
@@ -234,6 +235,8 @@ class TestTheNotFoundPage(unittest.TestCase):
         rows = (
             ('/PyPCAPKit/latest/pcapkit/foundation/extraction.html', '?q=1', '#the-extractor',
              f'{READ_THE_DOCS}en/latest/pcapkit/foundation/extraction.html?q=1#the-extractor'),
+            ('/PyPCAPKit/stable/pcapkit/index.html', '', '#pcapkit',
+             f'{READ_THE_DOCS}en/stable/pcapkit/index.html#pcapkit'),
             ('/PyPCAPKit/dev/', '', '', f'{READ_THE_DOCS}en/dev/'),
             ('/PyPCAPKit/dev', '', '', f'{READ_THE_DOCS}en/dev/'),
             ('/PyPCAPKit/v1.7.0/index.html', '', '#top', f'{READ_THE_DOCS}en/v1.7.0/index.html#top'),

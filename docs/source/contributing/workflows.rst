@@ -2429,7 +2429,7 @@ its root, so ``clean`` keeps them, and fails rather than overwrite a page:
      - Holds
    * - ``versions.json``
      - each version's path segment, mapped to its Read the Docs URL: ``latest``,
-       ``dev``, then every ``v*`` release tag ``origin`` lists, pre- and
+       ``stable``, ``dev``, then every ``v*`` release tag ``origin`` lists, pre- and
        post-releases included, in version order. A ``conda-*`` tag is none.
    * - ``404.html``
      - the page GitHub Pages serves for a missing path. Under a segment
