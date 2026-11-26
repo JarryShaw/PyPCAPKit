@@ -432,8 +432,8 @@ class TestThePythonVersionsReport(_ReportStep):
             '  - `3.10`: supported -> KTLO (end of life)\n'
             '  - `latest`: 3.14 -> 3.15\n'
             '- Regenerated: `.github/python-versions.toml`, `README.md`\n'
-            '- Ruleset 23497679, by hand: remove `Python 3.10`\n'
-            '- Ruleset 23497679, by hand: add `Python 3.10 (KTLO)`\n'
+            '- Rulesets 23497679 (`main`) and 28079111 (`develop`), by hand: remove `Python 3.10`\n'
+            '- Rulesets 23497679 (`main`) and 28079111 (`develop`), by hand: add `Python 3.10 (KTLO)`\n'
             '- held: 3.17 is a prerelease\n'
             '- Audit: success\n'
             '- Pull request: the `pr` job opens or updates it\n', 'success'))

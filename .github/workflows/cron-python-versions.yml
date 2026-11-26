@@ -4,7 +4,7 @@ name: Python Versions
 # tiers (util/update_python_versions.py's docstring gives the rules), rewrites
 # the file and the prose the audit tests pin to it, and runs that audit. `pr`
 # proposes any change on `bot/python-versions` for the owner to merge. Nothing
-# here pushes `main` or edits ruleset 23497679: the pull request body lists the
+# here pushes `main` or edits a ruleset: the pull request body lists the
 # required contexts to change by hand.
 #
 # `pr` pushes with the release App's token, not GITHUB_TOKEN, whose pushes
@@ -173,7 +173,8 @@ jobs:
               if plan['changed_files']:
                   lines.append('- Regenerated: ' + ', '.join(f'`{path}`' for path in plan['changed_files']))
               for kind in ('remove', 'add'):
-                  lines += [f'- Ruleset 23497679, by hand: {kind} `{name}`' for name in plan['required'][kind]]
+                  lines += [f'- Rulesets 23497679 (`main`) and 28079111 (`develop`), by hand: {kind} `{name}`'
+                            for name in plan['required'][kind]]
               lines += [f"- {note['kind']}: {note['text']}" for note in plan['notes']]
               warned = any(note['kind'] != 'held' for note in plan['notes'])
           lines.append(f"- Audit: {env.get('AUDIT') or 'not run'}")
