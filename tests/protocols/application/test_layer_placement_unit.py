@@ -126,12 +126,22 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
         self.assertEqual(InARP.__layer__, 'Link')
 
     def test_ospf_names_application_as_its_only_base(self) -> None:
+        """The family base, then each member under it (#3105)."""
+        from typing import Generic
+
         from pcapkit.protocols.application.application import Application
         from pcapkit.protocols.application.ospf.protocol import OSPF
+        from pcapkit.protocols.application.ospfv1.protocol import OSPFv1
+        from pcapkit.protocols.application.ospfv2.protocol import OSPFv2
+        from pcapkit.protocols.application.ospfv3.protocol import OSPFv3
         from pcapkit.protocols.link.link import Link
 
-        self.assertEqual(OSPF.__bases__, (Application,))
+        self.assertEqual(OSPF.__bases__, (Application, Generic))
         self.assertFalse(issubclass(OSPF, Link))
+        for member in (OSPFv1, OSPFv2, OSPFv3):
+            with self.subTest(member=member.__name__):
+                self.assertEqual(member.__bases__, (OSPF,))
+                self.assertEqual(member.__layer__, 'Application')
 
     def test_rarp_subclasses_both_application_and_arp_in_that_order(self) -> None:
         """The order is load-bearing: ``Link`` owns ``__layer__``, ``Raw`` does not."""

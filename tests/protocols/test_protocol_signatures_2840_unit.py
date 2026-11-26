@@ -42,6 +42,7 @@ EXTRAS = {
     'LinuxSLL': (('version', None),),
     'HTTP': (('version', None),),
     'L2TP': (('version', None),),
+    'OSPF': (('version', None),),
     'Frame': (('num', REQUIRED), ('header', REQUIRED)),
     'PCAPNG': (('num', REQUIRED), ('sct', REQUIRED), ('ctx', REQUIRED)),
     'IPv6_Ext': (('extension', False),),

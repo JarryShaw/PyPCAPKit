@@ -146,7 +146,7 @@ class TestOSPFTrailerKept(unittest.TestCase):
     def test_make_writes_trailer_outside_the_length(self) -> None:
         from pcapkit.protocols.application.ospf.protocol import OSPF
 
-        made = OSPF.from_fields(payload=b'abcd', trailer=b'\x00\x01')
+        made = OSPF.from_fields(version=2, payload=b'abcd', trailer=b'\x00\x01')
         self.assertEqual(made.info.len, 28)
         self.assertEqual(made.data[-6:], b'abcd\x00\x01')
         self.assertEqual(made.info.trailer, b'\x00\x01')

@@ -3,7 +3,7 @@
 
 GitHub issues:
 
-* #1249: :meth:`OSPF.make <pcapkit.protocols.application.ospf.protocol.OSPF.make>`
+* #1249: :meth:`OSPFv2.make <pcapkit.protocols.application.ospfv2.protocol.OSPFv2.make>`
   recomputed Packet Length from the payload and ``_make_data`` dropped the
   parsed one, so the 16-octet digest that cryptographic authentication appends
   outside the packet (:rfc:`2328#appendix-D.4.3`) was counted in it.
@@ -73,16 +73,16 @@ class TestOSPFRoundTrip(unittest.TestCase):
     def test_make_packet_length_default_and_explicit(self) -> None:
         from pcapkit.protocols.application.ospf.protocol import OSPF
 
-        self.assertEqual(bytes(OSPF.from_fields(payload=HELLO_BODY))[2:4], b'\x00\x2c')
-        self.assertEqual(bytes(OSPF.from_fields(packet_length=0x1e, payload=HELLO_BODY))[2:4], b'\x00\x1e')
+        self.assertEqual(bytes(OSPF.from_fields(version=2, payload=HELLO_BODY))[2:4], b'\x00\x2c')
+        self.assertEqual(bytes(OSPF.from_fields(version=2, packet_length=0x1e, payload=HELLO_BODY))[2:4], b'\x00\x1e')
 
     def test_from_data_without_len_computes_packet_length(self) -> None:
         from ipaddress import ip_address
 
         from pcapkit.protocols.application.ospf.protocol import OSPF
-        from pcapkit.protocols.application.ospf.data import OSPF as Data_OSPF
+        from pcapkit.protocols.application.ospfv2.data import OSPFv2 as Data_OSPFv2
 
-        data = Data_OSPF.from_dict({
+        data = Data_OSPFv2.from_dict({
             'version': 2, 'type': 1, 'router_id': ip_address('192.168.0.1'),
             'area_id': ip_address('0.0.0.0'), 'chksum': b'\x00\x00', 'autype': 0,
             'auth': bytes(8),
@@ -97,14 +97,14 @@ class TestOSPFRoundTrip(unittest.TestCase):
         for packet_length in (-1, 0x10000, True, 24.0, '24'):
             with self.subTest(packet_length=packet_length):
                 with self.assertRaises(ProtocolError) as caught:
-                    OSPF.from_fields(packet_length=packet_length)
+                    OSPF.from_fields(version=2, packet_length=packet_length)
                 self.assertEqual(str(caught.exception), f'OSPF: invalid packet length: {packet_length!r}')
-        self.assertEqual(bytes(OSPF.from_fields(packet_length=0xFFFF))[2:4], b'\xff\xff')
+        self.assertEqual(bytes(OSPF.from_fields(version=2, packet_length=0xFFFF))[2:4], b'\xff\xff')
 
     def test_make_crypto_auth_from_bytes(self) -> None:
         from pcapkit.protocols.application.ospf.protocol import OSPF
 
-        packet = bytes(OSPF.from_fields(auth_type=2, auth_data=CRYPTO_AUTH))
+        packet = bytes(OSPF.from_fields(version=2, auth_type=2, auth_data=CRYPTO_AUTH))
         self.assertEqual(packet[16:24], CRYPTO_AUTH)
 
         info = OSPF(packet, len(packet)).info
@@ -119,7 +119,7 @@ class TestOSPFRoundTrip(unittest.TestCase):
             for auth_data in (b'abc', b'0123456789', b''):
                 with self.subTest(auth_type=auth_type, auth_data=auth_data):
                     with self.assertRaises(ProtocolError) as caught:
-                        OSPF.from_fields(auth_type=auth_type, auth_data=auth_data)
+                        OSPF.from_fields(version=2, auth_type=auth_type, auth_data=auth_data)
                     self.assertIn('8 octets', str(caught.exception))
 
 

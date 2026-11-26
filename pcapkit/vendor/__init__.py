@@ -123,6 +123,7 @@ else:
     from pcapkit.vendor.mh import *
     from pcapkit.vendor.ngap import *
     from pcapkit.vendor.ospf import *
+    from pcapkit.vendor.ospfv1 import *
     from pcapkit.vendor.ppp import *
     from pcapkit.vendor.pppoe import *
     from pcapkit.vendor.radiotap import *
@@ -200,6 +201,8 @@ __all__ = [
     'NGAP_ProcedureCode', 'NGAP_ProtocolIE',
     # OSPF
     'OSPF_Authentication', 'OSPF_Packet',
+    # OSPFv1
+    'OSPFv1_Authentication', 'OSPFv1_Packet',
     # PPP
     'PPP_Protocol',
     # PPPoE

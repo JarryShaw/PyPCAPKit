@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal, Self
 
     from pcapkit.corekit.enum import EnumRegistry
+    from pcapkit.protocols.application.ospf.protocol import OSPF
     from pcapkit.protocols.data import Data
     from pcapkit.protocols.internet.igmp.protocol import IGMP
 
@@ -50,6 +51,11 @@ _exthdr_rebuilt = contextvars.ContextVar('_exthdr_rebuilt', default=0)
 #: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
 _IGMP: 'ModuleDescriptor[IGMP]' = \
     ModuleDescriptor('pcapkit.protocols.internet.igmp.protocol', 'IGMP')
+
+#: The OSPF base :meth:`Internet._next_layer_class` hands a packet to, to pick its
+#: version class, resolved there as ``_IGMP`` is (:issue:`3105`).
+_OSPF: 'ModuleDescriptor[OSPF]' = \
+    ModuleDescriptor('pcapkit.protocols.application.ospf.protocol', 'OSPF')
 
 
 class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
@@ -110,7 +116,10 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
        * - :attr:`~pcapkit.const.reg.transtype.TransType.SCTP`
          - :class:`pcapkit.protocols.transport.sctp.protocol.SCTP`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.OSPFIGP`
-         - :class:`pcapkit.protocols.application.ospf.protocol.OSPF`
+         - :class:`pcapkit.protocols.application.ospf.protocol.OSPF`, which dispatches to
+           :class:`pcapkit.protocols.application.ospfv1.protocol.OSPFv1`,
+           :class:`pcapkit.protocols.application.ospfv2.protocol.OSPFv2` or
+           :class:`pcapkit.protocols.application.ospfv3.protocol.OSPFv3`
 
     .. versionchanged:: 1.5.0
 
@@ -453,10 +462,13 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             return Raw, {'error': message}
 
         IGMPBase = _IGMP.klass  # pylint: disable=invalid-name
+        OSPFBase = _OSPF.klass  # pylint: disable=invalid-name
 
         protocol = self._lookup_next_layer(self.__proto__, cast('int', proto))
         if protocol is IGMPBase:
             protocol = IGMPBase._dispatch(file_, length)
+        elif protocol is OSPFBase:
+            protocol = OSPFBase._dispatch(file_, length)
         if depth and issubclass(protocol, Internet):
             return protocol, {'_exthdr_depth': depth}
         return protocol, {}

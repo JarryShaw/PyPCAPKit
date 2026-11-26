@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Unit tests for :mod:`pcapkit.protocols.application.ospf.protocol`."""
+"""Unit tests for :mod:`pcapkit.protocols.application.ospfv2.protocol`."""
 from __future__ import annotations
 
 import importlib.util
@@ -26,7 +26,7 @@ class OSPFUnitTests(unittest.TestCase):
     def test_ospf_index_is_its_transtype_and_make_data_preserves_header(self) -> None:
         from pcapkit.const.ospf.packet import Packet
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.application.ospf.protocol import OSPF
+        from pcapkit.protocols.application.ospfv2.protocol import OSPFv2
 
         data = DummyData(
             version=2,
@@ -38,12 +38,12 @@ class OSPFUnitTests(unittest.TestCase):
             auth=b'\x00' * 8,
             __next_type__=None,
         )
-        proto = object.__new__(OSPF)
+        proto = object.__new__(OSPFv2)
 
-        self.assertEqual(OSPF.__index__(), TransType.OSPFIGP)
-        self.assertEqual(OSPF.__index__(), 89)
+        self.assertEqual(OSPFv2.__index__(), TransType.OSPFIGP)
+        self.assertEqual(OSPFv2.__index__(), 89)
         self.assertEqual(proto.__length_hint__(), 24)
-        values = OSPF._make_data(data)
+        values = OSPFv2._make_data(data)
         self.assertEqual(values['version'], 2)
         self.assertEqual(values['type'], Packet.Hello)
         self.assertEqual(values['router_id'], '192.0.2.1')
@@ -55,15 +55,15 @@ class OSPFUnitTests(unittest.TestCase):
     def test_ospf_properties_read_make_and_auth_helpers(self) -> None:
         from pcapkit.const.ospf.authentication import Authentication
         from pcapkit.const.ospf.packet import Packet
-        from pcapkit.protocols.application.ospf.data import \
+        from pcapkit.protocols.application.ospfv2.data import \
             CryptographicAuthentication as DataCryptoAuth
-        from pcapkit.protocols.application.ospf.protocol import OSPF
-        from pcapkit.protocols.application.ospf.schema import \
+        from pcapkit.protocols.application.ospfv2.protocol import OSPFv2
+        from pcapkit.protocols.application.ospfv2.schema import \
             CryptographicAuthentication as SchemaCryptoAuth
-        from pcapkit.protocols.application.ospf.schema import OSPF as SchemaOSPF
+        from pcapkit.protocols.application.ospfv2.schema import OSPFv2 as SchemaOSPF
         from pcapkit.utilities.exceptions import ProtocolError
 
-        ospf = object.__new__(OSPF)
+        ospf = object.__new__(OSPFv2)
         # ``name``/``alias`` read ``_version``, not ``_info``: both are needed
         # while ``read`` is still running, before ``_info`` exists.
         ospf._version = 2
@@ -74,7 +74,7 @@ class OSPFUnitTests(unittest.TestCase):
         self.assertEqual(ospf.length, 24)
         self.assertEqual(ospf.type, Packet.Hello)
 
-        reader = object.__new__(OSPF)
+        reader = object.__new__(OSPFv2)
         reader.__header__ = SchemaOSPF(
             version=2,
             type=Packet.Database_Description,
@@ -94,7 +94,7 @@ class OSPFUnitTests(unittest.TestCase):
         self.assertEqual(reader._decode_next_layer.call_args.args[1], -1)
 
         crypto_schema = SchemaCryptoAuth(key_id=1, len=16, seq=99)
-        crypto_reader = object.__new__(OSPF)
+        crypto_reader = object.__new__(OSPFv2)
         crypto_reader.__header__ = SchemaOSPF(
             version=2,
             type=Packet.Link_State_Request,
@@ -113,9 +113,9 @@ class OSPFUnitTests(unittest.TestCase):
         self.assertEqual(crypto_data.auth.key_id, 1)
         self.assertEqual(crypto_data.auth.seq, 99)
 
-        maker = object.__new__(OSPF)
+        maker = object.__new__(OSPFv2)
         schema = maker.make(
-            version=3,
+            version=2,
             type=Packet.Link_State_Update,
             router_id='192.0.2.3',
             area_id='0.0.0.2',
@@ -151,7 +151,7 @@ class OSPFUnitTests(unittest.TestCase):
         """A :obj:`bool` router/area ID must not be silently packed. See #540.
 
         Latent rather than live: nothing in this module calls ``_make_id_numbers``
-        -- ``OSPF.make`` builds ``router_id``/``area_id`` from its own
+        -- ``OSPFv2.make`` builds ``router_id``/``area_id`` from its own
         arguments rather than through this helper -- so only a unit test (this one,
         and the one above) reaches it. It is guarded anyway, alongside the live sites #540
         covers, so that it does not resurface the moment a future caller reaches it.
@@ -159,12 +159,12 @@ class OSPFUnitTests(unittest.TestCase):
 
         .. code-block:: text
 
-           OSPF._make_id_numbers(True) -> 00000001  (i.e. 0.0.0.1)
+           OSPFv2._make_id_numbers(True) -> 00000001  (i.e. 0.0.0.1)
         """
-        from pcapkit.protocols.application.ospf.protocol import OSPF
+        from pcapkit.protocols.application.ospfv2.protocol import OSPFv2
         from pcapkit.utilities.exceptions import BaseError, FieldValueError
 
-        proto = object.__new__(OSPF)
+        proto = object.__new__(OSPFv2)
 
         with self.assertRaises(FieldValueError) as context:
             proto._make_id_numbers(True)  # type: ignore[arg-type]

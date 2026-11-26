@@ -2,7 +2,7 @@
 """Unit tests for the OSPF cryptographic-authentication names, #1090.
 
 ``CryptographicAuthentication`` is exported under that spelling from the OSPF
-schema and data modules, with no alias for the misspelled
+schema and data modules, now OSPFv2's (#3105), with no alias for the misspelled
 ``CrytographicAuthentication``. The ``OSPF_`` aggregate names went with the
 ``pcapkit.protocols.schema`` and ``pcapkit.protocols.data`` aggregations (#2534).
 """
@@ -23,8 +23,8 @@ class OSPFCryptographicAuthenticationUnitTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_correctly_spelled_name_is_exported(self) -> None:
-        from pcapkit.protocols.application.ospf import data as data_ospf
-        from pcapkit.protocols.application.ospf import schema as schema_ospf
+        from pcapkit.protocols.application.ospfv2 import data as data_ospf
+        from pcapkit.protocols.application.ospfv2 import schema as schema_ospf
 
         for module in (schema_ospf, data_ospf):
             with self.subTest(module=module.__name__):
@@ -33,8 +33,8 @@ class OSPFCryptographicAuthenticationUnitTests(unittest.TestCase):
                                  'CryptographicAuthentication')
 
     def test_misspelled_name_is_gone(self) -> None:
-        from pcapkit.protocols.application.ospf import data as data_ospf
-        from pcapkit.protocols.application.ospf import schema as schema_ospf
+        from pcapkit.protocols.application.ospfv2 import data as data_ospf
+        from pcapkit.protocols.application.ospfv2 import schema as schema_ospf
 
         for module in (schema_ospf, data_ospf):
             with self.subTest(module=module.__name__):
@@ -45,8 +45,8 @@ class OSPFCryptographicAuthenticationUnitTests(unittest.TestCase):
         from pcapkit.const.ospf.authentication import Authentication
         from pcapkit.corekit.fields.misc import SchemaField
         from pcapkit.corekit.fields.strings import BytesField
-        from pcapkit.protocols.application.ospf.schema import (CryptographicAuthentication,
-                                                               ospf_auth_data_selector)
+        from pcapkit.protocols.application.ospfv2.schema import (CryptographicAuthentication,
+                                                                 ospf_auth_data_selector)
 
         crypto_field = ospf_auth_data_selector({
             'auth_type': Authentication.Cryptographic_authentication,
