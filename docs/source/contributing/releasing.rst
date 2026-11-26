@@ -368,7 +368,8 @@ One-time setup:
    the Python Versions and Issue and PR Kinds workflows' ``pr`` jobs open their
    pull requests with a token of this App, with contents and pull requests write
    only (:issue:`1660`, :issue:`2561`, :doc:`workflows`), and Sync Develop's with
-   contents read and pull requests write (:issue:`2942`).
+   workflows write as well, to move its mirror of ``main`` (:issue:`2942`,
+   :pr:`3075`).
 2. Add repository variables ``RELEASE_APP_CLIENT_ID``, the App's Client ID, and
    ``RELEASE_APP_BOT_ID``, its bot's user id (``gh api
    "/users/<app-slug>[bot]" --jq .id``, as the action's README reads it).
@@ -575,6 +576,15 @@ start before it is approved, and rejecting it leaves nothing tagged and
 nothing published. Without its ``needs: github``, ``tag``, which has no
 reviewer of its own, could push a commit to ``main`` and cut a ``conda-*`` tag
 *ahead of* the approval it is supposed to wait for.
+
+The Release's Documentation
+---------------------------
+
+No release job publishes the documentation (:ref:`documentation-hosting`). GitHub
+Pages republishes ``main``'s build at its root, which ``/latest/`` aliases, once the
+release's push passes Unit Tests, and ``develop``'s build under ``/dev/`` on each push
+to ``develop``. Read the Docs builds ``latest`` from ``main``, ``develop``, and the
+release's tag as a version of its own, from the :file:`.readthedocs.yaml` in its tree.
 
 Precautions
 -----------

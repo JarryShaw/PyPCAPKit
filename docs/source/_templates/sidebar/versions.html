@@ -1,0 +1,14 @@
+{#- The switch between the two builds GitHub Pages serves (#3077): main's at the
+    site root, the latest release, and develop's under dev/. Each link names this
+    page in the other build. `pages_folder` is this build's folder, from conf.py,
+    and `content_root` the relative path to its root. -#}
+{%- set site_root = content_root ~ ('../' if pages_folder else '') %}
+<nav class="sidebar-versions" aria-label="Documentation version">
+  <span class="sidebar-versions-label">Version</span>
+  <ul>
+    {%- for folder, title in (('', 'latest release'), ('dev', 'development')) %}
+    <li><a href="{{ site_root }}{{ folder ~ '/' if folder else '' }}{{ pagename }}{{ file_suffix }}"
+      {%- if folder == pages_folder %} class="current" aria-current="page"{% endif %}>{{ title }}</a></li>
+    {%- endfor %}
+  </ul>
+</nav>

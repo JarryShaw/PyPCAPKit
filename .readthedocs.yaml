@@ -1,0 +1,25 @@
+# Read the Docs builds each version of the documentation from this file in that
+# version's own tree (#3077). The install matches deploy-pages.yml's `Install and
+# Build` step; conf.py sets PCAPKIT_SPHINX itself before it imports pcapkit, and
+# reads READTHEDOCS and READTHEDOCS_CANONICAL_URL, which Read the Docs sets, so
+# no variable is set here. tests/project/test_readthedocs_config_3077.py pins it.
+# https://docs.readthedocs.com/platform/stable/config-file/v2.html
+version: 2
+
+build:
+  os: ubuntu-24.04
+  tools:
+    # A supported CPython of .github/python-versions.toml that Read the Docs offers.
+    python: "3.14"
+
+sphinx:
+  configuration: docs/source/conf.py
+
+python:
+  install:
+    - requirements: docs/requirements.txt
+    - method: pip
+      path: .
+      extra_requirements:
+        - all
+        - dev

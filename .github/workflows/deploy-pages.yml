@@ -1,13 +1,17 @@
 name: GitHub Pages
 
 on:
-  # No `push` trigger: chaining off `Unit Tests`' completion reuses its verdict
-  # instead of running the gate a second time for the same tree (#715).
-  # `workflow_run` fires for any completion, PR or push, so `deploy-pages`
-  # filters on the event itself.
+  # `main`'s build has no `push` trigger: chaining off `Unit Tests`' completion
+  # reuses its verdict instead of running the gate a second time for the same
+  # tree (#715). `workflow_run` fires for any completion, PR or push, so
+  # `deploy-pages` filters on the event itself.
   workflow_run:
     workflows: ["Unit Tests"]
     types: [completed]
+  # #3077: each push to `develop` publishes its build under dev/, ungated so it
+  # is never stale. `head` and `discussion` skip it.
+  push:
+    branches: [develop]
   # #1967: GitHub Pages, Vendor Update and Conda Update run eight hours apart
   # on Saturdays, so each runs `head`'s test gate alone and `vendor-update` and
   # `conda-update` do not queue on `repository-maintenance` together. Conda
@@ -55,9 +59,11 @@ env:
 jobs:
   # #1967: the test gate on the schedule and the `verdict` on a `workflow_run`,
   # shared with Conda Update and Vendor Update; cron-head.yml says when each
-  # runs. On a pull request both skip.
+  # runs. On a pull request both skip. A push to `develop` skips the call: its
+  # gate would rerun Unit Tests, which that push runs anyway (#3077).
   head:
     name: Docs gate
+    if: ${{ github.event_name != 'push' }}
     permissions:
       contents: read
     uses: ./.github/workflows/cron-head.yml
@@ -84,7 +90,7 @@ jobs:
       - name: Checkout 🛎️
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # The default `github.sha` (main's tip), not
+          # The default `github.sha` (main's tip, or a `develop` push's commit), not
           # `github.event.workflow_run.head_sha`, which CodeQL flagged as
           # "checkout of untrusted code in a privileged context": on a pull
           # request's `Unit Tests` run it is a fork's commit. A trusted ref
@@ -108,8 +114,11 @@ jobs:
       # so an autodoc import failure is legible. Both are read at import time,
       # so they are exported before anything imports `pcapkit`. `.[all,dev]`
       # because autodoc imports the engine wrappers too, which need #910's
-      # `dev` extra, as in Lint.
+      # `dev` extra, as in Lint. `PAGES_FOLDER` is the folder the build is served
+      # from, which conf.py reads (#3077): dev/ for `develop`, the root otherwise.
       - name: Install and Build 🔧
+        env:
+          PAGES_FOLDER: ${{ github.event_name == 'push' && 'dev' || '' }}
         run: |
           set -x
 
@@ -125,6 +134,12 @@ jobs:
 
           # disable Jekyll
           touch docs/build/html/.nojekyll
+
+      # #3077: `/latest/` names the root build through a redirect stub per page,
+      # which the root publish carries; `develop`'s build has none.
+      - name: Write the /latest/ redirects
+        if: ${{ github.event_name != 'push' }}
+        run: python util/pages_latest.py docs/build/html
 
       # `.nojekyll` is hidden, and upload-artifact leaves hidden files out unless
       # told otherwise.
@@ -142,6 +157,12 @@ jobs:
   # runs no project code, and never on a pull request or a manual run.
   # `deploy-pages`' result is checked explicitly under `!cancelled()`: a skip
   # anywhere in the chain skips a job left with the implicit `success()` (#1632).
+  #
+  # #3077: two targets share `gh-pages`, `main`'s build at the root and
+  # `develop`'s under dev/. A group holds one pending job and cancels it when
+  # another joins, so each target has a group of its own, and neither can drop
+  # the other's pending publish. Each writes its own folder alone (`Deploy`), and
+  # a push the other target's landed first is rebased onto it rather than forced.
   publish-pages:
     name: Publish to gh-pages
     needs: [ deploy-pages ]
@@ -149,13 +170,18 @@ jobs:
       !cancelled() && needs.deploy-pages.result == 'success' &&
       github.event_name != 'pull_request' && github.event_name != 'workflow_dispatch'
     concurrency:
-      group: publish-pages-${{ github.ref }}
+      group: publish-pages-${{ github.event_name == 'push' && 'dev' || 'root' }}
       cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       actions: read
       contents: write
+    env:
+      # Each target's deploy commit, `<this> <sha>`, which the check reads back.
+      PUBLISHED: >-
+        ${{ github.event_name == 'push' && 'Publish the develop documentation of' ||
+        'Publish the documentation of' }}
     steps:
       # The deploy action pushes from a checkout of this repository.
       - name: Checkout 🛎️
@@ -172,27 +198,35 @@ jobs:
 
       # Builds finish in any order, and a concurrency group cannot order them (a
       # job joining one cancels the one pending there). So each deploy names its
-      # commit, and this skips only when `gh-pages` holds a build this run's
-      # commit is behind on main; anything else, an API error included,
+      # commit, and this skips only when `gh-pages` holds a build of this target
+      # that this run's commit is behind; anything else, an API error included,
       # publishes. Comparing heads alone would also skip when the newer commit's
       # run never publishes, a red one, leaving the docs older than this build.
+      # The newest of the last 100 `gh-pages` commits naming this target counts,
+      # since the other target's commits land between them.
       - name: Check gh-pages holds no newer build
         id: fresh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          published="$(gh api "repos/$GITHUB_REPOSITORY/commits/gh-pages" --jq .commit.message |
-                       sed -n 's/^Publish the documentation of \([0-9a-f]\{40\}\)$/\1/p' | head -n 1)"
+          published="$(gh api "repos/$GITHUB_REPOSITORY/commits?sha=gh-pages&per_page=100" --jq '.[].commit.message' |
+                       sed -n "s/^$PUBLISHED \([0-9a-f]\{40\}\)\$/\1/p" | head -n 1)"
           if [ -n "$published" ] && [ "$published" != "$GITHUB_SHA" ]; then
             status="$(gh api "repos/$GITHUB_REPOSITORY/compare/$published...$GITHUB_SHA" --jq .status || true)"
             if [ "$status" = behind ]; then
-              echo "::notice title=Newer documentation already published::gh-pages holds the build of $published, which $GITHUB_SHA is behind on main, so this older build is not published"
+              echo "::notice title=Newer documentation already published::gh-pages holds the build of $published, which $GITHUB_SHA is behind, so this older build is not published"
               echo "publish=false" >> "$GITHUB_OUTPUT"
               exit 0
             fi
           fi
           echo "publish=true" >> "$GITHUB_OUTPUT"
 
+      # #3077: `develop`'s build goes to dev/, whose `clean` deletes only inside
+      # it. The root's `clean` keeps dev/, which `clean-exclude` turns into the
+      # rsync protect filter `P /dev/`, anchored at the root; its own latest/
+      # stubs are rewritten with it. `force` is on by default, a plain force-push
+      # that would drop a publish the other target landed meanwhile; off, a
+      # rejected push is fetched, rebased onto it and retried (v4.9.0's git.ts).
       - name: Deploy 🚀
         if: steps.fresh.outputs.publish == 'true'
         uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # v4.9.0
@@ -200,9 +234,12 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages # The branch the action should deploy to.
           folder: docs/build/html # The folder the action should deploy.
+          target-folder: ${{ github.event_name == 'push' && 'dev' || '' }}
           clean: true # Automatically remove deleted files from the deploy branch
+          clean-exclude: /dev/
+          force: false
           # Read back by the step above; keep the two in step.
-          commit-message: Publish the documentation of ${{ github.sha }}
+          commit-message: ${{ env.PUBLISHED }} ${{ github.sha }}
 
   # #2030: the run's report, the gate's, the build's and the publish's results,
   # posted to the thread `deploy-pages: documentation build report`. As
@@ -212,7 +249,8 @@ jobs:
   # `deploy-pages` ran or `head`'s gate failed, so never on a pull request's
   # run or a verdict for another commit,
   # which skip `deploy-pages` deliberately, nor on a manual run, which the
-  # thread would read as a real one. It reads no artifact, and checks
+  # thread would read as a real one, nor on a push to `develop`, which it
+  # would post as a scheduled run (#3077). It reads no artifact, and checks
   # out the script and util/_actions.py, which it imports (#2047), alone. The
   # job and its step are `continue-on-error`;
   # util/discussion_report.py writes a warning rather than failing.
@@ -221,6 +259,7 @@ jobs:
     needs: [ head, deploy-pages, publish-pages ]
     if: >-
       ${{ always() && github.event_name != 'pull_request' && github.event_name != 'workflow_dispatch' &&
+      github.event_name != 'push' &&
       (needs.deploy-pages.result != 'skipped' ||
       needs.head.result == 'failure' || needs.head.result == 'cancelled') }}
     runs-on: ubuntu-latest

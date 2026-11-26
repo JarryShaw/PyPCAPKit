@@ -450,7 +450,10 @@ After every merge the sweep runs, in order:
 #. **Rebases**: a pull request the merge made conflicting is rebased and noted, as in
    the sweep. One that is only behind is left alone: ``main``'s ruleset requires
    branches to be up to date, every push to ``main`` puts every open pull request
-   behind, and the owner merges through the bypass.
+   behind, and the owner merges through the bypass. Sync Develop's pull request is
+   neither rebased nor updated: its head, ``sync/main``, is a mirror of ``main`` that
+   each run overwrites, so a conflict is resolved in a pull request into ``develop``
+   (:pr:`3075`, :doc:`workflows`).
 #. **The changelog fold**: the merged pull request's entry is written into the
    release's central changelog pull request (:ref:`release-lines`).
 #. **Worktrees and branch**: the merged pull request's worktrees become prunable, and
@@ -579,7 +582,8 @@ Remote Branch Cleanup
    ``gh api -X DELETE repos/JarryShaw/PyPCAPKit/git/refs/heads/<branch>``. A
    ``git push --delete`` naming more than five refs is refused: a repository rule
    caps a push at five branch or tag updates (``GH013``).
-*  **Branches under** ``test/`` **are kept.**
+*  **Branches under** ``test/`` **are kept**, and so is ``sync/main``, which Sync
+   Develop owns: deleting it closes the pull request open from it (:pr:`3075`).
 
 Briefs
 ------
