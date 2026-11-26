@@ -25,6 +25,8 @@ merges nothing and writes no ref but :data:`MIRROR`: the owner merges the pull
 request, with a merge commit, so ``develop`` keeps ``main``'s history. A read
 that fails warns under ``--check`` and fails under ``--propose``. Standard
 library and the :program:`gh` CLI only, with ``GH_TOKEN`` in the environment.
+:file:`util/stable_branch.py` mirrors ``main`` to ``stable`` with :func:`head_sha`
+and :func:`mirror` (#3077).
 
 """
 
@@ -107,19 +109,27 @@ def ref_sha(repo: 'str', branch: 'str') -> 'Optional[str]':
     return proc.stdout.strip()
 
 
-def mirror(repo: 'str', sha: 'str') -> 'None':
-    """Point :data:`MIRROR` at ``sha``: create it, or force-update it, whatever it holds."""
-    current = ref_sha(repo, MIRROR)
+def head_sha(repo: 'str') -> 'str':
+    """The commit :data:`HEAD` points at, or :exc:`ApiError` where it reads as none."""
+    sha = ref_sha(repo, HEAD) or ''
+    if not re.fullmatch(r'[0-9a-f]{40}', sha):
+        raise ApiError(f'{repo}\'s {HEAD} reads as {sha!r}, not a commit')
+    return sha
+
+
+def mirror(repo: 'str', sha: 'str', branch: 'str' = MIRROR) -> 'None':
+    """Point ``branch`` at ``sha``: create it, or force-update it, whatever it holds."""
+    current = ref_sha(repo, branch)
     if current == sha:
-        print(f'{MIRROR} is already at {sha[:9]}', flush=True)
+        print(f'{branch} is already at {sha[:9]}', flush=True)
         return
     if current is None:
-        api('-X', 'POST', f'repos/{repo}/git/refs', '-f', f'ref=refs/heads/{MIRROR}', '-f', f'sha={sha}',
+        api('-X', 'POST', f'repos/{repo}/git/refs', '-f', f'ref=refs/heads/{branch}', '-f', f'sha={sha}',
             '--jq', '.object.sha')
     else:
-        api('-X', 'PATCH', f'repos/{repo}/git/refs/heads/{MIRROR}', '-f', f'sha={sha}', '-F', 'force=true',
+        api('-X', 'PATCH', f'repos/{repo}/git/refs/heads/{branch}', '-f', f'sha={sha}', '-F', 'force=true',
             '--jq', '.object.sha')
-    print(f'{MIRROR} set to {sha[:9]}', flush=True)
+    print(f'{branch} set to {sha[:9]}', flush=True)
 
 
 def body(count: 'int', sha: 'str', run_url: 'str') -> 'str':
@@ -159,9 +169,7 @@ def propose(repo: 'str', run_url: 'str') -> 'int':
     if not count:
         print(f'{BASE} is level with {HEAD} or does not exist; nothing to propose', flush=True)
         return 0
-    sha = ref_sha(repo, HEAD) or ''
-    if not re.fullmatch(r'[0-9a-f]{40}', sha):
-        raise ApiError(f'{repo}\'s {HEAD} reads as {sha!r}, not a commit')
+    sha = head_sha(repo)
     mirror(repo, sha)
     text = body(count, sha, run_url)
     numbers = open_pull_requests(repo, MIRROR)

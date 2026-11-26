@@ -369,7 +369,8 @@ One-time setup:
    pull requests with a token of this App, with contents and pull requests write
    only (:issue:`1660`, :issue:`2561`, :doc:`workflows`), and Sync Develop's with
    workflows write as well, to move its mirror of ``main`` (:issue:`2942`,
-   :pr:`3075`).
+   :pr:`3075`). Stable Branch's ``mirror`` job moves ``stable`` with contents and
+   workflows write alone (:issue:`3077`).
 2. Add repository variables ``RELEASE_APP_CLIENT_ID``, the App's Client ID, and
    ``RELEASE_APP_BOT_ID``, its bot's user id (``gh api
    "/users/<app-slug>[bot]" --jq .id``, as the action's README reads it).
@@ -381,15 +382,15 @@ One-time setup:
      a job cannot access environment secrets until one of the required reviewers
      approves it".
    * ``release-app``, for the ``pr`` jobs of Python Versions, Issue and PR
-     Kinds, and Sync Develop. Create it with no required reviewer and its
-     deployment branches limited to ``main``, where those jobs run.
+     Kinds and Sync Develop, and Stable Branch's ``mirror``. Create it with no
+     required reviewer and its deployment branches limited to ``main``, where
+     those jobs run.
 
-   A job reads only the secrets of the environment it names, so those ``pr``
-   jobs need a copy outside ``github-release``, or they would wait on its
-   approval, which the owner ruled on :issue:`2648` is for Create Release alone.
-   ``github`` is the only job naming ``github-release``, and those ``pr`` jobs
-   the only others reading the key; where ``release-app`` has no key, each warns
-   and opens nothing.
+   A job reads only the secrets of the environment it names, so those jobs need
+   a copy outside ``github-release``, or they would wait on its approval, which
+   the owner ruled on :issue:`2648` is for Create Release alone. ``github`` is
+   the only job naming ``github-release``, and those jobs the only others
+   reading the key; where ``release-app`` has no key, each warns and skips.
 
 Unlike ``GITHUB_TOKEN``'s, the App's tag starts a tag-push run. It would rerun
 the release test gate, ask for a second approval and race the first run's
@@ -584,9 +585,10 @@ No release job publishes the documentation (:ref:`documentation-hosting`). GitHu
 Pages republishes ``main``'s build once the release's push passes Unit Tests. That
 build runs alongside Create Release, so its ``versions.json`` may predate the release's
 tag, which the next publish lists -- the next push to ``main`` or the Saturday
-schedule. Read the Docs builds ``latest`` from ``main``, ``dev`` from ``develop``, and
-the release's tag as a version of its own, from the :file:`.readthedocs.yaml` in its
-tree.
+schedule. Read the Docs builds ``stable`` from the ``stable`` branch, which Stable
+Branch moves to ``main``'s head on each push there, ``latest`` and ``dev`` from
+``develop``, and the release's tag as a version of its own, from the
+:file:`.readthedocs.yaml` in its tree.
 
 Precautions
 -----------

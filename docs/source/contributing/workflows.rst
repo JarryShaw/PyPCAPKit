@@ -147,6 +147,13 @@ At a Glance
      - --
      - --
      - ``workflow_dispatch``
+   * - Stable Branch
+     - :file:`stable-branch.yml`
+     - ``main``
+     - --
+     - --
+     - --
+     - ``workflow_dispatch``
    * - Engine Benchmark
      - :file:`benchmark.yml`
      - --
@@ -212,6 +219,7 @@ run id.
        CT["CI Timing<br/>ci-timing.yml"]
        BM["Engine Benchmark<br/>benchmark.yml"]
        SD["Sync Develop<br/>sync-develop.yml"]
+       SB["Stable Branch<br/>stable-branch.yml"]
        PS["Project Status<br/>project-status.yml"]
        MS["Milestone<br/>milestone.yml"]
        CR["Create Release<br/>create-release.yml"]
@@ -258,6 +266,9 @@ run id.
 
        PUSHMAIN --> SD
        DISPATCH --> SD
+
+       PUSHMAIN --> SB
+       DISPATCH --> SB
 
        DISPATCH --> PS
        DAILY -->|00:37| PS
@@ -2308,6 +2319,25 @@ rather than a squash, and a ``develop`` that does not exist yet is a notice.
 :file:`util/sync_develop.py` holds the rule, and
 :file:`tests/project/test_sync_develop_2942.py` pins it.
 
+Stable Branch (:issue:`3077`)
+-----------------------------
+
+**Stable Branch** (:file:`stable-branch.yml`) keeps the ``stable`` branch at ``main``'s
+head, so that Read the Docs's ``stable`` shows ``main``, as the owner asked in session,
+recorded on :issue:`3077`: Read the Docs builds ``stable`` from a branch of that name
+where one exists, rather than from the newest release tag (`Documentation Hosting
+(#3077)`_). On each push to ``main``, and on dispatch from it, its ``mirror`` job runs
+:file:`util/stable_branch.py` in ``release-app``, with a release App token holding
+contents and workflows write, as Sync Develop's ``pr`` moves ``sync/main``. The script
+reads ``main``'s head afresh, so a re-run of an older push cannot move ``stable`` back,
+then creates ``stable`` there or force-updates it, whatever it holds. It writes no other
+ref, and a run in progress is never cancelled.
+:file:`tests/project/test_stable_branch_3077.py` pins it.
+
+**The owner adds a ruleset on** ``refs/heads/stable`` restricting creations, updates
+and deletions, with the release App as its only bypass actor, so nothing else moves
+the mirror. A change meant for ``stable`` goes to ``main``.
+
 Deployment ``environment:``
 ----------------------------
 
@@ -2320,13 +2350,14 @@ These jobs of ``create-release.yml`` declare a deployment ``environment:``, and
 * ``conda`` -- ``environment: anaconda``
 
 The ``pr`` jobs of ``cron-python-versions.yml``, ``cron-issue-pr-kinds.yml`` and
-``sync-develop.yml`` declare ``environment: release-app``, for the release App's key
-(see `Python Versions`_, `Issue and PR Kinds (#2561)`_ and `Sync Develop (#2942)`_).
+``sync-develop.yml``, and ``stable-branch.yml``'s ``mirror``, declare ``environment:
+release-app``, for the release App's key (see `Python Versions`_, `Issue and PR Kinds
+(#2561)`_, `Sync Develop (#2942)`_ and `Stable Branch (#3077)`_).
 That environment has no reviewer, as the owner ruled on :issue:`2648` that only
 Create Release waits for an approval, and it deploys from ``main`` alone, where
 those jobs run.
 :doc:`releasing`'s "The Release App" says why the key is stored there as well
-as in ``github-release``. Where ``release-app`` has no key, each ``pr`` warns
+as in ``github-release``. Where ``release-app`` has no key, each of those jobs warns
 from its ``Check for the release App's key`` step and skips its other steps.
 :file:`tests/project/test_release_app_environment_2648.py` fails when a job other
 than Create Release's ``github`` names ``github-release``, when ``github`` does
@@ -2407,12 +2438,14 @@ its root, so ``clean`` keeps them, and fails rather than overwrite a page:
        found.
 
 **Read the Docs** builds the ``pypcapkit`` project outside GitHub Actions, at
-https://pypcapkit.jarryshaw.me/: ``main``'s build at ``/en/latest/``, ``develop``'s at
-``/en/dev/``, and each release tag's at ``/en/<tag>/`` from the first that carries
-:file:`.readthedocs.yaml`, since a version builds from that file in its own tree. It
-installs as the Pages build does. Every other build's sidebar links to it under the
-brand; there its own flyout menu switches versions, so :file:`docs/source/conf.py`
-leaves the link out and takes the canonical URL from ``READTHEDOCS_CANONICAL_URL``.
+https://pypcapkit.jarryshaw.me/: ``stable``, at ``/en/stable/``, from the ``stable``
+branch, `Stable Branch (#3077)`_'s mirror of ``main``; ``latest`` and ``dev``, at
+``/en/latest/`` and ``/en/dev/``, from ``develop``; and each release tag at
+``/en/<tag>/`` from the first that carries :file:`.readthedocs.yaml`, since a version
+builds from that file in its own tree. It installs as the Pages build does. Every other
+build's sidebar links to it under the brand; there its own flyout menu switches
+versions, so :file:`docs/source/conf.py` leaves the link out and takes the canonical URL
+from ``READTHEDOCS_CANONICAL_URL``.
 
 :file:`tests/project/test_pages_versions_3077.py` and
 :file:`tests/project/test_readthedocs_config_3077.py` pin both.

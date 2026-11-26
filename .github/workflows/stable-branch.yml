@@ -1,0 +1,75 @@
+name: Stable Branch
+
+# #3077: Read the Docs builds its `stable` version from a branch named stable
+# where one exists, rather than from the newest release tag, so `mirror` keeps
+# stable at main's head. util/stable_branch.py holds the rule: it reads main's
+# head afresh, so a re-run of an older push cannot move stable back, then
+# creates or force-updates stable there. No other ref is written. The release
+# App's token moves it, as Sync Develop's `pr` moves sync/main, and the owner's
+# ruleset on stable leaves the App its only writer.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+# One run at a time, so two pushes cannot race for the branch. A run in
+# progress is not cancelled: each reads main's head afresh.
+concurrency:
+  group: stable-branch
+  cancel-in-progress: false
+
+jobs:
+  # #2648: the release App's key is a secret of `release-app`, which has no
+  # reviewer and deploys from main alone. The token holds contents write, to
+  # move stable, and workflows write, without which a ref cannot move past a
+  # change main made to a workflow.
+  mirror:
+    name: Mirror main to stable
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: release-app
+    # GITHUB_TOKEN only checks out the scripts; the App's token moves the branch.
+    permissions:
+      contents: read
+
+    steps:
+      # Without the key in `release-app`, warn and skip the rest rather than fail
+      # at minting. The expression keeps the key itself out of the step's env.
+      - name: Check for the release App's key
+        id: key
+        env:
+          KEY_SET: ${{ secrets.RELEASE_APP_PRIVATE_KEY != '' }}
+        run: |
+          echo "set=$KEY_SET" >> "$GITHUB_OUTPUT"
+          if [ "$KEY_SET" != true ]; then
+            echo "::warning title=No stable mirror without the release App's key::the release-app environment has no RELEASE_APP_PRIVATE_KEY secret, so the mirror job skips. Store the App's key there as docs/source/contributing/releasing.rst describes."
+          fi
+
+      - name: Mint the release App's token
+        id: app
+        if: ${{ steps.key.outputs.set == 'true' }}
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-workflows: write
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: ${{ steps.key.outputs.set == 'true' }}
+        with:
+          sparse-checkout: |
+            util/_actions.py
+            util/sync_develop.py
+            util/stable_branch.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Mirror main to stable
+        if: ${{ steps.key.outputs.set == 'true' }}
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+        run: python3 util/stable_branch.py
