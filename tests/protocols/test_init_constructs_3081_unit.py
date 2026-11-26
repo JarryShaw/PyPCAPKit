@@ -2,7 +2,7 @@
 """Calling a protocol class parses a file, and constructs from keywords alone (GitHub issue #3081).
 
 The owner took option (A) on #3081: ``Proto(file, ...)`` parses as #2840 left it,
-``Proto(**fields)`` constructs as ``from_fields`` does, and ``parse`` is the
+``Proto(**fields)`` constructs as ``from_fields`` does, and ``from_file`` is the
 explicit form of the first. This module pins each branch:
 
 * :class:`ParseShapeTests` -- a field beside a file is refused by name, through the
@@ -14,9 +14,9 @@ explicit form of the first. This module pins each branch:
   where a file makes it the stop again; :obj:`None` for the file is refused;
 * :class:`VersionedFamilyTests` -- a versioned family's base gives the member
   ``version`` names, built or parsed, and a member checks ``version`` either way;
-* :class:`ParseMethodTests` -- ``parse`` gives what the class call gives, takes the
+* :class:`FromFileTests` -- ``from_file`` gives what the class call gives, takes the
   class's own parse keywords, and refuses a field;
-* :class:`FrameCountTests` -- ``parse`` costs the class call one frame at most, the
+* :class:`FrameCountTests` -- ``from_file`` costs the class call one frame at most, the
   same for a short frame and a deep one, and each ``__init__`` calls
   ``__post_init__`` itself, or through ``_parse`` where it says so (#1610);
   ``test_init_frames_3081_unit`` pins the frames per layer.
@@ -136,16 +136,16 @@ class ParseShapeTests(unittest.TestCase):
 
     def test_a_field_beside_a_file_is_refused_by_name(self) -> None:
         """One stray keyword is named alone, and several in sorted order; the parse keywords alone parse."""
-        for name, parse, keywords in self.parses():
+        for name, call, keywords in self.parses():
             with self.subTest(cls=name):
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore')
-                    self.assertEqual(type(parse(**keywords)).__name__, name)
+                    self.assertEqual(type(call(**keywords)).__name__, name)
                 with self.assertRaisesRegex(TypeError, rf"^{name}: unexpected keyword argument 'src' for a parse$"):
-                    parse(**keywords, src='192.0.2.1')
+                    call(**keywords, src='192.0.2.1')
                 with self.assertRaisesRegex(
                         TypeError, rf"^{name}: unexpected keyword arguments 'dst', 'src' for a parse$"):
-                    parse(**keywords, src='192.0.2.1', dst='192.0.2.2')
+                    call(**keywords, src='192.0.2.1', dst='192.0.2.2')
 
 
 class ConstructShapeTests(unittest.TestCase):
@@ -302,7 +302,7 @@ class ConstructShapeTests(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, "^Ethernet: unexpected keyword argument 'length' for a parse$"):
             Ethernet(FRAME, length=3)
         with self.assertRaisesRegex(TypeError, "^Ethernet: unexpected keyword arguments 'file', 'length' for a parse$"):
-            Ethernet.parse(FRAME, file=FRAME, length=3)
+            Ethernet.from_file(FRAME, file=FRAME, length=3)
 
     def test_a_field_named_file_or_length_is_that_field(self) -> None:
         """A keyword always wins over the positional of its name, so a field may be called either (#3081)."""
@@ -441,17 +441,17 @@ class VersionedFamilyTests(unittest.TestCase):
             IPv4(PACKET, version=6)
 
     def test_the_base_parses_to_the_member_its_octets_name(self) -> None:
-        """Through the class call and through ``parse`` alike."""
+        """Through the class call and through ``from_file`` alike."""
         from pcapkit.protocols.internet.ip.protocol import IP
 
         for octets, member in ((PACKET, 'IPv4'), (PACKET6, 'IPv6')):
-            for parse in (IP, IP.parse):
-                with self.subTest(member=member, parse=getattr(parse, '__name__', parse)):
-                    self.assertEqual(type(parse(octets)).__name__, member)
+            for build in (IP, IP.from_file):
+                with self.subTest(member=member, build=getattr(build, '__name__', build)):
+                    self.assertEqual(type(build(octets)).__name__, member)
 
 
-class ParseMethodTests(unittest.TestCase):
-    """``parse`` is the explicit form of the class call given a file."""
+class FromFileTests(unittest.TestCase):
+    """``from_file`` is the explicit form of the class call given a file."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -459,7 +459,7 @@ class ParseMethodTests(unittest.TestCase):
     def test_the_signature_is_the_parse_one_with_the_class_s_keywords(self) -> None:
         from pcapkit.protocols.protocol import ProtocolBase
 
-        params = inspect.signature(ProtocolBase.parse).parameters
+        params = inspect.signature(ProtocolBase.from_file).parameters
         self.assertEqual([(name, param.kind, param.default) for name, param in params.items()], [
             ('file', inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.empty),
             ('length', inspect.Parameter.POSITIONAL_ONLY, None),
@@ -469,7 +469,7 @@ class ParseMethodTests(unittest.TestCase):
             ('keywords', inspect.Parameter.VAR_KEYWORD, inspect.Parameter.empty),
         ])
 
-    def test_parse_gives_what_the_class_call_gives(self) -> None:
+    def test_from_file_gives_what_the_class_call_gives(self) -> None:
         """The same class, octets and data, with the stops, the length and the class's own keywords."""
         from pcapkit.protocols.application.dns.protocol import DNS
         from pcapkit.protocols.internet.ip.protocol import IP
@@ -494,34 +494,34 @@ class ParseMethodTests(unittest.TestCase):
         for cls, args, keywords in cases:
             with self.subTest(cls=cls.__name__, keywords=sorted(keywords)), warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                called, parsed = cls(*args, **keywords), cls.parse(*args, **keywords)
+                called, parsed = cls(*args, **keywords), cls.from_file(*args, **keywords)
                 self.assertIs(type(parsed), type(called))
                 self.assertEqual(parsed.data, called.data)
                 self.assertEqual(parsed.info.to_dict(), called.info.to_dict())
                 self.assertEqual(str(parsed.protochain), str(called.protochain))
 
-    def test_parse_refuses_a_field(self) -> None:
+    def test_from_file_refuses_a_field(self) -> None:
         """``protocol`` is the stop even where the class takes a field of that name."""
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.protocols.link.ethernet.protocol import Ethernet
         from pcapkit.utilities.exceptions import RegistryError
 
         with self.assertRaisesRegex(TypeError, "^Ethernet: unexpected keyword argument 'src' for a parse$"):
-            Ethernet.parse(FRAME, src='aa:bb:cc:dd:ee:ff')
+            Ethernet.from_file(FRAME, src='aa:bb:cc:dd:ee:ff')
         with self.assertRaisesRegex(TypeError, "^IPv4: unexpected keyword argument 'ttl' for a parse$"):
-            IPv4.parse(PACKET, ttl=1)
-        self.assertEqual(IPv4.parse(PACKET, protocol='IPv4')._exproto, 'IPv4')  # pylint: disable=protected-access
+            IPv4.from_file(PACKET, ttl=1)
+        self.assertEqual(IPv4.from_file(PACKET, protocol='IPv4')._exproto, 'IPv4')  # pylint: disable=protected-access
         with self.assertRaises(RegistryError):
-            IPv4.parse(PACKET, protocol=6)
+            IPv4.from_file(PACKET, protocol=6)
 
-    def test_parse_of_no_octets_is_refused(self) -> None:
+    def test_from_file_of_no_octets_is_refused(self) -> None:
         from pcapkit.protocols.internet.ip.protocol import IP
         from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         for cls in (Ethernet, IP):
             with self.subTest(cls=cls.__name__), self.assertRaisesRegex(
                     TypeError, rf'^{cls.__name__}: nothing to parse; build one with {cls.__name__}\.from_fields\(\)$'):
-                cls.parse(None)  # type: ignore[arg-type]
+                cls.from_file(None)  # type: ignore[arg-type]
 
 
 def post_init_caller(call: 'Callable[[], object]') -> 'Any':
@@ -541,7 +541,7 @@ def post_init_caller(call: 'Callable[[], object]') -> 'Any':
 
 
 class FrameCountTests(unittest.TestCase):
-    """``parse`` adds no frame per layer to the class call (#1610)."""
+    """``from_file`` adds no frame per layer to the class call (#1610)."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -569,10 +569,10 @@ class FrameCountTests(unittest.TestCase):
 
         header = Header(GLOBAL).info
         block = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={}).data
-        parse = vars(ProtocolBase)['_parse'].__code__
+        via_parse = vars(ProtocolBase)['_parse'].__code__
         cases = (
             ('TCP', lambda: TCP(SEGMENT), vars(ProtocolBase)['__init__'].__code__),
-            ('TCP.parse', lambda: TCP.parse(SEGMENT), vars(ProtocolBase)['__init__'].__code__),
+            ('TCP.from_file', lambda: TCP.from_file(SEGMENT), vars(ProtocolBase)['__init__'].__code__),
             ('Frame', lambda: Frame(record(FRAME), num=1, header=header), vars(Frame)['__init__'].__code__),
             ('PCAPNG', lambda: PCAPNG(block, num=0, sct=1, ctx=None), vars(PCAPNG)['__init__'].__code__),
             ('HOPOPT', lambda: HOPOPT(bytes([6, 0, 1, 4, 0, 0, 0, 0]) + SEGMENT), vars(IPv6_Ext)['__init__'].__code__),
@@ -580,18 +580,18 @@ class FrameCountTests(unittest.TestCase):
             ('Loopback', lambda: Loopback(b'\x02\x00\x00\x00' + PACKET), vars(Loopback)['__init__'].__code__),
             ('Netlink', lambda: Netlink(bytes(16), byteorder='little'), vars(Netlink)['__init__'].__code__),
             ('L2TP', lambda: L2TP(b'\x00\x02' + bytes(4)), vars(L2TP)['__init__'].__code__),
-            ('IP', lambda: IP(PACKET), parse),
-            ('ICMP', lambda: ICMP(b'\x08\x00' + bytes(6), version=4), parse),
-            ('IGMP', lambda: IGMP(bytes([0x11, 0]) + bytes(6)), parse),
-            ('LinuxSLL', lambda: LinuxSLL(bytes(14) + b'\x08\x00' + PACKET, version=1), parse),
-            ('HTTP', lambda: HTTP(b'GET / HTTP/1.1\r\n\r\n'), parse),
+            ('IP', lambda: IP(PACKET), via_parse),
+            ('ICMP', lambda: ICMP(b'\x08\x00' + bytes(6), version=4), via_parse),
+            ('IGMP', lambda: IGMP(bytes([0x11, 0]) + bytes(6)), via_parse),
+            ('LinuxSLL', lambda: LinuxSLL(bytes(14) + b'\x08\x00' + PACKET, version=1), via_parse),
+            ('HTTP', lambda: HTTP(b'GET / HTTP/1.1\r\n\r\n'), via_parse),
         )
         for name, call, caller in cases:
             with self.subTest(cls=name), warnings.catch_warnings():
                 warnings.simplefilter('ignore')
                 self.assertIs(post_init_caller(call), caller)
 
-    def test_parse_costs_the_class_call_one_frame_at_most_whatever_the_depth(self) -> None:
+    def test_from_file_costs_the_class_call_one_frame_at_most_whatever_the_depth(self) -> None:
         from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         costs = {}
@@ -600,8 +600,8 @@ class FrameCountTests(unittest.TestCase):
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')
                 Ethernet(data)
-                Ethernet.parse(data)
-                costs[count] = depth(lambda: Ethernet.parse(data)) - depth(lambda: Ethernet(data))  # pylint: disable=cell-var-from-loop
+                Ethernet.from_file(data)
+                costs[count] = depth(lambda: Ethernet.from_file(data)) - depth(lambda: Ethernet(data))  # pylint: disable=cell-var-from-loop
         self.assertEqual(costs[1], costs[20], costs)
         self.assertIn(costs[1], (0, 1), costs)
 

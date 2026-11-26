@@ -1505,19 +1505,22 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         return self
 
     @classmethod
-    def parse(cls, file: 'IO[bytes] | bytes', length: 'Optional[int]' = None, /, *,
-              layer: 'Optional[str]' = None,
-              protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
-              context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
-              **keywords: 'Any') -> 'Self':
-        """Parse a protocol instance from its octets.
+    def from_file(cls, file: 'IO[bytes] | bytes', length: 'Optional[int]' = None, /, *,
+                  layer: 'Optional[str]' = None,
+                  protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                  context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                  **keywords: 'Any') -> 'Self':
+        """Parse a protocol instance from ``file``, its octets as bytes or a binary stream.
 
         The explicit form of calling the class with ``file``, giving the same
         result: through a versioned family's base, the member the parse picks
         (:ref:`protocol-family-dispatch`). A field is refused (:issue:`3081`).
+        ``file`` is no path to a capture file, which :func:`~pcapkit.interface.core.extract`
+        reads.
 
         Args:
-            file: Source packet stream.
+            file: Source packet stream: :obj:`bytes`, or a binary stream read from
+                its current position.
             length: Length of packet data.
             layer: As :meth:`__init__`.
             protocol: As :meth:`__init__`; a stop, never a field.
@@ -1704,7 +1707,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                  **fields: 'Any') -> 'None':
         """Parse a protocol instance from its octets, or construct one from its fields.
 
-        Given ``file``, it parses, as :meth:`parse` does; given none, it
+        Given ``file``, it parses, as :meth:`from_file` does; given none, it
         constructs, as :meth:`from_fields` does (:issue:`3081`).
 
         Args:

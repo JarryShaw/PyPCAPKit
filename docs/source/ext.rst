@@ -320,7 +320,7 @@ implementation is :mod:`pcapkit.protocols.internet.ipv4.protocol`:
 
    Parsing takes no field: calling the class with a file is ``Proto(file, length,
    /, *, layer, protocol, context)``, as
-   :meth:`Protocol.parse <pcapkit.protocols.protocol.Protocol.parse>` is, and any
+   :meth:`Protocol.from_file <pcapkit.protocols.protocol.Protocol.from_file>` is, and any
    other keyword is refused. A parse that needs an input of its own declares it on
    an ``__init__`` override, keyword-only and before the stops, as
    :meth:`DNS.__init__ <pcapkit.protocols.application.dns.protocol.DNS.__init__>`
