@@ -57,7 +57,7 @@ NEEDS = {LINT: ['lint'], PAGES: ['head', 'deploy-pages', 'publish-pages']}
 IFS = {
     LINT: "${{ always() && github.event_name != 'pull_request' && needs.lint.result != 'skipped' }}",
     PAGES: "${{ always() && github.event_name != 'pull_request' && github.event_name != 'workflow_dispatch' && "
-           "github.event_name != 'push' && (needs.deploy-pages.result != 'skipped' || "
+           "(needs.deploy-pages.result != 'skipped' || "
            "needs.head.result == 'failure' || needs.head.result == 'cancelled') }}",
 }
 #: The ``--mode`` and ``--status`` each workflow passes, and the step's ``env:``
@@ -173,15 +173,11 @@ class TestTheWorkflowsPost(unittest.TestCase):
                                                    'persist-credentials': False})
 
     def test_the_mode_follows_the_event(self) -> None:
-        """Lint has no push trigger; GitHub Pages' ``workflow_run`` follows a push, so ``push``.
-
-        Pages' own ``push``, ``develop``'s (#3077), posts nothing.
-
-        """
+        """Lint has no push trigger; GitHub Pages' ``workflow_run`` follows a push, so ``push``."""
         self.assertEqual(sorted(load(LINT)['on']), ['pull_request', 'schedule', 'workflow_dispatch'])
         # A manual run posts nothing; tests/project/test_build_only_dispatch.py pins it.
         self.assertEqual(sorted(load(PAGES)['on']),
-                         ['pull_request', 'push', 'schedule', 'workflow_dispatch', 'workflow_run'])
+                         ['pull_request', 'schedule', 'workflow_dispatch', 'workflow_run'])
         expression = step(PAGES, 'discussion', POST)['env']['MODE']
         for event, mode in (('schedule', 'scheduled'), ('workflow_run', 'push')):
             with self.subTest(event=event):
@@ -211,9 +207,6 @@ class TestTheWorkflowsPost(unittest.TestCase):
             ('workflow_run', 'success', 'skipped', False),
             ('pull_request', 'skipped', 'success', False),
             ('pull_request', 'skipped', 'failure', False),
-            # #3077: a push to `develop`, which skips `head`, posts nothing either way.
-            ('push', 'skipped', 'success', False),
-            ('push', 'skipped', 'failure', False),
         )
         for event, head, built, expected in rows:
             needs = {'head': {'result': head}, 'deploy-pages': {'result': built},
