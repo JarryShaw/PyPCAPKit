@@ -3003,7 +3003,7 @@ its root, so <code class="docutils literal notranslate"><span class="pre">clean<
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">versions.json</span></code></p></td>
 <td><p>each version’s path segment, mapped to its Read the Docs URL: <code class="docutils literal notranslate"><span class="pre">latest</span></code>,
-<code class="docutils literal notranslate"><span class="pre">stable</span></code>, <code class="docutils literal notranslate"><span class="pre">dev</span></code>, then every <code class="docutils literal notranslate"><span class="pre">v*</span></code> release tag <code class="docutils literal notranslate"><span class="pre">origin</span></code> lists, pre- and
+<code class="docutils literal notranslate"><span class="pre">stable</span></code>, then every <code class="docutils literal notranslate"><span class="pre">v*</span></code> release tag <code class="docutils literal notranslate"><span class="pre">origin</span></code> lists, pre- and
 post-releases included, in version order. A <code class="docutils literal notranslate"><span class="pre">conda-*</span></code> tag is none.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">404.html</span></code></p></td>
@@ -3017,13 +3017,14 @@ found.</p></td>
 </div>
 <p><strong>Read the Docs</strong> builds the <code class="docutils literal notranslate"><span class="pre">pypcapkit</span></code> project outside GitHub Actions, at
 <a class="reference external" href="https://pypcapkit.jarryshaw.me/">https://pypcapkit.jarryshaw.me/</a>: <code class="docutils literal notranslate"><span class="pre">stable</span></code>, at <code class="docutils literal notranslate"><span class="pre">/en/stable/</span></code>, from the <code class="docutils literal notranslate"><span class="pre">stable</span></code>
-branch, <a class="reference internal" href="#stable-branch-3077">Stable Branch (#3077)</a>’s mirror of <code class="docutils literal notranslate"><span class="pre">main</span></code>; <code class="docutils literal notranslate"><span class="pre">latest</span></code> and <code class="docutils literal notranslate"><span class="pre">dev</span></code>, at
-<code class="docutils literal notranslate"><span class="pre">/en/latest/</span></code> and <code class="docutils literal notranslate"><span class="pre">/en/dev/</span></code>, from <code class="docutils literal notranslate"><span class="pre">develop</span></code>; and each release tag at
-<code class="docutils literal notranslate"><span class="pre">/en/&lt;tag&gt;/</span></code> from the first that carries <code class="file docutils literal notranslate"><span class="pre">.readthedocs.yaml</span></code>, since a version
-builds from that file in its own tree. It installs as the Pages build does. Every other
-build’s sidebar links to it under the brand; there its own flyout menu switches
-versions, so <code class="file docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code> leaves the link out and takes the canonical URL
-from <code class="docutils literal notranslate"><span class="pre">READTHEDOCS_CANONICAL_URL</span></code>.</p>
+branch, <a class="reference internal" href="#stable-branch-3077">Stable Branch (#3077)</a>’s mirror of <code class="docutils literal notranslate"><span class="pre">main</span></code>; <code class="docutils literal notranslate"><span class="pre">latest</span></code>, at <code class="docutils literal notranslate"><span class="pre">/en/latest/</span></code>,
+from <code class="docutils literal notranslate"><span class="pre">develop</span></code>; and each release tag at <code class="docutils literal notranslate"><span class="pre">/en/&lt;tag&gt;/</span></code> from the first that carries
+<code class="file docutils literal notranslate"><span class="pre">.readthedocs.yaml</span></code>, since a version builds from that file in its own tree. It
+installs as the Pages build does. Every other build’s sidebar links to it under the
+brand; there its own flyout menu switches versions, so <code class="file docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code>
+leaves the link out and takes the canonical URL from <code class="docutils literal notranslate"><span class="pre">READTHEDOCS_CANONICAL_URL</span></code>. No
+<code class="docutils literal notranslate"><span class="pre">dev</span></code> version duplicates <code class="docutils literal notranslate"><span class="pre">latest</span></code>, as the owner ruled in session, recorded on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3077">#3077</a>, so a Pages path under <code class="docutils literal notranslate"><span class="pre">/dev/</span></code> is not found.</p>
 <p><code class="file docutils literal notranslate"><span class="pre">tests/project/test_pages_versions_3077.py</span></code> and
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_readthedocs_config_3077.py</span></code> pin both.</p>
 </section>
