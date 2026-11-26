@@ -1,4 +1,4 @@
-## 1.8.0 -- unreleased
+## 1.8.0 -- 2026-11-26
 
 1.8.0 splits parsing a protocol from constructing one: calling a protocol class with a file parses it, calling it with fields alone builds one, and `from_file` and `from_fields` are the explicit pair. A parse takes no field, its stops and context only by keyword, and `analyze` dispatches a payload as a frame dispatches its next layer. Development moves to a `develop` branch, and the documentation is versioned on Read the Docs. Its breaking changes, each marked **a breaking change to** and ending with how to migrate, are to the protocol signatures.
 

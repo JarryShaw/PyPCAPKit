@@ -1,4 +1,4 @@
-1.8.0 -- unreleased
+1.8.0 -- 2026-11-26
 ===================
 
 1.8.0 splits parsing a protocol from constructing one: calling a protocol class
