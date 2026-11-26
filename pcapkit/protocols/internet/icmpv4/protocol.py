@@ -226,11 +226,11 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
 
         # NOTE: The quoted original datagram stays raw in the message body,
         # so there is no next layer; the schema has no ``payload`` field.
-        self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
+        self._next = NoPayload.from_fields()  # pylint: disable=attribute-defined-outside-init
         self._protos = ProtoChain(self.__class__, self.alias)  # pylint: disable=attribute-defined-outside-init
         return icmp
 
-    def make(self,
+    def make(self, *,
              type: 'Enum_Type | int' = Enum_Type.Echo,  # pylint: disable=redefined-builtin
              code: 'int' = 0,
              checksum: 'Optional[bytes]' = None,

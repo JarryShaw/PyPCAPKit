@@ -164,8 +164,8 @@ class TestTrialParseWarnings(unittest.TestCase):
                         warnings.simplefilter('always')
                         rebuilt = [PCAPNG.from_data(info, num=1, sct=1, ctx=context).data
                                    for info in (frame.info, frame.info.to_dict())]
-                        made = PCAPNG(num=1, sct=1, ctx=context, type=type_,
-                                      block={'packet_data': bytes(range(ORIGINAL)), 'timestamp': 0})
+                        made = PCAPNG.from_fields(num=1, sct=1, ctx=context, type=type_,
+                                                  block={'packet_data': bytes(range(ORIGINAL)), 'timestamp': 0})
                     self.assertEqual(self._schema(caught), [])
                     self.assertEqual(rebuilt, [block, block])
                     self.assertEqual(made.data, block)

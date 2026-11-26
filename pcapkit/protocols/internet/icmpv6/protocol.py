@@ -263,11 +263,11 @@ class ICMPv6(ICMP[Data_ICMPv6, Schema_ICMPv6],
 
         # NOTE: The quoted original packet stays raw in the message body,
         # so there is no next layer; the schema has no ``payload`` field.
-        self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
+        self._next = NoPayload.from_fields()  # pylint: disable=attribute-defined-outside-init
         self._protos = ProtoChain(self.__class__, self.alias)  # pylint: disable=attribute-defined-outside-init
         return icmpv6
 
-    def make(self,
+    def make(self, *,
              type: 'Enum_Type | int' = Enum_Type.Echo_Request,  # pylint: disable=redefined-builtin
              code: 'int' = 0,
              checksum: 'Optional[bytes]' = None,

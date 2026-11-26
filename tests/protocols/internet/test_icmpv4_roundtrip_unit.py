@@ -123,7 +123,7 @@ class ICMPv4RoundTripTests(unittest.TestCase):
         """``ICMPv4()`` builds a default Echo Request rather than raising."""
         from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 
-        proto = ICMPv4()
+        proto = ICMPv4.from_fields()
         # Type 8 (Echo), code 0, the RFC 792 checksum computed over an all-zero
         # 4-octet id/seq body, then that same body (#2470).
         self.assertEqual(bytes(proto), bytes.fromhex('0800f7ff00000000'))

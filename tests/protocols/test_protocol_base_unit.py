@@ -60,7 +60,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
                 self._next = next_protocol
                 if self._next is None:
                     from pcapkit.protocols.misc.no_payload.protocol import NoPayload
-                    self._next = NoPayload()
+                    self._next = NoPayload.from_fields()
                 self._protos = ProtoChain(self.__class__, self.alias, basis=self._next.protochain)
                 return data
 
@@ -78,7 +78,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         DummyProtocol, _, _ = self._make_protocol_class()
         from pcapkit.utilities.exceptions import UnsupportedCall
 
-        proto = DummyProtocol(packet=b'abcd', value=7)
+        proto = DummyProtocol.from_fields(packet=b'abcd', value=7)
 
         self.assertEqual(proto.name, 'Dummy Protocol')
         self.assertEqual(proto.alias, 'DummyProtocol')
@@ -122,7 +122,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
     def test_pack_unpack_from_schema_and_from_data(self) -> None:
         DummyProtocol, DummyData, RawSchema = self._make_protocol_class()
 
-        proto = DummyProtocol(packet=b'xy')
+        proto = DummyProtocol.from_fields(packet=b'xy')
         self.assertEqual(proto.pack(packet=b'zz'), b'zz')
 
         schema_from_dict = RawSchema(payload=b'12')
@@ -158,8 +158,8 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import ProtocolNotFound
 
-        payload = Raw(packet=b'body')
-        proto = DummyProtocol(packet=b'ab', next_protocol=payload)
+        payload = Raw.from_fields(packet=b'body')
+        proto = DummyProtocol.from_fields(packet=b'ab', next_protocol=payload)
 
         self.assertEqual(DummyProtocol.expand_comp(DummyProtocol),
                          (DummyProtocol, 'DUMMYPROTOCOL'))
@@ -188,7 +188,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
             one = 1
             two = 2
 
-        proto = DummyProtocol(packet=b'\x01\x02\x03\x04\x05\x06\x07\x08')
+        proto = DummyProtocol.from_fields(packet=b'\x01\x02\x03\x04\x05\x06\x07\x08')
 
         self.assertEqual(proto._read_unpack(1), 1)
         self.assertEqual(proto._read_unpack(2), 0x0203)
@@ -242,7 +242,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         DummyProtocol, _, _ = self._make_protocol_class()
         from pcapkit.utilities.exceptions import StructError
 
-        proto = DummyProtocol(packet=b'\x01')
+        proto = DummyProtocol.from_fields(packet=b'\x01')
         for size in (2, 3, 4, 5, 8):
             for signed in (False, True):
                 with self.subTest(size=size, signed=signed):
@@ -285,13 +285,13 @@ class ProtocolBaseUnitTests(unittest.TestCase):
             lambda: Raw,
             {4: ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw')},
         )
-        analyzed_module = DummyProtocol.analyze(4, b'module-body', alias=4)
+        analyzed_module = DummyProtocol.analyze(4, b'module-body')
         self.assertIsInstance(analyzed_module, Raw)
         # resolved for the dispatch, not written back over the descriptor (#1559)
         self.assertIsInstance(DummyProtocol.__proto__[4], ModuleDescriptor)
 
         DummyProtocol.__proto__ = collections.defaultdict(lambda: Raw, {1: Raw})
-        analyzed = DummyProtocol.analyze(1, b'raw-body', alias=1)
+        analyzed = DummyProtocol.analyze(1, b'raw-body')
         self.assertIsInstance(analyzed, Raw)
         self.assertEqual(bytes(analyzed), b'raw-body')
 
@@ -345,17 +345,17 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         from pcapkit.protocols.misc.no_payload.protocol import NoPayload
         self.assertIsInstance(DummyProtocol.analyze(3, b''), NoPayload)
 
-        proto = DummyProtocol(packet=b'abpayload')
+        proto = DummyProtocol.from_fields(packet=b'abpayload')
         decoded = proto._decode_next_layer(DummyData(value=3), 1, length=3)
         self.assertIs(decoded.__next_type__, Raw)
         self.assertEqual(decoded.__next_name__, 'raw')
         self.assertIsInstance(proto.payload, Raw)
         self.assertIn('Raw', str(proto.protochain))
 
-        proto_zero = DummyProtocol(packet=b'ab')
+        proto_zero = DummyProtocol.from_fields(packet=b'ab')
         self.assertIsInstance(proto_zero._import_next_layer(1, 0), NoPayload)
 
-        proto_module = DummyProtocol(packet=b'abmodule')
+        proto_module = DummyProtocol.from_fields(packet=b'abmodule')
         proto_module._sigterm = False
         proto_module.__proto__ = collections.defaultdict(
             lambda: Raw,
@@ -364,7 +364,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         self.assertIsInstance(proto_module._import_next_layer(5, None), Raw)
         self.assertIsInstance(proto_module.__proto__[5], ModuleDescriptor)  # not written back (#1559)
 
-        proto_stop = DummyProtocol(packet=b'abpayload', _protocol='dummyprotocol')
+        proto_stop = DummyProtocol(b'abpayload', protocol='dummyprotocol')
         self.assertTrue(proto_stop._check_term_threshold())
         self.assertIsInstance(proto_stop._import_next_layer(1, 3), Raw)
 
@@ -384,7 +384,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         DummyProtocol, _, _ = self._make_protocol_class()
         from pcapkit.utilities.exceptions import StructError
 
-        proto = DummyProtocol(packet=b'\x01')
+        proto = DummyProtocol.from_fields(packet=b'\x01')
         proto._file = io.BytesIO(b'')
         with self.assertRaises(StructError) as context:
             proto._read_binary()
@@ -498,7 +498,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         # ``analyze`` and ``_import_next_layer`` both go through the lookup, so
         # neither of them records an unregistered code either.
         self.assertIsInstance(DummyProtocol.analyze(99, b'body'), Raw)
-        proto = DummyProtocol(packet=b'abpayload')
+        proto = DummyProtocol.from_fields(packet=b'abpayload')
         proto._sigterm = False
         self.assertIsInstance(proto._import_next_layer(99, 3), Raw)
         self.assertEqual(set(DummyProtocol.__proto__), {7, 8})
@@ -545,31 +545,21 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         self.assertIsInstance(payload, DummyProtocol)
         self.assertEqual(payload.info.to_dict()['value'], 12)
 
-    def test_parse_limits_accept_the_spelling_every_producer_uses(self) -> None:
-        """``layer=``/``protocol=`` are honoured while parsing, ignored while making.
+    def test_parse_limits_are_layer_and_protocol_alone(self) -> None:
+        """``layer=``/``protocol=`` are the stops while parsing, and fields while making.
 
-        The limits are documented on ``ProtocolBase.__init__`` as ``_layer`` and
-        ``_protocol``, but nothing in the tree spells them that way: the engines
-        and every ``_import_next_layer`` pass them without the underscore, so
-        both were silently dropped (GH-356). Both spellings therefore have to
-        work, and the prefixed one has to win when the two disagree.
-
-        The un-prefixed pair may only be consumed while *parsing*, though.
-        ``protocol`` is a real ``make()`` argument -- ``IPv4.make`` takes one, and
-        ``Data_IPv6.to_dict`` carries one straight into ``from_data`` -- so
-        swallowing it on the construction path would silently drop the value
-        being constructed.
+        The engines and every ``_import_next_layer`` spell the stops without the
+        underscore (GH-356), and since #2840 that is the only spelling: the
+        prefixed ``_layer`` and ``_protocol`` are refused as any unknown keyword
+        is. ``protocol`` is a real ``make()`` argument -- ``IPv4.make`` takes one
+        -- so construction, through ``from_fields``, hands it to ``make``.
 
         """
         DummyProtocol, _, _ = self._make_protocol_class()
 
         for keywords, layer, proto in (
-            ({'_layer': 'Internet'}, 'Internet', None),
             ({'layer': 'Internet'}, 'Internet', None),
-            ({'_protocol': 'dummyprotocol'}, None, 'dummyprotocol'),
             ({'protocol': 'dummyprotocol'}, None, 'dummyprotocol'),
-            # the prefixed spelling wins over the un-prefixed one
-            ({'_layer': 'Internet', 'layer': 'Transport'}, 'Internet', None),
         ):
             with self.subTest(**keywords):
                 parsed = DummyProtocol(io.BytesIO(b'abpayload'), 9, **keywords)
@@ -578,38 +568,45 @@ class ProtocolBaseUnitTests(unittest.TestCase):
                 self.assertEqual(parsed._exproto, proto)
                 self.assertTrue(parsed._sigterm)
 
-        # ... and the un-prefixed pair reaches ``make()`` untouched when there is
-        # no source stream, i.e. nothing is being parsed.
-        made = DummyProtocol(packet=b'abpayload', protocol='dummyprotocol', layer='Internet')
+        for keywords in ({'_layer': 'Internet'}, {'_protocol': 'dummyprotocol'}):
+            with self.subTest(**keywords), self.assertRaisesRegex(TypeError, 'unexpected keyword'):
+                DummyProtocol(io.BytesIO(b'abpayload'), 9, **keywords)
+
+        made = DummyProtocol.from_fields(packet=b'abpayload', protocol='dummyprotocol', layer='Internet')
         self.assertIsNone(made._exlayer)
         self.assertIsNone(made._exproto)
         self.assertFalse(made._sigterm)
 
-    def test_no_limit_sentinels_are_not_treated_as_a_limit(self) -> None:
-        """``layer='none'`` and ``protocol='null'`` mean "no limit", not a name.
+    def test_none_is_the_only_no_limit(self) -> None:
+        """``layer='none'`` is no layer, and ``protocol='null'`` is a name like any other (#2840).
 
-        They are what ``Extractor.__init__`` substitutes for an omitted argument,
-        so they reach every protocol of every packet and must not be compared
-        against real protocol names.
+        ``Extractor`` maps its ``'none'`` to :obj:`None` before the engines, so no
+        sentinel string reaches a protocol.
 
         """
+        from pcapkit.utilities.exceptions import FormatError
+
         DummyProtocol, _, _ = self._make_protocol_class()
 
-        for keywords in ({'layer': 'none'}, {'layer': 'NONE'}, {'protocol': 'null'},
-                         {'_layer': 'none'}, {'_protocol': 'null'},
-                         {'layer': 'none', 'protocol': 'null'}):
-            with self.subTest(**keywords):
-                parsed = DummyProtocol(io.BytesIO(b'abpayload'), 9, **keywords)
+        for layer in ('none', 'NONE'):
+            with self.subTest(layer=layer), self.assertRaisesRegex(FormatError, 'unknown layer'):
+                DummyProtocol(io.BytesIO(b'abpayload'), 9, layer=layer)
 
-                self.assertIsNone(parsed._exlayer)
-                self.assertIsNone(parsed._exproto)
-                self.assertFalse(parsed._sigterm)
+        parsed = DummyProtocol(io.BytesIO(b'abpayload'), 9, protocol='null')
+        self.assertEqual(parsed._exproto, 'null')
+        self.assertFalse(parsed._sigterm)
+
+        parsed = DummyProtocol(io.BytesIO(b'abpayload'), 9, layer=None, protocol=None)
+        self.assertIsNone(parsed._exlayer)
+        self.assertIsNone(parsed._exproto)
+        self.assertFalse(parsed._sigterm)
 
     def test_packet_context_is_republished_as_dunder_packet(self) -> None:
-        """The enclosing layer's ``packet=`` reaches ``unpack`` as ``__packet__``.
+        """The enclosing layer's ``packet`` reaches ``unpack`` as ``__packet__``.
 
         ``_import_next_layer`` hands the next protocol its packet context as
-        ``packet=``, but the schema layer reads it from ``__packet__``
+        ``packet``, through ``_from_parent`` (#2840), but the schema layer reads
+        it from ``__packet__``
         (``Protocol.unpack``, and the ``pack``/``unpack`` overrides of ``Frame``
         and ``PCAPNG``). Nothing bridged the two, so a schema always saw an empty
         dict (GH-382).
@@ -637,7 +634,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         DummyProtocol.unpack = capture  # type: ignore[method-assign]
         try:
             outer = {'src': 'the-source', 'dst': 'the-destination'}
-            DummyProtocol(io.BytesIO(b'abpayload'), 9, packet=outer)
+            DummyProtocol._from_parent(io.BytesIO(b'abpayload'), 9, packet=outer)
         finally:
             DummyProtocol.unpack = original  # type: ignore[method-assign]
 
@@ -645,16 +642,16 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         # A copy, and the enclosing layer's own dict is left exactly as it was.
         self.assertIsNot(seen['identity'], outer)
         self.assertEqual(outer, {'src': 'the-source', 'dst': 'the-destination'})
-        # ``packet=`` is left in place as well, since it is the documented
-        # ``_import_next_layer`` spelling and some callers still read it.
+        # ``packet`` is left in place as well, since it is the
+        # ``_import_next_layer`` spelling and some hooks read it.
         self.assertIs(seen['packet'], outer)
 
     def test_explicit_dunder_packet_is_not_overridden(self) -> None:
-        """A caller that already supplies ``__packet__`` keeps its own dict.
+        """A layer handed ``__packet__`` keeps its own dict.
 
-        The PCAP-NG engine does exactly that -- it passes the section's snapshot
-        length as ``__packet__`` -- so the bridge must only fill the keyword in
-        when it is absent.
+        A re-dispatch of the same octets hands on the packet context it was given
+        as ``__packet__``, as TLS's SSLv2 trial does, so the bridge must only fill
+        the keyword in when it is absent.
 
         """
         DummyProtocol, _, _ = self._make_protocol_class()
@@ -669,8 +666,8 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         DummyProtocol.unpack = capture  # type: ignore[method-assign]
         try:
             chosen = {'snaplen': 262144}
-            DummyProtocol(io.BytesIO(b'abpayload'), 9,
-                          packet={'src': 'ignored'}, __packet__=chosen)
+            DummyProtocol._from_parent(io.BytesIO(b'abpayload'), 9,
+                                       packet={'src': 'ignored'}, __packet__=chosen)
         finally:
             DummyProtocol.unpack = original  # type: ignore[method-assign]
 

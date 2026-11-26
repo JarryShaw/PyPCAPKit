@@ -75,10 +75,11 @@ problem solved the same way for ``LINKTYPE_NULL``.
 """
 import collections
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
 
 from pcapkit.const.linux.arphrd import ARPHRD as Enum_ARPHRD
 from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.corekit.sentinels import NO_VALUE, NoValueType
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.link.netlink.data import Netlink as Data_Netlink
 from pcapkit.protocols.link.netlink.schema import Netlink as Schema_Netlink
@@ -86,10 +87,11 @@ from pcapkit.utilities.exceptions import ProtocolError
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from typing import Any, DefaultDict, Optional, Type
+    from typing import IO, Any, DefaultDict, Iterable, Mapping, Optional, Type
 
     from typing_extensions import Literal
 
+    from pcapkit.corekit.context import ContextRegistry, ProtocolContext
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema import Schema
 
@@ -246,7 +248,7 @@ class Netlink(Link[Data_Netlink, Schema_Netlink],
         )
         return self._decode_next_layer(netlink, netlink.nlmsg_type, length - self.length)
 
-    def make(self,
+    def make(self, *,
              nlmsg_type: 'int' = 0,
              nlmsg_flags: 'int' = 0,
              nlmsg_seq: 'int' = 0,
@@ -363,6 +365,58 @@ class Netlink(Link[Data_Netlink, Schema_Netlink],
 
         """
         return Enum_ARPHRD.NETLINK  # type: ignore[return-value]
+
+    @overload  # pragma: no cover
+    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., /, *,
+                 byteorder: "Optional[Literal['big', 'little']]" = ...,
+                 layer: 'Optional[str]' = ...,
+                 protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = ...,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                 ) -> 'None': ...
+    @overload  # pragma: no cover
+    def __init__(self, *, byteorder: "Optional[Literal['big', 'little']]" = ...,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                 **fields: 'Any') -> 'None': ...
+
+    # NOTE: The ignore is the one on ``Protocol.__init__``, for ``**fields`` against ``/`` (#3081).
+    def __init__(self, file: 'IO[bytes] | bytes | NoValueType' = NO_VALUE,  # type: ignore[misc] # pylint: disable=super-init-not-called
+                 length: 'Optional[int]' = None, /, *,
+                 byteorder: "Optional[Literal['big', 'little']]" = None,
+                 layer: 'Optional[str]' = None,
+                 protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                 **fields: 'Any') -> 'None':
+        """Parse a protocol instance from its octets, or construct one from its fields.
+
+        Args:
+            file: Source packet stream; omitted to construct.
+            length: Length of packet data.
+            byteorder: Byte order to read the header in, as :meth:`read` takes it;
+                :obj:`None` guesses it.
+            layer: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            protocol: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            context: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            **fields: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+
+        .. versionchanged:: 1.8.0
+
+           Declares ``byteorder``, its only parse keyword besides the stops
+           and the context (:issue:`2840`).
+
+        """
+        if isinstance(file, NoValueType):
+            if byteorder is not None:
+                fields['byteorder'] = byteorder
+            self._construct(context, self._call_fields(length, layer, protocol, fields))
+            return
+        # NOTE: ``_parse``, inline, so a parse adds no frame per layer (#1610).
+        keywords = self._start_parse(file, layer, protocol, context, {'byteorder': byteorder}, fields)
+        self.__post_init__(file, length, **keywords)
+        self._info.__update__(packet=self.packet.payload)
 
     ##########################################################################
     # Utilities.

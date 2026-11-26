@@ -55,8 +55,8 @@ class TestSMFDPDRebuild(unittest.TestCase):
 
         for name, cls in _classes().items():
             with self.subTest(proto=name):
-                built = cls(options=[(Option.SMF_DPD, {'mode': SMFDPDMode.H_DPD, 'hav': b'\x01\x02\x03\x04'})],
-                            next=TransType.IPv6_NoNxt, payload=b'')
+                built = cls.from_fields(options=[(Option.SMF_DPD, {'mode': SMFDPDMode.H_DPD, 'hav': b'\x01\x02\x03\x04'})],
+                                        next=TransType.IPv6_NoNxt, payload=b'')
                 self.assertEqual(built.data, HEADERS['H-DPD'])
 
     def test_tid_type_keyword_selects_default(self) -> None:
@@ -66,9 +66,9 @@ class TestSMFDPDRebuild(unittest.TestCase):
 
         for name, cls in _classes().items():
             with self.subTest(proto=name):
-                built = cls(options=[(Option.SMF_DPD, {'tid_type': TaggerID.DEFAULT, 'tid': b'\x0a\x0b\x0c\x0d',
-                                                       'id': b'\xaa\xbb'})],
-                            next=TransType.IPv6_NoNxt, payload=b'')
+                built = cls.from_fields(options=[(Option.SMF_DPD, {'tid_type': TaggerID.DEFAULT, 'tid': b'\x0a\x0b\x0c\x0d',
+                                                                   'id': b'\xaa\xbb'})],
+                                        next=TransType.IPv6_NoNxt, payload=b'')
                 self.assertEqual(built.data, HEADERS['I-DPD DEFAULT 4 octets'])
 
     def test_tagger_id_that_does_not_fit_its_type_is_rejected(self) -> None:
@@ -84,7 +84,7 @@ class TestSMFDPDRebuild(unittest.TestCase):
                            {'tid': bytes(17)}):
                 with self.subTest(proto=name, kwargs=kwargs):
                     with self.assertRaises(ProtocolError):
-                        cls(options=[(Option.SMF_DPD, kwargs)], next=TransType.IPv6_NoNxt, payload=b'')
+                        cls.from_fields(options=[(Option.SMF_DPD, kwargs)], next=TransType.IPv6_NoNxt, payload=b'')
 
 
 if __name__ == '__main__':

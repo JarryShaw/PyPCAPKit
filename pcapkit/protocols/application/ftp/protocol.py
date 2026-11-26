@@ -165,7 +165,7 @@ class FTP(Application[Data_FTP, Schema_FTP],
             raise ProtocolError('FTP: invalid packet format')
         return ftp
 
-    def make(self,
+    def make(self, *,
              cmmd: 'Optional[Enum_Command | str | bytes | bytearray]' = None,
              code: 'Optional[Enum_ReturnCode | int | str | bytes | bytearray]' = None,
              args: 'Optional[str | bytes | bytearray]' = None,

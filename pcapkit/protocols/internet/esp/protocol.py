@@ -1220,7 +1220,7 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
         return self._decode_next_layer(esp, next_type, len(inner), packet=packet,
                                        version=version, payload=inner)
 
-    def make(self,
+    def make(self, *,
              spi: 'int' = 0,
              seq: 'int' = 0,
              next: 'Enum_TransType | int' = Enum_TransType.UDP,  # pylint: disable=redefined-builtin

@@ -26,6 +26,8 @@ this tier has no network and no token:
   just short of all of them.
 * :class:`TestNoLongerRun` -- no cap finding on a job the workflow no longer runs
   (#2904), and the runs that decide which those are.
+* :class:`TestTableCells` -- a ``|`` in a job, step or test name escaped, so the
+  summary's tables keep their cells (#3054).
 * :class:`TestLikeForLike` -- a job's trend fitted only on the runs that reached its
   test step, and H3's baseline taken only from a report of the same window (#2915).
 * :class:`TestUnfinishedRuns` -- runs listed without the ``status`` filter, which
@@ -60,6 +62,7 @@ from unittest import mock
 import requests
 
 from tests import _tiers, _workflows
+from tests.project.test_job_summary_tables_3054 import problems
 from tests.project.test_ktlo_legs_stay_green_1672 import interpolate
 from tests.project.test_python_versions_1660 import NO_TOMLLIB
 from tests.project.test_python_versions_1660 import legs as matrix_legs
@@ -728,6 +731,7 @@ class TestEndToEnd(unittest.TestCase):
                          {'listed': 4, 'read': 4, 'first': '2026-10-05T14:20:30Z', 'last': '2026-10-09T22:57:57Z'})
         self.assertTrue(any('No baseline' in note for note in self.report['notes']))
         self.assertIn(self.summary.strip(), self.stdout)
+        self.assertEqual(problems(self.summary), [])
 
     def test_a_quiet_window_passes(self) -> 'None':
         class Empty(FakeAPI):
@@ -779,6 +783,35 @@ def listed(number: 'int', event: 'str', day: 'int', names: 'Iterable[str]',
         {'name': name, 'conclusion': 'success' if ran else 'skipped', 'run_attempt': 1,
          'runner_name': 'GitHub Actions 1' if ran else '', 'started_at': begun, 'completed_at': ended}
         for name in names]}
+
+
+class TestTableCells(unittest.TestCase):
+    """#3054: a job, step or test name holding a ``|`` stays one cell of its table."""
+
+    def test_a_pipe_in_a_name_is_escaped(self) -> 'None':
+        job, step = 'Engines (a | b)', 'Run a | b'
+        report = {
+            'window': {'since': '2026-10-03T00:00:00Z', 'until': '2026-10-10T00:00:00Z', 'days': 7.0},
+            'jobs': [{'workflow': 'unit-tests.yml', 'name': job, 'n': 20, 'median': 10.0, 'p90': 22.4,
+                      'max': 30.0, 'queue': {'p90': 1.0}, 'cap': 45, 'p90_share_of_cap': 0.5,
+                      'slope_per_day': 0.5, 'days_to_half_cap': 3.0, 'days_to_cap': 14.1, 'still_run': False}],
+            'steps': [{'workflow': 'unit-tests.yml', 'job': job, 'name': step, 'n': 20, 'median': 5.0,
+                       'p90': 9.9, 'cap': 20, 'days_to_cap': 14.1}],
+            'runs': {},
+            'derived': {'coverage_ratio': {'n': 0, 'median': None, 'min': None, 'max': None},
+                        'ms_per_test': {'n': 0, 'median': None}, 'test_counts': []},
+            'tests': {'3.13': {'runs': 1, 'top_modules': [['tests.a|b', 3.0]],
+                               'top_classes': [['tests.a|b.C', 2.0]]}},
+            'critical_path': {'push': {'runs': 3, 'leader': job, 'shares': {job: 1.0}, 'slack_median': 2.0}},
+            'notes': [],
+        }
+        summary = ci_timing.summary(report, [])
+        self.assertEqual(problems(summary), [])
+        self.assertIn('| unit-tests.yml | Engines (a \\| b) *(no longer run)* | 20 |', summary)
+        self.assertIn('| Engines (a \\| b) | Run a \\| b | 20 |', summary)
+        self.assertIn('| push | 3 | Engines (a \\| b) | 100% |', summary)
+        self.assertIn('| `tests.a\\|b` | 3.0 |', summary)
+        self.assertIn('| `tests.a\\|b.C` | 2.0 |', summary)
 
 
 class TestNoLongerRun(unittest.TestCase):

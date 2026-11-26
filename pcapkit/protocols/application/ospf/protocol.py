@@ -260,7 +260,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
         # ``Application._decode_next_layer`` refuses any other value.
         return self._decode_next_layer(ospf, -1, length - self.length)
 
-    def make(self,
+    def make(self, *,
              version: 'int' = 2,
              type: 'Enum_Packet | int' = Enum_Packet.Hello,
              packet_length: 'Optional[int]' = None,

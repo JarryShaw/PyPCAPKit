@@ -172,6 +172,10 @@ What decides whether a constructed error is loud:
    :no-members:
    :show-inheritance:
 
+.. autoexception:: pcapkit.utilities.exceptions.UnexpectedKeyword
+   :no-members:
+   :show-inheritance:
+
 :exc:`IOError` Category
 -----------------------
 

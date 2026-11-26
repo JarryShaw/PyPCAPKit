@@ -239,7 +239,7 @@ class CaptureTests(unittest.TestCase):
         for index, ((from_client, payload), (chain, records)) in enumerate(zip(MBEDTLS, TSHARK), 1):
             with self.subTest(datagram=index):
                 datagram = _udp(payload, from_client)
-                proto = UDP(datagram, len(datagram), __context__=registry)
+                proto = UDP(datagram, len(datagram), context=registry)
                 self.assertEqual(str(proto.protochain), chain)
                 self.assertEqual(_cid_layers(proto.payload), records)
         context = registry.match(['DTLS'], DTLSContext)
@@ -269,7 +269,7 @@ class CaptureTests(unittest.TestCase):
             with self.subTest(datagram=index + 1):
                 context = DTLSContext(cid_length=len(records[0][0]))
                 datagram = _udp(payload, from_client)
-                proto = UDP(datagram, len(datagram), __context__=context)
+                proto = UDP(datagram, len(datagram), context=context)
                 self.assertEqual(str(proto.protochain), chain)
                 self.assertEqual(_cid_layers(proto.payload), records)
 
@@ -301,7 +301,7 @@ class InstanceMemoryTests(unittest.TestCase):
         first = DTLSContext()
         first.register(SERVER_CID)
         wire = MBEDTLS[3][1]  # a ServerHello, which teaches the instance its parse holds
-        DTLS(wire, len(wire), __context__=DTLSContext())
+        DTLS(wire, len(wire), context=DTLSContext())
         DTLS(wire, len(wire))
 
         second = DTLSContext()
@@ -309,7 +309,7 @@ class InstanceMemoryTests(unittest.TestCase):
         self.assertEqual(first.connection_ids, (SERVER_CID,))
         self.assertEqual(second.connection_ids, ())
         self.assertIsNone(second.match(record[11:]))
-        for name, kwargs in (('a fresh instance', {'__context__': DTLSContext()}), ('no context', {})):
+        for name, kwargs in (('a fresh instance', {'context': DTLSContext()}), ('no context', {})):
             with self.subTest(parse=name), \
                     self.assertRaisesRegex(ProtocolError, 'no connection ID length is known'):
                 DTLS(record, len(record), **kwargs)
@@ -371,13 +371,13 @@ class InstanceMemoryTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         def build(**kwargs: 'Any') -> 'Any':
-            inner = DTLS(content_type=ContentType.tls12_cid, epoch=1, sequence_number=0, cid=SERVER_CID,
-                         content=bytes(range(32)))
-            return DTLS(content_type=ContentType.change_cipher_spec, epoch=0, sequence_number=3,
-                        content=b'\x01', payload=inner, **kwargs)
+            inner = DTLS.from_fields(content_type=ContentType.tls12_cid, epoch=1, sequence_number=0, cid=SERVER_CID,
+                                     content=bytes(range(32)))
+            return DTLS.from_fields(content_type=ContentType.change_cipher_spec, epoch=0, sequence_number=3,
+                                    content=b'\x01', payload=inner, **kwargs)
 
         context = DTLSContext()
-        self.assertEqual(str(build(__context__=context).protochain), 'DTLS 1.2:DTLS 1.2')
+        self.assertEqual(str(build(context=context).protochain), 'DTLS 1.2:DTLS 1.2')
         self.assertEqual(context.connection_ids, (SERVER_CID,))
 
         own = build()
@@ -453,7 +453,7 @@ class ResolutionTests(unittest.TestCase):
         from pcapkit.protocols.application.dtls.protocol import DTLS, DTLSContext
 
         wire = MBEDTLS[6][1]
-        parsed = DTLS(wire, len(wire), __context__=DTLSContext(SERVER_CID, cid_length=4))
+        parsed = DTLS(wire, len(wire), context=DTLSContext(SERVER_CID, cid_length=4))
         self.assertEqual(parsed.info.cid, SERVER_CID)
         self.assertEqual(parsed.info.length, 80)
 
@@ -467,7 +467,7 @@ class ResolutionTests(unittest.TestCase):
         ):
             with self.subTest(case=name):
                 wire = _cid_record(cid, fragment)
-                parsed = DTLS(wire, len(wire), __context__=DTLSContext(*ids))
+                parsed = DTLS(wire, len(wire), context=DTLSContext(*ids))
                 self.assertEqual((parsed.info.cid, parsed.info.content), (cid, fragment))
                 self.assertEqual(parsed.length, 13 + len(cid))
 
@@ -480,7 +480,7 @@ class ResolutionTests(unittest.TestCase):
         with warnings.catch_warnings(), \
                 self.assertRaisesRegex(ProtocolError, r'^DTLS 1\.2: invalid format: record length 16 runs past'):
             warnings.simplefilter('ignore')  # the schema's short read, as for a legacy record
-            DTLS(wire, len(wire), __context__=DTLSContext(SERVER_CID))
+            DTLS(wire, len(wire), context=DTLSContext(SERVER_CID))
 
     def test_only_dtls_1_2_carries_tls12_cid(self) -> None:
         """RFC 9146 section 10.3 applies the content type to DTLS 1.2 alone."""
@@ -490,8 +490,8 @@ class ResolutionTests(unittest.TestCase):
         wire = _cid_record(SERVER_CID, bytes(16), version=b'\xfe\xff')
         context = DTLSContext(SERVER_CID)
         with self.assertRaisesRegex(ProtocolError, r'^DTLS: invalid format: legacy record version 0xfeff'):
-            DTLS(wire, len(wire), __context__=context)
-        parsed = DTLS(CCS + wire, len(CCS + wire), __context__=context)
+            DTLS(wire, len(wire), context=context)
+        parsed = DTLS(CCS + wire, len(CCS + wire), context=context)
         self.assertEqual(str(parsed.protochain), 'DTLS 1.2:Raw')
         self.assertIsNone(parsed.payload.info.error)
 
@@ -519,7 +519,7 @@ class ResolutionTests(unittest.TestCase):
 
         registry = ContextRegistry(Other())
         wire = MBEDTLS[3][1]
-        DTLS(wire, len(wire), __context__=registry)
+        DTLS(wire, len(wire), context=registry)
         self.assertIsInstance(registry['DTLS'], Other)
         self.assertEqual(len(registry), 1)
 
@@ -555,7 +555,7 @@ class ChainTests(unittest.TestCase):
                                   ('before a legacy record', record + CCS, 'DTLS 1.2:DTLS 1.2'),
                                   ('two of them', record + record, 'DTLS 1.2:DTLS 1.2')):
             with self.subTest(case=name):
-                parsed = DTLS(wire, len(wire), __context__=DTLSContext(CLIENT_CID))
+                parsed = DTLS(wire, len(wire), context=DTLSContext(CLIENT_CID))
                 self.assertEqual(str(parsed.protochain), chain)
                 layers, _ = _dtls_layers(parsed)
                 self.assertEqual(sum(1 for layer in layers if layer.info.content_type == 25),
@@ -589,12 +589,12 @@ class RoundTripTests(unittest.TestCase):
         for index, (from_client, payload) in enumerate(MBEDTLS, 1):
             with self.subTest(datagram=index):
                 datagram = _udp(payload, from_client)
-                udp = UDP(datagram, len(datagram), __context__=registry)
+                udp = UDP(datagram, len(datagram), context=registry)
                 rebuilt = DTLS.from_data(udp.payload.info)
                 self.assertEqual(bytes(rebuilt).hex(), payload.hex())
                 self.assertEqual(str(rebuilt.protochain), str(udp.payload.protochain))
 
-                again = UDP.from_data(udp.info, __context__=registry)
+                again = UDP.from_data(udp.info, context=registry)
                 self.assertEqual(bytes(again).hex(), datagram.hex())
                 self.assertEqual(str(again.protochain), str(udp.protochain))
                 with warnings.catch_warnings():
@@ -609,7 +609,7 @@ class RoundTripTests(unittest.TestCase):
         for index in (4, 5, 6, 7):
             wire = MBEDTLS[index][1]
             with self.subTest(datagram=index + 1):
-                parsed = DTLS(wire, len(wire), __context__=DTLSContext(CLIENT_CID, SERVER_CID))
+                parsed = DTLS(wire, len(wire), context=DTLSContext(CLIENT_CID, SERVER_CID))
                 maker = object.__new__(DTLS)
                 schema = b''  # type: object
                 for layer in reversed(_dtls_layers(parsed)[0]):
@@ -621,12 +621,12 @@ class RoundTripTests(unittest.TestCase):
                 made = bytes(schema)  # type: ignore[call-overload]
                 self.assertEqual(made.hex(), wire.hex())
 
-                again = DTLS(made, len(made), __context__=DTLSContext(CLIENT_CID, SERVER_CID))
+                again = DTLS(made, len(made), context=DTLSContext(CLIENT_CID, SERVER_CID))
                 self.assertEqual(str(again.protochain), str(parsed.protochain))
                 self.assertEqual(_cid_layers(again), _cid_layers(parsed))
 
-        made = DTLS(content_type=ContentType.tls12_cid, epoch=3, sequence_number=7, cid=b'\x0a\x0b',
-                    content=bytes(range(20)))
+        made = DTLS.from_fields(content_type=ContentType.tls12_cid, epoch=3, sequence_number=7, cid=b'\x0a\x0b',
+                                content=bytes(range(20)))
         self.assertEqual(bytes(made).hex(), _cid_record(b'\x0a\x0b', bytes(range(20)), epoch=3,
                                                         sequence_number=7).hex())
         self.assertEqual((made.alias, made.length, made.info.cid, made.info.length), ('DTLS 1.2', 15, b'\x0a\x0b', 20))
@@ -636,10 +636,10 @@ class RoundTripTests(unittest.TestCase):
         from pcapkit.const.tls.content_type import ContentType
         from pcapkit.protocols.application.dtls.protocol import DTLS
 
-        inner = DTLS(content_type=ContentType.tls12_cid, epoch=1, sequence_number=0, cid=SERVER_CID,
-                     content=bytes(range(32)))
-        outer = DTLS(content_type=ContentType.change_cipher_spec, epoch=0, sequence_number=3,
-                     content=b'\x01', payload=inner)
+        inner = DTLS.from_fields(content_type=ContentType.tls12_cid, epoch=1, sequence_number=0, cid=SERVER_CID,
+                                 content=bytes(range(32)))
+        outer = DTLS.from_fields(content_type=ContentType.change_cipher_spec, epoch=0, sequence_number=3,
+                                 content=b'\x01', payload=inner)
         self.assertEqual(str(outer.protochain), 'DTLS 1.2:DTLS 1.2')
         self.assertEqual(_cid_layers(outer), ((SERVER_CID, 1, 0, 32),))
 

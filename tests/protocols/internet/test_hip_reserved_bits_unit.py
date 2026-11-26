@@ -51,7 +51,7 @@ class TestHIPReservedBits(unittest.TestCase):
         from pcapkit.protocols.internet.hip.protocol import HIP
 
         params = None if code is None else [(code, {'hit': ['2001:db8::1']})]
-        octets = bytearray(HIP(parameters=params, extension=True, **HIP_BASE).data)
+        octets = bytearray(HIP.from_fields(parameters=params, extension=True, **HIP_BASE).data)
         if ver is not None:
             self.assertEqual(octets[VER_OFFSET], 0x21)
             octets[VER_OFFSET] = ver
@@ -74,13 +74,13 @@ class TestHIPReservedBits(unittest.TestCase):
     def test_make_writes_version_reserved(self) -> None:
         from pcapkit.protocols.internet.hip.protocol import HIP
 
-        built = HIP(version_reserved=0b101, extension=True, **HIP_BASE).data
+        built = HIP.from_fields(version_reserved=0b101, extension=True, **HIP_BASE).data
         self.assertEqual(built[VER_OFFSET], 0x2b)
         parsed = HIP(built, len(built), extension=True)
         self.assertEqual(parsed.info.reserved, 0b101)
         self.assertEqual(HIP.from_data(parsed.info).data, built)
 
-        default = HIP(extension=True, **HIP_BASE).data
+        default = HIP.from_fields(extension=True, **HIP_BASE).data
         self.assertEqual(default[VER_OFFSET], 0x21)
 
     def test_from_data_rebuilds_route_flags_reserved(self) -> None:
@@ -102,7 +102,7 @@ class TestHIPReservedBits(unittest.TestCase):
 
         for code in self._route_codes():
             with self.subTest(code=code.name):
-                built = HIP(parameters=[(code, {
+                built = HIP.from_fields(parameters=[(code, {
                     'symmetric': True, 'flags_reserved': 0x1234, 'hit': ['2001:db8::1'],
                 })], extension=True, **HIP_BASE).data
                 self.assertEqual(built[FLAGS_OFFSET:FLAGS_OFFSET + 2], b'\x92\x34')
@@ -110,8 +110,8 @@ class TestHIPReservedBits(unittest.TestCase):
                 self.assertEqual(parsed.info.parameters[code].flags.reserved, 0x1234)
                 self.assertEqual(HIP.from_data(parsed.info).data, built)
 
-                default = HIP(parameters=[(code, {'hit': ['2001:db8::1']})],
-                              extension=True, **HIP_BASE).data
+                default = HIP.from_fields(parameters=[(code, {'hit': ['2001:db8::1']})],
+                                          extension=True, **HIP_BASE).data
                 self.assertEqual(default[FLAGS_OFFSET:FLAGS_OFFSET + 2], b'\x00\x00')
 
 

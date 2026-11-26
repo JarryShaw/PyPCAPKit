@@ -212,7 +212,7 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
             length = len(self)
         return self._read_tls_record(length, **kwargs)
 
-    def make(self,
+    def make(self, *,
              content_type: 'Enum_ContentType | int' = Enum_ContentType.application_data,
              version: 'int' = 0x0303,
              content: 'Any' = b'',
@@ -312,7 +312,7 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
                 return parsed
 
     @classmethod
-    def from_data(cls, data: 'Any', **kwargs: 'Any') -> 'Any':
+    def from_data(cls, data: 'Any', /, **kwargs: 'Any') -> 'Any':
         """Create protocol instance from data.
 
         An SSLv2 record that :meth:`unpack` adopted from port 443 is rebuilt as
@@ -466,7 +466,9 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
         # dispatcher matched (``'TLS'``, ``'SSL'``) is passed as its layer (#2567).
         stops = {'layer': self.__layer__} if self._sigterm else {'layer': self._exlayer, 'protocol': self._exproto}
         try:
-            obj = SSLv2(self._data, length, __context__=self._exctx, **stops, **kwargs)
+            # pylint: disable-next=protected-access
+            obj = SSLv2._from_parent(self._data, length, context=self._exctx, **stops,
+                                     **self._next_layer_state(kwargs))
         except ProtocolError:
             return None
         info = obj.info
@@ -541,4 +543,4 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
         file_ = self._get_payload()
         return self._parse_next_layer(type(self), file_, len(file_) if length is None else length,
                                       alias=proto, packet=packet, layer=self._exlayer,
-                                      protocol=self._exproto, __context__=self._exctx, chained=True)
+                                      protocol=self._exproto, context=self._exctx, chained=True)

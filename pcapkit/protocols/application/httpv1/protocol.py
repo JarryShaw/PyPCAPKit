@@ -187,7 +187,7 @@ class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
 
         return http
 
-    def make(self,  # type: ignore[override]
+    def make(self, *,  # type: ignore[override]
              http_version: 'Literal["0.9", "1.0", "1.1", b"0.9", b"1.0", b"1.1"]' = '1.1',
              method: 'Optional[Enum_Method | str | bytes]' = None,
              uri: 'Optional[str | bytes]' = None,

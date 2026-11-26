@@ -92,7 +92,7 @@ class ESPMessageTestCase(unittest.TestCase):
             warnings.simplefilter('ignore')
             if registry is None:
                 return ESP(packet, len(packet)).info
-            return ESP(packet, len(packet), __context__=registry).info
+            return ESP(packet, len(packet), context=registry).info
 
 
 class ReadTrailerMessages(ESPMessageTestCase):

@@ -87,6 +87,7 @@ How a parse reads a message:
    .. rubric:: Data Models
 
    .. automethod:: __index__
+   .. automethod:: __init__
    .. automethod:: __post_init__
 
    .. rubric:: Utilities

@@ -125,8 +125,8 @@ class TestMHOptionMutation(unittest.TestCase):
         from pcapkit.const.mh.packet import Packet
         from pcapkit.protocols.internet.mh.protocol import MH
 
-        return MH(type=Packet.Binding_Refresh_Request, next=59, checksum=b'\x00\x00',
-                  data={'options': [(code, kwargs)]}).data
+        return MH.from_fields(type=Packet.Binding_Refresh_Request, next=59, checksum=b'\x00\x00',
+                              data={'options': [(code, kwargs)]}).data
 
     def _assert_identity_or_refused(self, raw: bytes, crashed: 'set[str]', name: str) -> 'object':
         """Parse ``raw`` alone and inside IPv6; return the parsed MH, or None if refused."""
@@ -254,12 +254,12 @@ class TestMHOptionMutation(unittest.TestCase):
                         with self.assertRaisesRegex(ProtocolError, 'invalid prefix length'):
                             self._brr(code, {'prefix_length': value})
                         with self.assertRaisesRegex(ProtocolError, 'invalid prefix length'):
-                            MH(type=Packet.Binding_Refresh_Request, next=59, checksum=b'\x00\x00',
-                               data={'options': options})
+                            MH.from_fields(type=Packet.Binding_Refresh_Request, next=59, checksum=b'\x00\x00',
+                                           data={'options': options})
                         continue
                     raw = self._brr(code, {'prefix_length': value})
-                    self.assertEqual(MH(type=Packet.Binding_Refresh_Request, next=59, checksum=b'\x00\x00',
-                                        data={'options': options}).data, raw)
+                    self.assertEqual(MH.from_fields(type=Packet.Binding_Refresh_Request, next=59, checksum=b'\x00\x00',
+                                                    data={'options': options}).data, raw)
                     self.assertEqual(MH(raw, len(raw)).info.options[code].prefix_length, value)
 
     def test_cga_public_key_takes_its_der_length(self) -> None:

@@ -130,7 +130,8 @@ kept that rule on :issue:`2805`.
    1.6.1 and 1.6.2 do.
 
 Under the module scheme each section names a module except *Project infrastructure*,
-which is for what belongs to none. The map is one-to-one with the package list below --
+which is for what belongs to none. A module section's title is a ``:mod:`` reference,
+``:mod:`pcapkit.const```, so it links to the module's page (:issue:`3094`). The map is one-to-one with the package list below --
 every package, :mod:`pcapkit.interface` included, has a section of its own:
 
 .. code-block:: shell

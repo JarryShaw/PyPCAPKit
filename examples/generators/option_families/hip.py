@@ -102,8 +102,8 @@ def _hip_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     # path that returns before touching it is the ``if extension`` early exit.
     # Without it every HIP code fails with ``AttributeError: 'HIP'
     # object has no attribute '_info'``.
-    return HIP(parameters=[(code, kwargs)] * HIP_COPIES,
-               extension=True, **_hip_base(code))
+    return HIP.from_fields(parameters=[(code, kwargs)] * HIP_COPIES,
+                           extension=True, **_hip_base(code))
 
 
 def _hip_parse(octets: 'bytes') -> 'Any':
@@ -125,7 +125,7 @@ def _hip_rebuild(parameters: 'Any') -> 'Any':
     base = dict(HIP_BASE)
     if first is not None:
         base['version'] = HIP_VERSION.get(int(first), 2)
-    return HIP(parameters=parameters, extension=True, **base)
+    return HIP.from_fields(parameters=parameters, extension=True, **base)
 
 
 #: The families this module adds.

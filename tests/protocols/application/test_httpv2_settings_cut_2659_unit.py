@@ -263,7 +263,7 @@ class EditedFrameTests(unittest.TestCase):
         from pcapkit.const.http.setting import Setting
         from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
-        http = HTTPv2(type=Frame.SETTINGS, frame={'settings': [(Setting.HEADER_TABLE_SIZE, 4096)]})
+        http = HTTPv2.from_fields(type=Frame.SETTINGS, frame={'settings': [(Setting.HEADER_TABLE_SIZE, 4096)]})
         self.assertEqual(http.data, _frame(0x4, 0x0, 0, PAIRS[:6]))
         self.assertEqual(http.info.length, 6)
         self.assertNotIn('__short_read__', http.info)

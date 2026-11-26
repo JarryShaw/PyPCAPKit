@@ -111,13 +111,13 @@ class TestLoopback(unittest.TestCase):
         for family, payload, name in FAMILIES:
             for byteorder in ('little', 'big'):
                 with self.subTest(family=family, byteorder=byteorder):
-                    made = Loopback(family=family, byteorder=byteorder, payload=payload).data
+                    made = Loopback.from_fields(family=family, byteorder=byteorder, payload=payload).data
                     self.assertEqual(made, _header(family, byteorder) + payload)
                     parsed = Loopback(made, len(made))
                     self.assertEqual((parsed.info.family, parsed.info.byteorder), (family, byteorder))
                     self.assertEqual(type(parsed.payload).__name__, name)
                     self._assert_rebuilds(parsed)
-        self.assertEqual(Loopback().data, _header(2, sys.byteorder))
+        self.assertEqual(Loopback.from_fields().data, _header(2, sys.byteorder))
 
     def test_make_rejects_what_does_not_fit(self) -> None:
         from pcapkit.protocols.link.loopback.protocol import Loopback
@@ -125,7 +125,7 @@ class TestLoopback(unittest.TestCase):
 
         for kwargs in ({'byteorder': 'native'}, {'family': -1}, {'family': 0x1_0000_0000}):
             with self.subTest(**kwargs), self.assertRaises(ProtocolError):
-                Loopback(**kwargs)
+                Loopback.from_fields(**kwargs)
 
     def test_make_names_an_unknown_byteorder(self) -> None:
         """The byte-order check is inline, not ``_make_uint``'s, with this prefix (#2614)."""
@@ -133,7 +133,7 @@ class TestLoopback(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
-            Loopback(byteorder='native')
+            Loopback.from_fields(byteorder='native')
         self.assertEqual(str(ctx.exception), "Loopback: invalid byte order: 'native'")
 
     def test_make_rejects_a_family_that_is_not_an_int(self) -> None:
@@ -146,7 +146,7 @@ class TestLoopback(unittest.TestCase):
         for family in (True, False, '2', 2.0, None):
             with self.subTest(family=family):
                 with self.assertRaises(ProtocolError) as ctx:
-                    Loopback(family=family)
+                    Loopback.from_fields(family=family)
                 self.assertEqual(str(ctx.exception), f'Loopback: invalid address family: {family!r}')
 
     def test_registered_for_null_and_loop(self) -> None:
@@ -223,7 +223,7 @@ class TestLoopback(unittest.TestCase):
 
         raw = _header(2, 'little') + IPV4
         frames = self._assert_capture(108, [(raw, 'Loopback:Raw')], ipv4=0)
-        parsed = Loopback(raw, len(raw), alias=LinkType.LOOP)
+        parsed = Loopback._from_parent(raw, len(raw), alias=LinkType.LOOP)  # pylint: disable=protected-access
         for layer in [frame.payload for frame in frames] + [parsed]:
             with self.subTest(layer=layer):
                 self.assertEqual((layer.info.family, layer.info.byteorder), (0x0200_0000, 'big'))
@@ -249,7 +249,7 @@ class TestLoopback(unittest.TestCase):
                 raw = _header(family, byteorder) + payload
                 for hint in ({}, {'alias': LinkType.NULL}, {'alias': LinkType.LOOP}):
                     with self.subTest(family=family, byteorder=byteorder, **hint):
-                        parsed = Loopback(raw, len(raw), **hint)
+                        parsed = Loopback._from_parent(raw, len(raw), **hint)  # pylint: disable=protected-access
                         if hint.get('alias') == LinkType.LOOP:
                             expected = (int.from_bytes(raw[:4], 'big'), 'big')
                         else:  # inferred; a family of 0 reads the same either way

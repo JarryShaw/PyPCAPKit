@@ -67,6 +67,7 @@ which tells whether a payload opens with an HTTP/1.* start line.
    .. automethod:: _make_data
    .. automethod:: _guess_version
    .. automethod:: _member_of_version
+   .. automethod:: _construction_member
    .. automethod:: _dispatch_version
 
 .. autofunction:: pcapkit.protocols.application.http.protocol.test_start_line

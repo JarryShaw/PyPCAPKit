@@ -32,8 +32,8 @@ class TCPNSFlagRoundTripUnitTests(unittest.TestCase):
         """``make(ns=True)`` sets the low bit of byte 12, next to a data offset of 5."""
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        self.assertEqual(TCP(srcport=1, dstport=2, ns=True).data[12], 0x51)
-        self.assertEqual(TCP(srcport=1, dstport=2, ns=False).data[12], 0x50)
+        self.assertEqual(TCP.from_fields(srcport=1, dstport=2, ns=True).data[12], 0x51)
+        self.assertEqual(TCP.from_fields(srcport=1, dstport=2, ns=False).data[12], 0x50)
 
     def test_read_exposes_ns(self) -> None:
         """A parsed segment reports ``flags.ns`` as read from bit 103."""
@@ -41,7 +41,7 @@ class TCPNSFlagRoundTripUnitTests(unittest.TestCase):
 
         for ns in (True, False):
             with self.subTest(ns=ns):
-                raw = TCP(srcport=1, dstport=2, ns=ns).data
+                raw = TCP.from_fields(srcport=1, dstport=2, ns=ns).data
                 self.assertIs(TCP(raw).info.flags.ns, ns)
 
     def test_from_data_keeps_ns(self) -> None:
@@ -50,7 +50,7 @@ class TCPNSFlagRoundTripUnitTests(unittest.TestCase):
 
         for ns in (True, False):
             with self.subTest(ns=ns):
-                raw = TCP(srcport=1, dstport=2, ns=ns, ack=True).data
+                raw = TCP.from_fields(srcport=1, dstport=2, ns=ns, ack=True).data
                 rebuilt = TCP.from_data(TCP(raw).info)
                 self.assertEqual(rebuilt.data, raw)
                 self.assertIs(rebuilt.info.flags.ns, ns)
@@ -59,7 +59,7 @@ class TCPNSFlagRoundTripUnitTests(unittest.TestCase):
         """``ns`` leads the flags, in wire order, ahead of ``cwr``; ``reserved`` trails them."""
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        flags = TCP(TCP(srcport=1, dstport=2).data).info.flags
+        flags = TCP(TCP.from_fields(srcport=1, dstport=2).data).info.flags
         self.assertEqual(list(flags.keys()),
                          ['ns', 'cwr', 'ece', 'urg', 'ack', 'psh', 'rst', 'syn', 'fin', 'reserved'])
 

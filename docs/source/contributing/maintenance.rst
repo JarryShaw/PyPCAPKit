@@ -112,8 +112,8 @@ re-creates a missing one from its file.
    * - Board sweep
      - 13 min
      - the same channels, then every open and closed item's labels, heads,
-       mergeability, file lists and check runs; ``main``'s CI; the CI reports; the
-       Actions queue; host load
+       mergeability, file lists and check runs; ``main``'s CI and ``develop``'s Unit
+       Tests; the CI reports; the Actions queue; host load
      - the post gate, the queue thresholds, the host guard
      - pushes, labels, verdicts, rebase notes, dispatches, cancelled runs, pruned
        worktrees
@@ -201,9 +201,9 @@ Board Sweep
 #. **Lead the report with what is ready to merge**: ``review: good-to-go`` at the
    current head, every required check run completed, none failed. Experimental legs
    count against neither condition; a :ref:`KTLO <ktlo-tier>` leg is left out of the
-   tally, but its failing test ids are diffed against ``main``'s, because the leg can
-   read green while its tests fail. Re-read the checks once they complete: a verdict
-   given while CI ran says nothing about how it ended.
+   tally, but its failing test ids are diffed against the base branch's, because the
+   leg can read green while its tests fail. Re-read the checks once they complete: a
+   verdict given while CI ran says nothing about how it ended.
 #. **Dispatch to fill every gap**: a reviewer for each pull request at
    ``review: pending`` on its head, a worker for each ``pending`` issue, with the
    label moved in the same pass, and a fix worker for each ``review: good-to-go`` pull
@@ -212,7 +212,8 @@ Board Sweep
    failing step, never reporting a bare red mark. A timeout kill and a lost runner
    both read *the operation was canceled*; compare the job's duration against its cap
    across several runs before deciding which.
-#. **Watch** ``main`` (`The Post-Merge Routine and the Main-CI Watch`_).
+#. **Watch** ``main`` (`The Post-Merge Routine and the Main-CI Watch`_), and
+   ``develop``'s Unit Tests push runs too.
 #. **Keep the loops scheduled**, re-creating any that expired.
 #. **Rebase every conflicting pull request unasked**, and post a rebase note: old and
    new heads, whether the patch id is unchanged, the CI tally on the old head, and the
@@ -328,7 +329,7 @@ The Pull Request Lifecycle
        FX --> PU["Worker pushes at queue under 40,<br/>then the coordinator verifies<br/>review: pending"]
        PU --> R
        VD -->|GOOD TO GO| GG["One-line verdict<br/>review: good-to-go"]
-       GG --> RDY{"Required checks completed green,<br/>no test failing that main passes?"}
+       GG --> RDY{"Required checks completed green,<br/>no test failing that its base branch passes?"}
        CI --> RDY
        RDY -->|no| FX
        RDY -->|yes| M["Reported ready; the owner merges"]
@@ -356,10 +357,11 @@ The steps that the graph compresses:
    cell, Lint and deploy-pages are green, never held for a slow non-blocking leg.
    Once that leg finishes its failing test ids are re-read, since an experimental or
    KTLO leg ends green whatever its tests did. A merge wave supersedes every GraalPy
-   run on ``main``, so a pull request's GraalPy leg may be the only full run there is.
-*  **A green, conflict-free pull request can still break** ``main``: after a merge
-   wave, merge it into the current ``main`` in a scratch tree and run the affected
-   tests before calling it ready.
+   run on the base branch, so a pull request's GraalPy leg may be the only full run
+   there is.
+*  **A green, conflict-free pull request can still break its base branch**: after a
+   merge wave, merge it into the current head of its base (usually ``develop``) in a
+   scratch tree and run the affected tests before calling it ready.
 *  **Findings on an unmerged pull request go back to its original worker**, which
    still holds the context, rather than to a new issue; a separate issue is for a
    pull request already merged or a concern genuinely apart from it.
@@ -445,15 +447,15 @@ After every merge the sweep runs, in order:
    Reports, any scheduled run, and the head's own runs.
 #. **The latest-tier sweeps, locally**: the project modules that only CI's
    ``latest`` leg runs (Test Tiers on :doc:`workflows`) are run on a scratch tree of
-   the new ``main``, because a merge wave supersedes ``main``'s runs before they
-   finish.
+   the new head of the branch the merge landed on (usually ``develop``), because a
+   merge wave supersedes that branch's runs before they finish.
 #. **Rebases**: a pull request the merge made conflicting is rebased and noted, as in
-   the sweep. One that is only behind is left alone: ``main``'s ruleset requires
-   branches to be up to date, every push to ``main`` puts every open pull request
-   behind, and the owner merges through the bypass. Sync Develop's pull request is
-   neither rebased nor updated: its head, ``sync/main``, is a mirror of ``main`` that
-   each run overwrites, so a conflict is resolved in a pull request into ``develop``
-   (:pr:`3075`, :doc:`workflows`).
+   the sweep. One that is only behind is left alone: the ``main`` and ``develop``
+   rulesets both require branches to be up to date, so every push to either branch
+   puts the open pull requests that target it behind, and the owner merges through
+   the bypass. Sync Develop's pull request is neither rebased nor updated: its head,
+   ``sync/main``, is a mirror of ``main`` that each run overwrites, so a conflict is
+   resolved in a pull request into ``develop`` (:pr:`3075`, :doc:`workflows`).
 #. **The changelog fold**: the merged pull request's entry is written into the
    release's central changelog pull request (:ref:`release-lines`).
 #. **Worktrees and branch**: the merged pull request's worktrees become prunable, and
@@ -478,10 +480,10 @@ which it skips or stops rather than cancels (:doc:`workflows`).
        RC --> T["Fix verified: the failing module passes locally"]
        T --> FIX["Pushed straight to main,<br/>with no queue threshold"]
 
-**Read** ``main`` **at job level.** A run stays queued while one job waits, even with a
-job already failed. A non-blocking leg's red check is a defect as well: such a leg may
-only warn and end green, so a step that can lose its runner is contained -- capped,
-bounded, timed out -- rather than excused.
+**Read** ``main`` **at job level**, and ``develop``'s Unit Tests push runs too. A run
+stays queued while one job waits, even with a job already failed. A non-blocking leg's
+red check is a defect as well: such a leg may only warn and end green, so a step that
+can lose its runner is contained -- capped, bounded, timed out -- rather than excused.
 
 **The scheduled workflows run on** ``main`` **alone, with no** ``develop`` **leg**, as
 ruled on :issue:`3062`: they catch upstream drift, which both branches share, and
@@ -565,8 +567,8 @@ conservative:
    elsewhere, which hold reviewers' baselines and the coordinator's landing trees.
 *  **Keep** a locked tree; a live agent's; one touched in the last 3 hours; one on an
    open pull request's branch, so its agent can be resumed for the next round; one
-   with uncommitted tracked edits not already on ``main``; one with commits no merged
-   pull request carries.
+   with uncommitted tracked edits not already on the branch the merges land on; one
+   with commits no merged pull request carries.
 *  **Remove** a clean tree whose head is, or is an earlier round of, a merged pull
    request's head, and a tree whose every commit is upstream. Save its diff first, and
    never force past a lock: the lock is the signal.
@@ -594,8 +596,8 @@ Briefs
 
 *  the conventions pages to read first, to follow over its own inference and to cite
    by name, with unsettled questions brought back as options and a recommendation;
-*  an explicit base sha to branch from -- never ``origin/main`` by name, which sibling
-   worktrees move -- and a sample regeneration in the fresh tree;
+*  an explicit base sha to branch from -- never ``origin/develop`` or ``origin/main`` by
+   name, which sibling worktrees move -- and a sample regeneration in the fresh tree;
 *  the issue, read in full and read-only;
 *  the test recipe: one module per process, run from inside the worktree with
    ``pcapkit.__file__`` asserted to resolve there -- an editable install of the shared
@@ -619,8 +621,8 @@ Briefs
 other than the author's -- a worker run without a model override inherits the
 coordinator's, so its reviewer names another; the load-bearing claims, ranked, with an
 instruction to falsify rather than bless; the pull request's own diff as the thing
-under review, not ``main``; the time budget; and a report that opens and closes with
-``GOOD TO GO`` or ``NEEDS CHANGES`` at the sha, with each claim marked confirmed,
+under review, not its base branch; the time budget; and a report that opens and closes
+with ``GOOD TO GO`` or ``NEEDS CHANGES`` at the sha, with each claim marked confirmed,
 refuted or ``UNVERIFIED``.
 
 **Everything the automation writes is as short as it can be while staying accurate**
@@ -687,15 +689,17 @@ carrying state or ``review:`` labels, and print the queued and in-progress run c
 Post-Merge Sweep Runner
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-*  **Input**: a scratch tree of the new ``main``.
+*  **Input**: a scratch tree of the new head of the branch the merge landed on (usually
+   ``develop``).
 *  Regenerates the sample captures if the tree lacks them, then runs a fixed list of
    latest-tier modules -- the RFC-constants, protocol-package, public-API, dead-helper,
    member-order, doc-claims, const-export and shared-context-variable guards, the
    schema and short-read round trips, and the dispatch registry and reachability
    checks -- each in its own process with a time limit and the file-size cap.
 *  Asserts in each process that :mod:`pcapkit` imports from the scratch tree, and
-   prints each module's summary line with its exit code. A red one is fixed and
-   pushed straight to ``main``.
+   prints each module's summary line with its exit code. A red one is fixed on that
+   branch, and pushed straight to it when it is ``main``. A red ``develop`` is fixed
+   through a pull request into ``develop``, since no ruling allows a direct push there.
 
 Worktree Pruner
 ~~~~~~~~~~~~~~~
@@ -703,10 +707,11 @@ Worktree Pruner
 *  Applies `Worktree Cleanup`_. Its inputs are the ids of live agents, the open pull
    requests' branches, and a map from every sha a merged pull request ever had -- its
    heads, its commits, both sides of each force-push -- to that pull request, since
-   squash merges and amended heads leave an agent's own shas off ``main``.
+   squash merges and amended heads leave an agent's own shas off ``main`` and
+   ``develop``.
 *  A tree's commits count as landed when ``git cherry`` shows them upstream, or when
    every one maps to a merged pull request; its uncommitted edits count as landed when
-   their diff reverse-applies to ``main``'s index.
+   their diff reverse-applies to ``main``'s or ``develop``'s index.
 *  Has a dry run that only classifies. A real run saves each tree's diff before the
    removal, never forces past a lock, runs ``git worktree prune``, and prints what it
    removed and what it kept, with the reason for each.

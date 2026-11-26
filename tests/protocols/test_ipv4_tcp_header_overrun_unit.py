@@ -157,8 +157,8 @@ class TestTimestampAddressKeys(unittest.TestCase):
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
-        return IPv4(options=[(OptionNumber.TS, {'timestamp': {key: timedelta(milliseconds=1)}})],
-                    protocol=253).data
+        return IPv4.from_fields(options=[(OptionNumber.TS, {'timestamp': {key: timedelta(milliseconds=1)}})],
+                                protocol=253).data
 
     def test_a_string_key_builds_like_an_address_key(self) -> None:
         from ipaddress import IPv4Address

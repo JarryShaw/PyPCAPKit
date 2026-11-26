@@ -72,6 +72,7 @@ every extraction engine.
 
    .. automethod:: register_reassembly
    .. automethod:: _setup_reassembly
+   .. automethod:: _frame_keywords
    .. automethod:: _reassemble
 
    .. rubric:: Flow Tracing

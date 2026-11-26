@@ -586,7 +586,10 @@ def convert_traced(rst: str) -> tuple[str, list[tuple[int, int]]]:
             level = {'=': '##', '-': '###', '~': '####'}.get(
                 underline[0] if underline else '')
             if level and set(underline) == {underline[0]}:
-                out.append(f'{level} {line}')
+                # A title may carry a role (``:mod:`pcapkit.const```, #3094), which
+                # renders as it does in the prose: a code span.
+                title = _PY_ROLE.sub(lambda match: py_role(match[1], match[2]), line)
+                out.append(f'{level} {title}')
                 origin.append(index + 1)
                 index += 2
                 continue

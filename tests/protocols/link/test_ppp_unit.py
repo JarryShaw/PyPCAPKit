@@ -101,9 +101,10 @@ class TestPPP(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def _parse(self, data: bytes, **kwargs):  # type: ignore[no-untyped-def]
+    def _parse(self, data: bytes, **state):  # type: ignore[no-untyped-def]
+        """``data`` parsed as PPP, ``state`` as a frame's link layer hands it on."""
         from pcapkit.protocols.link.ppp.protocol import PPP
-        return PPP(data, len(data), **kwargs)
+        return PPP._from_parent(data, len(data), **state)  # pylint: disable=protected-access
 
     def _assert_rebuilds(self, layer) -> None:  # type: ignore[no-untyped-def]
         """``layer`` rebuilds byte-exactly from its info, and from ``info.to_dict()``."""
@@ -245,7 +246,7 @@ class TestPPP(unittest.TestCase):
         for kwargs, head in cases:
             with self.subTest(kwargs=kwargs):
                 payload = b'' if 'control_packet' in kwargs else IPV4
-                made = PPP(**kwargs, payload=payload)
+                made = PPP.from_fields(**kwargs, payload=payload)
                 self.assertEqual(made.data, head + payload)
                 parsed = self._parse(made.data)
                 self.assertEqual(bytes(PPP.from_data(parsed.info)), made.data)
@@ -280,7 +281,7 @@ class TestPPP(unittest.TestCase):
         )
         for kwargs, message in cases:
             with self.subTest(kwargs=kwargs), self.assertRaisesRegex(ProtocolError, message):
-                PPP(**kwargs)
+                PPP.from_fields(**kwargs)
 
     ##########################################################################
     # Bindings.

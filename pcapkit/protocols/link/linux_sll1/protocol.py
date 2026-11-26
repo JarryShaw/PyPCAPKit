@@ -152,7 +152,7 @@ class LinuxSLL1(LinuxSLL[Data_LinuxSLL1, Schema_LinuxSLL1],
                                            schema.protocol_type)
         return self._decode_next_layer(linux_sll, _proto, length - self.length)
 
-    def make(self,
+    def make(self, *,
              packet_type: 'int' = 0,
              arphrd_type: 'Enum_Hardware | int' = Enum_Hardware.Ethernet,
              link_addr: 'bytes | bytearray' = b'',

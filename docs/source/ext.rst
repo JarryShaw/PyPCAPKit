@@ -263,7 +263,7 @@ implementation is :mod:`pcapkit.protocols.internet.ipv4.protocol`:
 
            return IPv4Data(...)
 
-       def make(self, ..., **kwargs: 'Any') -> 'IPv4Schema':
+       def make(self, *, ..., **kwargs: 'Any') -> 'IPv4Schema':
            ...
 
            return IPv4Schema(...)
@@ -274,13 +274,17 @@ implementation is :mod:`pcapkit.protocols.internet.ipv4.protocol`:
 
 .. important::
 
-   **Declare every construction keyword your protocol accepts.** Constructing a
-   protocol with a keyword no signature declares raises
-   :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, so a misspelling fails
-   instead of building a wrong field. The accepted set, read by
+   **Declare every construction keyword your protocol accepts.** Calling the class
+   with its fields alone builds a protocol, as
+   :meth:`Protocol.from_fields <pcapkit.protocols.protocol.Protocol.from_fields>`
+   does, and a keyword no signature declares raises
+   :exc:`~pcapkit.utilities.exceptions.UnexpectedKeyword`, a :exc:`TypeError`, so a
+   misspelling fails instead of building a wrong field. ``make`` takes its fields
+   as keywords only, ending in ``**kwargs``. The accepted set, read by
    :func:`inspect.signature`, is the union of the keyword-taking parameters of
-   ``make``, ``read``, ``pack``, ``unpack``, ``__post_init__`` and ``__init__``
-   across the MRO: :meth:`Protocol.__post_init__
+   ``make``, ``read``, ``pack``, ``unpack`` and ``__post_init__`` across the MRO,
+   the hooks' ``file`` and ``length`` aside, though a ``make`` field of either
+   name counts (:issue:`3081`): :meth:`Protocol.__post_init__
    <pcapkit.protocols.protocol.Protocol.__post_init__>` hands one ``**kwargs``
    to both construction and parse, so a keyword only ``read`` declares still
    travels through ``make``.
@@ -308,19 +312,47 @@ implementation is :mod:`pcapkit.protocols.internet.ipv4.protocol`:
    dispatcher's subclasses stay checked. Prefer a declared parameter to either,
    since it also documents the keyword.
 
-   Parsing is unaffected. :meth:`Protocol.from_data
-   <pcapkit.protocols.protocol.Protocol.from_data>` checks its caller's keywords
-   as strictly, but only warns with
+   :meth:`Protocol.from_data <pcapkit.protocols.protocol.Protocol.from_data>`
+   checks its caller's keywords as strictly, ``context`` aside, but only warns with
    :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for a key from your
    ``_make_data``, a disagreement between two of your own mappings rather than a
    caller's typo.
 
+   Parsing takes no field: calling the class with a file is ``Proto(file, length,
+   /, *, layer, protocol, context)``, as
+   :meth:`Protocol.from_file <pcapkit.protocols.protocol.Protocol.from_file>` is, and any
+   other keyword is refused. A parse that needs an input of its own declares it on
+   an ``__init__`` override, keyword-only and before the stops, as
+   :meth:`DNS.__init__ <pcapkit.protocols.application.dns.protocol.DNS.__init__>`
+   declares ``framed``. Given a file, the override parses through
+   :meth:`Protocol._parse <pcapkit.protocols.protocol.Protocol._parse>`, which
+   refuses the fields; given none, it constructs (:issue:`3081`):
+
+   .. code-block:: python
+
+      from pcapkit.corekit.sentinels import NO_VALUE, NoValueType
+
+      def __init__(self, file=NO_VALUE, length=None, /, *, framed=None,
+                   layer=None, protocol=None, context=None, **fields):
+          if isinstance(file, NoValueType):
+              if framed is not None:  # a field of ``make`` too
+                  fields['framed'] = framed
+              self._construct(context, self._call_fields(length, layer, protocol, fields))
+          else:
+              self._parse(file, length, fields, layer=layer, protocol=protocol,
+                          context=context, framed=framed)
+
+   What the layer carrying yours hands on, such as ``alias`` and ``packet``,
+   reaches your hooks as keywords, never the signature (:issue:`2840`).
+
    .. warning::
 
-      The check lives in :meth:`Protocol.__init__
-      <pcapkit.protocols.protocol.Protocol.__init__>`, where every producer's
-      keywords converge, so it covers ``SomeProtocol(...)`` and the ``pack`` it
-      leads to, but **not** ``make`` called on a bare instance, such as
+      The check lives in :meth:`Protocol.from_fields
+      <pcapkit.protocols.protocol.Protocol.from_fields>`,
+      :meth:`~pcapkit.protocols.protocol.Protocol.from_data` and a call of the class
+      given no file, which hand the keywords on, so it covers
+      ``SomeProtocol(...)`` and the ``pack`` it leads to, but **not** ``make``
+      called on a bare instance, such as
       ``object.__new__(cls).make(...)``, which drops an undeclared keyword
       silently. This package's tests and :meth:`HTTP.make
       <pcapkit.protocols.application.http.protocol.HTTP.make>` call ``make`` that

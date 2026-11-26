@@ -94,13 +94,13 @@ class TestL2TPv2LengthRoundTrip(unittest.TestCase):
 
         # ``type`` is passed as the raw ``T`` bit so the octets do not depend on
         # how :class:`~pcapkit.const.l2tp.type.Type` names it.
-        with_len = L2TPv2(type=0, tunnel_id=7, session_id=9, total_length=12,
-                          payload=PAYLOAD)
+        with_len = L2TPv2.from_fields(type=0, tunnel_id=7, session_id=9, total_length=12,
+                                      payload=PAYLOAD)
         self.assertEqual(with_len.data, build(0, 1, 0, 0, 0))
         self.assertTrue(with_len.info.flags.len)
         self.assertEqual(with_len.info.length, 12)
 
-        without = L2TPv2(type=0, tunnel_id=7, session_id=9, payload=PAYLOAD)
+        without = L2TPv2.from_fields(type=0, tunnel_id=7, session_id=9, payload=PAYLOAD)
         self.assertEqual(without.data, build(0, 0, 0, 0, 0))
         self.assertFalse(without.info.flags.len)
         self.assertIsNone(without.info.length)

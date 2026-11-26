@@ -214,12 +214,12 @@ def _pcapng_bytes(linktype: 'Any', packet_data: 'bytes') -> 'bytes':
     from pcapkit.foundation.engines.pcapng import Context
     from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-    shb = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
+    shb = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
     context = Context(shb.info)
-    idb = PCAPNG(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
+    idb = PCAPNG.from_fields(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
                 block={'linktype': linktype, 'snaplen': 0x40000})
     context.interfaces.append(idb.info)
-    epb = PCAPNG(num=2, sct=1, ctx=context, type=BlockType.Enhanced_Packet_Block,
+    epb = PCAPNG.from_fields(num=2, sct=1, ctx=context, type=BlockType.Enhanced_Packet_Block,
                 block={'timestamp': EPOCH, 'packet_data': packet_data})
     return bytes(shb) + bytes(idb) + bytes(epb)
 
@@ -253,55 +253,55 @@ def _extract_first(data: 'bytes', suffix: 'str') -> 'Any':
 def _tcp(dstport: 'int', payload: 'bytes' = b'') -> 'bytes':
     """A minimal TCP segment to ``dstport``."""
     from pcapkit.protocols.transport.tcp.protocol import TCP
-    return bytes(TCP(dstport=dstport, payload=payload, **_TCP_BASE))
+    return bytes(TCP.from_fields(dstport=dstport, payload=payload, **_TCP_BASE))
 
 
 def _udp(dstport: 'int', payload: 'bytes' = b'') -> 'bytes':
     """A minimal UDP datagram to ``dstport``."""
     from pcapkit.protocols.transport.udp.protocol import UDP
-    return bytes(UDP(srcport=50000, dstport=dstport, payload=payload))
+    return bytes(UDP.from_fields(srcport=50000, dstport=dstport, payload=payload))
 
 
 def _ip4(protocol: 'int', payload: 'bytes') -> 'bytes':
     """A minimal option-less IPv4 header carrying ``payload``."""
     from pcapkit.protocols.internet.ipv4.protocol import IPv4
-    return bytes(IPv4(protocol=protocol, src='192.0.2.1', dst='198.51.100.1', payload=payload))
+    return bytes(IPv4.from_fields(protocol=protocol, src='192.0.2.1', dst='198.51.100.1', payload=payload))
 
 
 def _ip6(next_: 'int', payload: 'bytes') -> 'bytes':
     """A minimal IPv6 header carrying ``payload``."""
     from pcapkit.protocols.internet.ipv6.protocol import IPv6
-    return bytes(IPv6(next=next_, src='2001:db8::1', dst='2001:db8::2', payload=payload))
+    return bytes(IPv6.from_fields(next=next_, src='2001:db8::1', dst='2001:db8::2', payload=payload))
 
 
 def _ethernet(ethertype: 'int', payload: 'bytes') -> 'bytes':
     """A minimal Ethernet II frame carrying ``payload``."""
     from pcapkit.protocols.link.ethernet.protocol import Ethernet
-    return bytes(Ethernet(type=ethertype, payload=payload))
+    return bytes(Ethernet.from_fields(type=ethertype, payload=payload))
 
 
 def _ppp(payload: 'bytes', protocol: 'int' = 0x0021, acfc: 'bool' = False) -> 'bytes':
     """A PPP frame carrying ``payload``, by default an IPv4 datagram."""
     from pcapkit.protocols.link.ppp.protocol import PPP
-    return bytes(PPP(protocol=protocol, acfc=acfc, payload=payload))
+    return bytes(PPP.from_fields(protocol=protocol, acfc=acfc, payload=payload))
 
 
 def _loopback(family: 'int', payload: 'bytes', byteorder: 'str' = 'little') -> 'bytes':
     """A BSD loopback header carrying ``payload``."""
     from pcapkit.protocols.link.loopback.protocol import Loopback
-    return bytes(Loopback(family=family, byteorder=byteorder, payload=payload))
+    return bytes(Loopback.from_fields(family=family, byteorder=byteorder, payload=payload))
 
 
 def _linux_sll(payload: 'bytes') -> 'bytes':
     """A ``LINUX_SLL`` header carrying ``payload``."""
     from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
-    return bytes(LinuxSLL1(payload=payload))
+    return bytes(LinuxSLL1.from_fields(payload=payload))
 
 
 def _linux_sll2(payload: 'bytes') -> 'bytes':
     """A ``LINUX_SLL2`` header carrying ``payload``."""
     from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
-    return bytes(LinuxSLL2(payload=payload))
+    return bytes(LinuxSLL2.from_fields(payload=payload))
 
 
 def _linux_sll_payload(arphrd_type: 'Any') -> 'tuple[int, bytes]':
@@ -325,21 +325,21 @@ def _linux_sll_payload(arphrd_type: 'Any') -> 'tuple[int, bytes]':
 
     if arphrd_type == ARPHRD.FRAD:
         from pcapkit.protocols.link.frad.protocol import FRAD
-        return 0, bytes(FRAD(nlpid=0xCC, payload=_ip4(6, _tcp(9999))))
+        return 0, bytes(FRAD.from_fields(nlpid=0xCC, payload=_ip4(6, _tcp(9999))))
     if arphrd_type in (ARPHRD.IPGRE, ARPHRD.IP6GRE):
         from pcapkit.protocols.link.gre.protocol import GRE
-        return 0x0800, bytes(GRE(protocol_type=0x0800, payload=_ip4(6, _tcp(9999))))
+        return 0x0800, bytes(GRE.from_fields(protocol_type=0x0800, payload=_ip4(6, _tcp(9999))))
     if arphrd_type == ARPHRD.IEEE80211_RADIOTAP:
         from pcapkit.const.ieee802_11.control_subtype import ControlSubtype
         from pcapkit.const.ieee802_11.type import Type
         from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
         from pcapkit.protocols.link.radiotap.protocol import Radiotap
-        ack = bytes(IEEE802_11(type=Type.Control, subtype=ControlSubtype.ACK, addr1='02:00:00:00:00:01'))
-        return 0, bytes(Radiotap(payload=ack))
+        ack = bytes(IEEE802_11.from_fields(type=Type.Control, subtype=ControlSubtype.ACK, addr1='02:00:00:00:00:01'))
+        return 0, bytes(Radiotap.from_fields(payload=ack))
     if arphrd_type == ARPHRD.NETLINK:
         from pcapkit.protocols.link.netlink.protocol import Netlink
-        return 0, bytes(Netlink(nlmsg_type=3, nlmsg_seq=1, byteorder='little',
-                                payload=b'\xaa\xbb\xcc\xdd'))
+        return 0, bytes(Netlink.from_fields(nlmsg_type=3, nlmsg_seq=1, byteorder='little',
+                                            payload=b'\xaa\xbb\xcc\xdd'))
     raise LookupError(f'linux_sll: no payload builder for {arphrd_type!r}')  # pragma: no cover
 
 

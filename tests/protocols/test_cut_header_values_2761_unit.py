@@ -132,7 +132,7 @@ class CutHeaderValuesTests(unittest.TestCase):
 
         try:
             with CaughtByCaller(ProtocolError):
-                yield klass(**MAKE.get(name, {})).data
+                yield klass.from_fields(**MAKE.get(name, {})).data
         except BaseError:
             pass  # its defaults build nothing, so its octets are below
         yield from OCTETS.get(name, ())
@@ -164,7 +164,7 @@ class CutHeaderValuesTests(unittest.TestCase):
             with self.subTest(protocol=name):
                 try:
                     with CaughtByCaller(ProtocolError):
-                        built = klass(**MAKE.get(name, {})) is not None
+                        built = klass.from_fields(**MAKE.get(name, {})) is not None
                 except (BaseError, TypeError):
                     built = False
                 self.assertEqual(name in NOT_CUT, not built and name not in OCTETS)

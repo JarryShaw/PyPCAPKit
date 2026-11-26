@@ -42,10 +42,12 @@ from pcapkit.utilities.exceptions import ProtocolError
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, ClassVar, DefaultDict, Optional, Type, Union
+    from typing import (IO, Any, Callable, ClassVar, DefaultDict, Iterable, Optional, Type, Union,
+                        overload)
 
     from typing_extensions import Literal
 
+    from pcapkit.corekit.context import ContextRegistry, ProtocolContext
     from pcapkit.corekit.enum import EnumRegistry
     from pcapkit.protocols.link.ppp.schema import ControlHeader as Schema_ControlHeader
     from pcapkit.protocols.link.ppp.schema import ControlTest
@@ -239,7 +241,7 @@ class PPP(Link[Data_PPP, Schema_PPP],
         proto = -1 if control_packet is not None else schema.protocol
         return self._decode_next_layer(ppp, proto, length - self.length)
 
-    def make(self,
+    def make(self, *,
              protocol: 'Enum_Protocol | int' = Enum_Protocol.Internet_Protocol_version_4,
              acfc: 'bool' = False,
              pfc: 'bool' = False,
@@ -386,6 +388,21 @@ class PPP(Link[Data_PPP, Schema_PPP],
     ##########################################################################
     # Data models.
     ##########################################################################
+
+    if TYPE_CHECKING:
+        # NOTE: ``protocol`` stops a parse and is a field of a construction, so each
+        # shape types it as such (#3081); the ``__init__`` called is the inherited one.
+        @overload
+        def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., /, *,
+                     layer: 'Optional[str]' = ...,
+                     protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = ...,
+                     context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                     ) -> 'None': ...
+        @overload
+        def __init__(self, *, protocol: 'Enum_Protocol | int' = ...,
+                     context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                     **fields: 'Any') -> 'None': ...
+        def __init__(self, *args: 'Any', **kwargs: 'Any') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument
 
     def __length_hint__(self) -> 'Literal[4]':
         """Return an estimated length for the object."""

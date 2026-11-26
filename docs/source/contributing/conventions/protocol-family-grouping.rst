@@ -103,8 +103,9 @@ either ruling. The asymmetry is deliberate and concerns the registry only; parsi
 building through a base directly is the rule below.
 
 **A versioned family's base dispatches on both paths** (:issue:`2524`). Parsing
-octets through it, constructing it from fields and its ``from_data`` give a member,
-never an instance of the base, and a subclass of the base is constructed as itself.
+octets through it, building it from fields and its ``from_data`` give a
+member, never an instance of the base, and a subclass of the base is constructed as
+itself.
 
 **The member is the one the** ``version`` **keyword names, or else the one the octets
 or the data model carry, and never one a field picks.** ``version`` names the member
@@ -115,11 +116,11 @@ data model's class or its ``version``, as the table below gives. No field picks 
 member, not even a field only one member takes, and no member is a default: fields
 without ``version`` raise :exc:`~pcapkit.utilities.exceptions.ProtocolError`, and a
 field the member does not take fails that member's own keyword check. Ruled on
-:issue:`2574`. A class built directly takes ``version`` too, which must be its own: a
-member's, or, for a subclass outside the members, the one an IGMP class states in its
-``version`` (a subclass of the other bases has none). While parsing, the keyword is
-handed on unread, since an IP layer passes its own version under that name to the
-layer it carries.
+:issue:`2574`. A class parsed or built directly takes ``version`` too, which must be
+its own: a member's, or, for a subclass outside the members, the one an IGMP class
+states in its ``version`` (a subclass of the other bases has none). The keyword reaches
+no hook: an IP layer hands its own version to the layer it carries through the private
+next-layer channel, so the check never meets it (:issue:`2840`).
 
 The member a call through a versioned base gives, as a decision:
 

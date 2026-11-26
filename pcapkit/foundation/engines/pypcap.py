@@ -289,7 +289,7 @@ class PyPCAP(EngineBase['RawFrame']):
 
         ext = self._extractor
 
-        if ext._exlyr != 'none' or ext._exptl != 'null':
+        if ext._exlyr is not None or ext._exptl is not None:
             warn("'Extractor(engine=pypcap)' does not support protocol and layer threshold; "
                  f"'layer={ext._exlyr}' and 'protocol={ext._exptl}' ignored",
                  AttributeWarning, stacklevel=stacklevel())

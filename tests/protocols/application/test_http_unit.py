@@ -66,6 +66,11 @@ def base_read(raw: bytes) -> object:
     return http.read(len(raw))
 
 
+def versioned(stand_in: object) -> SimpleNamespace:
+    """``stand_in`` as a versioned class's ``_from_parent``, through which ``HTTP`` parses (#2840)."""
+    return SimpleNamespace(_from_parent=stand_in)
+
+
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class HTTPUnitTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -123,6 +128,10 @@ class HTTPUnitTests(unittest.TestCase):
                 self.init_length = length
                 self.kwargs = kwargs
 
+            @classmethod
+            def _from_parent(cls, file, length, /, **state):
+                return cls(file, length, **state)
+
             @staticmethod
             def make(**kwargs):
                 return ('v1-made', kwargs)
@@ -136,6 +145,10 @@ class HTTPUnitTests(unittest.TestCase):
                 self.file = file
                 self.init_length = length
                 self.kwargs = kwargs
+
+            @classmethod
+            def _from_parent(cls, file, length, /, **state):
+                return cls(file, length, **state)
 
             @staticmethod
             def make(**kwargs):
@@ -175,15 +188,15 @@ class HTTPUnitTests(unittest.TestCase):
         frame.__cached__ = {}
 
         with mock.patch('pcapkit.protocols.application.httpv1.protocol.HTTPv1',
-                        mock.Mock(side_effect=ProtocolError('bad v1'))), \
+                        versioned(mock.Mock(side_effect=ProtocolError('bad v1')))), \
                 mock.patch('pcapkit.protocols.application.httpv2.protocol.HTTPv2', FakeHTTPv2):
             self.assertIsInstance(HTTP._guess_version(frame, 9), FakeHTTPv2)
         with mock.patch('pcapkit.protocols.application.httpv1.protocol.HTTPv1', FakeHTTPv1):
             self.assertIsInstance(HTTP._guess_version(http, 9), FakeHTTPv1)
         with mock.patch('pcapkit.protocols.application.httpv1.protocol.HTTPv1',
-                        mock.Mock(side_effect=ProtocolError('bad v1'))), \
+                        versioned(mock.Mock(side_effect=ProtocolError('bad v1')))), \
                 mock.patch('pcapkit.protocols.application.httpv2.protocol.HTTPv2',
-                           mock.Mock(side_effect=ProtocolError('bad v2'))):
+                           versioned(mock.Mock(side_effect=ProtocolError('bad v2')))):
             with self.assertRaises(ProtocolError):
                 HTTP._guess_version(frame, 9)
 
@@ -248,7 +261,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         from pcapkit.protocols.application.http.protocol import HTTP
 
-        proto = HTTP(version=1, http_version='1.1', method='GET', uri='/')
+        proto = HTTP.from_fields(version=1, http_version='1.1', method='GET', uri='/')
         self.assertEqual(proto.data, b'GET / HTTP/1.1\r\n\r\n')
         self.assertEqual(proto.version, '1.1')
 
@@ -272,6 +285,10 @@ class HTTPUnitTests(unittest.TestCase):
 
             def __init__(self, file: object, length: int, **kwargs: object) -> None:
                 self.received = file
+
+            @classmethod
+            def _from_parent(cls, file: object, length: int, /, **state: object) -> 'RecordingHTTP':
+                return cls(file, length, **state)
 
         http = object.__new__(HTTP)
         http._data = b'GET / HTTP/1.1\r\n\r\n'
@@ -344,7 +361,7 @@ class HTTPUnitTests(unittest.TestCase):
         for version, module in ((1, 'httpv1'), (2, 'httpv2')):
             with self.subTest(version=version):
                 with mock.patch(f'pcapkit.protocols.application.{module}.protocol.HTTPv{version}',
-                                mock.Mock(side_effect=ValueError('boom'))):
+                                versioned(mock.Mock(side_effect=ValueError('boom')))):
                     with self.assertRaises(ProtocolError) as ctx:
                         http.read(version=version)
 
@@ -354,7 +371,7 @@ class HTTPUnitTests(unittest.TestCase):
         # A ``ProtocolError`` from the delegate is re-raised as it is, not
         # re-labelled with the version it was dispatched on.
         with mock.patch('pcapkit.protocols.application.httpv1.protocol.HTTPv1',
-                        mock.Mock(side_effect=ProtocolError('HTTP: invalid format'))):
+                        versioned(mock.Mock(side_effect=ProtocolError('HTTP: invalid format')))):
             with self.assertRaises(ProtocolError) as ctx:
                 http.read(version=1)
         self.assertEqual(str(ctx.exception), 'HTTP: invalid format')
@@ -438,8 +455,8 @@ class HTTPUnitTests(unittest.TestCase):
         def record(name: str, real: object) -> object:
             def spy(*args: object, **kwargs: object) -> object:
                 entered.append(name)
-                return real(*args, **kwargs)  # type: ignore[operator]
-            return spy
+                return real._from_parent(*args, **kwargs)  # type: ignore[attr-defined]
+            return versioned(spy)
 
         with mock.patch('pcapkit.protocols.application.httpv1.protocol.HTTPv1',
                         record('httpv1', real_v1)), \
@@ -1071,7 +1088,7 @@ class HTTPUnitTests(unittest.TestCase):
 
         from pcapkit.protocols.application.httpv1.protocol import HTTPv1
 
-        request = HTTPv1(method='GET', uri='/', http_version='1.1')
+        request = HTTPv1.from_fields(method='GET', uri='/', http_version='1.1')
         self.assertEqual(request.data, b'GET / HTTP/1.1\r\n\r\n')
         self.assertEqual(request.info.receipt.method, 'GET')
         self.assertEqual(request.info.receipt.uri, '/')
@@ -1079,13 +1096,13 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual(len(request.info.header), 0)
 
         wire = b'HTTP/1.0 200 OK\r\n\r\nbody'
-        response = HTTPv1(status=200, message='OK', http_version='1.0', body=b'body')
+        response = HTTPv1.from_fields(status=200, message='OK', http_version='1.0', body=b'body')
         self.assertEqual(response.data, wire)
         self.assertEqual(response.info.receipt.status, 200)
         self.assertEqual(len(response.info.header), 0)
 
         parsed = HTTPv1(io.BytesIO(wire), len(wire))
-        self.assertEqual(HTTPv1(**HTTPv1._make_data(parsed.info)).data, wire)
+        self.assertEqual(HTTPv1.from_fields(**HTTPv1._make_data(parsed.info)).data, wire)
 
     def test_httpv1_from_data_round_trips_a_message_with_an_empty_body(self) -> None:
         """``from_data(info)`` rebuilds a message whose body is empty (#1050).
@@ -1453,7 +1470,7 @@ class HTTPUnitTests(unittest.TestCase):
         for label, error in faults:
             with self.subTest(fault=label):
                 with mock.patch('pcapkit.protocols.application.httpv1.protocol.HTTPv1',
-                                mock.Mock(side_effect=error)):
+                                versioned(mock.Mock(side_effect=error))):
                     # It must propagate, not be swallowed into an HTTP/2 answer.
                     with self.assertRaises(struct.error):
                         base_read(raw)

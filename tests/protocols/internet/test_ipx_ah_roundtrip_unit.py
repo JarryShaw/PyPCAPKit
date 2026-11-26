@@ -58,7 +58,7 @@ class TestIPXRoundTrip(unittest.TestCase):
         for name, packet in IPX_PACKETS.items():
             with self.subTest(packet=name), warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                parsed = IPX(io.BytesIO(packet), len(packet), extension=True)
+                parsed = IPX._from_parent(io.BytesIO(packet), len(packet), extension=True)  # pylint: disable=protected-access
                 self.assertEqual(IPX.from_data(parsed.info).data, packet)
 
     def test_make_computes_length_when_not_given(self) -> None:
@@ -66,7 +66,7 @@ class TestIPXRoundTrip(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            proto = IPX(payload=b'hi')
+            proto = IPX.from_fields(payload=b'hi')
         self.assertEqual(proto.data[2:4], bytes.fromhex('0020'))
 
 
@@ -99,7 +99,7 @@ class TestAHRoundTrip(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            proto = AH(icv=bytes(12))
+            proto = AH.from_fields(icv=bytes(12))
         self.assertEqual(proto.data[2:4], bytes(2))
 
 

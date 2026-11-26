@@ -131,6 +131,13 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         this package deliberately keeps low. Nothing is reassembled, parsed
         or retained unless it is asked for.
 
+    .. versionchanged:: 1.8.0
+
+       With ``analyze=True``, a datagram's payload is parsed with the ``layer``,
+       ``protocol`` and ``context`` of a :term:`default engine` extraction feeding
+       the tracer, as TCP reassembly's are, where it was parsed with none of them
+       (:issue:`2946`).
+
     """
 
     if TYPE_CHECKING:
@@ -478,7 +485,10 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         as one contiguous payload, which is what an application-layer parse needs,
         and it inherits
         :attr:`TCP.__timeout__ <pcapkit.foundation.reassembly.tcp.reassembly.TCP.__timeout__>`
-        -- no timeout -- so nothing here is evicted on a clock.
+        -- no timeout -- so nothing here is evicted on a clock. It parses its
+        payloads with :attr:`self._parse_keywords
+        <pcapkit.foundation.traceflow.traceflow.TraceFlow._parse_keywords>`, as
+        an engine's TCP reassembler does (:issue:`2946`).
 
         """
         if not self._analyze:
@@ -490,7 +500,9 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         from pcapkit.foundation.reassembly.tcp.reassembly import TCP as TCP_Reassembly
 
         self._reasm_packet = Reasm_Packet
-        return TCP_Reassembly(strict=False)
+        reassembly = TCP_Reassembly(strict=False)
+        reassembly._parse_keywords = dict(self._parse_keywords)
+        return reassembly
 
     def _make_segment(self, packet: 'Packet[_AT]') -> 'Any':
         """Describe a traced packet the way the reassembler expects a segment.

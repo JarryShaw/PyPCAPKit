@@ -88,10 +88,10 @@ class TestPCAPNGRoundTrip(unittest.TestCase):
         from pcapkit.foundation.engines.pcapng import Context
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        section = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
+        section = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
         context = Context(section.info)  # type: Any
-        interface = PCAPNG(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
-                           block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
+        interface = PCAPNG.from_fields(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
+                                       block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
         context.interfaces.append(interface.info)
         return context
 
@@ -114,9 +114,9 @@ class TestPCAPNGRoundTrip(unittest.TestCase):
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        block = PCAPNG(num=2, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
-                       block={'linktype': 1, 'snaplen': 65535,
-                              'options': [(OptionType.if_name, {'name': 'eth0'})]})
+        block = PCAPNG.from_fields(num=2, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
+                                   block={'linktype': 1, 'snaplen': 65535,
+                                          'options': [(OptionType.if_name, {'name': 'eth0'})]})
         self.assertEqual(block.info.options[OptionType.if_name].name, 'eth0')
         self.assertEqual(self._rebuild(block.data), block.data)
 
@@ -128,10 +128,10 @@ class TestPCAPNGRoundTrip(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaisesRegex(ProtocolError, r'\[if_name\] option must be only one, not 2'):
-            PCAPNG(num=2, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
-                   block={'linktype': 1, 'snaplen': 65535,
-                          'options': [(OptionType.if_name, {'name': 'eth0'}),
-                                      (OptionType.if_name, {'name': 'eth1'})]})
+            PCAPNG.from_fields(num=2, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
+                               block={'linktype': 1, 'snaplen': 65535,
+                                      'options': [(OptionType.if_name, {'name': 'eth0'}),
+                                                  (OptionType.if_name, {'name': 'eth1'})]})
 
     def test_if_ipv6addr_is_seventeen_octets(self) -> None:
         """#1268: ``if_IPv6addr`` declares the 17 octets it carries."""
@@ -139,9 +139,9 @@ class TestPCAPNGRoundTrip(unittest.TestCase):
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        block = PCAPNG(num=2, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
-                       block={'linktype': 1, 'snaplen': 65535,
-                              'options': [(OptionType.if_IPv6addr, {'interface': '2001:db8::1/64'})]})
+        block = PCAPNG.from_fields(num=2, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
+                                   block={'linktype': 1, 'snaplen': 65535,
+                                          'options': [(OptionType.if_IPv6addr, {'interface': '2001:db8::1/64'})]})
         # 20 octets of block (16 before the options), a 4-octet option header, 17 octets of value and
         # 3 of padding
         self.assertEqual(len(block.data), 44)

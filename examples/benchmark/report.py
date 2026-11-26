@@ -33,6 +33,10 @@ So the two tables are not two formattings of one result and neither replaces the
 other. The ratio table pools every interpreter and answers a question about engines;
 the per-version table separates them and answers a question about interpreters.
 
+:func:`render_markdown` and :func:`render_versions_markdown` give both tables again as
+GitHub Flavored Markdown, for a page GitHub renders, where reStructuredText shows as
+its source (#3054).
+
 **Why the spread is reported.** A single pass cannot distinguish a real difference
 between two engines from the machine having been briefly busy. So the whole set is
 measured several times and each row carries the range actually observed. Rows
@@ -68,8 +72,9 @@ if TYPE_CHECKING:
     from typing import Any, Iterable, Optional, Sequence
 
 __all__ = ['Row', 'absolutes_by_version', 'baseline_absolutes', 'collect', 'overlapping',
-           'python_series', 'render_rst', 'render_text', 'render_versions_rst',
-           'unmeasured_by_version', 'version_columns']
+           'python_series', 'render_markdown', 'render_rst', 'render_text',
+           'render_versions_markdown', 'render_versions_rst', 'unmeasured_by_version',
+           'version_columns']
 
 #: Engine name reported for ``pcapkit``'s own parser. ``pcapkit.extract`` accepts
 #: ``'default'``; the documentation calls it ``pcapkit``, and that is the
@@ -118,6 +123,10 @@ DEFAULT_RUNNER = 'examples/benchmark/benchmark.py'
 #: the backslashes it had just inserted.
 RST_SPECIAL = ('\\', '`', '*', '_', '|', '[', ']')
 
+#: The same for GitHub Flavored Markdown, where ``<`` opens HTML and ``&`` an entity,
+#: and ``|`` ends a table cell. See :func:`_escape_markdown`.
+MARKDOWN_SPECIAL = ('\\', '`', '*', '_', '|', '[', ']', '<', '>', '~', '&')
+
 
 def _escape(text: 'str') -> 'str':
     """Neutralise reStructuredText markup in text that came from elsewhere.
@@ -160,6 +169,28 @@ def _escape(text: 'str') -> 'str':
     if text.endswith(':'):
         text = text[:-1] + '\\:'
     return text
+
+
+def _escape_markdown(text: 'str') -> 'str':
+    """Neutralise GitHub Flavored Markdown in text that came from elsewhere.
+
+    :func:`_escape`'s twin for :func:`render_markdown` and
+    :func:`render_versions_markdown`, whose notes carry the same outside reasons:
+    ``**kwargs`` would open emphasis, ``<none>`` would be read as HTML, and a ``|``
+    would end a table cell early. A newline would end the note's list item, so the
+    text is put on one line.
+
+    Args:
+        text: Prose from outside this module.
+
+    Returns:
+        The same prose on one line, markup characters backslash-escaped, which GitHub
+        removes on rendering.
+
+    """
+    for char in MARKDOWN_SPECIAL:
+        text = text.replace(char, '\\' + char)
+    return ' '.join(text.split())
 
 
 def _wrap(text: 'str', initial: 'str' = '', subsequent: 'str' = '') -> 'list[str]':
@@ -768,6 +799,26 @@ def _simple_table(headers: 'Sequence[str]', body: 'Sequence[Sequence[str]]',
     return lines
 
 
+def _markdown_table(headers: 'Sequence[str]', body: 'Sequence[Sequence[str]]') -> 'list[str]':
+    """Render a GitHub Flavored Markdown pipe table, its figure columns right-aligned.
+
+    Every cell is this module's own markup, so none holds a ``|``; outside text goes
+    in the notes below a table, through :func:`_escape_markdown`.
+
+    Args:
+        headers: Column headings.
+        body: Rows of cells, all the same length as *headers*.
+
+    Returns:
+        The table's lines.
+
+    """
+    def line(cells: 'Sequence[str]') -> 'str':
+        return '| ' + ' | '.join(cells) + ' |'
+
+    return [line(headers), line(['---'] + ['--:'] * (len(headers) - 1)), *map(line, body)]
+
+
 def _image_pairs(documents: 'Sequence[dict[str, Any]]',
                  image: 'Optional[str]') -> 'list[tuple[str, str]]':
     """The image each interpreter's figures came out of, as label/value pairs.
@@ -1274,6 +1325,156 @@ def render_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
     return '\n'.join(lines).rstrip() + '\n'
 
 
+def _markdown_notes(documents: 'Sequence[dict[str, Any]]',
+                    missing: 'Sequence[tuple[str, str]]') -> 'list[str]':
+    """A note per version the run could not measure in full, for the Markdown tables.
+
+    Args:
+        documents: One :mod:`benchmark` document per environment.
+        missing: ``(version, reason)`` pairs for versions whose build or run failed.
+
+    Returns:
+        One list item each, the reason escaped.
+
+    """
+    return [f'- {label}: {_escape_markdown(reason)}'
+            for label, reason in _missing_pairs(documents, missing)]
+
+
+def render_versions_markdown(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
+                             missing: 'Sequence[tuple[str, str]]' = (),
+                             emulated: 'Optional[str]' = None) -> 'str':
+    """Render :func:`render_versions_rst`'s table as GitHub Flavored Markdown.
+
+    For a page GitHub renders, such as the benchmark workflow's job summary, where
+    reStructuredText shows as its source (#3054). The figures and gaps are the
+    reStructuredText's, with a note below the table for each footnote; the
+    longer prose stays in the reStructuredText, which the workflow folds beneath.
+
+    Args:
+        rows: The table's rows, from :func:`collect`, for their order.
+        documents: One :mod:`benchmark` document per environment.
+        missing: ``(version, reason)`` pairs for versions whose build or run failed.
+        emulated: Description of the emulation in play, or :data:`None`.
+
+    Returns:
+        Markdown, under a ``###`` heading.
+
+    """
+    first = _ordered(documents)[0]
+    columns = version_columns(documents, missing)
+    grid = absolutes_by_version(documents)
+    reasons = unmeasured_by_version(documents)
+    measured_series = {python_series(document) for document in documents}
+    absent = {version for version, _ in missing if version not in measured_series}
+
+    notes = _markdown_notes(documents, missing)
+    body = []  # type: list[list[str]]
+    for row in rows:
+        by_series = grid.get(row.engine, {})
+        # As in the reStructuredText: a gap under a version that produced nothing is
+        # that version's note, not the engine's.
+        by_reason = {}  # type: dict[str, list[str]]
+        for series in columns:
+            if series not in by_series and series not in absent:
+                reason = reasons.get(row.engine, {}).get(series, 'no reason recorded')
+                by_reason.setdefault(reason, []).append(series)
+        notes.extend(f'- `{row.label}` not measured on {", ".join(series_list)}: '
+                     f'{_escape_markdown(reason)}' for reason, series_list in by_reason.items())
+        cells = [f'`{row.label}`']
+        for series in columns:
+            values = by_series.get(series)
+            cells.append(_fixed(statistics.median(values)) if values else '--')
+        body.append(cells)
+
+    lines = ['### Test Results', '',
+             f"Milliseconds per packet, the median of {first['repeats']} passes. The columns "
+             'come from one run on one machine, so they compare with each other and with no '
+             'other machine. A `--` cell was attempted and not measured; it is not a zero.', '']
+    lines.extend(_markdown_table(['Engine', *columns], body))
+    lines.append('')
+    lines.extend(notes)
+    if emulated:
+        lines.extend(['', f'**{_escape_markdown(emulated)}** Timings taken under emulation are '
+                          'not comparable with native ones. Re-run natively before publishing.'])
+    return '\n'.join(lines).rstrip() + '\n'
+
+
+def render_markdown(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
+                    missing: 'Sequence[tuple[str, str]]' = (),
+                    emulated: 'Optional[str]' = None) -> 'str':
+    """Render :func:`render_rst`'s ratio table as GitHub Flavored Markdown.
+
+    :func:`render_versions_markdown`'s twin, for the same pages. The provenance block
+    stays in the reStructuredText. A row carries the plain-text report's marks,
+    :data:`OVERLAP_MARK` and :data:`PARTIAL_MARK`, in place of its footnotes, and the
+    notes below the table explain them.
+
+    Args:
+        rows: The table's rows, from :func:`collect`.
+        documents: One :mod:`benchmark` document per environment.
+        missing: ``(version, reason)`` pairs for Python versions that produced no
+            measurements, noted so the table does not read as the complete matrix.
+        emulated: Description of the emulation in play, or :data:`None`.
+
+    Returns:
+        Markdown, under a ``###`` heading.
+
+    """
+    marked = overlapping(rows)
+    spreads = [row.spread for row in rows if row.measured and len(row.ratios) > 1]
+    notes = []  # type: list[str]
+    if marked and spreads:
+        notes.append(f"- {OVERLAP_MARK} These rows' observed ranges overlap, so the order "
+                     'their medians suggest is not established.')
+    elif marked:
+        notes.append(f'- {OVERLAP_MARK} Measured on a single pass, so no gap between rows '
+                     'is established.')
+    body = []  # type: list[list[str]]
+    for row in rows:
+        name = f'`{row.label}`'
+        if not row.measured:
+            body.append([name, '*not measured*', '--', '0'])
+            notes.append(f'- `{row.label}` not measured: {_escape_markdown(row.reason)}')
+            continue
+        if row.engine == BASELINE:
+            relative, observed = '1', '*baseline*'
+        else:
+            relative = _significant(row.median)
+            observed = (_range(row.low, row.high)
+                        if len(row.ratios) > 1 else '*single pass*')
+        if row.engine in marked:
+            name += f' {OVERLAP_MARK}'
+        if row.partial:
+            name += f' {PARTIAL_MARK}'
+            detail = [f'{row.discarded} extraction(s) discarded'] if row.discarded else []
+            detail.extend(_escape_markdown(failure) for failure in row.failures)
+            notes.append(f'- {PARTIAL_MARK} `{row.label}` rests on less evidence than the '
+                         f'rows beside it: {"; ".join(detail)}')
+        body.append([name, relative, observed, str(len(row.ratios))])
+    notes.extend(_markdown_notes(documents, missing))
+
+    lines = ['### Test Results (Relative)', '',
+             f'Times relative to `{BASELINE_LABEL}`, which is 1 by definition; lower is faster. '
+             'Each ratio is taken against the baseline measured in the same environment on the '
+             'same pass, and "Observed range" is the smallest and largest seen across the '
+             'passes.', '']
+    lines.extend(_markdown_table(['Engine', 'Relative time', 'Observed range', 'Samples'], body))
+    lines.append('')
+    absolutes = baseline_absolutes(documents)
+    if absolutes:
+        median = _significant(statistics.median(absolutes), 4)
+        spread = (f'{_range(min(absolutes), max(absolutes))} across {len(absolutes)} passes'
+                  if len(absolutes) > 1 else 'one pass only')
+        lines.extend([f'`{BASELINE_LABEL}` itself ran at **{median} ms per packet** on this '
+                      f'run ({spread}), which converts the ratios back to times.', ''])
+    lines.extend(notes)
+    if emulated:
+        lines.extend(['', f'**{_escape_markdown(emulated)}** Timings taken under emulation are '
+                          'not comparable with native ones. Re-run natively before publishing.'])
+    return '\n'.join(lines).rstrip() + '\n'
+
+
 def render_text(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
                 image: 'Optional[str]' = None,
                 emulated: 'Optional[str]' = None,
@@ -1438,6 +1639,10 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
                         help='also write just the ratio RST snippet here')
     parser.add_argument('--versions-rst-out', default=None,
                         help='also write just the per-version absolute RST snippet here')
+    parser.add_argument('--md-out', default=None,
+                        help='also write the ratio table as GitHub Flavored Markdown here')
+    parser.add_argument('--versions-md-out', default=None,
+                        help='also write the per-version table as GitHub Flavored Markdown here')
     args = parser.parse_args(argv)
 
     missing = []  # type: list[tuple[str, str]]
@@ -1474,6 +1679,14 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
     print(versions_snippet)
     print(snippet)
 
+    # The Markdown first: benchmark.yml writes its report once `--rst-out`'s file
+    # exists, so that file is written last.
+    if args.versions_md_out:
+        with open(args.versions_md_out, 'w', encoding='utf-8') as file:
+            file.write(render_versions_markdown(rows, documents, missing, args.emulated))
+    if args.md_out:
+        with open(args.md_out, 'w', encoding='utf-8') as file:
+            file.write(render_markdown(rows, documents, missing, args.emulated))
     if args.versions_rst_out:
         with open(args.versions_rst_out, 'w', encoding='utf-8') as file:
             file.write(versions_snippet)

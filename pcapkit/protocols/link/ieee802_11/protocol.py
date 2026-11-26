@@ -186,7 +186,7 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
         hdr_len = _header_length(layout(frame_control))
         return self._decode_next_layer(ieee802_11, -1, max(0, length - hdr_len))
 
-    def make(self,
+    def make(self, *,
              type: 'Enum_Type | int' = Enum_Type.Data,  # pylint: disable=redefined-builtin
              subtype: 'Subtype | int' = 0,
              version: 'Literal[0]' = 0,

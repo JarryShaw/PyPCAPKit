@@ -133,6 +133,7 @@ from typing import TYPE_CHECKING, Generic, cast, overload
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.schema.extlen import ext_len_to_octets
+from pcapkit.corekit.sentinels import NO_VALUE, NoValueType
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.protocols.internet.ipv6_ext.data import IPv6_Ext as Data_IPv6_Ext
 from pcapkit.protocols.internet.ipv6_ext.schema import IPv6_Ext as Schema_IPv6_Ext
@@ -143,10 +144,11 @@ from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, stackle
 from pcapkit.utilities.warnings import SchemaWarning, warn
 
 if TYPE_CHECKING:
-    from typing import IO, Any, NoReturn, Optional, Protocol
+    from typing import IO, Any, Iterable, Mapping, NoReturn, Optional, Protocol, Type
 
     from typing_extensions import Literal
 
+    from pcapkit.corekit.context import ContextRegistry, ProtocolContext
     from pcapkit.corekit.protochain import ProtoChain
 
     class _NextHeaderData(Protocol):
@@ -502,7 +504,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         if extension:
             # NOTE: As an IPv6 extension header the upper layer belongs to the enclosing
             # IPv6 header, so hold NoPayload here so that membership does not raise (#2487).
-            self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
+            self._next = NoPayload.from_fields()  # pylint: disable=attribute-defined-outside-init
             return cast('_PT', generic_ext)
         return self._decode_next_layer(cast('_PT', generic_ext), next_header, length - ext_len,
                                        payload=rest[max(ext_len - 2, 0):])
@@ -534,16 +536,14 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
                 or code that does not fit in one octet.
 
         Note:
-            **Declared, and keyword-only**, each for its own reason.
-
             These keywords stay *declared*, unlike :meth:`read`'s own,
             because ``_check_construction_keywords()`` builds its allowlist
             from the :func:`inspect.signature` of ``make`` and the other
             construction methods of every class in the MRO, plus any
             ``__keywords__``. Hiding them in ``**kwargs`` **breaks
             construction**: a plain
-            ``IPv6_Ext(next=..., len=..., data=..., payload=...)`` raises
-            ``UnsupportedCall: IPv6_Ext: unexpected keyword(s)``. The
+            ``IPv6_Ext.from_fields(next=..., len=..., data=..., payload=...)``
+            raises ``UnexpectedKeyword: IPv6_Ext: unexpected keyword(s)``. The
             ``__keywords__`` escape hatch would cover that too, but a set
             there is unioned down the MRO, so every subclass would accept
             these names and drop them. A ``make`` signature can be kept from
@@ -553,21 +553,8 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             so a subclass that overrides ``make`` accepts ``len`` or ``data``
             only where its own ``make`` declares it (:issue:`2286`).
 
-            They are keyword-*only* because this class is also a base and each
-            subclass's ``make`` puts different names in the same positions. As
-            positional parameters they draw pylint ``arguments-renamed``
-            warnings (:meth:`ESP.make <pcapkit.protocols.internet.esp.protocol.ESP.make>` has ``spi``, ``seq`` and
-            ``next`` where these have ``next``, ``len`` and ``data``) and mypy
-            ``[override]`` errors. With no positional parameters there is no
-            position to disagree about, and the allowlist is unaffected because
-            :func:`~pcapkit.protocols.protocol._declared_keywords` collects ``KEYWORD_ONLY``
-            parameters too.
-            Nothing calls a protocol's ``make`` positionally; ``__init__``
-            spreads ``**kwargs`` into it.
-
             ``read`` needs none of this for ``error``: it arrives on the
-            *parse* path alone, which ``__init__`` exempts from the
-            construction check. ``alias`` arrives on a rebuild too, from
+            *parse* path alone, which has no construction check. ``alias`` arrives on a rebuild too, from
             :meth:`_make_data`, so this class lists it in
             :attr:`~pcapkit.protocols.protocol.Protocol.__keywords__`
             (:issue:`2768`).
@@ -591,6 +578,58 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
     ##########################################################################
     # Data models.
     ##########################################################################
+
+    @overload  # pragma: no cover
+    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., /, *,
+                 extension: 'bool' = ...,
+                 layer: 'Optional[str]' = ...,
+                 protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = ...,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                 ) -> 'None': ...
+    @overload  # pragma: no cover
+    def __init__(self, *, extension: 'bool' = ...,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                 **fields: 'Any') -> 'None': ...
+
+    # NOTE: The ignore is the one on ``Protocol.__init__``, for ``**fields`` against ``/`` (#3081).
+    def __init__(self, file: 'IO[bytes] | bytes | NoValueType' = NO_VALUE,  # type: ignore[misc] # pylint: disable=super-init-not-called
+                 length: 'Optional[int]' = None, /, *,
+                 extension: 'bool' = False,
+                 layer: 'Optional[str]' = None,
+                 protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                 **fields: 'Any') -> 'None':
+        """Parse a protocol instance from its octets, or construct one from its fields.
+
+        Args:
+            file: Source packet stream; omitted to construct.
+            length: Length of packet data.
+            extension: If the protocol is used as an IPv6 extension header. As
+                the next layer of an IP header, the one that header hands on.
+            layer: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            protocol: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            context: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            **fields: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+
+        .. versionchanged:: 1.8.0
+
+           Declares ``extension``, its only parse keyword besides the stops
+           and the context; the enclosing IP version reaches it from the layer
+           carrying it alone (:issue:`2840`).
+
+        """
+        if isinstance(file, NoValueType):
+            fields['extension'] = extension
+            self._construct(context, self._call_fields(length, layer, protocol, fields))
+            return
+        # NOTE: ``_parse``, inline, so a parse adds no frame per layer (#1610).
+        keywords = self._start_parse(file, layer, protocol, context, {'extension': extension}, fields)
+        self.__post_init__(file, length, **keywords)
+        self._info.__update__(packet=self.packet.payload)
 
     @overload
     def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ

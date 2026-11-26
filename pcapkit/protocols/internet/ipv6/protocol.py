@@ -77,6 +77,10 @@ _VERIFY_UPPER: 'ModuleDescriptor[Any]' = \
 #: there for the same reason.
 _IPV6_EXT: 'ModuleDescriptor[Any]' = \
     ModuleDescriptor('pcapkit.protocols.internet.ipv6_ext.protocol', 'IPv6_Ext')
+#: The Fragment header, whose stop :meth:`IPv6._stops_next_layer` also meets,
+#: resolved there for the same reason.
+_IPV6_FRAG: 'ModuleDescriptor[Any]' = \
+    ModuleDescriptor('pcapkit.protocols.internet.ipv6_frag.protocol', 'IPv6_Frag')
 
 
 class IPv6(IP[Data_IPv6, Schema_IPv6],
@@ -122,6 +126,13 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
          arguments of :meth:`make`; resolve a name with
          :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
          (:issue:`2594`).
+
+    .. versionchanged:: 1.8.0
+
+       A ``protocol=`` stop at an extension header the walk parses, by name or
+       by class, ends the walk there, and the rest of the packet is the
+       :class:`~pcapkit.protocols.misc.raw.protocol.Raw` upper layer, as at a
+       stop at this layer (:issue:`3067`).
 
     """
 
@@ -265,7 +276,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
         return self._decode_next_layer(ipv6, schema.next, extent, packet=__packet__)  # pylint: disable=no-member
 
-    def make(self,
+    def make(self, *,
              traffic_class: 'int' = 0,
              flow_label: 'int' = 0,
              next: 'Enum_TransType | int' = Enum_TransType.UDP,
@@ -615,6 +626,12 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
                     opaque = True
                     break
 
+            # NOTE: A stop met at this header keeps the rest as the raw upper layer, as one met at
+            # this layer does, so the frame ends where ``analyze`` does (#3067).
+            if next_._sigterm:  # pylint: disable=protected-access
+                self._sigterm = True
+                break
+
         # record real header & payload length (headers exclude)
         ipv6.__update__({
             'hdr_len': hdr_len if split is None else split[0],
@@ -757,4 +774,23 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         protocol, extra = self._next_layer_class(proto, file_, length, extension)
         return self._parse_next_layer(protocol, file_, length, version=version, extension=extension,
                                       alias=proto, packet=packet, layer=self._exlayer,
-                                      protocol=self._exproto, __context__=self._exctx, **extra)
+                                      protocol=self._exproto, context=self._exctx, **extra)
+
+    @classmethod
+    def _stops_next_layer(cls, kwargs: 'dict[str, Any]') -> 'bool':
+        """Whether :meth:`analyze` keeps a payload given ``kwargs`` raw.
+
+        Arguments:
+            kwargs: keyword arguments of the parse, as for
+                :meth:`Protocol._stops_next_layer
+                <pcapkit.protocols.protocol.Protocol._stops_next_layer>`
+
+        Returns:
+            Whether the parse stops at this class or at
+            :class:`~pcapkit.protocols.internet.ipv6_frag.protocol.IPv6_Frag`: a
+            reassembled payload, which :meth:`analyze` parses, is the next layer
+            of its Fragment header (:issue:`2945`).
+
+        """
+        # pylint: disable-next=protected-access
+        return super()._stops_next_layer(kwargs) or _IPV6_FRAG.klass._stops_next_layer(kwargs)

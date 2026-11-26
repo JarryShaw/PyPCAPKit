@@ -40,7 +40,7 @@ moves two octets on (:rfc:`1035#section-4.2.2`, :rfc:`7766#section-8`).
 
 """
 import collections
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.dns.opcode import Opcode as Enum_Opcode
 from pcapkit.const.dns.option import Option as Enum_Option
@@ -50,6 +50,7 @@ from pcapkit.const.dns.rr_type import RRType as Enum_RRType
 from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
+from pcapkit.corekit.sentinels import NO_VALUE, NoValueType
 from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.application.dns.const import HEADER_LENGTH
 from pcapkit.protocols.application.dns.data import AAAA as Data_AAAA
@@ -81,12 +82,13 @@ from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, Callable, DefaultDict, Iterable, Mapping, Optional, Union
+    from typing import IO, Any, Callable, DefaultDict, Iterable, Mapping, Optional, Type, Union
 
     from mypy_extensions import NamedArg
     from typing_extensions import Literal
 
     from pcapkit.const.reg.apptype.udp import UDP as AppType_UDP
+    from pcapkit.corekit.context import ContextRegistry, ProtocolContext
     from pcapkit.protocols.application.dns.data import OptionData as Data_OptionData
     from pcapkit.protocols.application.dns.data import RData as Data_RData
     from pcapkit.protocols.protocol import ProtocolBase
@@ -445,7 +447,7 @@ class DNS(Application[Data_DNS, Schema_DNS], schema=Schema_DNS, data=Data_DNS):
         rest = (len(self._data) if length is None else length) - self._length
         return self._decode_next_layer(dns, -1, rest)
 
-    def make(self,  # pylint: disable=redefined-builtin
+    def make(self, *,  # pylint: disable=redefined-builtin
              id: 'int' = 0,
              qr: 'bool' = False,
              opcode: 'Enum_Opcode | int' = Enum_Opcode.Query,
@@ -633,6 +635,60 @@ class DNS(Application[Data_DNS, Schema_DNS], schema=Schema_DNS, data=Data_DNS):
 
         """
         return int(_UDP.klass.domain)  # type: ignore[call-overload]
+
+    @overload  # pragma: no cover
+    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., /, *,
+                 framed: 'Optional[bool]' = ...,
+                 layer: 'Optional[str]' = ...,
+                 protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = ...,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                 ) -> 'None': ...
+    @overload  # pragma: no cover
+    def __init__(self, *, framed: 'Optional[bool]' = ...,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                 **fields: 'Any') -> 'None': ...
+
+    # NOTE: The ignore is the one on ``Protocol.__init__``, for ``**fields`` against ``/`` (#3081).
+    def __init__(self, file: 'IO[bytes] | bytes | NoValueType' = NO_VALUE,  # type: ignore[misc] # pylint: disable=super-init-not-called
+                 length: 'Optional[int]' = None, /, *,
+                 framed: 'Optional[bool]' = None,
+                 layer: 'Optional[str]' = None,
+                 protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                 **fields: 'Any') -> 'None':
+        """Parse a protocol instance from its octets, or construct one from its fields.
+
+        Args:
+            file: Source packet stream; omitted to construct.
+            length: Length of packet data.
+            framed: Whether the TCP length field precedes the message. When
+                :obj:`None`, it does where :func:`_frames_message` finds a whole
+                message behind a length field that reads better than the octets
+                as a plain one, which is how a TCP segment carries one.
+            layer: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            protocol: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            context: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            **fields: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+
+        .. versionchanged:: 1.8.0
+
+           Declares ``framed``, its only parse keyword besides the stops and
+           the context (:issue:`2840`).
+
+        """
+        if isinstance(file, NoValueType):
+            if framed is not None:
+                fields['framed'] = framed
+            self._construct(context, self._call_fields(length, layer, protocol, fields))
+            return
+        # NOTE: ``_parse``, inline, so a parse adds no frame per layer (#1610).
+        keywords = self._start_parse(file, layer, protocol, context, {'framed': framed}, fields)
+        self.__post_init__(file, length, **keywords)
+        self._info.__update__(packet=self.packet.payload)
 
     def __post_init__(self, file: 'Optional[Any]' = None, length: 'Optional[int]' = None,
                       **kwargs: 'Any') -> 'None':
@@ -1754,4 +1810,4 @@ class DNS(Application[Data_DNS, Schema_DNS], schema=Schema_DNS, data=Data_DNS):
         file_ = self._get_payload()
         return self._parse_next_layer(type(self), file_, len(file_) if length is None else length,
                                       alias=proto, packet=packet, layer=self._exlayer,
-                                      protocol=self._exproto, __context__=self._exctx, framed=True)
+                                      protocol=self._exproto, context=self._exctx, framed=True)

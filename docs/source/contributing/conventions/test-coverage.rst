@@ -125,13 +125,14 @@ Raising Coverage
 A test that also passes on the unfixed tree cannot tell the fix from its absence, so it
 pins nothing. Before opening the pull request, take the fix out, run the new test, put
 the fix back, and say in the pull request that you did. Diff the committed fix from the
-merge base, with three dots: a two-dot ``git diff origin/main`` also carries the commits
-``origin/main`` has and the branch lacks, as reverse deltas, and reverse-applying it
-undoes that work in the tree.
+merge base, with three dots, against ``origin/<base>``: the branch the pull request
+targets, ``develop`` or, for a released-line fix, ``main``. A two-dot
+``git diff origin/<base>`` also carries the commits ``origin/<base>`` has and the branch
+lacks, as reverse deltas, and reverse-applying it undoes that work in the tree.
 
 .. code-block:: shell
 
-   git diff origin/main...HEAD -- pcapkit/ > /tmp/fix.diff
+   git diff origin/<base>...HEAD -- pcapkit/ > /tmp/fix.diff
    git apply -R /tmp/fix.diff
    python -m pytest tests/<path>/test_<name>_unit.py -q    # must fail
    git apply /tmp/fix.diff

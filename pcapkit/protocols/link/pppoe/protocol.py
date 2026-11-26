@@ -172,7 +172,7 @@ class PPPoE(Link[Data_PPPoE, Schema_PPPoE],
             return self._decode_next_layer(pppoe, Enum_EtherType.Point_to_Point_Protocol, schema.length)
         return self._decode_next_layer(pppoe, -1, 0)
 
-    def make(self,
+    def make(self, *,
              code: 'Enum_Code | int' = Enum_Code.PPP_Session_Stage,
              session_id: 'int' = 0,
              payload_length: 'Optional[int]' = None,

@@ -158,8 +158,8 @@ class HIPR1CounterWidthTests(unittest.TestCase):
         from pcapkit.protocols.internet.hip.protocol import HIP
 
         counter = 0x0123456789abcdef
-        built = HIP(parameters=[(Parameter.R1_COUNTER, {'counter': counter})],
-                    extension=True, version=2, **HIP_BASE)
+        built = HIP.from_fields(parameters=[(Parameter.R1_COUNTER, {'counter': counter})],
+                                extension=True, version=2, **HIP_BASE)
         octets = built.data
         parsed = HIP(octets, len(octets), extension=True)
 

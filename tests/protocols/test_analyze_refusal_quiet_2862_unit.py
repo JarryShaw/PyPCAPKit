@@ -76,12 +76,20 @@ def _ports() -> 'tuple[Any, Any]':
     return AppType_TCP.get(SPORT), AppType_TCP.get(DPORT)
 
 
+class FromParent:
+    """A stand-in next layer, which the library builds through ``_from_parent`` (#2840)."""
+
+    @classmethod
+    def _from_parent(cls, file: 'Any', length: int, extra: 'Any' = None, /, **kwargs: 'Any') -> 'Any':
+        return cls(file, length, **(extra or {}), **kwargs)  # type: ignore[call-arg]
+
+
 def _layer(refuse: bool) -> type:
     """A stand-in next layer that warns, then refuses its octets if ``refuse``."""
     from pcapkit.utilities.exceptions import ProtocolError
     from pcapkit.utilities.warnings import ProtocolWarning, warn
 
-    class Layer:
+    class Layer(FromParent):
         def __init__(self, file: 'Any', length: int, **kwargs: 'Any') -> None:
             warn('stand-in warning', ProtocolWarning)
             if refuse:
@@ -96,11 +104,11 @@ def _carrier() -> type:
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.utilities.warnings import ProtocolWarning, warn
 
-    class Inner:
+    class Inner(FromParent):
         def __init__(self, file: 'Any', length: int, **kwargs: 'Any') -> None:
             warn('inner', ProtocolWarning)
 
-    class Carrier:
+    class Carrier(FromParent):
         def __init__(self, file: 'Any', length: int, **kwargs: 'Any') -> None:
             warn('outer-1', ProtocolWarning)
             self.data = file.read(length)
@@ -113,7 +121,7 @@ def _carrier() -> type:
 def _broken() -> type:
     """A stand-in next layer that fails with an error other than a refusal."""
 
-    class Broken:
+    class Broken(FromParent):
         def __init__(self, file: 'Any', length: int, **kwargs: 'Any') -> None:
             raise ValueError('stand-in bug')
 

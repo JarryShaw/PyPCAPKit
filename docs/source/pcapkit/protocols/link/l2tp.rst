@@ -40,11 +40,13 @@ layout on all.
    .. rubric:: Data Models
 
    .. automethod:: __index__
+   .. automethod:: __init__
    .. automethod:: __new__
 
    .. rubric:: Utilities
 
    .. automethod:: _member_of_version
+   .. automethod:: _construction_member
 
 Versions Not Implemented
 ------------------------
@@ -70,9 +72,10 @@ since callers take element zero as canonical.
 Version Dispatch
 ----------------
 
-Constructing the base gives the member its ``version`` field names, from octets or
-from fields; without it, octets give the one their version nibble names, and fields
-are refused, since no field picks a member (:issue:`2574`).
+Parsing octets through the base, or building it from fields, gives the
+member its ``version`` keyword names; without it, octets give the one their version
+nibble names, and fields are refused, since no field picks a member (:issue:`2574`).
+Parsing a member, ``version`` must be its own (:issue:`2840`).
 :meth:`~pcapkit.protocols.link.l2tp.protocol.L2TP._member_of_version` maps ``2`` to
 :class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2` and refuses any other version, for
 that field, for the nibble and for the data

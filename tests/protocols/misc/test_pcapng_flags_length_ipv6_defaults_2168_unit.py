@@ -62,9 +62,9 @@ class TestPCAPNGIPv6MakeDefaults(PCAPNGTestCase):
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         context = self._context()
-        block = PCAPNG(num=2, sct=1, ctx=context, type=BlockType.Name_Resolution_Block,
-                       block={'records': [(RecordType.nrb_record_ipv6, {'names': ['a']}),
-                                          (RecordType.nrb_record_end, {})]})
+        block = PCAPNG.from_fields(num=2, sct=1, ctx=context, type=BlockType.Name_Resolution_Block,
+                                   block={'records': [(RecordType.nrb_record_ipv6, {'names': ['a']}),
+                                                      (RecordType.nrb_record_end, {})]})
         record = self._parse(block.data, context).info.records[RecordType.nrb_record_ipv6]
         self.assertEqual(record.ip, IPv6Address('::1'))
         self.assertRebuilds(block.data, context)
@@ -78,11 +78,11 @@ class TestPCAPNGIPv6MakeDefaults(PCAPNGTestCase):
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         context = self._context()
-        block = PCAPNG(num=2, sct=1, ctx=context, type=BlockType.Name_Resolution_Block,
-                       block={'records': [(RecordType.nrb_record_ipv4, {'names': ['a']}),
-                                          (RecordType.nrb_record_end, {})],
-                              'options': [(OptionType.ns_dnsIP6addr, {}),
-                                          (OptionType.opt_endofopt, {})]})
+        block = PCAPNG.from_fields(num=2, sct=1, ctx=context, type=BlockType.Name_Resolution_Block,
+                                   block={'records': [(RecordType.nrb_record_ipv4, {'names': ['a']}),
+                                                      (RecordType.nrb_record_end, {})],
+                                          'options': [(OptionType.ns_dnsIP6addr, {}),
+                                                      (OptionType.opt_endofopt, {})]})
         option = self._parse(block.data, context).info.options[OptionType.ns_dnsIP6addr]
         self.assertEqual(option.ip, IPv6Address('2001:4860:4860::8888'))
         self.assertRebuilds(block.data, context)

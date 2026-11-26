@@ -174,7 +174,7 @@ class TCPMPTCPUnknownLengthUnitTests(unittest.TestCase):
         from pcapkit.const.tcp.option import Option as Enum_Option
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        tcp = TCP(options=[(Enum_Option.Multipath_TCP, {
+        tcp = TCP.from_fields(options=[(Enum_Option.Multipath_TCP, {
             'subtype': Enum_MPTCPOption.Reserved_for_Private_Use,
             'data': b'',
         })], **TCP_BASE)  # type: ignore[arg-type]

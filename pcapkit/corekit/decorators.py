@@ -220,7 +220,7 @@ def beholder(
 
             # NOTE: ``alias=proto`` matches ``_import_next_layer``, so a failed parse still
             # reports the code it arrived with as ``Data_Raw.protocol`` (#418).
-            next_ = protocol(file_, length, error=str(exc), alias=proto)
+            next_ = protocol._from_parent(file_, length, error=str(exc), alias=proto)
             return cast('R_beholder', next_)
     return behold
 

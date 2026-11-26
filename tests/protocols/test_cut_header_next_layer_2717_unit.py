@@ -245,7 +245,7 @@ class DispatchingProtocolSweepTests(_Quiet):
             name = f'{klass.__module__}.{klass.__qualname__}'
             if name in NOT_A_HEADER_FIELD:
                 continue
-            whole = klass(**MAKE.get(name, {})).data
+            whole = klass.from_fields(**MAKE.get(name, {})).data
             with self.subTest(protocol=name, captured='whole'):
                 layer = klass(whole, len(whole))
                 self.assertIs(type(layer.payload), NoPayload)

@@ -99,21 +99,21 @@ class EnumerationFieldTests(unittest.TestCase):
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
         def dccp_option(code: 'Any', args: 'dict[str, Any]') -> 'bytes':
-            return DCCP(type=PacketType.DCCP_Ack, ack=1, checksum=b'\x00\x00', options=[(code, args)]).data
+            return DCCP.from_fields(type=PacketType.DCCP_Ack, ack=1, checksum=b'\x00\x00', options=[(code, args)]).data
 
         builders = {
-            'TCP._make_mode_chkreq': lambda: TCP(
+            'TCP._make_mode_chkreq': lambda: TCP.from_fields(
                 options=[(TCP_Option.TCP_Alternate_Checksum_Request, {'algorithm': value})]).data,
             # MP_PRIO takes an Address ID, and RFC 8684 section 3.3.8 an ACK.
-            'TCP._make_mode_mp': lambda: TCP(
+            'TCP._make_mode_mp': lambda: TCP.from_fields(
                 ack=True, options=[(TCP_Option.Multipath_TCP, {'subtype': value, 'addr_id': 1})]).data,
-            'DCCP.make': lambda: DCCP(**{'type': PacketType.DCCP_Reset, 'ack': 1, 'checksum': b'\x00\x00',
-                                         field.keyword: value}).data,
+            'DCCP.make': lambda: DCCP.from_fields(**{'type': PacketType.DCCP_Reset, 'ack': 1, 'checksum': b'\x00\x00',
+                                                     field.keyword: value}).data,
             'DCCP._make_opt_change': lambda: dccp_option(DCCP_Option.Change_L, {'feature': value, 'value': b'\x01'}),
             'DCCP._make_opt_confirm': lambda: dccp_option(DCCP_Option.Confirm_R, {'feature': value, 'value': b'\x01'}),
             'DCCP._make_opt_ack_vector': lambda: dccp_option(DCCP_Option.Ack_Vector_Nonce_0, {'vector': [(value, 3)]}),
             'DCCP._make_opt_data_dropped': lambda: dccp_option(DCCP_Option.Data_Dropped, {'vector': [(value, 2)]}),
-            'TCP._make_tcp_options': lambda: TCP(options=[(value, {})]).data,
+            'TCP._make_tcp_options': lambda: TCP.from_fields(options=[(value, {})]).data,
             'DCCP._make_dccp_options': lambda: dccp_option(value, {}),
         }
         return builders[field.maker]()
@@ -126,8 +126,8 @@ class EnumerationFieldTests(unittest.TestCase):
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
         if field.maker == 'TCP._make_tcp_options':
-            return TCP(options=options).data
-        return DCCP(type=PacketType.DCCP_Ack, ack=1, checksum=b'\x00\x00', options=options).data
+            return TCP.from_fields(options=options).data
+        return DCCP.from_fields(type=PacketType.DCCP_Ack, ack=1, checksum=b'\x00\x00', options=options).data
 
     def assertRefused(self, field: 'Field', value: 'Any', options: 'Any' = None) -> 'None':  # pylint: disable=invalid-name
         """Building ``value`` in ``field``, or the option list ``options``, raises the ``ProtocolError`` naming it."""

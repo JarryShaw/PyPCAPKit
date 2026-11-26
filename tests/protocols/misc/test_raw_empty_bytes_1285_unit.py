@@ -39,7 +39,7 @@ class TestRawEmptyBytes(unittest.TestCase):
 
         for payload in (b'', b'abc'):
             with self.subTest(payload=payload):
-                self.assertEqual(Raw(payload).data, Raw(packet=payload).data)
+                self.assertEqual(Raw(payload).data, Raw.from_fields(packet=payload).data)
 
 
 if __name__ == '__main__':

@@ -262,7 +262,7 @@ class IGMPRoundTripTests(unittest.TestCase):
         from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
-        made = IPv4(protocol=2, src='10.0.0.1', dst='224.0.0.1', payload=IGMPV3_REPORT)
+        made = IPv4.from_fields(protocol=2, src='10.0.0.1', dst='224.0.0.1', payload=IGMPV3_REPORT)
         packet = made.data
         parsed = IPv4(io.BytesIO(packet), len(packet))
 
@@ -291,7 +291,7 @@ class IGMPRoundTripTests(unittest.TestCase):
         from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
-        packet = IPv4(protocol=2, src='10.0.0.1', dst='224.0.0.1', payload=IGMPV3_QUERY).data
+        packet = IPv4.from_fields(protocol=2, src='10.0.0.1', dst='224.0.0.1', payload=IGMPV3_QUERY).data
         parsed = IPv4(io.BytesIO(packet), len(packet))
 
         self.assertIsInstance(parsed.payload, IGMPv3)
@@ -306,8 +306,8 @@ class IGMPRoundTripTests(unittest.TestCase):
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.protocols.misc.raw.protocol import Raw
 
-        packet = IPv4(protocol=2, src='10.0.0.1', dst='224.0.0.1',
-                      payload=IGMP_QUERY_10_OCTETS).data
+        packet = IPv4.from_fields(protocol=2, src='10.0.0.1', dst='224.0.0.1',
+                                  payload=IGMP_QUERY_10_OCTETS).data
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             parsed = IPv4(io.BytesIO(packet), len(packet))
@@ -733,7 +733,7 @@ class IGMPUnitTests(unittest.TestCase):
         for value, version in ((0, 'IGMPv1'), (255, 'IGMPv2')):
             with self.subTest(max_resp_time=value):
                 cls = igmp_class(version)
-                built = cls(type=0x11, max_resp_time=value)
+                built = cls.from_fields(type=0x11, max_resp_time=value)
                 packet = built.data
                 parsed = cls(io.BytesIO(packet), len(packet))
                 self.assertEqual(packet[1], value)
@@ -1165,7 +1165,7 @@ class IGMPv3TruncatedReportTests(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            outer = IPv4(protocol=2, src='10.0.0.1', dst='224.0.0.22', payload=packet).data
+            outer = IPv4.from_fields(protocol=2, src='10.0.0.1', dst='224.0.0.22', payload=packet).data
             cut = outer[:len(outer) - len(packet) + keep]
             parsed = IPv4(cut)
         return cut, parsed
@@ -1384,7 +1384,7 @@ class IGMPv3DirectCutTests(unittest.TestCase):
                                    ('report', IGMPV3_TWO_RECORD_REPORT, 30)):
             with self.subTest(name), warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                outer = IPv4(protocol=2, src='10.0.0.1', dst='224.0.0.22', payload=packet).data
+                outer = IPv4.from_fields(protocol=2, src='10.0.0.1', dst='224.0.0.22', payload=packet).data
                 carried = IPv4(outer[:len(outer) - len(packet) + keep]).payload
                 direct = self.parse(packet[:keep])
                 self.assertEqual(direct.info['__short_read__'], carried.info['__short_read__'])
@@ -1436,8 +1436,8 @@ class IGMPv3RecordCountTests(unittest.TestCase):
         records = igmpv3_group_record(1, '239.1.1.1') + igmpv3_group_record(2, '239.2.2.2')
         for count, wire in ((None, 2), (2, 2), (3, 3), (0xFFFF, 0xFFFF)):
             with self.subTest(count=count):
-                built = IGMPv3(type=Type.IGMPv3_Membership_Report, records=self.RECORDS,
-                               num_group_records=count, payload=b'XYZW').data
+                built = IGMPv3.from_fields(type=Type.IGMPv3_Membership_Report, records=self.RECORDS,
+                                           num_group_records=count, payload=b'XYZW').data
                 self.assertEqual(built[6:8], wire.to_bytes(2, 'big'))
                 self.assertEqual(built[8:], records + b'XYZW')
 
@@ -1531,10 +1531,10 @@ class IGMPDispatchTests(unittest.TestCase):
         }
         for label, (fields, version) in cases.items():
             with self.subTest(fields=label):
-                layer = IGMP(version=int(version[-1]), **fields)
+                layer = IGMP.from_fields(version=int(version[-1]), **fields)
                 klass = igmp_class(version)
                 self.assertIs(type(layer), klass)
-                self.assertEqual(layer.data, klass(**fields).data)
+                self.assertEqual(layer.data, klass.from_fields(**fields).data)
                 parsed = IGMP(layer.data)
                 self.assertIs(type(parsed), klass)
                 self.assertEqual(parsed.data, layer.data)
@@ -1557,7 +1557,7 @@ class IGMPDispatchTests(unittest.TestCase):
             with self.subTest(fields=label):
                 with self.assertRaisesRegex(ProtocolError,
                                             r'^IGMP: no version to build with; pass version=1, 2 or 3$'):
-                    IGMP(**fields)
+                    IGMP.from_fields(**fields)
 
     def test_version_is_the_only_check(self) -> None:
         """The class ``version`` names refuses what it does not build, by its own checks."""
@@ -1567,31 +1567,36 @@ class IGMPDispatchTests(unittest.TestCase):
         for version in (0, 4, True, '2', 1.0, 3.0):
             with self.subTest(version=version):
                 with self.assertRaisesRegex(ProtocolError, f'^IGMP: invalid version: {version!r}$'):
-                    IGMP(version=version)
+                    IGMP.from_fields(version=version)
         with self.assertRaisesRegex(ProtocolError, 'invalid type'):
-            IGMP(version=2, type=300)
+            IGMP.from_fields(version=2, type=300)
         with self.assertRaisesRegex(ProtocolError, 'is not an IGMPv2 message'):
-            IGMP(version=2)
+            IGMP.from_fields(version=2)
         with self.assertRaises(UnsupportedCall):
-            IGMP(version=1, no_such_field=1)
+            IGMP.from_fields(version=1, no_such_field=1)
         with self.assertRaisesRegex(UnsupportedCall, "^IGMPv1: unexpected keyword\\(s\\): 'qqic', 'qrv'"):
-            IGMP(version=1, qrv=2, qqic=125)
+            IGMP.from_fields(version=1, qrv=2, qqic=125)
 
     def test_a_version_class_takes_version_only_as_its_own(self) -> None:
-        """Building, ``version`` must be the class's; parsing, it is handed on unread."""
+        """Building or parsing, ``version`` must be the class's (#2840)."""
         from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
         from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
-        self.assertEqual(IGMPv1(version=1).data, IGMPv1().data)
+        self.assertEqual(IGMPv1.from_fields(version=1).data, IGMPv1.from_fields().data)
         with self.assertRaisesRegex(ProtocolError, '^IGMPv1: version=2 names another member$'):
-            IGMPv1(version=2)
+            IGMPv1.from_fields(version=2)
         with self.assertRaisesRegex(ProtocolError, '^IGMPv2: version=3 names another member$'):
-            IGMPv2(version=3, max_resp_time=100)
-        # NOTE: The enclosing IP layer passes its own version, ``4``, under the
-        # same name, as ``test_ipv4_dispatches_igmp_to_each_version`` relies on.
+            IGMPv2.from_fields(version=3, max_resp_time=100)
         packet = IGMP_PACKETS['v2-report'][0]
-        self.assertEqual(IGMPv2(packet, version=4).data, packet)
+        with self.assertRaisesRegex(ProtocolError, '^IGMP: invalid version: 4$'):
+            IGMPv2(packet, version=4)
+        with self.assertRaisesRegex(ProtocolError, '^IGMPv2: version=3 names another member$'):
+            IGMPv2(packet, version=3)
+        self.assertEqual(IGMPv2(packet, version=2).data, packet)
+        # NOTE: The enclosing IP layer's own version, ``4``, takes the private channel,
+        # as ``test_ipv4_dispatches_igmp_to_each_version`` relies on.
+        self.assertEqual(IGMPv2._from_parent(packet, len(packet), version=4).data, packet)  # pylint: disable=protected-access
 
     def test_version_is_in_the_data_model_only(self) -> None:
         """Each data model carries ``version``; no octet does, and every round trip keeps it (#2574)."""
@@ -1609,7 +1614,7 @@ class IGMPDispatchTests(unittest.TestCase):
                 self.assertEqual(rebuilt.data, packet)
                 fields = klass._make_data(parsed.info)
                 self.assertEqual(fields['version'], number)
-                made = IGMP(**fields)
+                made = IGMP.from_fields(**fields)
                 self.assertEqual(made.info.version, number)
                 self.assertEqual(made.data, packet)
                 self.assertEqual(IGMP(made.data).info, parsed.info)
@@ -1661,11 +1666,11 @@ class IGMPDispatchTests(unittest.TestCase):
         self.assertIs(type(IGMP(packet)), IGMPv2)
         self.assertIs(type(Custom(packet)), Custom)
         self.assertIs(type(Custom.from_data(Custom(packet).info)), Custom)
-        self.assertIs(type(Custom(type=0x16, group='239.1.2.3', version=2)), Custom)
+        self.assertIs(type(Custom.from_fields(type=0x16, group='239.1.2.3', version=2)), Custom)
         # NOTE: A subclass outside the members states a version of its own, as
         # every IGMP class does, and takes no other in ``version``.
         with self.assertRaisesRegex(ProtocolError, '^Custom: version=1 names another member$'):
-            Custom(type=0x16, group='239.1.2.3', version=1)
+            Custom.from_fields(type=0x16, group='239.1.2.3', version=1)
 
     def test_ipv4_dispatches_igmp_to_each_version(self) -> None:
         from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
@@ -1676,7 +1681,7 @@ class IGMPDispatchTests(unittest.TestCase):
         expected_classes = {'IGMPv1': IGMPv1, 'IGMPv2': IGMPv2, 'IGMPv3': IGMPv3}
         for name, (packet, version) in {**IGMP_PACKETS, **IGMPV3_PACKETS}.items():
             with self.subTest(packet=name):
-                outer = IPv4(protocol=2, src='10.0.0.1', dst='224.0.0.1', payload=packet).data
+                outer = IPv4.from_fields(protocol=2, src='10.0.0.1', dst='224.0.0.1', payload=packet).data
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore')
                     parsed = IPv4(io.BytesIO(outer), len(outer))
@@ -1701,7 +1706,7 @@ class IGMPSelectorTests(unittest.TestCase):
         layer IP protocol 2 dispatched it to."""
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
-        outer = IPv4(protocol=2, src='10.0.0.1', dst='224.0.0.1', payload=packet).data
+        outer = IPv4.from_fields(protocol=2, src='10.0.0.1', dst='224.0.0.1', payload=packet).data
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             frame = IPv4(io.BytesIO(outer), len(outer))

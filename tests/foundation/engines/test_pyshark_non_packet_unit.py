@@ -128,7 +128,7 @@ class TestPySharkNonPacketRecords(unittest.TestCase):
 
     def test_verbose_mode_prints_a_commented_packet(self) -> None:
         engine, ext = self._engine([_packet(1, comment=True), _packet(2)])
-        vars(ext).update(_exlyr='none', _exptl='null', _exctx=None, _flag_r=False, _flag_v=True,
+        vars(ext).update(_exlyr=None, _exptl=None, _exctx=None, _flag_r=False, _flag_v=True,
                          _vfunc_default=True, _ifnm='test.pcapng', record_header=lambda: None)
         stream = engine._extmp
         engine._expkg = types.SimpleNamespace(FileCapture=lambda *args, **kwargs: stream)
@@ -145,7 +145,7 @@ class TestPySharkNonPacketRecords(unittest.TestCase):
         first, last = _packet(1), _packet(2)
         engine, ext = self._engine([first, last])
         calls = []  # type: list[tuple[object, object]]
-        vars(ext).update(_exlyr='none', _exptl='null', _exctx=None, _flag_r=False, _flag_v=True,
+        vars(ext).update(_exlyr=None, _exptl=None, _exctx=None, _flag_r=False, _flag_v=True,
                          _vfunc_default=False, _vfunc=lambda e, f: calls.append((e, f)),
                          _ifnm='test.pcapng', record_header=lambda: None)
         stream = engine._extmp

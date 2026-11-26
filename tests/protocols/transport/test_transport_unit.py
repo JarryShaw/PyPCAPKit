@@ -13,6 +13,16 @@ RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
 
+class FromParent:
+    """A stand-in payload, which ``analyze`` builds through ``_from_parent`` (#2840)."""
+
+    @classmethod
+    def _from_parent(cls, file: io.BytesIO, length: int, extra: dict[str, object] | None = None, /, *,
+                     layer: object = None, protocol: object = None, context: object = None,
+                     **state: object) -> object:
+        return cls(file, length, **(extra or {}), **state)  # type: ignore[call-arg]
+
+
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class TransportUnitTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -112,26 +122,18 @@ class TransportUnitTests(unittest.TestCase):
             DummyTransport.register(80, Raw)
         warn.assert_not_called()
 
-    def test_analyze_prefers_source_port_match(self) -> None:
+    def test_analyze_takes_the_lower_port_at_the_source(self) -> None:
         from pcapkit.protocols.transport.transport import Transport
 
-        class SourceProtocol:
+        class UnknownProtocol(FromParent):
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 self.payload = payload_io.read()
                 self.length = length
                 self.kwargs = kwargs
 
-        class DestinationProtocol:
-            def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
-                self.payload = payload_io.read()
-                self.length = length
-                self.kwargs = kwargs
-
+        # NOTE: Neither port is registered, so the destination is no fallback (#2945).
         class DummyTransport(Transport):
-            __proto__ = collections.defaultdict(lambda: DestinationProtocol, {
-                53: SourceProtocol,
-                5353: DestinationProtocol,
-            })
+            __proto__ = collections.defaultdict(lambda: UnknownProtocol, {})
 
             @property
             def name(self) -> str:
@@ -147,24 +149,30 @@ class TransportUnitTests(unittest.TestCase):
             def make(self, **kwargs: object) -> object:
                 raise NotImplementedError
 
-        report = DummyTransport.analyze((53, 5353), b'payload', marker=True)
+        report = DummyTransport.analyze((53, 5353), b'payload')
 
-        self.assertIsInstance(report, SourceProtocol)
+        self.assertIsInstance(report, UnknownProtocol)
         self.assertEqual(report.payload, b'payload')
         self.assertEqual(report.length, 7)
-        self.assertEqual(report.kwargs['marker'], True)
+        self.assertEqual(report.kwargs, {'alias': 53})
 
-    def test_analyze_falls_back_to_destination_port_match(self) -> None:
+    def test_analyze_takes_the_lower_port_at_the_destination(self) -> None:
         from pcapkit.protocols.transport.transport import Transport
 
-        class DestinationProtocol:
+        class LowerProtocol(FromParent):
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 self.payload = payload_io.read()
                 self.length = length
 
+        class HigherProtocol(FromParent):
+            def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
+                self.payload = payload_io.read()
+
+        # NOTE: Both ports are registered, so the source port is no longer preferred (#2945).
         class DummyTransport(Transport):
-            __proto__ = collections.defaultdict(lambda: DestinationProtocol, {
-                80: DestinationProtocol,
+            __proto__ = collections.defaultdict(lambda: HigherProtocol, {
+                80: LowerProtocol,
+                5353: HigherProtocol,
             })
 
             @property
@@ -181,9 +189,9 @@ class TransportUnitTests(unittest.TestCase):
             def make(self, **kwargs: object) -> object:
                 raise NotImplementedError
 
-        report = DummyTransport.analyze((54321, 80), b'hello')
+        report = DummyTransport.analyze((5353, 80), b'hello')
 
-        self.assertIsInstance(report, DestinationProtocol)
+        self.assertIsInstance(report, LowerProtocol)
         self.assertEqual(report.payload, b'hello')
         self.assertEqual(report.length, 5)
 
@@ -191,17 +199,17 @@ class TransportUnitTests(unittest.TestCase):
         from pcapkit.protocols.transport.transport import Transport
         from pcapkit.utilities.exceptions import StructError
 
-        class EOFProtocol:
+        class EOFProtocol(FromParent):
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 raise StructError('truncated payload', eof=True, quiet=True)
 
-        class FakeRaw:
+        class FakeRaw(FromParent):
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 self.payload = payload_io.read()
                 self.length = length
                 self.kwargs = kwargs
 
-        class FakeNoPayload:
+        class FakeNoPayload(FromParent):
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 self.payload = payload_io.read()
                 self.length = length
@@ -241,17 +249,17 @@ class TransportUnitTests(unittest.TestCase):
     def test_analyze_uses_raw_after_non_struct_error(self) -> None:
         from pcapkit.protocols.transport.transport import Transport
 
-        class BrokenProtocol:
+        class BrokenProtocol(FromParent):
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 raise ValueError('boom')
 
-        class FakeRaw:
+        class FakeRaw(FromParent):
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 self.payload = payload_io.read()
                 self.length = length
                 self.kwargs = kwargs
 
-        class FakeNoPayload:
+        class FakeNoPayload(FromParent):
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 self.payload = payload_io.read()
                 self.length = length
@@ -468,11 +476,11 @@ class TransportUnitTests(unittest.TestCase):
                 for kwargs in ({'srcport': value, 'dstport': 53}, {'srcport': 53, 'dstport': value}):
                     with self.subTest(protocol=cls.__name__, **kwargs):
                         with self.assertRaises(ProtocolError) as ctx:
-                            cls(**kwargs)
+                            cls.from_fields(**kwargs)
                         self.assertEqual(str(ctx.exception), f'{cls.__name__}: invalid port: {value!r}')
 
         # An ``int`` port resolves to its application type.
-        self.assertEqual(UDP(srcport=1, dstport=53).info.srcport.port, 1)
+        self.assertEqual(UDP.from_fields(srcport=1, dstport=53).info.srcport.port, 1)
 
 
 if __name__ == '__main__':

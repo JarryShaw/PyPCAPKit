@@ -42,8 +42,8 @@ class TestEthernetMacRoundTrip(unittest.TestCase):
     def test_make_packs_mac_addresses_as_octets(self) -> None:
         from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
-        proto = Ethernet(dst='01:23:45:67:89:ab', src='fe-dc-ba-98-76-54',
-                         payload=b'payload')
+        proto = Ethernet.from_fields(dst='01:23:45:67:89:ab', src='fe-dc-ba-98-76-54',
+                                     payload=b'payload')
         self.assertEqual(proto.data, FRAMES['nontrivial'])
         self.assertEqual(proto.info.dst, '01:23:45:67:89:ab')
         self.assertEqual(proto.info.src, 'fe:dc:ba:98:76:54')
@@ -51,7 +51,7 @@ class TestEthernetMacRoundTrip(unittest.TestCase):
     def test_make_default_mac_is_all_zero_octets(self) -> None:
         from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
-        proto = Ethernet(payload=b'payload')
+        proto = Ethernet.from_fields(payload=b'payload')
         self.assertEqual(proto.data, FRAMES['all-zero'])
 
     def test_from_data_rebuilds_byte_for_byte(self) -> None:

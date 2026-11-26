@@ -271,7 +271,7 @@ class FrameLayerLimitTests(unittest.TestCase):
                 pad = -(len(inner) + 2) % 4  # ESP-NULL: padding, its length, Next Header 4
                 esp = struct.pack('!II', 7, 1) + inner + bytes(range(1, pad + 1)) + bytes([pad, 4])
                 parsed, messages = self.frame(wire.ethernet(wire.ipv6(walked + esp, nxt=60), 0x86DD),
-                                              __context__=registry)
+                                              context=registry)
 
                 # walked as an extension header, ESP refuses ``payload`` and
                 # ``protochain``, so what it dissected is read off ``_next``

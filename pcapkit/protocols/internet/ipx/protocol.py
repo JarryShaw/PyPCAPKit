@@ -183,7 +183,7 @@ class IPX(Internet[Data_IPX, Schema_IPX],
 
         return self._decode_next_layer(ipx, ipx.type, ipx.len - 30)
 
-    def make(self,
+    def make(self, *,
              chksum: 'bytes' = b'\x00\x00',
              count: 'int' = 0,
              type: 'Enum_Packet | int' = Enum_Packet.Unknown,

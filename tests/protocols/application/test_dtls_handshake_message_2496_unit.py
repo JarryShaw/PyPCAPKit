@@ -123,7 +123,7 @@ class FragmentBodyTests(unittest.TestCase):
                     wire = _record(_handshake(1, BODY[offset:offset + length],
                                               fragment_offset=offset, fragment_length=length,
                                               length=len(BODY)))
-                    made = DTLS(content_type=22, content=(self._fragment(body, offset, length),))
+                    made = DTLS.from_fields(content_type=22, content=(self._fragment(body, offset, length),))
                     self.assertEqual(bytes(made), wire)
                     self.assertEqual(DTLS(wire, len(wire)).info.content[0].body,
                                      BODY[offset:offset + length])
@@ -138,7 +138,7 @@ class FragmentBodyTests(unittest.TestCase):
                 'whole message, range overruns it': (BODY, HALF, len(BODY) - HALF + 1),
         }.items():
             with self.subTest(case=name), self.assertRaisesRegex(ProtocolError, 'fragment_length'):
-                DTLS(content_type=22, content=(self._fragment(body, offset, length),))
+                DTLS.from_fields(content_type=22, content=(self._fragment(body, offset, length),))
 
     def test_a_parsed_fragment_rebuilds_byte_exact(self) -> None:
         """A fragment's own body is never cut, even one whose range overruns

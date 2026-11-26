@@ -114,11 +114,12 @@ from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 if TYPE_CHECKING:
     from datetime import timedelta
     from ipaddress import IPv4Address
-    from typing import IO, Any, Callable, DefaultDict, Optional
+    from typing import IO, Any, Callable, DefaultDict, Iterable, Mapping, Optional, Type, overload
 
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
+    from pcapkit.corekit.context import ContextRegistry, ProtocolContext
     from pcapkit.protocols.internet.ipv4.data import Option as Data_Option
     from pcapkit.protocols.internet.ipv4.schema import Option as Schema_Option
     from pcapkit.protocols.protocol import ProtocolBase
@@ -479,7 +480,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 return self._decode_next_layer(ipv4, proto, _plen, packet=__packet__, declared=declared)
         return self._decode_next_layer(ipv4, proto, _plen, packet=__packet__, declared=declared)
 
-    def make(self,
+    def make(self, *,
              tos_pre: 'Enum_ToSPrecedence | int' = Enum_ToSPrecedence.Routine,
              tos_del: 'Enum_ToSDelay | int' = Enum_ToSDelay.NORMAL,
              tos_thr: 'Enum_ToSThroughput | int' = Enum_ToSThroughput.NORMAL,
@@ -693,6 +694,22 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
     ##########################################################################
     # Data models.
     ##########################################################################
+
+    if TYPE_CHECKING:
+        # NOTE: ``protocol`` stops a parse and is a field of a construction, so each
+        # shape types it as such (#3081); the ``__init__`` called is the inherited one.
+        @overload
+        def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., /, *,
+                     version: 'Optional[Literal[4, 6]]' = ...,
+                     layer: 'Optional[str]' = ...,
+                     protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = ...,
+                     context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                     ) -> 'None': ...
+        @overload
+        def __init__(self, *, version: 'Optional[Literal[4, 6]]' = ..., protocol: 'Enum_TransType | int' = ...,
+                     context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                     **fields: 'Any') -> 'None': ...
+        def __init__(self, *args: 'Any', **kwargs: 'Any') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument
 
     def __length_hint__(self) -> 'Literal[20]':
         """Return an estimated length for the object."""

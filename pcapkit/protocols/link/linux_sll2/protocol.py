@@ -153,7 +153,7 @@ class LinuxSLL2(LinuxSLL[Data_LinuxSLL2, Schema_LinuxSLL2],
                                            schema.protocol_type)
         return self._decode_next_layer(linux_sll2, _proto, length - self.length)
 
-    def make(self,
+    def make(self, *,
              protocol_type: 'Enum_EtherType | int' = Enum_EtherType.Internet_Protocol_version_4,
              reserved: 'int' = 0,
              interface_index: 'int' = 0,

@@ -54,8 +54,8 @@ class TestPCAPNGDSBBytesSecrets(PCAPNGTestCase):
         context = self._context()
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')  # a short ZigBee key reads short, as parsed
-            made = PCAPNG(num=2, sct=1, ctx=context, type=BlockType.Decryption_Secrets_Block,
-                          block=block)
+            made = PCAPNG.from_fields(num=2, sct=1, ctx=context, type=BlockType.Decryption_Secrets_Block,
+                                      block=block)
             parsed = PCAPNG(made.data, len(made.data), num=2, sct=1, ctx=context)
             remade = PCAPNG.from_data(made.info, num=2, sct=1, ctx=context).data
             self.assertRebuilds(octets, context)
@@ -89,8 +89,8 @@ class TestPCAPNGDSBBytesSecrets(PCAPNGTestCase):
         from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        made = PCAPNG(num=2, sct=1, ctx=self._context(), type=BlockType.Decryption_Secrets_Block,
-                      block={'secrets_data': SECRETS[TLS_KEY_LOG]})
+        made = PCAPNG.from_fields(num=2, sct=1, ctx=self._context(), type=BlockType.Decryption_Secrets_Block,
+                                  block={'secrets_data': SECRETS[TLS_KEY_LOG]})
         entries = made.info.secrets_data.entries  # type: ignore[attr-defined]
         self.assertEqual(list(entries[TLSKeyLabel.CLIENT_RANDOM].items()),
                          [(b'\xab' * 32, b'\xcd' * 48)])

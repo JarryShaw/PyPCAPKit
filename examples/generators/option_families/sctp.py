@@ -77,7 +77,7 @@ def _sctp_chunk_overrides() -> 'dict[Any, dict[str, Any]]':
 
 def _sctp_chunk_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     from pcapkit.protocols.transport.sctp.protocol import SCTP
-    return SCTP(chunks=[(code, kwargs)], **SCTP_BASE)
+    return SCTP.from_fields(chunks=[(code, kwargs)], **SCTP_BASE)
 
 
 def _sctp_parse(octets: 'bytes') -> 'Any':
@@ -91,7 +91,7 @@ def _sctp_extract(parsed: 'Any') -> 'Any':
 
 def _sctp_rebuild(chunks: 'Any') -> 'Any':
     from pcapkit.protocols.transport.sctp.protocol import SCTP
-    return SCTP(chunks=chunks, **SCTP_BASE)
+    return SCTP.from_fields(chunks=chunks, **SCTP_BASE)
 
 
 def _sctp_param_registry() -> 'Any':
@@ -126,8 +126,8 @@ def _sctp_param_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
 
     # A parameter is not a top-level item: it travels inside a chunk, and
     # HEARTBEAT is the smallest chunk that carries an arbitrary one.
-    return SCTP(chunks=[(Enum_Chunk.Heartbeat_Request,
-                         {'parameters': [(code, kwargs)]})], **SCTP_BASE)
+    return SCTP.from_fields(chunks=[(Enum_Chunk.Heartbeat_Request,
+                                     {'parameters': [(code, kwargs)]})], **SCTP_BASE)
 
 
 def _sctp_cause_registry() -> 'Any':
@@ -160,8 +160,8 @@ def _sctp_cause_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
 
     # An error cause travels inside an ERROR (or ABORT) chunk, under the
     # keyword ``error`` rather than ``causes``.
-    return SCTP(chunks=[(Enum_Chunk.Operation_Error,
-                         {'error': [(code, kwargs)]})], **SCTP_BASE)
+    return SCTP.from_fields(chunks=[(Enum_Chunk.Operation_Error,
+                                     {'error': [(code, kwargs)]})], **SCTP_BASE)
 
 
 #: The families this module adds.

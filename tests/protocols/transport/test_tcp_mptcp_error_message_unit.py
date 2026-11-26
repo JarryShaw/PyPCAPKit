@@ -101,9 +101,9 @@ def build_mptcp(*, syn: 'bool' = False, ack: 'bool' = False, **option: 'Any') ->
     from pcapkit.const.tcp.option import Option as Enum_Option
     from pcapkit.protocols.transport.tcp.protocol import TCP
 
-    return TCP(syn=syn, ack=ack,
-               options=[(Enum_Option.Multipath_TCP, option)],  # type: ignore[arg-type]
-               **TCP_HEADER)
+    return TCP.from_fields(syn=syn, ack=ack,
+                           options=[(Enum_Option.Multipath_TCP, option)],  # type: ignore[arg-type]
+                           **TCP_HEADER)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
