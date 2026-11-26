@@ -541,25 +541,25 @@ class ScopeTests(unittest.TestCase):
         self.assertEqual([str(item.message) for item in caught], [])
 
     def test_out_of_band_keywords_are_refused_while_constructing(self) -> None:
-        """The keywords that configured a ``Proto(**fields)`` call are gone with it (#2840).
+        """The keywords that configured a ``Proto(**fields)`` call are gone (#2840).
 
-        ``Proto(**fields)`` no longer constructs: ``__init__`` takes octets. So
         ``_layer``, ``_protocol`` and ``__context__``, which configured that call
         rather than naming a field, are refused by :meth:`ProtocolBase.from_fields
-        <pcapkit.protocols.protocol.ProtocolBase.from_fields>`, which takes
-        ``context``, and ``OUT_OF_BAND_KEYWORDS`` that listed them is removed.
-        ``__packet__``, which the schema layer reads, is still taken.
+        <pcapkit.protocols.protocol.ProtocolBase.from_fields>` and by the call
+        itself, which constructs again (#3081); both take ``context``, and
+        ``OUT_OF_BAND_KEYWORDS`` that listed them is removed. ``__packet__``, which
+        the schema layer reads, is still taken.
 
         """
         import pcapkit.protocols.protocol as module
         from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import UnexpectedKeyword
 
-        with self.assertRaises(TypeError):
-            TCP(**GOOD_HEADER)
+        self.assertEqual(TCP(**GOOD_HEADER).data, TCP.from_fields(**GOOD_HEADER).data)
         for keyword in ('_layer', '_protocol', '__context__'):
-            with self.subTest(keyword=keyword), self.assertRaises(UnexpectedKeyword):
-                TCP.from_fields(**GOOD_HEADER, **{keyword: None})
+            for build in (TCP, TCP.from_fields):
+                with self.subTest(keyword=keyword, build=build.__name__), self.assertRaises(UnexpectedKeyword):
+                    build(**GOOD_HEADER, **{keyword: None})
 
         segment = TCP.from_fields(**GOOD_HEADER, context=None, __packet__={})
         self.assertEqual(segment.info.seq, 1)

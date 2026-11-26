@@ -82,10 +82,11 @@ from pcapkit.utilities.exceptions import (CaughtByCaller, FieldValueError, Proto
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import IO, Any, NoReturn, Optional
+    from typing import IO, Any, Iterable, Mapping, NoReturn, Optional, Type
 
     from typing_extensions import Literal
 
+    from pcapkit.corekit.context import ContextRegistry, ProtocolContext
     from pcapkit.protocols.internet.ah.protocol import AH
     from pcapkit.protocols.internet.ipv6.schema import IPv6 as Schema_IPv6
     from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
@@ -310,6 +311,21 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
     ##########################################################################
     # Data models.
     ##########################################################################
+
+    if TYPE_CHECKING:
+        # NOTE: ``protocol`` stops a parse and is a field of a construction, so each
+        # shape types it as such (#3081); the ``__init__`` called is the inherited one.
+        @overload
+        def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., /, *,
+                     layer: 'Optional[str]' = ...,
+                     protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = ...,
+                     context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                     ) -> 'None': ...
+        @overload
+        def __init__(self, *, protocol: 'Optional[Enum_TransType | int]' = ...,
+                     context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                     **fields: 'Any') -> 'None': ...
+        def __init__(self, *args: 'Any', **kwargs: 'Any') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument
 
     @overload
     def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...

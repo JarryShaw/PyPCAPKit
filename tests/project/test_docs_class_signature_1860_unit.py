@@ -14,8 +14,9 @@ their class docstrings lose the types of the parameters they list.
 ``restore_class_signature`` in :file:`docs/source/conf.py` gives such a class its
 ``__init__``'s parameters, and ``constructor_for_types`` has the library read the
 parameter types from that ``__init__``. The expected signatures are the ones the
-build showed before 3.15, where it had one; a protocol class's is the closed parse
-signature of #2840.
+build showed before 3.15, where it had one; a protocol class's is the parse overload
+of its ``__init__`` (#2840, #3081), a versioned base's read past the ``__new__`` that
+picks its member.
 
 The tests call the hooks directly and replay the signature event through Sphinx's
 own :class:`~sphinx.events.EventManager`. They need Sphinx and
@@ -27,6 +28,7 @@ from __future__ import annotations
 
 import inspect
 import types
+import typing
 import unittest
 from typing import TYPE_CHECKING, overload
 from unittest import mock
@@ -87,6 +89,10 @@ def resolve(name: 'str') -> 'Any':
 #: Each class, and the signature restored for it.
 RESTORED = {
     'pcapkit.protocols.application.ftp.protocol.FTP': '(file, length=None, /, *, layer=None, protocol=None, context=None)',
+    'pcapkit.protocols.internet.ip.protocol.IP': ('(file, length=None, /, *, version=None, layer=None, protocol=None, '
+                                                  'context=None)'),
+    'pcapkit.protocols.internet.ipv4.protocol.IPv4': ('(file, length=None, /, *, version=None, layer=None, '
+                                                      'protocol=None, context=None)'),
     'pcapkit.dumpkit.pcap.PCAPIO': '(fname, *, protocol, byteorder=sys.byteorder, nanosecond=False, **kwargs)',
     'pcapkit.foundation.reassembly.ipv4.reassembly.IPv4': '(*, strict=True, store=True, timeout=None)',
     'pcapkit.foundation.traceflow.tcp.traceflow.TCP': ("(*, fout='./tmp', format='pcap', byteorder=sys.byteorder, "
@@ -123,6 +129,13 @@ class Built(Forwarding):
         return super().__new__(cls)
 
 
+class Keyed(Forwarding):
+    """A class whose ``__new__`` names a parameter the ``__init__`` does not take, beside ``**kwargs``."""
+
+    def __new__(cls, value: 'str', **kwargs: 'Any') -> 'Keyed':  # pylint: disable=unused-argument
+        return super().__new__(cls)
+
+
 class Overloaded:
     """A class whose pass-through ``__new__`` hides an overloaded ``__init__``."""
 
@@ -136,6 +149,22 @@ class Overloaded:
 
     def __init__(self, value: 'Any') -> 'None':
         self.value = value
+
+
+class Shaped:
+    """A class whose pass-through ``__new__`` hides an ``__init__`` of two shapes, as a protocol's does."""
+
+    def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'Shaped':  # pylint: disable=unused-argument
+        return super().__new__(cls)
+
+    @overload
+    def __init__(self, file: 'bytes', length: 'int' = ..., /, *, stop: 'str' = ...) -> 'None': ...
+    @overload
+    def __init__(self, *, size: 'int' = ...) -> 'None': ...
+
+    def __init__(self, file: 'Any' = None, length: 'Any' = None, /, *,  # pylint: disable=unused-argument
+                 stop: 'Any' = 'none', size: 'int' = 0) -> 'None':
+        self.size = size
 
 
 @unittest.skipUnless(HAS_SPHINX, SPHINX_SKIP_REASON)
@@ -172,15 +201,43 @@ class ClassSignatureTests(unittest.TestCase):
         for name in RESTORED:
             cls = resolve(name)
             init = self.conf.hidden_init(cls)
+            # NOTE: An overloaded ``__init__`` shows its first overload (#3081).
+            shown = (typing.get_overloads(init) or [init])[0]
             restored = signature_from_str(self.restore(name)[0])
             shape = [(param.name, param.kind) for param in restored.parameters.values()]
             with self.subTest(name=name):
                 self.assertEqual(shape, [(param.name, param.kind)
-                                         for param in list(inspect.signature(init).parameters.values())[1:]])
+                                         for param in list(inspect.signature(shown).parameters.values())[1:]])
                 public = inspect.signature(cls).parameters.values()
-                if [param.kind for param in public] != [inspect.Parameter.VAR_POSITIONAL,
-                                                       inspect.Parameter.VAR_KEYWORD]:
+                if shown is init and [param.kind for param in public] != [inspect.Parameter.VAR_POSITIONAL,
+                                                                          inspect.Parameter.VAR_KEYWORD]:
                     self.assertEqual(shape, [(param.name, param.kind) for param in public])
+
+    def test_an_overloaded_init_shows_its_first_overload(self) -> 'None':
+        """One signature heads a class, so a protocol's is its parse, with no sentinel default (#3081).
+
+        Each ``...`` default of the overload is the implementation's, and a default
+        only the implementation gives stays out with the parameters it names.
+
+        """
+        self.assertEqual(self.conf.restore_class_signature(self.app, 'class', 'Shaped', Shaped, {}, CATCH_ALL, None),
+                         ("(file, length=None, /, *, stop='none')", None))
+        for name in ('pcapkit.protocols.application.ftp.protocol.FTP', 'pcapkit.protocols.internet.ip.protocol.IP'):
+            with self.subTest(name=name):
+                restored = self.restore(name)[0]
+                self.assertNotIn('NO_VALUE', restored)
+                self.assertNotIn('fields', restored)
+
+    def test_a_new_that_picks_the_member_is_walked_past(self) -> 'None':
+        """A versioned base's ``__new__`` names what it reads and hands the rest on (#3081)."""
+        from pcapkit.protocols.internet.ip.protocol import IP  # pylint: disable=import-outside-toplevel
+
+        for name in ('pcapkit.protocols.internet.ip.protocol.IP', 'pcapkit.protocols.internet.ipv4.protocol.IPv4'):
+            with self.subTest(name=name):
+                self.assertIs(self.conf.hidden_init(resolve(name)), vars(IP)['__init__'])
+        self.assertTrue(self.conf.hands_on(vars(IP)['__new__'], vars(IP)['__init__']))
+        # NOTE: ``Built``'s takes no ``**kwargs``, so it is the constructor.
+        self.assertFalse(self.conf.hands_on(Built.__new__, Built.__init__))
 
     def test_other_classes_are_left_alone(self) -> 'None':
         """Nothing hides these classes' constructor, or it is not known before first construction."""
@@ -191,8 +248,14 @@ class ClassSignatureTests(unittest.TestCase):
         self.library.assert_not_called()
 
     def test_new_with_parameters_is_left_to_autodoc(self) -> 'None':
-        """Walking past it would restore the base's ``(*args, **kwargs)`` over ``(value, raw)``."""
+        """Walking past it would restore the base's ``(*args, **kwargs)`` over ``(value, raw)``.
+
+        With ``**kwargs`` beside a parameter the ``__init__`` does not take, it is
+        still the constructor (#3081).
+
+        """
         self.assertIsNone(self.conf.hidden_init(Built))
+        self.assertIsNone(self.conf.hidden_init(Keyed))
         self.assertIsNone(self.conf.restore_class_signature(self.app, 'class', 'Built', Built, {}, '(value, raw)',
                                                             None))
         self.library.assert_not_called()
@@ -234,18 +297,19 @@ class ConstructorTypesTests(unittest.TestCase):
         """Each class docstring lists the ``__init__`` parameters, which otherwise lose their types."""
         for name in ('pcapkit.foundation.reassembly.ipv4.reassembly.IPv4',
                      'pcapkit.foundation.traceflow.tcp.traceflow.TCP',
-                     'pcapkit.corekit.infoclass.Info', 'pcapkit.corekit.infoclass.MultiInfo',
-                     'pcapkit.protocols.application.ftp.protocol.FTP'):
+                     'pcapkit.corekit.infoclass.Info', 'pcapkit.corekit.infoclass.MultiInfo'):
             cls = resolve(name)
             with self.subTest(name=name):
                 self.assertEqual(self.conf.typehints_constructor_name(cls), '__new__')
                 self.assertEqual(self.conf.constructor_for_types(cls), '__init__')
 
     def test_overloaded_init_keeps_the_library_choice(self) -> 'None':
-        """Reading it would add an ``Overloads`` field to the class."""
-        self.assertIsNotNone(self.conf.hidden_init(Overloaded))
-        self.assertEqual(self.conf.typehints_constructor_name(Overloaded), '__new__')
-        self.assertEqual(self.conf.constructor_for_types(Overloaded), '__new__')
+        """Reading it would add an ``Overloads`` field to the class, and so to every protocol class (#3081)."""
+        for cls in (Overloaded, resolve('pcapkit.protocols.application.ftp.protocol.FTP')):
+            with self.subTest(cls=cls.__name__):
+                self.assertIsNotNone(self.conf.hidden_init(cls))
+                self.assertEqual(self.conf.typehints_constructor_name(cls), '__new__')
+                self.assertEqual(self.conf.constructor_for_types(cls), '__new__')
 
     def test_other_classes_keep_the_library_choice(self) -> 'None':
         """A class with no pass-through ``__new__`` in the way is left as the library reads it."""

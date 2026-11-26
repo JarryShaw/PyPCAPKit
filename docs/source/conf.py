@@ -1013,6 +1013,34 @@ def passes_through(new: 'FunctionType') -> bool:
                                                     inspect.Parameter.VAR_KEYWORD]
 
 
+def hands_on(new: 'FunctionType', init: 'Any') -> bool:
+    """Whether a ``__new__`` only picks the class, handing its arguments on to ``init``.
+
+    A versioned family's base, such as :class:`~pcapkit.protocols.internet.ip.protocol.IP`,
+    defines one: it names the ``file`` and ``length`` it reads to pick the member,
+    and takes the rest as ``**kwargs`` for the member's ``__init__`` (:issue:`3081`).
+
+    Args:
+        new: The ``__new__`` function.
+        init: The ``__init__`` a call runs after it.
+
+    Returns:
+        :data:`True` if its parameters after ``cls`` end in ``**kwargs`` and the
+        others are each a parameter of ``init``.
+
+    """
+    if not inspect.isfunction(init):
+        return False
+    try:
+        parameters = list(inspect.signature(new).parameters.values())[1:]
+        names = set(inspect.signature(init).parameters)
+    except (TypeError, ValueError):
+        return False
+    if not parameters or parameters[-1].kind is not inspect.Parameter.VAR_KEYWORD:
+        return False
+    return all(param.name in names for param in parameters[:-1])
+
+
 def hidden_init(cls: type) -> 'Optional[FunctionType]':
     """The ``__init__`` a call to ``cls`` runs, where a ``__new__`` hides it from autodoc.
 
@@ -1028,8 +1056,9 @@ def hidden_init(cls: type) -> 'Optional[FunctionType]':
     ``(fname, **kwargs)`` of :class:`dictdumper.dumper.Dumper` (:issue:`1860`).
 
     The MRO is walked as :func:`inspect.signature` walks it, but past each
-    ``__new__`` that only passes its arguments through. A ``__new__`` with
-    parameters of its own is the constructor, and autodoc reads it already.
+    ``__new__`` that only passes its arguments through, or only picks the class
+    and hands them on (see :func:`hands_on`). A ``__new__`` with parameters of
+    its own is the constructor, and autodoc reads it already.
 
     :class:`Info` and :class:`Schema` give each subclass its own ``__init__`` on
     its first construction (see :func:`~pcapkit.corekit.infoclass.info_final`),
@@ -1053,7 +1082,8 @@ def hidden_init(cls: type) -> 'Optional[FunctionType]':
         new = namespace.get('__new__')
         if isinstance(new, staticmethod):
             new = new.__func__
-        if inspect.isfunction(new) and not passes_through(new):
+        if inspect.isfunction(new) and not passes_through(new) \
+                and not hands_on(new, getattr(klass, '__init__', None)):
             return None
         if '__init__' in namespace:
             init = namespace['__init__']
@@ -1075,6 +1105,10 @@ def init_signature(app: 'Sphinx', init: 'FunctionType') -> str:
     :data:`~pcapkit.corekit.sentinels.NO_VALUE` defaults are written as the
     generator writes them, whatever the sentinel's ``repr()``.
 
+    A class is headed by one signature here, so an overloaded ``__init__`` gives
+    its first overload, each ``...`` default the implementation's. A protocol's
+    is the parse; the construction is on the ``__init__`` entry (:issue:`3081`).
+
     Args:
         app: Sphinx application.
         init: The ``__init__`` function.
@@ -1093,6 +1127,12 @@ def init_signature(app: 'Sphinx', init: 'FunctionType') -> str:
     if preserve:
         parameters = [param.replace(default=DefaultValue('NO_VALUE')) if param.default is NO_VALUE else param
                       for param in parameters]
+    overloads = typing.get_overloads(init)
+    if overloads:
+        defaults = {param.name: param.default for param in parameters}
+        parameters = [param.replace(default=defaults.get(param.name, param.default))
+                      if param.default is Ellipsis else param
+                      for param in list(inspect.signature(overloads[0]).parameters.values())[1:]]
     text = stringify_signature(signature.replace(parameters=parameters),
                                show_annotation=False, show_return_annotation=False)
     return text.replace('\\', '\\\\') if app.config.strip_signature_backslash else text

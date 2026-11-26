@@ -40,7 +40,7 @@ moves two octets on (:rfc:`1035#section-4.2.2`, :rfc:`7766#section-8`).
 
 """
 import collections
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.dns.opcode import Opcode as Enum_Opcode
 from pcapkit.const.dns.option import Option as Enum_Option
@@ -50,6 +50,7 @@ from pcapkit.const.dns.rr_type import RRType as Enum_RRType
 from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
+from pcapkit.corekit.sentinels import NO_VALUE, NoValueType
 from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.application.dns.const import HEADER_LENGTH
 from pcapkit.protocols.application.dns.data import AAAA as Data_AAAA
@@ -635,16 +636,30 @@ class DNS(Application[Data_DNS, Schema_DNS], schema=Schema_DNS, data=Data_DNS):
         """
         return int(_UDP.klass.domain)  # type: ignore[call-overload]
 
-    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = None, /, *,  # pylint: disable=super-init-not-called
+    @overload  # pragma: no cover
+    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., /, *,
+                 framed: 'Optional[bool]' = ...,
+                 layer: 'Optional[str]' = ...,
+                 protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = ...,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                 ) -> 'None': ...
+    @overload  # pragma: no cover
+    def __init__(self, *, framed: 'Optional[bool]' = ...,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                 **fields: 'Any') -> 'None': ...
+
+    # NOTE: The ignore is the one on ``Protocol.__init__``, for ``**fields`` against ``/`` (#3081).
+    def __init__(self, file: 'IO[bytes] | bytes | NoValueType' = NO_VALUE,  # type: ignore[misc] # pylint: disable=super-init-not-called
+                 length: 'Optional[int]' = None, /, *,
                  framed: 'Optional[bool]' = None,
                  layer: 'Optional[str]' = None,
                  protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
                  context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
-                 ) -> 'None':
-        """Parse a protocol instance from its octets.
+                 **fields: 'Any') -> 'None':
+        """Parse a protocol instance from its octets, or construct one from its fields.
 
         Args:
-            file: Source packet stream.
+            file: Source packet stream; omitted to construct.
             length: Length of packet data.
             framed: Whether the TCP length field precedes the message. When
                 :obj:`None`, it does where :func:`_frames_message` finds a whole
@@ -656,15 +671,22 @@ class DNS(Application[Data_DNS, Schema_DNS], schema=Schema_DNS, data=Data_DNS):
                 <pcapkit.protocols.protocol.Protocol.__init__>`.
             context: As :meth:`Protocol.__init__
                 <pcapkit.protocols.protocol.Protocol.__init__>`.
+            **fields: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
 
         .. versionchanged:: 1.8.0
 
-           Declares ``framed``, its only keyword besides the stops and the
-           context (:issue:`2840`).
+           Declares ``framed``, its only parse keyword besides the stops and
+           the context (:issue:`2840`).
 
         """
+        if isinstance(file, NoValueType):
+            if framed is not None:
+                fields['framed'] = framed
+            self._construct(context, self._call_fields(length, layer, protocol, fields))
+            return
         # NOTE: ``_parse``, inline, so a parse adds no frame per layer (#1610).
-        keywords = self._start_parse(file, layer, protocol, context, {'framed': framed})
+        keywords = self._start_parse(file, layer, protocol, context, {'framed': framed}, fields)
         self.__post_init__(file, length, **keywords)
         self._info.__update__(packet=self.packet.payload)
 

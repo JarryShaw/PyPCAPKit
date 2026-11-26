@@ -72,6 +72,7 @@ from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.schema.byteorder import packet_byteorder
 from pcapkit.corekit.schema.padding import pad_length
+from pcapkit.corekit.sentinels import NO_VALUE, NoValueType
 from pcapkit.corekit.version import VersionInfo
 from pcapkit.protocols.data import Packet as Data_Packet
 from pcapkit.protocols.misc.pcapng.data import PCAPNG as Data_PCAPNG
@@ -1285,6 +1286,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         """
         # pylint: disable=protected-access
+        kwargs = self._pack_keywords(kwargs)
         target = self._packing_target()
         if target is not self:
             # NOTE: The copy would share the instance's counter, which
@@ -1528,16 +1530,30 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
     # Data models.
     ##########################################################################
 
-    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = None, /, *,  # pylint: disable=super-init-not-called
+    @overload  # pragma: no cover
+    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., /, *,
+                 num: 'int', sct: 'int', ctx: 'Optional[Context]',
+                 layer: 'Optional[str]' = ...,
+                 protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = ...,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                 ) -> 'None': ...
+    @overload  # pragma: no cover
+    def __init__(self, *, num: 'int', sct: 'int', ctx: 'Optional[Context]',
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                 **fields: 'Any') -> 'None': ...
+
+    # NOTE: The ignore is the one on ``Protocol.__init__``, for ``**fields`` against ``/`` (#3081).
+    def __init__(self, file: 'IO[bytes] | bytes | NoValueType' = NO_VALUE,  # type: ignore[misc] # pylint: disable=super-init-not-called
+                 length: 'Optional[int]' = None, /, *,
                  num: 'int', sct: 'int', ctx: 'Optional[Context]',
                  layer: 'Optional[str]' = None,
                  protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
                  context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
-                 ) -> 'None':
-        """Parse a protocol instance from its octets.
+                 **fields: 'Any') -> 'None':
+        """Parse a protocol instance from its octets, or construct one from its fields.
 
         Args:
-            file: Source packet stream.
+            file: Source packet stream; omitted to construct.
             length: Length of packet data.
             num: Frame index number.
             sct: Section index number.
@@ -1549,15 +1565,21 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 <pcapkit.protocols.protocol.Protocol.__init__>`.
             context: As :meth:`Protocol.__init__
                 <pcapkit.protocols.protocol.Protocol.__init__>`.
+            **fields: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
 
         .. versionchanged:: 1.8.0
 
            Declares ``num``, ``sct`` and ``ctx``, which a parse needs, as its
-           only keywords besides the stops and the context (:issue:`2840`).
+           only parse keywords besides the stops and the context (:issue:`2840`).
 
         """
+        if isinstance(file, NoValueType):
+            fields = {'num': num, 'sct': sct, 'ctx': ctx, **fields}
+            self._construct(context, self._call_fields(length, layer, protocol, fields))
+            return
         # NOTE: ``_parse``, inline, so a parse adds no frame per layer (#1610).
-        keywords = self._start_parse(file, layer, protocol, context, {'num': num, 'sct': sct, 'ctx': ctx})
+        keywords = self._start_parse(file, layer, protocol, context, {'num': num, 'sct': sct, 'ctx': ctx}, fields)
         self.__post_init__(file, length, **keywords)
         self._info.__update__(packet=self.packet.payload)
 

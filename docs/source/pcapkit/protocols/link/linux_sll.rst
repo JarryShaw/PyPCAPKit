@@ -21,7 +21,7 @@ Linux "cooked" capture encapsulation family:
 The versions differ in field order and width, so each parses its own header.
 The base holds what they share: the next-layer dispatch, and link-layer address
 validation. It has no registry index, so its ``__index__`` raises. Parsing octets
-through the base, or building it with ``from_fields``, gives the version its
+through the base, or building it from fields, gives the version its
 ``version`` keyword names, which a version checks as its own on both paths
 (:issue:`2840`), and is refused without it, since the link type rather than the
 header names the version. Its

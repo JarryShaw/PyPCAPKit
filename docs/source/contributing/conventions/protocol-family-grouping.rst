@@ -103,7 +103,7 @@ either ruling. The asymmetry is deliberate and concerns the registry only; parsi
 building through a base directly is the rule below.
 
 **A versioned family's base dispatches on both paths** (:issue:`2524`). Parsing
-octets through it, building it with ``from_fields`` and its ``from_data`` give a
+octets through it, building it from fields and its ``from_data`` give a
 member, never an instance of the base, and a subclass of the base is constructed as
 itself.
 

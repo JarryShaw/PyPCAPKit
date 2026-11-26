@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 """A parse refuses what its signature does not take (GitHub issue #2840).
 
-``Proto(file, length=None, /, *, layer=None, protocol=None, context=None)`` parses
-only, so:
+``Proto(file, length=None, /, *, layer=None, protocol=None, context=None)`` parses,
+taking no field (#3081), so:
 
 * :class:`UnknownKeywordTests` -- a misspelt stop, the old prefixed stops,
-  ``__context__``, ``packet`` and ``__packet__`` are Python's own
-  :exc:`TypeError`, and so are no octets at all, where a misspelling used to parse
-  in full;
+  ``__context__``, ``packet`` and ``__packet__`` are a :exc:`TypeError` naming
+  them, and so is ``None`` for octets, where a misspelling used to parse in full;
 * :class:`StopTests` -- ``layer`` is one of the four layer names or :obj:`None`,
   else :exc:`~pcapkit.utilities.exceptions.FormatError`, and ``protocol`` a name,
   class or instance or :obj:`None`, else
@@ -37,7 +36,7 @@ FRAME = wire.ethernet(wire.ipv4(SEGMENT, proto=6), 0x0800)
 
 
 class UnknownKeywordTests(unittest.TestCase):
-    """Python refuses a keyword the parse signature does not declare."""
+    """A parse refuses a keyword its signature does not declare."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -64,7 +63,7 @@ class UnknownKeywordTests(unittest.TestCase):
                     cls(octets, len(octets), **{key: value})
 
     def test_no_octets_is_refused(self) -> None:
-        """``Proto()`` misses ``file``; ``Proto(None)`` points at ``from_fields``."""
+        """``Proto(None)`` points at ``from_fields``, rather than constructing."""
         from pcapkit.protocols.application.http.protocol import HTTP
         from pcapkit.protocols.internet.icmp.protocol import ICMP
         from pcapkit.protocols.internet.igmp.protocol import IGMP
@@ -74,8 +73,6 @@ class UnknownKeywordTests(unittest.TestCase):
         from pcapkit.protocols.link.l2tp.protocol import L2TP
         from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
 
-        with self.assertRaisesRegex(TypeError, "missing 1 required positional argument: 'file'"):
-            Ethernet()  # pylint: disable=no-value-for-parameter
         for cls in (Ethernet, IP, IPv4, ICMP, IGMP, LinuxSLL, HTTP, L2TP):
             with self.subTest(cls=cls.__name__), self.assertRaisesRegex(
                     TypeError, rf'^{cls.__name__}: nothing to parse; build one with {cls.__name__}\.from_fields\(\)$'):
@@ -229,8 +226,8 @@ class OverrideTests(unittest.TestCase):
 
         class Marked(Raw):
             def __init__(self, file, length=None, /, *, extension=False,  # type: ignore[no-untyped-def]
-                         layer=None, protocol=None, context=None):
-                self._parse(file, length, layer=layer, protocol=protocol, context=context,
+                         layer=None, protocol=None, context=None, **fields):
+                self._parse(file, length, fields, layer=layer, protocol=protocol, context=context,
                             extension=extension)
 
             def read(self, length=None, **kwargs):  # type: ignore[no-untyped-def]
@@ -245,6 +242,9 @@ class OverrideTests(unittest.TestCase):
         self.assertIs(seen[-1]['extension'], True)
         with self.assertRaisesRegex(TypeError, r'^Marked: nothing to parse'):
             Marked(None)  # type: ignore[arg-type]
+        # NOTE: ``_parse`` refuses the fields an override hands it beside a file (#3081).
+        with self.assertRaisesRegex(TypeError, r"^Marked: unexpected keyword argument 'src' for a parse$"):
+            Marked(b'octets', 6, src=1)
 
     def test_analyze_takes_next_layer_state_alone_privately(self) -> None:
         """``_analyze_from_parent`` refuses a key that is no next-layer state, as ``_from_parent`` does."""

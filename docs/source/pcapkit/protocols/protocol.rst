@@ -26,12 +26,12 @@ The built-in families, those bases included, derive from
 
 .. versionchanged:: 1.8.0
 
-   A protocol is constructed with :meth:`~Protocol.from_fields`, whose unknown
-   keyword raises :exc:`~pcapkit.utilities.exceptions.UnexpectedKeyword`, a
-   :exc:`TypeError` too, and every ``make`` takes its fields as keywords only.
-   Calling the class parses only, through a closed signature, so Python refuses
-   an unknown keyword, and :meth:`~Protocol.analyze` takes the same keywords
-   (:issue:`2840`).
+   Calling the class parses a positional file, as :meth:`~Protocol.parse` does,
+   and constructs from keywords alone, as :meth:`~Protocol.from_fields` does
+   (:issue:`3081`). A construction's unknown keyword raises
+   :exc:`~pcapkit.utilities.exceptions.UnexpectedKeyword`, a :exc:`TypeError`
+   too, a parse refuses any field, every ``make`` takes its fields as keywords
+   only, and :meth:`~Protocol.analyze` takes the parse's keywords (:issue:`2840`).
 
 .. versionremoved:: 1.8.0
 
@@ -39,8 +39,8 @@ The built-in families, those bases included, derive from
    no longer runs :meth:`~Protocol.__init__` (:issue:`2840`).
 
    ``pcapkit.protocols.protocol.OUT_OF_BAND_KEYWORDS``, the keywords
-   ``Proto(**fields)`` took beyond the fields, with that call: build with
-   :meth:`~Protocol.from_fields`, which takes ``context`` (:issue:`2840`).
+   ``Proto(**fields)`` took beyond the fields: a construction takes ``context``
+   alone (:issue:`2840`).
 
 .. autoclass:: pcapkit.protocols.protocol.Protocol
    :no-members:
@@ -64,6 +64,7 @@ The built-in families, those bases included, derive from
    .. automethod:: analyze
 
    .. automethod:: from_schema
+   .. automethod:: parse
    .. automethod:: from_fields
    .. automethod:: from_data
 
@@ -99,8 +100,11 @@ The built-in families, those bases included, derive from
    .. automethod:: _make_data
    .. automethod:: _make_index
    .. automethod:: _make_payload
+   .. automethod:: _pack_keywords
    .. automethod:: _packing_target
    .. automethod:: _construction_member
+   .. automethod:: _call_fields
+   .. automethod:: _construct
    .. automethod:: _initialise
    .. automethod:: _start_parse
    .. automethod:: _parse
@@ -150,6 +154,7 @@ The built-in families, those bases included, derive from
    .. autoattribute:: _sigterm
    .. autoattribute:: __short_read__
    .. autoattribute:: __next_layer__
+   .. autoattribute:: __named_fields__
    .. autoattribute:: _past_layer_limit
    .. autoattribute:: __data__
 
@@ -172,18 +177,22 @@ The built-in families, those bases included, derive from
 Parsing and Construction
 ------------------------
 
-Parsing and construction, :meth:`~Protocol.from_schema`, :meth:`~Protocol.from_fields`
-and :meth:`~Protocol.from_data` included, end in one path. Calling the class parses;
-``from_fields`` and ``from_data`` construct:
+Parsing and construction, :meth:`~Protocol.from_schema`, :meth:`~Protocol.parse`,
+:meth:`~Protocol.from_fields` and :meth:`~Protocol.from_data` included, end in one
+path. Calling the class with a file parses, and with keywords alone constructs:
 
 .. mermaid::
 
    flowchart TD
        FS["from\_schema(schema)"] -->|"\_\_header\_\_ = schema,<br/>then its octets"| P
+       PA["parse(file, length, ...)"] --> P
        P["Proto(file, length, /, *,<br/>layer, protocol, context)"] --> INIT
-       INIT["\_\_init\_\_, or an override taking keywords of its own"] --> START
-       START["\_start\_parse<br/>refuses no octets, checks the stops,<br/>takes \_\_next\_layer\_\_ over the keywords"]
+       PF["Proto(field=value, ..., context)"] --> INIT
+       INIT["\_\_init\_\_, or an override taking keywords of its own"] -->|"a file"| START
+       INIT -->|"no file"| CALL["\_call\_fields<br/>a stop is a field where the class takes one,<br/>else refused, as a length is"]
+       START["\_start\_parse<br/>refuses no octets and any field, checks the stops,<br/>takes \_\_next\_layer\_\_ over the keywords"]
        FF["from\_fields(field=value, ...)<br/>construct"] --> MEM
+       CALL --> MEM
        FD["from\_data(data)"] -->|"\_make\_data(data) gives the fields"| MEM
        MEM["\_construction\_member<br/>a versioned family's base picks its member"] --> CHK
        CHK["\_check\_construction\_keywords<br/>an undeclared keyword: UnexpectedKeyword,<br/>or a warning for one \_make\_data gives"]
@@ -201,6 +210,8 @@ and :meth:`~Protocol.from_data` included, end in one path. Calling the class par
        READ["read(): the data model,<br/>calling \_decode\_next\_layer"] --> INFO["\_info updated with packet"]
 
        click FS "protocol.html#pcapkit.protocols.protocol.Protocol.from_schema"
+       click PA "protocol.html#pcapkit.protocols.protocol.Protocol.parse"
+       click CALL "protocol.html#pcapkit.protocols.protocol.Protocol._call_fields"
        click FF "protocol.html#pcapkit.protocols.protocol.Protocol.from_fields"
        click FD "protocol.html#pcapkit.protocols.protocol.Protocol.from_data"
        click MEM "protocol.html#pcapkit.protocols.protocol.Protocol._construction_member"
@@ -372,6 +383,7 @@ Internal Definitions
                   register
                   analyze
                   from_schema
+                  parse
                   from_fields
                   from_data
                   read
@@ -435,7 +447,7 @@ Internal Definitions
       :no-contents-entry:
 
       :meth:`~Protocol.id`, :meth:`~Protocol.register`,
-      :meth:`~Protocol.analyze`, :meth:`~Protocol.from_schema`,
+      :meth:`~Protocol.analyze`, :meth:`~Protocol.from_schema`, :meth:`~Protocol.parse`,
       :meth:`~Protocol.from_fields`, :meth:`~Protocol.from_data`, :meth:`~Protocol.read`,
       :meth:`~Protocol.make`, :meth:`~Protocol.unpack`, :meth:`~Protocol.pack`,
       :meth:`~Protocol.decode`, :meth:`~Protocol.unquote`,
@@ -517,6 +529,9 @@ Internal Definitions
    :no-value:
 
 .. autodata:: pcapkit.protocols.protocol._KEYWORD_CONSUMERS
+   :no-value:
+
+.. autodata:: pcapkit.protocols.protocol._PARSE_NAMES
    :no-value:
 
 .. autofunction:: pcapkit.protocols.protocol._declared_keywords
