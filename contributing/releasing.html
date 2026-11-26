@@ -5,11 +5,12 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta property="og:title" content="Release Process" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/releasing.html" />
+<meta property="og:url" content="https://jarryshaw.github.io/PyPCAPKit/contributing/releasing.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="Release Lines: A minor release, X.Y.0, carries the roadmap work ( Help Wanted) its milestone tracks; a patch release, X.Y.Z, ships fixes and vendor refreshes; and a vendor bump between releases is ..." />
 <meta name="description" content="Release Lines: A minor release, X.Y.0, carries the roadmap work ( Help Wanted) its milestone tracks; a patch release, X.Y.Z, ships fixes and vendor refreshes; and a vendor bump between releases is ..." />
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="GitHub Actions Workflows" href="workflows.html"><link rel="prev" title="Public Signatures" href="conventions/public-signatures.html">
+        <link rel="canonical" href="https://jarryshaw.github.io/PyPCAPKit/contributing/releasing.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>Release Process - PyPCAPKit</title>
@@ -19,6 +20,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../_static/mermaid.css?v=10b7d883" />
+    <link rel="stylesheet" type="text/css" href="../_static/versions.css?v=2ddb3a12" />
     
     
 
@@ -199,7 +201,14 @@
   
   <span class="sidebar-brand-text">PyPCAPKit</span>
   
-</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+</a>
+<nav class="sidebar-versions" aria-label="Documentation version">
+  <span class="sidebar-versions-label">Version</span>
+  <ul>
+    <li><a href="../contributing/releasing.html" class="current" aria-current="page">latest release</a></li>
+    <li><a href="../dev/contributing/releasing.html">development</a></li>
+  </ul>
+</nav><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
@@ -930,7 +939,8 @@ permissions at read and write, and install it on this repository only. Add
 the Python Versions and Issue and PR Kinds workflows’ <code class="docutils literal notranslate"><span class="pre">pr</span></code> jobs open their
 pull requests with a token of this App, with contents and pull requests write
 only (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1660">#1660</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2561">#2561</a>, <a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a>), and Sync Develop’s with
-contents read and pull requests write (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2942">#2942</a>).</p></li>
+workflows write as well, to move its mirror of <code class="docutils literal notranslate"><span class="pre">main</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2942">#2942</a>,
+<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/3075">#3075</a>).</p></li>
 <li><p>Add repository variables <code class="docutils literal notranslate"><span class="pre">RELEASE_APP_CLIENT_ID</span></code>, the App’s Client ID, and
 <code class="docutils literal notranslate"><span class="pre">RELEASE_APP_BOT_ID</span></code>, its bot’s user id (<code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">api</span>
 <span class="pre">&quot;/users/&lt;app-slug&gt;[bot]&quot;</span> <span class="pre">--jq</span> <span class="pre">.id</span></code>, as the action’s README reads it).</p></li>
@@ -1124,6 +1134,14 @@ nothing published. Without its <code class="docutils literal notranslate"><span 
 reviewer of its own, could push a commit to <code class="docutils literal notranslate"><span class="pre">main</span></code> and cut a <code class="docutils literal notranslate"><span class="pre">conda-*</span></code> tag
 <em>ahead of</em> the approval it is supposed to wait for.</p>
 </section>
+<section id="the-release-s-documentation">
+<h2>The Release’s Documentation<a class="headerlink" href="#the-release-s-documentation" title="Link to this heading">¶</a></h2>
+<p>No release job publishes the documentation (<a class="reference internal" href="workflows.html#documentation-hosting"><span class="std std-ref">Documentation Hosting (#3077)</span></a>). GitHub
+Pages republishes <code class="docutils literal notranslate"><span class="pre">main</span></code>’s build at its root, which <code class="docutils literal notranslate"><span class="pre">/latest/</span></code> aliases, once the
+release’s push passes Unit Tests, and <code class="docutils literal notranslate"><span class="pre">develop</span></code>’s build under <code class="docutils literal notranslate"><span class="pre">/dev/</span></code> on each push
+to <code class="docutils literal notranslate"><span class="pre">develop</span></code>. Read the Docs builds <code class="docutils literal notranslate"><span class="pre">latest</span></code> from <code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">develop</span></code>, and the
+release’s tag as a version of its own, from the <code class="file docutils literal notranslate"><span class="pre">.readthedocs.yaml</span></code> in its tree.</p>
+</section>
 <section id="precautions">
 <h2>Precautions<a class="headerlink" href="#precautions" title="Link to this heading">¶</a></h2>
 <div class="admonition warning">
@@ -1312,6 +1330,7 @@ attention, not that the release needs a hand-rolled recovery.</p>
 <li><a class="reference internal" href="#per-job-evidence-not-a-shared-proxy">Per-Job Evidence, Not a Shared Proxy</a></li>
 <li><a class="reference internal" href="#the-skip-cascade-guard">The Skip-Cascade Guard</a></li>
 <li><a class="reference internal" href="#the-release-pipeline">The Release Pipeline</a></li>
+<li><a class="reference internal" href="#the-release-s-documentation">The Release’s Documentation</a></li>
 <li><a class="reference internal" href="#precautions">Precautions</a></li>
 <li><a class="reference internal" href="#recovery">Recovery</a></li>
 </ul>

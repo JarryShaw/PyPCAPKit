@@ -5,11 +5,12 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta property="og:title" content="Maintenance Workflow" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/maintenance.html" />
+<meta property="og:url" content="https://jarryshaw.github.io/PyPCAPKit/contributing/maintenance.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="Actors and Roles:,,, Actor, Responsible for, Never,,, Owner, Rulings and merges, given in GitHub comments on the issue or pull request. Merges, tags and releases are the owner’s alone., Asked to de..." />
 <meta name="description" content="Actors and Roles:,,, Actor, Responsible for, Never,,, Owner, Rulings and merges, given in GitHub comments on the issue or pull request. Merges, tags and releases are the owner’s alone., Asked to de..." />
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Help Wanted" href="pep.html"><link rel="prev" title="GitHub Actions Workflows" href="workflows.html">
+        <link rel="canonical" href="https://jarryshaw.github.io/PyPCAPKit/contributing/maintenance.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>Maintenance Workflow - PyPCAPKit</title>
@@ -19,6 +20,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../_static/mermaid.css?v=10b7d883" />
+    <link rel="stylesheet" type="text/css" href="../_static/versions.css?v=2ddb3a12" />
     
     
 
@@ -199,7 +201,14 @@
   
   <span class="sidebar-brand-text">PyPCAPKit</span>
   
-</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+</a>
+<nav class="sidebar-versions" aria-label="Documentation version">
+  <span class="sidebar-versions-label">Version</span>
+  <ul>
+    <li><a href="../contributing/maintenance.html" class="current" aria-current="page">latest release</a></li>
+    <li><a href="../dev/contributing/maintenance.html">development</a></li>
+  </ul>
+</nav><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
@@ -1050,7 +1059,10 @@ finish.</p></li>
 <li><p><strong>Rebases</strong>: a pull request the merge made conflicting is rebased and noted, as in
 the sweep. One that is only behind is left alone: <code class="docutils literal notranslate"><span class="pre">main</span></code>’s ruleset requires
 branches to be up to date, every push to <code class="docutils literal notranslate"><span class="pre">main</span></code> puts every open pull request
-behind, and the owner merges through the bypass.</p></li>
+behind, and the owner merges through the bypass. Sync Develop’s pull request is
+neither rebased nor updated: its head, <code class="docutils literal notranslate"><span class="pre">sync/main</span></code>, is a mirror of <code class="docutils literal notranslate"><span class="pre">main</span></code> that
+each run overwrites, so a conflict is resolved in a pull request into <code class="docutils literal notranslate"><span class="pre">develop</span></code>
+(<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/3075">#3075</a>, <a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a>).</p></li>
 <li><p><strong>The changelog fold</strong>: the merged pull request’s entry is written into the
 release’s central changelog pull request (<a class="reference internal" href="releasing.html#release-lines"><span class="std std-ref">Release Lines</span></a>).</p></li>
 <li><p><strong>Worktrees and branch</strong>: the merged pull request’s worktrees become prunable, and
@@ -1189,7 +1201,8 @@ not delete it on merge.</p></li>
 <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">api</span> <span class="pre">-X</span> <span class="pre">DELETE</span> <span class="pre">repos/JarryShaw/PyPCAPKit/git/refs/heads/&lt;branch&gt;</span></code>. A
 <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">push</span> <span class="pre">--delete</span></code> naming more than five refs is refused: a repository rule
 caps a push at five branch or tag updates (<code class="docutils literal notranslate"><span class="pre">GH013</span></code>).</p></li>
-<li><p><strong>Branches under</strong> <code class="docutils literal notranslate"><span class="pre">test/</span></code> <strong>are kept.</strong></p></li>
+<li><p><strong>Branches under</strong> <code class="docutils literal notranslate"><span class="pre">test/</span></code> <strong>are kept</strong>, and so is <code class="docutils literal notranslate"><span class="pre">sync/main</span></code>, which Sync
+Develop owns: deleting it closes the pull request open from it (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/3075">#3075</a>).</p></li>
 </ul>
 </section>
 </section>
