@@ -72,7 +72,7 @@ At a Glance
      - ``workflow_dispatch``
    * - GitHub Pages
      - :file:`deploy-pages.yml`
-     - ``develop``
+     - --
      - ``main``, ``develop``
      - Sat 02:00
      - **Unit Tests**
@@ -147,6 +147,13 @@ At a Glance
      - --
      - --
      - ``workflow_dispatch``
+   * - Stable Branch
+     - :file:`stable-branch.yml`
+     - ``main``
+     - --
+     - --
+     - --
+     - ``workflow_dispatch``
    * - Engine Benchmark
      - :file:`benchmark.yml`
      - --
@@ -168,10 +175,10 @@ At a Glance
 the publishing ones on ``main`` alone: Vendor Update, Conda Update and GitHub Pages
 each skip a Unit Tests run whose ``.head_branch`` is not ``main``, so the Create
 Release run that follows releases nothing, as for a pull request's run. GitHub Pages
-also publishes ``develop``'s build, on each push to it (`Documentation Hosting
-(#3077)`_), and builds the docs for a pull request to either branch and publishes
-none, as ``publish-pages`` skips every ``pull_request`` run. Every schedule runs on
-``main``, the default branch.
+builds the docs for a pull request to either branch and publishes none, as
+``publish-pages`` skips every ``pull_request`` run; ``develop``'s build is on Read the
+Docs alone (`Documentation Hosting (#3077)`_). Every schedule runs on ``main``, the
+default branch.
 
 The Graph
 ---------
@@ -189,7 +196,6 @@ run id.
    flowchart LR
        PUSH["push: main, develop"]
        PUSHMAIN["push: main"]
-       PUSHDEV["push: develop"]
        PR["pull_request: main, develop"]
        SAT["schedule: Saturday"]
        MON["schedule: Monday"]
@@ -213,6 +219,7 @@ run id.
        CT["CI Timing<br/>ci-timing.yml"]
        BM["Engine Benchmark<br/>benchmark.yml"]
        SD["Sync Develop<br/>sync-develop.yml"]
+       SB["Stable Branch<br/>stable-branch.yml"]
        PS["Project Status<br/>project-status.yml"]
        MS["Milestone<br/>milestone.yml"]
        CR["Create Release<br/>create-release.yml"]
@@ -231,7 +238,6 @@ run id.
        PR --> CQ
        SAT -->|02:00| CQ
 
-       PUSHDEV --> GP
        PR --> GP
        SAT -->|02:00| GP
        DISPATCH --> GP
@@ -261,6 +267,9 @@ run id.
        PUSHMAIN --> SD
        DISPATCH --> SD
 
+       PUSHMAIN --> SB
+       DISPATCH --> SB
+
        DISPATCH --> PS
        DAILY -->|00:37| PS
        ISSUES --> PS
@@ -273,7 +282,7 @@ run id.
        TAG --> CR
 
        classDef trig fill:none,stroke-dasharray:2 2
-       class PUSH,PUSHMAIN,PUSHDEV,PR,SAT,MON,WED,DISPATCH,DAILY,ISSUES,PRT,TAG trig
+       class PUSH,PUSHMAIN,PR,SAT,MON,WED,DISPATCH,DAILY,ISSUES,PRT,TAG trig
 
 .. mermaid::
 
@@ -2310,6 +2319,25 @@ rather than a squash, and a ``develop`` that does not exist yet is a notice.
 :file:`util/sync_develop.py` holds the rule, and
 :file:`tests/project/test_sync_develop_2942.py` pins it.
 
+Stable Branch (:issue:`3077`)
+-----------------------------
+
+**Stable Branch** (:file:`stable-branch.yml`) keeps the ``stable`` branch at ``main``'s
+head, so that Read the Docs's ``stable`` shows ``main``, as the owner asked in session,
+recorded on :issue:`3077`: Read the Docs builds ``stable`` from a branch of that name
+where one exists, rather than from the newest release tag (`Documentation Hosting
+(#3077)`_). On each push to ``main``, and on dispatch from it, its ``mirror`` job runs
+:file:`util/stable_branch.py` in ``release-app``, with a release App token holding
+contents and workflows write, as Sync Develop's ``pr`` moves ``sync/main``. The script
+reads ``main``'s head afresh, so a re-run of an older push cannot move ``stable`` back,
+then creates ``stable`` there or force-updates it, whatever it holds. It writes no other
+ref, and a run in progress is never cancelled.
+:file:`tests/project/test_stable_branch_3077.py` pins it.
+
+**The owner adds a ruleset on** ``refs/heads/stable`` restricting creations, updates
+and deletions, with the release App as its only bypass actor, so nothing else moves
+the mirror. A change meant for ``stable`` goes to ``main``.
+
 Deployment ``environment:``
 ----------------------------
 
@@ -2322,13 +2350,14 @@ These jobs of ``create-release.yml`` declare a deployment ``environment:``, and
 * ``conda`` -- ``environment: anaconda``
 
 The ``pr`` jobs of ``cron-python-versions.yml``, ``cron-issue-pr-kinds.yml`` and
-``sync-develop.yml`` declare ``environment: release-app``, for the release App's key
-(see `Python Versions`_, `Issue and PR Kinds (#2561)`_ and `Sync Develop (#2942)`_).
+``sync-develop.yml``, and ``stable-branch.yml``'s ``mirror``, declare ``environment:
+release-app``, for the release App's key (see `Python Versions`_, `Issue and PR Kinds
+(#2561)`_, `Sync Develop (#2942)`_ and `Stable Branch (#3077)`_).
 That environment has no reviewer, as the owner ruled on :issue:`2648` that only
 Create Release waits for an approval, and it deploys from ``main`` alone, where
 those jobs run.
 :doc:`releasing`'s "The Release App" says why the key is stored there as well
-as in ``github-release``. Where ``release-app`` has no key, each ``pr`` warns
+as in ``github-release``. Where ``release-app`` has no key, each of those jobs warns
 from its ``Check for the release App's key`` step and skips its other steps.
 :file:`tests/project/test_release_app_environment_2648.py` fails when a job other
 than Create Release's ``github`` names ``github-release``, when ``github`` does
@@ -2370,9 +2399,9 @@ through an ``environment:``-gated deployment. Its ``deploy-pages`` job builds
 the site, a pull request's included, with ``contents: read``, and uploads it
 for ``publish-pages``, which alone holds ``contents: write`` and never runs on
 a pull request. Its ``Check gh-pages holds no newer build`` step skips the
-deploy when ``gh-pages`` already holds a build of its target from a commit this
-run's commit is behind, so a build that finishes late cannot replace newer
-documentation (:issue:`1968`, `Documentation Hosting (#3077)`_). Of these environments, only
+deploy when ``gh-pages`` already holds the build of a commit this run's commit
+is behind, so a build that finishes late cannot replace newer documentation
+(:issue:`1968`). Of these environments, only
 ``github-release`` carries a required reviewer; :doc:`releasing`
 covers why one approval on that single environment is enough to gate the
 whole release graph, and is the page to read for the reasoning rather than
@@ -2383,50 +2412,40 @@ repeating it here.
 Documentation Hosting (:issue:`3077`)
 -------------------------------------
 
-**GitHub Pages** serves two builds from the ``gh-pages`` branch, at
-https://jarryshaw.github.io/PyPCAPKit/:
+**GitHub Pages** serves ``main``'s build alone, at https://jarryshaw.github.io/PyPCAPKit/
+from the ``gh-pages`` branch, and Read the Docs every version, as ruled on
+:issue:`3077`. ``publish-pages`` publishes it after a ``workflow_run`` whose verdict
+covers ``main``'s tip, and on the Saturday schedule.
+
+A Pages path under a version's segment goes to Read the Docs. ``Write the version
+redirects`` runs :file:`util/pages_versions.py` on each build, which adds two files at
+its root, so ``clean`` keeps them, and fails rather than overwrite a page:
 
 .. list-table::
    :header-rows: 1
-   :widths: 14 40 46
+   :widths: 18 82
 
-   * - Folder
+   * - File
      - Holds
-     - Published by
-   * - the root
-     - ``main``'s build
-     - ``publish-pages``, after a ``workflow_run`` whose verdict covers ``main``'s tip
-       and on the Saturday schedule
-   * - ``latest/``
-     - a redirect stub per page of the root build, to that page at the root
-     - the root publish, carrying what ``Write the /latest/ redirects`` writes with
-       :file:`util/pages_latest.py`
-   * - ``dev/``
-     - ``develop``'s build
-     - ``publish-pages``, on each push to ``develop``, with no ``head`` gate and no
-       report
-
-Each build names its folder to :file:`docs/source/conf.py` in ``PAGES_FOLDER``, which
-sets its canonical and edit links, and the sidebar links each page to its copy in the
-other build. The two publishes cannot clobber each other:
-
-*  **Each waits in its target's own concurrency group**, ``publish-pages-root`` or
-   ``publish-pages-dev``, so neither cancels the other's pending publish.
-*  **Each writes its own folder alone.** ``develop``'s deploys into ``dev/`` through
-   ``target-folder``, and the root's ``clean`` keeps ``dev/`` through
-   ``clean-exclude``.
-*  **Neither force-pushes** (``force: false``): a push the other target landed first
-   is fetched and rebased onto, not overwritten.
-
-``Check gh-pages holds no newer build`` compares against the newest build of its own
-target among the last 100 ``gh-pages`` commits, which name it in their message.
+   * - ``versions.json``
+     - each version's path segment, mapped to its Read the Docs URL: ``latest``,
+       ``stable``, ``dev``, then every ``v*`` release tag ``origin`` lists, pre- and
+       post-releases included, in version order. A ``conda-*`` tag is none.
+   * - ``404.html``
+     - the page GitHub Pages serves for a missing path. Under a segment
+       ``versions.json`` lists, it sends the reader to the same page on Read the
+       Docs, the query and fragment kept; anywhere else, it says the page is not
+       found.
 
 **Read the Docs** builds the ``pypcapkit`` project outside GitHub Actions, at
-https://pypcapkit.jarryshaw.me/: ``latest`` from ``main``, ``develop``, and each
-release tag from the first that carries :file:`.readthedocs.yaml`, since a version
-builds from that file in its own tree. It installs as the Pages build does. Its flyout
-menu switches versions, so :file:`docs/source/conf.py` leaves out the sidebar switch
-there and takes the canonical URL from ``READTHEDOCS_CANONICAL_URL``.
+https://pypcapkit.jarryshaw.me/: ``stable``, at ``/en/stable/``, from the ``stable``
+branch, `Stable Branch (#3077)`_'s mirror of ``main``; ``latest`` and ``dev``, at
+``/en/latest/`` and ``/en/dev/``, from ``develop``; and each release tag at
+``/en/<tag>/`` from the first that carries :file:`.readthedocs.yaml`, since a version
+builds from that file in its own tree. It installs as the Pages build does. Every other
+build's sidebar links to it under the brand; there its own flyout menu switches
+versions, so :file:`docs/source/conf.py` leaves the link out and takes the canonical URL
+from ``READTHEDOCS_CANONICAL_URL``.
 
-:file:`tests/project/test_pages_dev_latest_3077.py` and
+:file:`tests/project/test_pages_versions_3077.py` and
 :file:`tests/project/test_readthedocs_config_3077.py` pin both.

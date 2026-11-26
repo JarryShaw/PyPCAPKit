@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Page not found - PyPCAPKit</title>
+<script>
+(function () {
+  var base = "/PyPCAPKit/";
+  var path = location.pathname;
+  if (path.slice(0, base.length) !== base) return;
+  var rest = path.slice(base.length);
+  var slash = rest.indexOf("/");
+  var segment = slash < 0 ? rest : rest.slice(0, slash);
+  var page = slash < 0 ? "" : rest.slice(slash + 1);
+  if (!segment) return;
+  fetch(base + "versions.json").then(function (response) {
+    return response.ok ? response.json() : {};
+  }).then(function (versions) {
+    if (Object.prototype.hasOwnProperty.call(versions, segment)) {
+      location.replace(versions[segment] + page + location.search + location.hash);
+    }
+  }).catch(function () {});
+})();
+</script>
+</head>
+<body>
+<h1>Page not found</h1>
+<p>Nothing is at this address. <a href="https://jarryshaw.github.io/PyPCAPKit/">Go to the PyPCAPKit documentation</a>.</p>
+</body>
+</html>

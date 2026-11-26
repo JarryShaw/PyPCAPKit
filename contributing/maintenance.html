@@ -20,7 +20,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../_static/mermaid.css?v=10b7d883" />
-    <link rel="stylesheet" type="text/css" href="../_static/versions.css?v=2ddb3a12" />
+    <link rel="stylesheet" type="text/css" href="../_static/versions.css?v=cb5dadd8" />
     
     
 
@@ -201,14 +201,9 @@
   
   <span class="sidebar-brand-text">PyPCAPKit</span>
   
-</a>
-<nav class="sidebar-versions" aria-label="Documentation version">
-  <span class="sidebar-versions-label">Version</span>
-  <ul>
-    <li><a href="../contributing/maintenance.html" class="current" aria-current="page">latest release</a></li>
-    <li><a href="../dev/contributing/maintenance.html">development</a></li>
-  </ul>
-</nav><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+</a><div class="sidebar-versions">
+  <a href="https://pypcapkit.jarryshaw.me/">All versions on Read the Docs</a>
+</div><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
@@ -1202,7 +1197,9 @@ not delete it on merge.</p></li>
 <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">push</span> <span class="pre">--delete</span></code> naming more than five refs is refused: a repository rule
 caps a push at five branch or tag updates (<code class="docutils literal notranslate"><span class="pre">GH013</span></code>).</p></li>
 <li><p><strong>Branches under</strong> <code class="docutils literal notranslate"><span class="pre">test/</span></code> <strong>are kept</strong>, and so is <code class="docutils literal notranslate"><span class="pre">sync/main</span></code>, which Sync
-Develop owns: deleting it closes the pull request open from it (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/3075">#3075</a>).</p></li>
+Develop owns: deleting it closes the pull request open from it (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/3075">#3075</a>). So is
+<code class="docutils literal notranslate"><span class="pre">stable</span></code>, which Stable Branch owns and Read the Docs builds <code class="docutils literal notranslate"><span class="pre">stable</span></code> from
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3077">#3077</a>).</p></li>
 </ul>
 </section>
 </section>

@@ -20,7 +20,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../_static/mermaid.css?v=10b7d883" />
-    <link rel="stylesheet" type="text/css" href="../_static/versions.css?v=2ddb3a12" />
+    <link rel="stylesheet" type="text/css" href="../_static/versions.css?v=cb5dadd8" />
     
     
 
@@ -201,14 +201,9 @@
   
   <span class="sidebar-brand-text">PyPCAPKit</span>
   
-</a>
-<nav class="sidebar-versions" aria-label="Documentation version">
-  <span class="sidebar-versions-label">Version</span>
-  <ul>
-    <li><a href="../contributing/releasing.html" class="current" aria-current="page">latest release</a></li>
-    <li><a href="../dev/contributing/releasing.html">development</a></li>
-  </ul>
-</nav><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+</a><div class="sidebar-versions">
+  <a href="https://pypcapkit.jarryshaw.me/">All versions on Read the Docs</a>
+</div><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
@@ -940,7 +935,8 @@ the Python Versions and Issue and PR Kinds workflows’ <code class="docutils li
 pull requests with a token of this App, with contents and pull requests write
 only (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1660">#1660</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2561">#2561</a>, <a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a>), and Sync Develop’s with
 workflows write as well, to move its mirror of <code class="docutils literal notranslate"><span class="pre">main</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2942">#2942</a>,
-<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/3075">#3075</a>).</p></li>
+<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/3075">#3075</a>). Stable Branch’s <code class="docutils literal notranslate"><span class="pre">mirror</span></code> job moves <code class="docutils literal notranslate"><span class="pre">stable</span></code> with contents and
+workflows write alone (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3077">#3077</a>).</p></li>
 <li><p>Add repository variables <code class="docutils literal notranslate"><span class="pre">RELEASE_APP_CLIENT_ID</span></code>, the App’s Client ID, and
 <code class="docutils literal notranslate"><span class="pre">RELEASE_APP_BOT_ID</span></code>, its bot’s user id (<code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">api</span>
 <span class="pre">&quot;/users/&lt;app-slug&gt;[bot]&quot;</span> <span class="pre">--jq</span> <span class="pre">.id</span></code>, as the action’s README reads it).</p></li>
@@ -952,15 +948,15 @@ rotation, rather than at the repository, where every job could read it:</p>
 a job cannot access environment secrets until one of the required reviewers
 approves it”.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">release-app</span></code>, for the <code class="docutils literal notranslate"><span class="pre">pr</span></code> jobs of Python Versions, Issue and PR
-Kinds, and Sync Develop. Create it with no required reviewer and its
-deployment branches limited to <code class="docutils literal notranslate"><span class="pre">main</span></code>, where those jobs run.</p></li>
+Kinds and Sync Develop, and Stable Branch’s <code class="docutils literal notranslate"><span class="pre">mirror</span></code>. Create it with no
+required reviewer and its deployment branches limited to <code class="docutils literal notranslate"><span class="pre">main</span></code>, where
+those jobs run.</p></li>
 </ul>
-<p>A job reads only the secrets of the environment it names, so those <code class="docutils literal notranslate"><span class="pre">pr</span></code>
-jobs need a copy outside <code class="docutils literal notranslate"><span class="pre">github-release</span></code>, or they would wait on its
-approval, which the owner ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2648">#2648</a> is for Create Release alone.
-<code class="docutils literal notranslate"><span class="pre">github</span></code> is the only job naming <code class="docutils literal notranslate"><span class="pre">github-release</span></code>, and those <code class="docutils literal notranslate"><span class="pre">pr</span></code> jobs
-the only others reading the key; where <code class="docutils literal notranslate"><span class="pre">release-app</span></code> has no key, each warns
-and opens nothing.</p>
+<p>A job reads only the secrets of the environment it names, so those jobs need
+a copy outside <code class="docutils literal notranslate"><span class="pre">github-release</span></code>, or they would wait on its approval, which
+the owner ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2648">#2648</a> is for Create Release alone. <code class="docutils literal notranslate"><span class="pre">github</span></code> is
+the only job naming <code class="docutils literal notranslate"><span class="pre">github-release</span></code>, and those jobs the only others
+reading the key; where <code class="docutils literal notranslate"><span class="pre">release-app</span></code> has no key, each warns and skips.</p>
 </li>
 </ol>
 <p>Unlike <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code>’s, the App’s tag starts a tag-push run. It would rerun
@@ -1137,10 +1133,13 @@ reviewer of its own, could push a commit to <code class="docutils literal notran
 <section id="the-release-s-documentation">
 <h2>The Release’s Documentation<a class="headerlink" href="#the-release-s-documentation" title="Link to this heading">¶</a></h2>
 <p>No release job publishes the documentation (<a class="reference internal" href="workflows.html#documentation-hosting"><span class="std std-ref">Documentation Hosting (#3077)</span></a>). GitHub
-Pages republishes <code class="docutils literal notranslate"><span class="pre">main</span></code>’s build at its root, which <code class="docutils literal notranslate"><span class="pre">/latest/</span></code> aliases, once the
-release’s push passes Unit Tests, and <code class="docutils literal notranslate"><span class="pre">develop</span></code>’s build under <code class="docutils literal notranslate"><span class="pre">/dev/</span></code> on each push
-to <code class="docutils literal notranslate"><span class="pre">develop</span></code>. Read the Docs builds <code class="docutils literal notranslate"><span class="pre">latest</span></code> from <code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">develop</span></code>, and the
-release’s tag as a version of its own, from the <code class="file docutils literal notranslate"><span class="pre">.readthedocs.yaml</span></code> in its tree.</p>
+Pages republishes <code class="docutils literal notranslate"><span class="pre">main</span></code>’s build once the release’s push passes Unit Tests. That
+build runs alongside Create Release, so its <code class="docutils literal notranslate"><span class="pre">versions.json</span></code> may predate the release’s
+tag, which the next publish lists – the next push to <code class="docutils literal notranslate"><span class="pre">main</span></code> or the Saturday
+schedule. Read the Docs builds <code class="docutils literal notranslate"><span class="pre">stable</span></code> from the <code class="docutils literal notranslate"><span class="pre">stable</span></code> branch, which Stable
+Branch moves to <code class="docutils literal notranslate"><span class="pre">main</span></code>’s head on each push there, <code class="docutils literal notranslate"><span class="pre">latest</span></code> and <code class="docutils literal notranslate"><span class="pre">dev</span></code> from
+<code class="docutils literal notranslate"><span class="pre">develop</span></code>, and the release’s tag as a version of its own, from the
+<code class="file docutils literal notranslate"><span class="pre">.readthedocs.yaml</span></code> in its tree.</p>
 </section>
 <section id="precautions">
 <h2>Precautions<a class="headerlink" href="#precautions" title="Link to this heading">¶</a></h2>

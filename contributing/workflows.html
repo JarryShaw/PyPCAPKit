@@ -20,7 +20,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../_static/mermaid.css?v=10b7d883" />
-    <link rel="stylesheet" type="text/css" href="../_static/versions.css?v=2ddb3a12" />
+    <link rel="stylesheet" type="text/css" href="../_static/versions.css?v=cb5dadd8" />
     
     
 
@@ -201,14 +201,9 @@
   
   <span class="sidebar-brand-text">PyPCAPKit</span>
   
-</a>
-<nav class="sidebar-versions" aria-label="Documentation version">
-  <span class="sidebar-versions-label">Version</span>
-  <ul>
-    <li><a href="../contributing/workflows.html" class="current" aria-current="page">latest release</a></li>
-    <li><a href="../dev/contributing/workflows.html">development</a></li>
-  </ul>
-</nav><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+</a><div class="sidebar-versions">
+  <a href="https://pypcapkit.jarryshaw.me/">All versions on Read the Docs</a>
+</div><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
@@ -682,7 +677,7 @@ page is the repository-wide graph; the release pipeline, job by job, is on
 </tr>
 <tr class="row-odd"><td><p>GitHub Pages</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">develop</span></code></p></td>
+<td><p>–</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">develop</span></code></p></td>
 <td><p>Sat 02:00</p></td>
 <td><p><strong>Unit Tests</strong></p></td>
@@ -768,7 +763,15 @@ page is the repository-wide graph; the release pipeline, job by job, is on
 <td><p>–</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>Engine Benchmark</p></td>
+<tr class="row-even"><td><p>Stable Branch</p></td>
+<td><p><code class="file docutils literal notranslate"><span class="pre">stable-branch.yml</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Engine Benchmark</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">benchmark.yml</span></code></p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
@@ -792,10 +795,10 @@ for when no upstream run exists to chain from.</p>
 the publishing ones on <code class="docutils literal notranslate"><span class="pre">main</span></code> alone: Vendor Update, Conda Update and GitHub Pages
 each skip a Unit Tests run whose <code class="docutils literal notranslate"><span class="pre">.head_branch</span></code> is not <code class="docutils literal notranslate"><span class="pre">main</span></code>, so the Create
 Release run that follows releases nothing, as for a pull request’s run. GitHub Pages
-also publishes <code class="docutils literal notranslate"><span class="pre">develop</span></code>’s build, on each push to it (<a class="reference internal" href="#documentation-hosting-3077">Documentation Hosting
-(#3077)</a>), and builds the docs for a pull request to either branch and publishes
-none, as <code class="docutils literal notranslate"><span class="pre">publish-pages</span></code> skips every <code class="docutils literal notranslate"><span class="pre">pull_request</span></code> run. Every schedule runs on
-<code class="docutils literal notranslate"><span class="pre">main</span></code>, the default branch.</p>
+builds the docs for a pull request to either branch and publishes none, as
+<code class="docutils literal notranslate"><span class="pre">publish-pages</span></code> skips every <code class="docutils literal notranslate"><span class="pre">pull_request</span></code> run; <code class="docutils literal notranslate"><span class="pre">develop</span></code>’s build is on Read the
+Docs alone (<a class="reference internal" href="#documentation-hosting-3077">Documentation Hosting (#3077)</a>). Every schedule runs on <code class="docutils literal notranslate"><span class="pre">main</span></code>, the
+default branch.</p>
 </section>
 <section id="the-graph">
 <h2>The Graph<a class="headerlink" href="#the-graph" title="Link to this heading">¶</a></h2>
@@ -810,7 +813,6 @@ run id.</p>
         flowchart LR
     PUSH[&quot;push: main, develop&quot;]
     PUSHMAIN[&quot;push: main&quot;]
-    PUSHDEV[&quot;push: develop&quot;]
     PR[&quot;pull_request: main, develop&quot;]
     SAT[&quot;schedule: Saturday&quot;]
     MON[&quot;schedule: Monday&quot;]
@@ -834,6 +836,7 @@ run id.</p>
     CT[&quot;CI Timing&lt;br/&gt;ci-timing.yml&quot;]
     BM[&quot;Engine Benchmark&lt;br/&gt;benchmark.yml&quot;]
     SD[&quot;Sync Develop&lt;br/&gt;sync-develop.yml&quot;]
+    SB[&quot;Stable Branch&lt;br/&gt;stable-branch.yml&quot;]
     PS[&quot;Project Status&lt;br/&gt;project-status.yml&quot;]
     MS[&quot;Milestone&lt;br/&gt;milestone.yml&quot;]
     CR[&quot;Create Release&lt;br/&gt;create-release.yml&quot;]
@@ -852,7 +855,6 @@ run id.</p>
     PR --&gt; CQ
     SAT --&gt;|02:00| CQ
 
-    PUSHDEV --&gt; GP
     PR --&gt; GP
     SAT --&gt;|02:00| GP
     DISPATCH --&gt; GP
@@ -882,6 +884,9 @@ run id.</p>
     PUSHMAIN --&gt; SD
     DISPATCH --&gt; SD
 
+    PUSHMAIN --&gt; SB
+    DISPATCH --&gt; SB
+
     DISPATCH --&gt; PS
     DAILY --&gt;|00:37| PS
     ISSUES --&gt; PS
@@ -894,7 +899,7 @@ run id.</p>
     TAG --&gt; CR
 
     classDef trig fill:none,stroke-dasharray:2 2
-    class PUSH,PUSHMAIN,PUSHDEV,PR,SAT,MON,WED,DISPATCH,DAILY,ISSUES,PRT,TAG trig
+    class PUSH,PUSHMAIN,PR,SAT,MON,WED,DISPATCH,DAILY,ISSUES,PRT,TAG trig
     </pre><pre  class="mermaid">
         ---
 config:
@@ -2894,6 +2899,23 @@ rather than a squash, and a <code class="docutils literal notranslate"><span cla
 <code class="file docutils literal notranslate"><span class="pre">util/sync_develop.py</span></code> holds the rule, and
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_sync_develop_2942.py</span></code> pins it.</p>
 </section>
+<section id="stable-branch-3077">
+<h2>Stable Branch (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3077">#3077</a>)<a class="headerlink" href="#stable-branch-3077" title="Link to this heading">¶</a></h2>
+<p><strong>Stable Branch</strong> (<code class="file docutils literal notranslate"><span class="pre">stable-branch.yml</span></code>) keeps the <code class="docutils literal notranslate"><span class="pre">stable</span></code> branch at <code class="docutils literal notranslate"><span class="pre">main</span></code>’s
+head, so that Read the Docs’s <code class="docutils literal notranslate"><span class="pre">stable</span></code> shows <code class="docutils literal notranslate"><span class="pre">main</span></code>, as the owner asked in session,
+recorded on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3077">#3077</a>: Read the Docs builds <code class="docutils literal notranslate"><span class="pre">stable</span></code> from a branch of that name
+where one exists, rather than from the newest release tag (<a class="reference internal" href="#documentation-hosting-3077">Documentation Hosting
+(#3077)</a>). On each push to <code class="docutils literal notranslate"><span class="pre">main</span></code>, and on dispatch from it, its <code class="docutils literal notranslate"><span class="pre">mirror</span></code> job runs
+<code class="file docutils literal notranslate"><span class="pre">util/stable_branch.py</span></code> in <code class="docutils literal notranslate"><span class="pre">release-app</span></code>, with a release App token holding
+contents and workflows write, as Sync Develop’s <code class="docutils literal notranslate"><span class="pre">pr</span></code> moves <code class="docutils literal notranslate"><span class="pre">sync/main</span></code>. The script
+reads <code class="docutils literal notranslate"><span class="pre">main</span></code>’s head afresh, so a re-run of an older push cannot move <code class="docutils literal notranslate"><span class="pre">stable</span></code> back,
+then creates <code class="docutils literal notranslate"><span class="pre">stable</span></code> there or force-updates it, whatever it holds. It writes no other
+ref, and a run in progress is never cancelled.
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_stable_branch_3077.py</span></code> pins it.</p>
+<p><strong>The owner adds a ruleset on</strong> <code class="docutils literal notranslate"><span class="pre">refs/heads/stable</span></code> restricting creations, updates
+and deletions, with the release App as its only bypass actor, so nothing else moves
+the mirror. A change meant for <code class="docutils literal notranslate"><span class="pre">stable</span></code> goes to <code class="docutils literal notranslate"><span class="pre">main</span></code>.</p>
+</section>
 <section id="deployment-environment">
 <h2>Deployment <code class="docutils literal notranslate"><span class="pre">environment:</span></code><a class="headerlink" href="#deployment-environment" title="Link to this heading">¶</a></h2>
 <p>These jobs of <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> declare a deployment <code class="docutils literal notranslate"><span class="pre">environment:</span></code>, and
@@ -2905,13 +2927,14 @@ rather than a squash, and a <code class="docutils literal notranslate"><span cla
 <li><p><code class="docutils literal notranslate"><span class="pre">conda</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">anaconda</span></code></p></li>
 </ul>
 <p>The <code class="docutils literal notranslate"><span class="pre">pr</span></code> jobs of <code class="docutils literal notranslate"><span class="pre">cron-python-versions.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">cron-issue-pr-kinds.yml</span></code> and
-<code class="docutils literal notranslate"><span class="pre">sync-develop.yml</span></code> declare <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">release-app</span></code>, for the release App’s key
-(see <a class="reference internal" href="#python-versions">Python Versions</a>, <a class="reference internal" href="#issue-and-pr-kinds-2561">Issue and PR Kinds (#2561)</a> and <a class="reference internal" href="#sync-develop-2942">Sync Develop (#2942)</a>).
+<code class="docutils literal notranslate"><span class="pre">sync-develop.yml</span></code>, and <code class="docutils literal notranslate"><span class="pre">stable-branch.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">mirror</span></code>, declare <code class="docutils literal notranslate"><span class="pre">environment:</span>
+<span class="pre">release-app</span></code>, for the release App’s key (see <a class="reference internal" href="#python-versions">Python Versions</a>, <a class="reference internal" href="#issue-and-pr-kinds-2561">Issue and PR Kinds
+(#2561)</a>, <a class="reference internal" href="#sync-develop-2942">Sync Develop (#2942)</a> and <a class="reference internal" href="#stable-branch-3077">Stable Branch (#3077)</a>).
 That environment has no reviewer, as the owner ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2648">#2648</a> that only
 Create Release waits for an approval, and it deploys from <code class="docutils literal notranslate"><span class="pre">main</span></code> alone, where
 those jobs run.
 <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>’s “The Release App” says why the key is stored there as well
-as in <code class="docutils literal notranslate"><span class="pre">github-release</span></code>. Where <code class="docutils literal notranslate"><span class="pre">release-app</span></code> has no key, each <code class="docutils literal notranslate"><span class="pre">pr</span></code> warns
+as in <code class="docutils literal notranslate"><span class="pre">github-release</span></code>. Where <code class="docutils literal notranslate"><span class="pre">release-app</span></code> has no key, each of those jobs warns
 from its <code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">for</span> <span class="pre">the</span> <span class="pre">release</span> <span class="pre">App's</span> <span class="pre">key</span></code> step and skips its other steps.
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_release_app_environment_2648.py</span></code> fails when a job other
 than Create Release’s <code class="docutils literal notranslate"><span class="pre">github</span></code> names <code class="docutils literal notranslate"><span class="pre">github-release</span></code>, when <code class="docutils literal notranslate"><span class="pre">github</span></code> does
@@ -2949,9 +2972,9 @@ through an <code class="docutils literal notranslate"><span class="pre">environm
 the site, a pull request’s included, with <code class="docutils literal notranslate"><span class="pre">contents:</span> <span class="pre">read</span></code>, and uploads it
 for <code class="docutils literal notranslate"><span class="pre">publish-pages</span></code>, which alone holds <code class="docutils literal notranslate"><span class="pre">contents:</span> <span class="pre">write</span></code> and never runs on
 a pull request. Its <code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">gh-pages</span> <span class="pre">holds</span> <span class="pre">no</span> <span class="pre">newer</span> <span class="pre">build</span></code> step skips the
-deploy when <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code> already holds a build of its target from a commit this
-run’s commit is behind, so a build that finishes late cannot replace newer
-documentation (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>, <a class="reference internal" href="#documentation-hosting-3077">Documentation Hosting (#3077)</a>). Of these environments, only
+deploy when <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code> already holds the build of a commit this run’s commit
+is behind, so a build that finishes late cannot replace newer documentation
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>). Of these environments, only
 <code class="docutils literal notranslate"><span class="pre">github-release</span></code> carries a required reviewer; <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>
 covers why one approval on that single environment is enough to gate the
 whole release graph, and is the page to read for the reasoning rather than
@@ -2959,61 +2982,49 @@ repeating it here.</p>
 </section>
 <section id="documentation-hosting-3077">
 <span id="documentation-hosting"></span><h2>Documentation Hosting (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3077">#3077</a>)<a class="headerlink" href="#documentation-hosting-3077" title="Link to this heading">¶</a></h2>
-<p><strong>GitHub Pages</strong> serves two builds from the <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code> branch, at
-<a class="reference external" href="https://jarryshaw.github.io/PyPCAPKit/">https://jarryshaw.github.io/PyPCAPKit/</a>:</p>
+<p><strong>GitHub Pages</strong> serves <code class="docutils literal notranslate"><span class="pre">main</span></code>’s build alone, at <a class="reference external" href="https://jarryshaw.github.io/PyPCAPKit/">https://jarryshaw.github.io/PyPCAPKit/</a>
+from the <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code> branch, and Read the Docs every version, as ruled on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3077">#3077</a>. <code class="docutils literal notranslate"><span class="pre">publish-pages</span></code> publishes it after a <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> whose verdict
+covers <code class="docutils literal notranslate"><span class="pre">main</span></code>’s tip, and on the Saturday schedule.</p>
+<p>A Pages path under a version’s segment goes to Read the Docs. <code class="docutils literal notranslate"><span class="pre">Write</span> <span class="pre">the</span> <span class="pre">version</span>
+<span class="pre">redirects</span></code> runs <code class="file docutils literal notranslate"><span class="pre">util/pages_versions.py</span></code> on each build, which adds two files at
+its root, so <code class="docutils literal notranslate"><span class="pre">clean</span></code> keeps them, and fails rather than overwrite a page:</p>
 <div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">
 <colgroup>
-<col style="width: 14.0%" />
-<col style="width: 40.0%" />
-<col style="width: 46.0%" />
+<col style="width: 18.0%" />
+<col style="width: 82.0%" />
 </colgroup>
 <thead>
-<tr class="row-odd"><th class="head"><p>Folder</p></th>
+<tr class="row-odd"><th class="head"><p>File</p></th>
 <th class="head"><p>Holds</p></th>
-<th class="head"><p>Published by</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>the root</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code>’s build</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">publish-pages</span></code>, after a <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> whose verdict covers <code class="docutils literal notranslate"><span class="pre">main</span></code>’s tip
-and on the Saturday schedule</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">versions.json</span></code></p></td>
+<td><p>each version’s path segment, mapped to its Read the Docs URL: <code class="docutils literal notranslate"><span class="pre">latest</span></code>,
+<code class="docutils literal notranslate"><span class="pre">stable</span></code>, <code class="docutils literal notranslate"><span class="pre">dev</span></code>, then every <code class="docutils literal notranslate"><span class="pre">v*</span></code> release tag <code class="docutils literal notranslate"><span class="pre">origin</span></code> lists, pre- and
+post-releases included, in version order. A <code class="docutils literal notranslate"><span class="pre">conda-*</span></code> tag is none.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">latest/</span></code></p></td>
-<td><p>a redirect stub per page of the root build, to that page at the root</p></td>
-<td><p>the root publish, carrying what <code class="docutils literal notranslate"><span class="pre">Write</span> <span class="pre">the</span> <span class="pre">/latest/</span> <span class="pre">redirects</span></code> writes with
-<code class="file docutils literal notranslate"><span class="pre">util/pages_latest.py</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dev/</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">develop</span></code>’s build</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">publish-pages</span></code>, on each push to <code class="docutils literal notranslate"><span class="pre">develop</span></code>, with no <code class="docutils literal notranslate"><span class="pre">head</span></code> gate and no
-report</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">404.html</span></code></p></td>
+<td><p>the page GitHub Pages serves for a missing path. Under a segment
+<code class="docutils literal notranslate"><span class="pre">versions.json</span></code> lists, it sends the reader to the same page on Read the
+Docs, the query and fragment kept; anywhere else, it says the page is not
+found.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>Each build names its folder to <code class="file docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code> in <code class="docutils literal notranslate"><span class="pre">PAGES_FOLDER</span></code>, which
-sets its canonical and edit links, and the sidebar links each page to its copy in the
-other build. The two publishes cannot clobber each other:</p>
-<ul class="simple">
-<li><p><strong>Each waits in its target’s own concurrency group</strong>, <code class="docutils literal notranslate"><span class="pre">publish-pages-root</span></code> or
-<code class="docutils literal notranslate"><span class="pre">publish-pages-dev</span></code>, so neither cancels the other’s pending publish.</p></li>
-<li><p><strong>Each writes its own folder alone.</strong> <code class="docutils literal notranslate"><span class="pre">develop</span></code>’s deploys into <code class="docutils literal notranslate"><span class="pre">dev/</span></code> through
-<code class="docutils literal notranslate"><span class="pre">target-folder</span></code>, and the root’s <code class="docutils literal notranslate"><span class="pre">clean</span></code> keeps <code class="docutils literal notranslate"><span class="pre">dev/</span></code> through
-<code class="docutils literal notranslate"><span class="pre">clean-exclude</span></code>.</p></li>
-<li><p><strong>Neither force-pushes</strong> (<code class="docutils literal notranslate"><span class="pre">force:</span> <span class="pre">false</span></code>): a push the other target landed first
-is fetched and rebased onto, not overwritten.</p></li>
-</ul>
-<p><code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">gh-pages</span> <span class="pre">holds</span> <span class="pre">no</span> <span class="pre">newer</span> <span class="pre">build</span></code> compares against the newest build of its own
-target among the last 100 <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code> commits, which name it in their message.</p>
 <p><strong>Read the Docs</strong> builds the <code class="docutils literal notranslate"><span class="pre">pypcapkit</span></code> project outside GitHub Actions, at
-<a class="reference external" href="https://pypcapkit.jarryshaw.me/">https://pypcapkit.jarryshaw.me/</a>: <code class="docutils literal notranslate"><span class="pre">latest</span></code> from <code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">develop</span></code>, and each
-release tag from the first that carries <code class="file docutils literal notranslate"><span class="pre">.readthedocs.yaml</span></code>, since a version
-builds from that file in its own tree. It installs as the Pages build does. Its flyout
-menu switches versions, so <code class="file docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code> leaves out the sidebar switch
-there and takes the canonical URL from <code class="docutils literal notranslate"><span class="pre">READTHEDOCS_CANONICAL_URL</span></code>.</p>
-<p><code class="file docutils literal notranslate"><span class="pre">tests/project/test_pages_dev_latest_3077.py</span></code> and
+<a class="reference external" href="https://pypcapkit.jarryshaw.me/">https://pypcapkit.jarryshaw.me/</a>: <code class="docutils literal notranslate"><span class="pre">stable</span></code>, at <code class="docutils literal notranslate"><span class="pre">/en/stable/</span></code>, from the <code class="docutils literal notranslate"><span class="pre">stable</span></code>
+branch, <a class="reference internal" href="#stable-branch-3077">Stable Branch (#3077)</a>’s mirror of <code class="docutils literal notranslate"><span class="pre">main</span></code>; <code class="docutils literal notranslate"><span class="pre">latest</span></code> and <code class="docutils literal notranslate"><span class="pre">dev</span></code>, at
+<code class="docutils literal notranslate"><span class="pre">/en/latest/</span></code> and <code class="docutils literal notranslate"><span class="pre">/en/dev/</span></code>, from <code class="docutils literal notranslate"><span class="pre">develop</span></code>; and each release tag at
+<code class="docutils literal notranslate"><span class="pre">/en/&lt;tag&gt;/</span></code> from the first that carries <code class="file docutils literal notranslate"><span class="pre">.readthedocs.yaml</span></code>, since a version
+builds from that file in its own tree. It installs as the Pages build does. Every other
+build’s sidebar links to it under the brand; there its own flyout menu switches
+versions, so <code class="file docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code> leaves the link out and takes the canonical URL
+from <code class="docutils literal notranslate"><span class="pre">READTHEDOCS_CANONICAL_URL</span></code>.</p>
+<p><code class="file docutils literal notranslate"><span class="pre">tests/project/test_pages_versions_3077.py</span></code> and
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_readthedocs_config_3077.py</span></code> pin both.</p>
 </section>
 </section>
@@ -3098,6 +3109,7 @@ there and takes the canonical URL from <code class="docutils literal notranslate
 <li><a class="reference internal" href="#python-versions">Python Versions</a></li>
 <li><a class="reference internal" href="#issue-and-pr-kinds-2561">Issue and PR Kinds (#2561)</a></li>
 <li><a class="reference internal" href="#sync-develop-2942">Sync Develop (#2942)</a></li>
+<li><a class="reference internal" href="#stable-branch-3077">Stable Branch (#3077)</a></li>
 <li><a class="reference internal" href="#deployment-environment">Deployment <code class="docutils literal notranslate"><span class="pre">environment:</span></code></a></li>
 <li><a class="reference internal" href="#documentation-hosting-3077">Documentation Hosting (#3077)</a></li>
 </ul>
