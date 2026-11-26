@@ -1,0 +1,21 @@
+# Read the Docs build of the v0.16.0 documentation (#3077). This file
+# replaces the tag's .readthedocs.yml, which uses keys RTD has removed,
+# and is the only change from the tag.
+version: 2
+
+build:
+  os: ubuntu-24.04
+  tools:
+    python: "3.10"
+  jobs:
+    pre_build:
+      # no viewcode pages (#3077): edit conf.py in the checkout, then prove it
+      - 'sed -i -e "s/.sphinx\.ext\.viewcode.[[:space:]]*,\{0,1\}//" -e "s/app\.connect(.viewcode-[a-z-]*.,[^)]*)/None/" doc/sphinx/source/conf.py'
+      - '! grep -n -e "sphinx\.ext\.viewcode" -e "connect(.viewcode-" doc/sphinx/source/conf.py'
+    install:
+      - python -m pip install --upgrade --no-cache-dir pip setuptools
+      - python -m pip install --exists-action=w --no-cache-dir --uploaded-prior-to 2022-06-01T05:30:02Z -r doc/sphinx/requirements.txt
+      - python -m pip install --upgrade --upgrade-strategy only-if-needed --no-cache-dir "."
+
+sphinx:
+  configuration: doc/sphinx/source/conf.py
