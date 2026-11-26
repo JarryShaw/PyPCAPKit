@@ -583,7 +583,9 @@ Remote Branch Cleanup
    ``git push --delete`` naming more than five refs is refused: a repository rule
    caps a push at five branch or tag updates (``GH013``).
 *  **Branches under** ``test/`` **are kept**, and so is ``sync/main``, which Sync
-   Develop owns: deleting it closes the pull request open from it (:pr:`3075`).
+   Develop owns: deleting it closes the pull request open from it (:pr:`3075`). So is
+   ``stable``, which Stable Branch owns and Read the Docs builds ``stable`` from
+   (:issue:`3077`).
 
 Briefs
 ------

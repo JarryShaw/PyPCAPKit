@@ -5,14 +5,15 @@
 release App's key, ``RELEASE_APP_PRIVATE_KEY``, for Create Release's ``github``.
 The owner ruled on #2648 that an approval at a deployment gate is for Create
 Release alone, so the ``pr`` jobs of Python Versions, Issue and PR Kinds and
-Sync Develop (#2942) read the same key from ``release-app``, which has no reviewer.
+Sync Develop (#2942), and Stable Branch's ``mirror`` (#3077), read the same key
+from ``release-app``, which has no reviewer.
 
 * :class:`TestOnlyCreateReleaseNamesTheGate` scans every workflow: Create
   Release's ``github`` is the only job naming ``github-release``, and every other
   job reading the key names ``release-app``. Its mutation rows show the scan
-  failing on a cron job pointed back at the gate, on ``github`` moved off it,
-  and on any other job, in Create Release or elsewhere, reading the key outside
-  ``release-app``.
+  failing on a ``release-app`` reader pointed back at the gate, on ``github``
+  moved off it, and on any other job, in Create Release or elsewhere, reading
+  the key outside ``release-app``.
 * :class:`TestTheKeyCheck` pins how a ``release-app`` reader behaves while that
   environment holds no key: it warns and skips its other steps rather than
   failing at minting. The check's shell runs here under :program:`bash`.
@@ -45,8 +46,10 @@ if TYPE_CHECKING:
 GATE, APP = 'github-release', 'release-app'
 #: Create Release, and its job that names :data:`GATE`.
 RELEASE, RELEASE_JOB = 'create-release.yml', 'github'
-#: The jobs reading the key from :data:`APP`.
-CRON_READERS = {('cron-issue-pr-kinds.yml', 'pr'), ('cron-python-versions.yml', 'pr'), ('sync-develop.yml', 'pr')}
+#: The jobs reading the key from :data:`APP`, each with what its check warns there
+#: is none of without the key.
+APP_READERS = {('cron-issue-pr-kinds.yml', 'pr'): 'pull request', ('cron-python-versions.yml', 'pr'): 'pull request',
+               ('stable-branch.yml', 'mirror'): 'stable mirror', ('sync-develop.yml', 'pr'): 'pull request'}
 #: A read of the App's private key, as ``secrets.X`` or ``secrets['X']``.
 KEY = re.compile(r"""secrets\s*(?:\.\s*|\[\s*['"])RELEASE_APP_PRIVATE_KEY\b""")
 
@@ -95,8 +98,8 @@ class TestOnlyCreateReleaseNamesTheGate(unittest.TestCase):
         self.assertEqual(violations(workflows()), [])
 
     def test_the_scan_finds_the_readers(self) -> None:
-        """Not vacuous: ``github`` and the cron ``pr`` jobs read the key."""
-        self.assertEqual(readers(workflows()), CRON_READERS | {(RELEASE, RELEASE_JOB)})
+        """Not vacuous: ``github`` and the ``release-app`` jobs read the key."""
+        self.assertEqual(readers(workflows()), set(APP_READERS) | {(RELEASE, RELEASE_JOB)})
 
     def test_each_mutation_is_caught(self) -> None:
         def point(name: 'str', job: 'str', value: 'Any') -> 'Any':
@@ -120,6 +123,8 @@ class TestOnlyCreateReleaseNamesTheGate(unittest.TestCase):
             'Python Versions pointed back at the gate': point('cron-python-versions.yml', 'pr', GATE),
             'Issue and PR Kinds pointed back at the gate': point('cron-issue-pr-kinds.yml', 'pr', GATE),
             'a cron reader naming no environment': point('cron-issue-pr-kinds.yml', 'pr', None),
+            'Stable Branch pointed back at the gate': point('stable-branch.yml', 'mirror', GATE),
+            'Stable Branch naming no environment': point('stable-branch.yml', 'mirror', None),
             "Create Release's github moved off the gate": point(RELEASE, RELEASE_JOB, APP),
             "Create Release's github naming no environment": point(RELEASE, RELEASE_JOB, None),
             'another Create Release job reading the key from conda-tag': reader(RELEASE, 'conda-tag'),
@@ -139,7 +144,13 @@ class TestTheKeyCheck(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         specs = workflows()
-        cls.jobs = {(name, job_id): specs[name]['jobs'][job_id] for name, job_id in sorted(CRON_READERS)}
+        cls.jobs = {(name, job_id): specs[name]['jobs'][job_id] for name, job_id in sorted(APP_READERS)}
+
+    @staticmethod
+    def generic(reader: 'tuple[str, str]', check: 'dict[str, Any]') -> 'str':
+        """``check``, with what its job makes and the job's id replaced by placeholders."""
+        return repr(check).replace(f'No {APP_READERS[reader]} ', 'No <what> ').replace(
+            f'so the {reader[1]} job', 'so the <job> job')
 
     def test_the_first_step_checks_and_every_other_waits_on_it(self) -> None:
         for (name, job_id), job in self.jobs.items():
@@ -150,7 +161,8 @@ class TestTheKeyCheck(unittest.TestCase):
                 self.assertNotIn('if', check)
                 self.assertTrue(rest)
                 self.assertEqual([step.get('if') for step in rest], [GATED] * len(rest))
-        self.assertEqual(len({repr(job['steps'][0]) for job in self.jobs.values()}), 1, 'the checks differ')
+        self.assertEqual(len({self.generic(reader, job['steps'][0]) for reader, job in self.jobs.items()}), 1,
+                         'the checks differ beyond what their jobs make')
 
     def test_an_unset_key_skips_every_other_step(self) -> None:
         """An unset secret reads as an empty string; ``env:`` gets the boolean as text."""
@@ -163,24 +175,30 @@ class TestTheKeyCheck(unittest.TestCase):
 
     @unittest.skipIf(not BASH, 'needs bash on PATH')
     def test_the_check_warns_and_writes_its_output(self) -> None:
-        script = next(iter(self.jobs.values()))['steps'][0]['run']
-        for value, warned in (('false', True), ('true', False)):
-            with self.subTest(KEY_SET=value), tempfile.TemporaryDirectory(prefix='pcapkit-2648-') as tmp:
-                root = pathlib.Path(tmp)
-                (root / 'step.sh').write_text(script, encoding='utf-8')
-                output = root / 'output'
-                env = {'PATH': os.environ.get('PATH', ''), 'GITHUB_OUTPUT': str(output), 'KEY_SET': value}
-                result = subprocess.run(bash_argv('-e', str(root / 'step.sh'), executable=str(BASH)),  # nosec: B603
-                                        cwd=root, env=env, capture_output=True, text=True, check=False, timeout=60)
-                self.assertEqual(result.returncode, 0, result.stderr)
-                self.assertEqual(output.read_text(encoding='utf-8'), f'set={value}\n')
-                if warned:
-                    self.assertTrue(result.stdout.startswith(
-                        "::warning title=No pull request without the release App's key::"), result.stdout)
-                    for named in (APP, 'RELEASE_APP_PRIVATE_KEY', 'docs/source/contributing/releasing.rst'):
-                        self.assertIn(named, result.stdout)
-                else:
-                    self.assertEqual(result.stdout, '')
+        for (name, job_id), job in self.jobs.items():
+            script = job['steps'][0]['run']
+            for value, warned in (('false', True), ('true', False)):
+                with self.subTest(workflow=name, KEY_SET=value), \
+                        tempfile.TemporaryDirectory(prefix='pcapkit-2648-') as tmp:
+                    root = pathlib.Path(tmp)
+                    (root / 'step.sh').write_text(script, encoding='utf-8')
+                    output = root / 'output'
+                    env = {'PATH': os.environ.get('PATH', ''), 'GITHUB_OUTPUT': str(output), 'KEY_SET': value}
+                    result = subprocess.run(bash_argv('-e', str(root / 'step.sh'),  # nosec: B603
+                                                      executable=str(BASH)),
+                                            cwd=root, env=env, capture_output=True, text=True, check=False,
+                                            timeout=60)
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(output.read_text(encoding='utf-8'), f'set={value}\n')
+                    if warned:
+                        self.assertTrue(result.stdout.startswith(
+                            f"::warning title=No {APP_READERS[(name, job_id)]} without the release App's key::"),
+                            result.stdout)
+                        for named in (APP, 'RELEASE_APP_PRIVATE_KEY', 'docs/source/contributing/releasing.rst',
+                                      f'so the {job_id} job skips'):
+                            self.assertIn(named, result.stdout)
+                    else:
+                        self.assertEqual(result.stdout, '')
 
 
 if __name__ == '__main__':
