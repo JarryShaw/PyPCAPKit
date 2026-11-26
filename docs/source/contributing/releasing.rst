@@ -581,10 +581,12 @@ The Release's Documentation
 ---------------------------
 
 No release job publishes the documentation (:ref:`documentation-hosting`). GitHub
-Pages republishes ``main``'s build at its root, which ``/latest/`` aliases, once the
-release's push passes Unit Tests, and ``develop``'s build under ``/dev/`` on each push
-to ``develop``. Read the Docs builds ``latest`` from ``main``, ``develop``, and the
-release's tag as a version of its own, from the :file:`.readthedocs.yaml` in its tree.
+Pages republishes ``main``'s build once the release's push passes Unit Tests. That
+build runs alongside Create Release, so its ``versions.json`` may predate the release's
+tag, which the next publish lists -- the next push to ``main`` or the Saturday
+schedule. Read the Docs builds ``latest`` from ``main``, ``dev`` from ``develop``, and
+the release's tag as a version of its own, from the :file:`.readthedocs.yaml` in its
+tree.
 
 Precautions
 -----------
