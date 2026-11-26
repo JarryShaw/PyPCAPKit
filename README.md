@@ -21,10 +21,11 @@ Requires **Python 3.8** or later. CI supports 3.11 to 3.15, and tests the end-of
 pip install pypcapkit
 ```
 
-Or from a clone, for unreleased changes and development:
+Or from a clone of `develop` (a plain clone is the released `main`), for unreleased changes and
+development:
 
 ```shell
-git clone https://github.com/JarryShaw/PyPCAPKit.git
+git clone -b develop https://github.com/JarryShaw/PyPCAPKit.git
 cd PyPCAPKit
 pip install -e .
 ```
