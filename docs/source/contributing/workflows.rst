@@ -2252,8 +2252,9 @@ run, in ``release-app``, an environment with no reviewer. It mints a release App
 token (:doc:`releasing`, "The Release App") with contents and pull
 requests write, force-pushes ``bot/python-versions`` and opens or updates its
 one pull request, whose body lists each move and why, the ``Compat`` contexts to
-change in the ruleset by hand, and every renamed check run. It never pushes
-``main``, edits the ruleset or writes a workflow file, which that token cannot
+change by hand in rulesets 23497679 (``main``) and 28079111 (``develop``), and
+every renamed check run. It never pushes ``main``, edits a ruleset or writes a
+workflow file, which that token cannot
 push, so workflow comments name the tiers rather than restate them. While the
 branch's pull request is open, it does not re-push tiers a commit on the branch
 already proposes, hand edits or merges of ``main`` on top or not, nor overwrite
