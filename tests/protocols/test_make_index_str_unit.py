@@ -41,7 +41,7 @@ def _attr(path: 'str') -> 'Any':
 
 def _tcp_alternate_checksum(**kwargs: 'Any') -> 'Any':
     option = _attr('pcapkit.const.tcp.option.Option')
-    return _attr('pcapkit.protocols.transport.tcp.protocol.TCP').from_fields(
+    return _attr('pcapkit.protocols.transport.tcp.protocol.TCP').build(
         options=[(option.TCP_Alternate_Checksum_Request, kwargs)],
     )
 
@@ -62,8 +62,8 @@ def _ipv6_option(protocol: 'str', option: 'str') -> 'Any':
     def build(**kwargs: 'Any') -> 'Any':
         code = getattr(_attr('pcapkit.const.ipv6.option.Option'), option)
         transtype = _attr('pcapkit.const.reg.transtype.TransType')
-        return _attr(protocol).from_fields(options=[(code, kwargs)],
-                                           next=transtype.IPv6_NoNxt, payload=b'')
+        return _attr(protocol).build(options=[(code, kwargs)],
+                                     next=transtype.IPv6_NoNxt, payload=b'')
     return build
 
 
@@ -110,7 +110,7 @@ class TestMakeRefusesNames(unittest.TestCase):
         exc = _attr('pcapkit.utilities.exceptions.ProtocolError')
         for case, (maker, arg, _, member, extra) in CASES.items():
             with self.subTest(case=case):
-                build = _attr(maker).from_fields if isinstance(maker, str) else maker
+                build = _attr(maker).build if isinstance(maker, str) else maker
                 with self.assertRaises(exc):
                     build(**extra, **{arg: member})
 
@@ -118,7 +118,7 @@ class TestMakeRefusesNames(unittest.TestCase):
         protocol = _attr('pcapkit.protocols.protocol.Protocol')
         for case, (maker, arg, enum_path, member, extra) in CASES.items():
             with self.subTest(case=case):
-                build = _attr(maker).from_fields if isinstance(maker, str) else maker
+                build = _attr(maker).build if isinstance(maker, str) else maker
                 namespace = _attr(enum_path)
                 value = getattr(namespace, member)
 
@@ -138,9 +138,9 @@ class TestMakeRefusesNames(unittest.TestCase):
         protocol = _attr('pcapkit.protocols.protocol.Protocol')
 
         with self.assertRaises(exc):
-            http.from_fields(status='CODE_404')
+            http.build(status='CODE_404')
         resolved = protocol.resolve_index('CODE_404', namespace=status_code)
-        self.assertEqual(http.from_fields(status=resolved).data, http.from_fields(status=status_code.CODE_404).data)
+        self.assertEqual(http.build(status=resolved).data, http.build(status=status_code.CODE_404).data)
 
     def test_removed_keywords_are_refused(self) -> None:
         exc = _attr('pcapkit.utilities.exceptions.UnsupportedCall')
@@ -149,7 +149,7 @@ class TestMakeRefusesNames(unittest.TestCase):
                                ('type_reversed', True)):
             with self.subTest(keyword=keyword):
                 with self.assertRaises(exc):
-                    ethernet.from_fields(**{keyword: value})
+                    ethernet.build(**{keyword: value})
 
 
 class TestMakeIndex(unittest.TestCase):
@@ -246,11 +246,11 @@ class TestMakePort(unittest.TestCase):
                 for value in (1 << 16, -1, 'http', True):
                     with self.subTest(protocol=protocol.__name__, keyword=keyword, value=value):
                         with self.assertRaisesRegex(exc, rf'^{protocol.__name__}: invalid port: '):
-                            protocol.from_fields(**{keyword: value})
+                            protocol.build(**{keyword: value})
 
     def test_widest_port_builds(self) -> None:
         tcp = _attr('pcapkit.protocols.transport.tcp.protocol.TCP')
-        self.assertEqual(tcp.from_fields(srcport=0xFFFF).data[:2], b'\xff\xff')
+        self.assertEqual(tcp.build(srcport=0xFFFF).data[:2], b'\xff\xff')
 
 
 class TestResolveIndex(unittest.TestCase):
@@ -296,7 +296,7 @@ class TestResolveIndex(unittest.TestCase):
         ethernet = _attr('pcapkit.protocols.link.ethernet.protocol.Ethernet')
         ethertype = _attr('pcapkit.const.reg.ethertype.EtherType')
         code = ethernet.resolve_index('Address_Resolution_Protocol', namespace=ethertype)
-        self.assertEqual(ethernet.from_fields(type=code).data[12:14], b'\x08\x06')
+        self.assertEqual(ethernet.build(type=code).data[12:14], b'\x08\x06')
 
 
 if __name__ == '__main__':

@@ -148,37 +148,37 @@ class GREChecksumTests(unittest.TestCase):
                     self.assertEqual(self.LinuxSLL1.from_data(layer.info).data, linux_sll(frame))
 
     def test_make_computes_the_checksum(self) -> None:
-        self.assertEqual(self.GRE.from_fields(checksum_present=True, payload=IPV4).data, FRAMES['checksum'])
-        self.assertEqual(self.GRE.from_fields(checksum_present=True, key=0x11223344, payload=IPV4).data,
+        self.assertEqual(self.GRE.build(checksum_present=True, payload=IPV4).data, FRAMES['checksum'])
+        self.assertEqual(self.GRE.build(checksum_present=True, key=0x11223344, payload=IPV4).data,
                          FRAMES['checksum-key'])
-        made = self.GRE.from_fields(checksum_present=True, payload=b'\x01\x02\x03').data
+        made = self.GRE.build(checksum_present=True, payload=b'\x01\x02\x03').data
         self.assertEqual(made, FRAMES['odd-payload'])
         self.assertEqual(self.status(made), (self.Status.VALID, []))
 
     def test_off_given_or_absent_is_written_as_is(self) -> None:
         with mock.patch.object(self.config, 'CHECKSUM_COMPUTE', False):
-            self.assertEqual(self.GRE.from_fields(checksum_present=True, payload=IPV4).data, gre(IPV4, checksum=0))
-        self.assertEqual(self.GRE.from_fields(checksum=0xBEEF, payload=IPV4).data, gre(IPV4, checksum=0xBEEF))
-        self.assertEqual(self.GRE.from_fields(checksum_present=True, checksum=0xBEEF, payload=IPV4).data,
+            self.assertEqual(self.GRE.build(checksum_present=True, payload=IPV4).data, gre(IPV4, checksum=0))
+        self.assertEqual(self.GRE.build(checksum=0xBEEF, payload=IPV4).data, gre(IPV4, checksum=0xBEEF))
+        self.assertEqual(self.GRE.build(checksum_present=True, checksum=0xBEEF, payload=IPV4).data,
                          gre(IPV4, checksum=0xBEEF))
-        self.assertEqual(self.GRE.from_fields(payload=IPV4).data, gre(IPV4, checksum=False))
-        self.assertEqual(self.GRE.from_fields(checksum_present=False, payload=IPV4).data, gre(IPV4, checksum=False))
+        self.assertEqual(self.GRE.build(payload=IPV4).data, gre(IPV4, checksum=False))
+        self.assertEqual(self.GRE.build(checksum_present=False, payload=IPV4).data, gre(IPV4, checksum=False))
 
     def test_make_refuses_a_checksum_with_c_clear(self) -> None:
         from pcapkit.utilities.exceptions import ProtocolError
 
         for kwargs in ({'checksum_present': False, 'checksum': 0}, {'checksum_present': False, 'reserved1': 0}):
             with self.subTest(**kwargs), self.assertRaises(ProtocolError):
-                self.GRE.from_fields(**kwargs)
+                self.GRE.build(**kwargs)
         # Reserved1 goes with C, whether or not the checksum is given.
-        self.assertEqual(self.GRE.from_fields(checksum_present=True, reserved1=5).data[6:8], b'\x00\x05')
+        self.assertEqual(self.GRE.build(checksum_present=True, reserved1=5).data[6:8], b'\x00\x05')
 
     @unittest.skipUnless(HAS_SCAPY, 'scapy not installed')
     def test_make_agrees_with_scapy(self) -> None:
         from scapy.layers.l2 import GRE
 
         for kwargs in ({}, {'key': 0x11223344}):
-            made = self.GRE.from_fields(checksum_present=True, payload=b'\x01\x02\x03', **kwargs).data
+            made = self.GRE.build(checksum_present=True, payload=b'\x01\x02\x03', **kwargs).data
             with self.subTest(**kwargs):
                 packet = GRE(made)
                 del packet.chksum

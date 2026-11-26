@@ -2,13 +2,13 @@
 """Calling a protocol class parses a file, and constructs from keywords alone (GitHub issue #3081).
 
 The owner took option (A) on #3081: ``Proto(file, ...)`` parses as #2840 left it,
-``Proto(**fields)`` constructs as ``from_fields`` does, and ``parse`` is the
+``Proto(**fields)`` constructs as ``build`` does, and ``parse`` is the
 explicit form of the first. This module pins each branch:
 
 * :class:`ParseShapeTests` -- a field beside a file is refused by name, through the
   base ``__init__``, the overrides and the versioned family bases, which parse
   without it;
-* :class:`ConstructShapeTests` -- keywords alone build what ``from_fields`` builds,
+* :class:`ConstructShapeTests` -- keywords alone build what ``build`` builds,
   through the base and every override; a stop given no file is refused unless the
   class takes a field of that name, as IPv4, PPP and IP_Pseudo take ``protocol``,
   where a file makes it the stop again; :obj:`None` for the file is refused;
@@ -117,7 +117,7 @@ class ParseShapeTests(unittest.TestCase):
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
         header = Header(GLOBAL).info
-        block = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={}).data
+        block = PCAPNG.build(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={}).data
         return [
             ('TCP', lambda **kw: TCP(SEGMENT, **kw), {}),
             ('IPv4', lambda **kw: IP(PACKET, **kw), {}),
@@ -149,15 +149,15 @@ class ParseShapeTests(unittest.TestCase):
 
 
 class ConstructShapeTests(unittest.TestCase):
-    """Given no file, the class call constructs as ``from_fields`` does, and takes no stop."""
+    """Given no file, the class call constructs as ``build`` does, and takes no stop."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def assertBuildsAsFromFields(self, cls: 'Any', **fields: 'Any') -> 'Any':  # pylint: disable=invalid-name
+    def assertConstructsAsBuild(self, cls: 'Any', **fields: 'Any') -> 'Any':  # pylint: disable=invalid-name
         """Build ``cls`` both ways from ``fields``, and check they agree."""
         built = cls(**fields)
-        expected = cls.from_fields(**fields)
+        expected = cls.build(**fields)
         self.assertIs(type(built), type(expected))
         self.assertEqual(built.data, expected.data)
         self.assertEqual(built.info.to_dict(), expected.info.to_dict())
@@ -165,7 +165,7 @@ class ConstructShapeTests(unittest.TestCase):
         self.assertIsNone(built._exproto)  # pylint: disable=protected-access
         return built
 
-    def test_the_base_and_every_override_build_as_from_fields_does(self) -> None:
+    def test_the_base_and_every_override_construct_as_build_does(self) -> None:
         """An override's own parse keyword is a field where it is given, and left out where not."""
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.protocols.application.dns.protocol import DNS
@@ -195,7 +195,7 @@ class ConstructShapeTests(unittest.TestCase):
         )
         for cls, fields in cases:
             with self.subTest(cls=cls.__name__, fields=sorted(fields)):
-                self.assertBuildsAsFromFields(cls, **fields)
+                self.assertConstructsAsBuild(cls, **fields)
         # NOTE: The keyword reaches ``make``: big-endian AF_INET, and the TCP length field.
         self.assertEqual(Loopback(byteorder='big', family=2).data, b'\x00\x00\x00\x02')
         self.assertEqual(DNS(framed=True).data[:2], b'\x00\x0c')
@@ -238,7 +238,7 @@ class ConstructShapeTests(unittest.TestCase):
         )
         for cls, field, fields, octets, stop in cases:
             with self.subTest(cls=cls.__name__):
-                built = self.assertBuildsAsFromFields(cls, protocol=field, **fields)
+                built = self.assertConstructsAsBuild(cls, protocol=field, **fields)
                 self.assertEqual(built.info.protocol, field)
                 parsed = cls(octets, protocol=stop)
                 self.assertEqual(parsed._exproto, stop)  # pylint: disable=protected-access
@@ -257,7 +257,7 @@ class ConstructShapeTests(unittest.TestCase):
         calls = (
             (lambda: Ethernet(length=3), "^Ethernet: unexpected keyword\\(s\\): 'length'"),
             (lambda: Ethernet(file=FRAME), "^Ethernet: unexpected keyword\\(s\\): 'file'"),
-            (lambda: Ethernet.from_fields(length=3), "^Ethernet: unexpected keyword\\(s\\): 'length'"),
+            (lambda: Ethernet.build(length=3), "^Ethernet: unexpected keyword\\(s\\): 'length'"),
             (lambda: IP(version=4, file=PACKET, length=20), "^IPv4: unexpected keyword\\(s\\): 'file', 'length'"),
         )
         for call, message in calls:
@@ -322,10 +322,10 @@ class ConstructShapeTests(unittest.TestCase):
 
         builds = (
             ('Sized(length=3)', lambda: Sized(length=3), bytes(3)),
-            ('Sized.from_fields(length=3)', lambda: Sized.from_fields(length=3), bytes(3)),
+            ('Sized.build(length=3)', lambda: Sized.build(length=3), bytes(3)),
             ('Sized.from_data(..., length=2)', lambda: Sized.from_data(Sized(length=3).info, length=2), bytes(2)),
             ("Filed(file=b'x')", lambda: Filed(file=b'x'), b'x'),
-            ("Filed.from_fields(file=b'x')", lambda: Filed.from_fields(file=b'x'), b'x'),
+            ("Filed.build(file=b'x')", lambda: Filed.build(file=b'x'), b'x'),
         )
         for name, build, data in builds:
             with self.subTest(build=name):
@@ -363,11 +363,11 @@ class ConstructShapeTests(unittest.TestCase):
                            (lambda: IPv4(None, src='192.0.2.1'), 'IPv4'),  # type: ignore[call-overload]
                            (lambda: IP(None, version=4), 'IP')):  # type: ignore[call-overload]
             with self.subTest(cls=name), self.assertRaisesRegex(
-                    TypeError, rf'^{name}: nothing to parse; build one with {name}\.from_fields\(\)$'):
+                    TypeError, rf'^{name}: nothing to parse; build one with {name}\.build\(\)$'):
                 call()
 
-    def test_the_context_and_the_field_check_are_from_fields_own(self) -> None:
-        """``context`` is adopted, and an undeclared field raises as ``from_fields`` raises it."""
+    def test_the_context_and_the_field_check_are_those_of_build(self) -> None:
+        """``context`` is adopted, and an undeclared field raises as ``build`` raises it."""
         from pcapkit.corekit.context import ContextRegistry
         from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import UnexpectedKeyword
@@ -378,7 +378,7 @@ class ConstructShapeTests(unittest.TestCase):
             warnings.simplefilter('ignore')
             TCP(seq=1)
         with self.assertRaises(UnexpectedKeyword) as built:
-            TCP.from_fields(seq=1)
+            TCP.build(seq=1)
         self.assertEqual(str(called.exception), str(built.exception))
 
 
@@ -415,7 +415,7 @@ class VersionedFamilyTests(unittest.TestCase):
             with self.subTest(base=base.__name__, version=version):
                 built = base(version=version, **fields)
                 self.assertEqual(type(built).__name__, member)
-                self.assertEqual(built.data, base.from_fields(version=version, **fields).data)
+                self.assertEqual(built.data, base.build(version=version, **fields).data)
                 # NOTE: The member it gives builds the same, checking ``version`` as its own.
                 self.assertEqual(type(built)(version=version, **fields).data, built.data)
                 self.assertEqual(type(built)(**fields).data, built.data)
@@ -520,7 +520,7 @@ class ParseMethodTests(unittest.TestCase):
 
         for cls in (Ethernet, IP):
             with self.subTest(cls=cls.__name__), self.assertRaisesRegex(
-                    TypeError, rf'^{cls.__name__}: nothing to parse; build one with {cls.__name__}\.from_fields\(\)$'):
+                    TypeError, rf'^{cls.__name__}: nothing to parse; build one with {cls.__name__}\.build\(\)$'):
                 cls.parse(None)  # type: ignore[arg-type]
 
 
@@ -568,7 +568,7 @@ class FrameCountTests(unittest.TestCase):
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
         header = Header(GLOBAL).info
-        block = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={}).data
+        block = PCAPNG.build(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={}).data
         parse = vars(ProtocolBase)['_parse'].__code__
         cases = (
             ('TCP', lambda: TCP(SEGMENT), vars(ProtocolBase)['__init__'].__code__),

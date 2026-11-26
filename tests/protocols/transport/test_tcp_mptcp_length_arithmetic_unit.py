@@ -261,7 +261,7 @@ class TCPMPTCPFastcloseLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
         from pcapkit.const.tcp.option import Option as Enum_Option
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        tcp = TCP.from_fields(
+        tcp = TCP.build(
             options=[(Enum_Option.Multipath_TCP, {
                 'subtype': Enum_MPTCPOption.MP_FASTCLOSE,
                 'key': 0x0102030405060708,
@@ -430,7 +430,7 @@ class TCPMPTCPRemoveAddressLengthUnitTests(LengthInvariantMixin, unittest.TestCa
         from pcapkit.const.tcp.option import Option as Enum_Option
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        tcp = TCP.from_fields(
+        tcp = TCP.build(
             options=[(Enum_Option.Multipath_TCP, {
                 'subtype': Enum_MPTCPOption.REMOVE_ADDR,
                 'addr_id': [7, 8, 9],
@@ -572,7 +572,7 @@ class TCPMPTCPDSSLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
         from pcapkit.const.tcp.option import Option as Enum_Option
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        tcp = TCP.from_fields(
+        tcp = TCP.build(
             options=[(Enum_Option.Multipath_TCP, {
                 'subtype': Enum_MPTCPOption.DSS,
                 'ack': 0x11223344, 'dsn': 0x55667788, 'ssn': 3, 'dl_len': 4,

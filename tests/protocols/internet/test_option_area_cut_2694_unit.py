@@ -126,7 +126,7 @@ class OptionAreaCutTests(unittest.TestCase):
         """Every registered MH message type, built with its defaults."""
         from pcapkit.protocols.internet.mh.protocol import MH
 
-        return {getattr(code, 'name', str(code)): bytes(MH.from_fields(type=code, data={}, **MH_BASE))
+        return {getattr(code, 'name', str(code)): bytes(MH.build(type=code, data={}, **MH_BASE))
                 for code in MH.__message__}
 
     def assertRebuildsQuietly(self, cls: 'Any', layer: 'Any', raw: bytes,  # pylint: disable=invalid-name
@@ -191,7 +191,7 @@ class OptionAreaCutTests(unittest.TestCase):
 
         for code, reserved in ((Packet.Localized_Routing_Initiation, range(8, 10)),
                                (Packet.Update_Notification_Acknowledgement, range(9, 12))):
-            whole = bytes(MH.from_fields(type=code, data={}, **MH_BASE))
+            whole = bytes(MH.build(type=code, data={}, **MH_BASE))
             for cut in reserved:
                 raw = whole[:cut]
                 with self.subTest(message=code.name, cut=cut):
@@ -263,11 +263,11 @@ class OptionAreaCutTests(unittest.TestCase):
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore')
                     self.assertEqual(cls._make_data(cls(OPTIONS[:5]).info)['len'], 1)
-                self.assertEqual(bytes(cls.from_fields(next=59, options=[], len=0)), bytes([59, 0, 1, 4]) + bytes(4))
+                self.assertEqual(bytes(cls.build(next=59, options=[], len=0)), bytes([59, 0, 1, 4]) + bytes(4))
                 with reported():
                     for value in (-1, 256, True):
                         with self.assertRaises(ProtocolError):
-                            cls.from_fields(next=59, options=[], len=value)
+                            cls.build(next=59, options=[], len=value)
 
     def test_options_header_cut_option_that_does_not_rebuild_is_refused_quietly(self) -> None:
         # a Router Alert cut after its type reads a length of zero, which its parser

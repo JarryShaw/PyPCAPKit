@@ -132,16 +132,16 @@ class _Row:
 
         cls = _class(self.cls)
         if self.argument == 'options':
-            return cls.from_fields(next=59, options=[(value, {})]).data
+            return cls.build(next=59, options=[(value, {})]).data
         if self.option is not None:
             args = {**self.extra, self.argument: value}
-            return cls.from_fields(next=59, options=[(Option[self.option], args)]).data
+            return cls.build(next=59, options=[(Option[self.option], args)]).data
         if self.cls == 'ESP':
-            return cls.from_fields(spi=1, seq=1, next=value, encrypt=True, payload=b'abcd',
-                                   context=_esp_context()).data
+            return cls.build(spi=1, seq=1, next=value, encrypt=True, payload=b'abcd',
+                             context=_esp_context()).data
         if self.cls == 'IPv6_Ext':
-            return cls.from_fields(next=value, len=0, data=bytes(6)).data
-        return cls.from_fields(**{self.argument: value}).data
+            return cls.build(next=value, len=0, data=bytes(6)).data
+        return cls.build(**{self.argument: value}).data
 
     def read(self, octets: 'bytes') -> 'object':
         from pcapkit.const.ipv6.extension_header import ExtensionHeader

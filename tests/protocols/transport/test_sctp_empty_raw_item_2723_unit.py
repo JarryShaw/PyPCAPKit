@@ -49,7 +49,7 @@ class TestSCTPEmptyRawItem(unittest.TestCase):
             for parameters in ([b''], [PARAMETER, b'']):
                 with self.subTest(chunk=chunk, parameters=parameters):
                     with self.assertRaisesRegex(ProtocolError, r"invalid parameter: b'' holds no type field"):
-                        SCTP.from_fields(chunks=[(chunk, {'parameters': parameters})])
+                        SCTP.build(chunks=[(chunk, {'parameters': parameters})])
 
     def test_empty_cause_is_refused(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
@@ -60,13 +60,13 @@ class TestSCTPEmptyRawItem(unittest.TestCase):
             for error in ([b''], [CAUSE, b'']):
                 with self.subTest(chunk=chunk, error=error):
                     with self.assertRaisesRegex(ProtocolError, r"invalid error cause: b'' holds no code field"):
-                        SCTP.from_fields(chunks=[(chunk, {'error': error})])
+                        SCTP.build(chunks=[(chunk, {'error': error})])
 
     def test_raw_parameter_builds_as_given(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
         from pcapkit.protocols.transport.sctp.protocol import SCTP
 
-        built = SCTP.from_fields(chunks=[(Chunk.Initiation, {'parameters': [PARAMETER]})]).data
+        built = SCTP.build(chunks=[(Chunk.Initiation, {'parameters': [PARAMETER]})]).data
         self.assertEqual(built[12], Chunk.Initiation)
         self.assertEqual(int.from_bytes(built[14:16], 'big'), 28)  # 20 fixed octets and the parameter
         self.assertEqual(built[32:], PARAMETER)
@@ -75,7 +75,7 @@ class TestSCTPEmptyRawItem(unittest.TestCase):
         from pcapkit.const.sctp.chunk import Chunk
         from pcapkit.protocols.transport.sctp.protocol import SCTP
 
-        built = SCTP.from_fields(chunks=[(Chunk.Abort, {'error': [CAUSE]})]).data
+        built = SCTP.build(chunks=[(Chunk.Abort, {'error': [CAUSE]})]).data
         self.assertEqual(built[12], Chunk.Abort)
         self.assertEqual(int.from_bytes(built[14:16], 'big'), 12)  # the chunk header and the cause
         self.assertEqual(built[16:], CAUSE)

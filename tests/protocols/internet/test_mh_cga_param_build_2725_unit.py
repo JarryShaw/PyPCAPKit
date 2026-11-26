@@ -61,8 +61,8 @@ def _build(options: 'list[Any]') -> 'Any':
     from pcapkit.const.mh.packet import Packet
     from pcapkit.protocols.internet.mh.protocol import MH
 
-    return MH.from_fields(type=Packet.Binding_Refresh_Request, next=59, checksum=b'\x00\x00',
-                          data={'options': options})
+    return MH.build(type=Packet.Binding_Refresh_Request, next=59, checksum=b'\x00\x00',
+                    data={'options': options})
 
 
 def _fields(key: 'bytes') -> 'dict[str, Any]':

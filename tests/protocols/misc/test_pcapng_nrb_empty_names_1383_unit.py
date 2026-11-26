@@ -70,9 +70,9 @@ class TestPCAPNGNRBEmptyNames(PCAPNGTestCase):
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         context = self._context()
-        block = PCAPNG.from_fields(num=2, sct=1, ctx=context, type=BlockType.Name_Resolution_Block,
-                                   block={'records': [(RecordType.nrb_record_ipv4,
-                                                       {'ip': '10.0.0.1', 'names': ['a', '']})]})
+        block = PCAPNG.build(num=2, sct=1, ctx=context, type=BlockType.Name_Resolution_Block,
+                             block={'records': [(RecordType.nrb_record_ipv4,
+                                                 {'ip': '10.0.0.1', 'names': ['a', '']})]})
         self.assertIn(b'\x0a\x00\x00\x01a\x00\x00', block.data)
         self.assertEqual(self._parse(block.data, context).info.records[RecordType.nrb_record_ipv4].records, ('a', ''))
         self.assertRebuilds(block.data, context)

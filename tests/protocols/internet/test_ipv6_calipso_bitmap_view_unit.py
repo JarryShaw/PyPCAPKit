@@ -59,7 +59,7 @@ class TestCALIPSOBitmapView(unittest.TestCase):
                 held = HeldViews()
                 self.addCleanup(held.release)
                 with mock.patch.object(module, 'memoryview', held, create=True):
-                    made = cls.from_fields(next=59, options=[(Option.CALIPSO, dict(domain=1, level=5, bitmap=bitmap))])
+                    made = cls.build(next=59, options=[(Option.CALIPSO, dict(domain=1, level=5, bitmap=bitmap))])
                 self.assertTrue(held.views)
                 self.assertIn(bytes(range(1, 9)), made.data)
 

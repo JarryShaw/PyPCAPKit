@@ -88,7 +88,7 @@ class TestRawItemRejectedByRead(unittest.TestCase):
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore')
                     with self.assertRaisesRegex(exc, r'malformed raw item given to make\(\)') as caught:
-                        cls.from_fields(**kwargs)
+                        cls.build(**kwargs)
                 # the reader's own error is chained, and its message kept
                 self.assertIsInstance(caught.exception.__cause__, exc)
                 self.assertRegex(str(caught.exception.__cause__), message)
@@ -97,7 +97,7 @@ class TestRawItemRejectedByRead(unittest.TestCase):
     def test_well_formed_raw_item_still_builds(self) -> None:
         # the wider ``try`` leaves a raw item that does parse alone
         ipv4 = _attr('pcapkit.protocols.internet.ipv4.protocol.IPv4')
-        proto = ipv4.from_fields(options=[b'\x94\x04\x00\x00'], protocol=253)
+        proto = ipv4.build(options=[b'\x94\x04\x00\x00'], protocol=253)
         self.assertEqual(proto.data.hex(), '460000180000000000fda5e47f0000010000000094040000')
 
 

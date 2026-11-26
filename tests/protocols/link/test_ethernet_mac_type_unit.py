@@ -28,7 +28,7 @@ class TestEthernetMacAddressType(unittest.TestCase):
             for value in (True, False, 5, None, 1.5):
                 with self.subTest(field=field, value=value):
                     with self.assertRaises(ProtocolError) as context:
-                        Ethernet.from_fields(**{field: value})
+                        Ethernet.build(**{field: value})
                     self.assertEqual(
                         str(context.exception),
                         f'Ethernet: invalid MAC address: must be a str, bytes or bytearray, '
@@ -36,7 +36,7 @@ class TestEthernetMacAddressType(unittest.TestCase):
 
     def test_malformed_string_message(self) -> None:
         with self.assertRaises(ProtocolError) as context:
-            Ethernet.from_fields(dst='not-a-mac')
+            Ethernet.build(dst='not-a-mac')
         self.assertEqual(str(context.exception), "Ethernet: invalid MAC address: 'not-a-mac'")
 
     def test_supported_forms_still_pack(self) -> None:
@@ -44,7 +44,7 @@ class TestEthernetMacAddressType(unittest.TestCase):
         for value in ('01:23:45:67:89:ab', b'01-23-45-67-89-ab',
                       bytearray(b'01:23:45:67:89:ab')):
             with self.subTest(value=value):
-                self.assertEqual(Ethernet.from_fields(dst=value).data[:6], raw)
+                self.assertEqual(Ethernet.build(dst=value).data[:6], raw)
 
 
 if __name__ == '__main__':

@@ -77,7 +77,7 @@ class TestMakeRawItems(unittest.TestCase):
         for case, (klass, kwargs, packed) in RAW_ITEMS.items():
             with self.subTest(case=case):
                 cls = _attr(klass)
-                proto = cls.from_fields(**kwargs)
+                proto = cls.build(**kwargs)
                 self.assertEqual(proto.data.hex(), packed)
                 # the made packet reads as the same octets parsed afresh
                 extra = {'extension': True} if kwargs.get('extension') else {}
@@ -93,12 +93,12 @@ class TestMakeRawItems(unittest.TestCase):
                 header = cls(bytes.fromhex(packed), **extra).__header__
                 item = getattr(header, 'param' if key == 'parameters' else 'options')[0]
                 self.assertNotIsInstance(item, bytes)
-                proto = cls.from_fields(**{**kwargs, key: [item]})
+                proto = cls.build(**{**kwargs, key: [item]})
                 self.assertEqual(proto.data.hex(), packed)
 
     def test_bare_mh_constructs(self) -> None:
         mh = _attr('pcapkit.protocols.internet.mh.protocol.MH')
-        proto = mh.from_fields()
+        proto = mh.build()
         self.assertEqual(proto.data.hex(), '1100000000000000')
         self.assertEqual(proto.info, mh(proto.data).info)
 
@@ -124,7 +124,7 @@ class TestMakeRawItems(unittest.TestCase):
         ipv4 = _attr('pcapkit.protocols.internet.ipv4.protocol.IPv4')
         # a lone length-less option makes the packed octets unparsable
         with self.assertRaisesRegex(exc, r'malformed raw item given to make\(\)') as caught:
-            ipv4.from_fields(options=[b'\x02', b'\x94\x04\x00\x00'], protocol=253)
+            ipv4.build(options=[b'\x02', b'\x94\x04\x00\x00'], protocol=253)
         self.assertIsInstance(caught.exception.__cause__, exc)
 
     def test_random_raw_items_raise_library_errors_only(self) -> None:
@@ -149,7 +149,7 @@ class TestMakeRawItems(unittest.TestCase):
                     try:
                         with importlib.import_module('warnings').catch_warnings():
                             importlib.import_module('warnings').simplefilter('ignore')
-                            cls.from_fields(**{**kwargs, key: value})
+                            cls.build(**{**kwargs, key: value})
                     except base:
                         pass
 
@@ -161,7 +161,7 @@ class TestMakeRawItems(unittest.TestCase):
         hip = _attr('pcapkit.protocols.internet.hip.protocol.HIP')
         exc = _attr('pcapkit.utilities.exceptions.ProtocolError')
         with self.assertRaisesRegex(exc, r'runs past the end of the data'):
-            hip.from_fields(extension=True, parameters=[b'\x00\x41\x00\x08' + bytes(8)])
+            hip.build(extension=True, parameters=[b'\x00\x41\x00\x08' + bytes(8)])
 
 
 if __name__ == '__main__':

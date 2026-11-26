@@ -46,8 +46,8 @@ class HIPCipherLimitTests(unittest.TestCase):
         from pcapkit.protocols.internet.hip.protocol import HIP
 
         # Distinct values, so a test can tell *which* IDs were kept.
-        built = HIP.from_fields(parameters=[(Parameter.HIP_CIPHER, {'ciphers': list(range(1, count + 1))})],
-                                extension=True, version=2, **HIP_BASE)
+        built = HIP.build(parameters=[(Parameter.HIP_CIPHER, {'ciphers': list(range(1, count + 1))})],
+                          extension=True, version=2, **HIP_BASE)
         octets = built.data
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')

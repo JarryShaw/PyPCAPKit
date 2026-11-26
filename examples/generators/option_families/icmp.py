@@ -64,7 +64,7 @@ def _icmpv4_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
 
     # ``body`` has to be a mapping for ``make`` to dispatch on ``__type__``;
     # a ``bytes`` body is parsed against the schema registry instead.
-    return ICMPv4.from_fields(type=code, code=0, body=dict(kwargs))
+    return ICMPv4.build(type=code, code=0, body=dict(kwargs))
 
 
 def _icmpv4_parse(octets: 'bytes') -> 'Any':
@@ -78,8 +78,8 @@ def _icmp_extract(parsed: 'Any') -> 'Any':
 
 def _icmpv4_rebuild(message: 'Any') -> 'Any':
     from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
-    return ICMPv4.from_fields(type=message.type, code=message.code, checksum=message.checksum,
-                              body=message)
+    return ICMPv4.build(type=message.type, code=message.code, checksum=message.checksum,
+                        body=message)
 
 
 def _icmpv6_registry() -> 'Any':
@@ -117,7 +117,7 @@ def _icmpv6_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
 
     # With no enclosing IPv6 layer to supply the pseudo-header, the checksum is
     # left zero, and the rebuild passes the parsed zero back.
-    return ICMPv6.from_fields(type=code, code=0, body=dict(kwargs))
+    return ICMPv6.build(type=code, code=0, body=dict(kwargs))
 
 
 def _icmpv6_parse(octets: 'bytes') -> 'Any':
@@ -127,8 +127,8 @@ def _icmpv6_parse(octets: 'bytes') -> 'Any':
 
 def _icmpv6_rebuild(message: 'Any') -> 'Any':
     from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
-    return ICMPv6.from_fields(type=message.type, code=message.code, checksum=message.checksum,
-                              body=message)
+    return ICMPv6.build(type=message.type, code=message.code, checksum=message.checksum,
+                        body=message)
 
 
 #: The families this module adds.

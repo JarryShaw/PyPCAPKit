@@ -37,7 +37,7 @@ class TestFrameSnaplenZero(unittest.TestCase):
         from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         header = Header(ghdr)
-        return Frame.from_fields(num=1, header=header.info, ts_sec=1, ts_usec=2, packet=PACKET)
+        return Frame.build(num=1, header=header.info, ts_sec=1, ts_usec=2, packet=PACKET)
 
     def test_zero_snaplen_keeps_the_whole_packet(self) -> None:
         frame = self._frame(GLOBAL_ZERO)

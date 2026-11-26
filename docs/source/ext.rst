@@ -276,7 +276,7 @@ implementation is :mod:`pcapkit.protocols.internet.ipv4.protocol`:
 
    **Declare every construction keyword your protocol accepts.** Calling the class
    with its fields alone builds a protocol, as
-   :meth:`Protocol.from_fields <pcapkit.protocols.protocol.Protocol.from_fields>`
+   :meth:`Protocol.build <pcapkit.protocols.protocol.Protocol.build>`
    does, and a keyword no signature declares raises
    :exc:`~pcapkit.utilities.exceptions.UnexpectedKeyword`, a :exc:`TypeError`, so a
    misspelling fails instead of building a wrong field. ``make`` takes its fields
@@ -347,8 +347,8 @@ implementation is :mod:`pcapkit.protocols.internet.ipv4.protocol`:
 
    .. warning::
 
-      The check lives in :meth:`Protocol.from_fields
-      <pcapkit.protocols.protocol.Protocol.from_fields>`,
+      The check lives in :meth:`Protocol.build
+      <pcapkit.protocols.protocol.Protocol.build>`,
       :meth:`~pcapkit.protocols.protocol.Protocol.from_data` and a call of the class
       given no file, which hand the keywords on, so it covers
       ``SomeProtocol(...)`` and the ``pack`` it leads to, but **not** ``make``

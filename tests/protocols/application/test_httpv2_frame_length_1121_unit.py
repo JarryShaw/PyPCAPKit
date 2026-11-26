@@ -82,7 +82,7 @@ class HTTPv2FrameLengthUnitTests(unittest.TestCase):
 
         for name, (raw, kwargs) in RFC_FRAMES.items():
             with self.subTest(frame=name):
-                self.assertEqual(bytes(HTTPv2.from_fields(**kwargs)), raw)
+                self.assertEqual(bytes(HTTPv2.build(**kwargs)), raw)
 
     def test_parsed_frames_rebuild_to_the_same_octets(self) -> None:
         """parse -> ``make`` reproduces the wire octets."""
@@ -91,7 +91,7 @@ class HTTPv2FrameLengthUnitTests(unittest.TestCase):
         for name, (raw, _) in RFC_FRAMES.items():
             with self.subTest(frame=name):
                 info = HTTPv2(io.BytesIO(raw), len(raw)).info
-                self.assertEqual(bytes(HTTPv2.from_fields(type=info.type, sid=info.sid, frame=info)), raw)
+                self.assertEqual(bytes(HTTPv2.build(type=info.type, sid=info.sid, frame=info)), raw)
 
     def test_a_header_inclusive_length_is_rejected(self) -> None:
         """A fixed-size frame declaring payload + 9 is a size error."""

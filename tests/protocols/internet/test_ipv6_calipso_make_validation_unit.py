@@ -44,7 +44,7 @@ class TestCALIPSOMakeValidation(unittest.TestCase):
     def _make(self, cls: 'type', **fields: 'object') -> 'object':
         from pcapkit.const.ipv6.option import Option
 
-        return cls.from_fields(next=59, options=[(Option.CALIPSO, dict(domain=1, level=5, **fields))])
+        return cls.build(next=59, options=[(Option.CALIPSO, dict(domain=1, level=5, **fields))])
 
     def test_overlong_option_data_raises(self) -> None:
         from pcapkit.utilities.exceptions import ProtocolError

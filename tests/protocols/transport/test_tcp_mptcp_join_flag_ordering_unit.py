@@ -93,7 +93,7 @@ Relationship to the rest of the suite
 --------------------------------------
 
 Everything here goes through the **public** constructor,
-``TCP.from_fields(options=[(code, kwargs)], …)``, or ``pack`` on a parsed instance. The MP_JOIN cases in
+``TCP.build(options=[(code, kwargs)], …)``, or ``pack`` on a parsed instance. The MP_JOIN cases in
 :mod:`tests.protocols.transport.test_tcp_mptcp_length_arithmetic_unit` call
 ``_make_join_syn``/``_make_join_synack``/``_make_join_ack`` directly on a
 ``TCP.__new__(TCP)``, bypassing ``_make_mptcp_join`` and its ``self._flags`` read, so
@@ -165,9 +165,9 @@ def build_join(*, syn: 'bool', ack: 'bool', **option: 'object') -> 'object':
 
     args = dict(option)
     args['subtype'] = Enum_MPTCPOption.MP_JOIN
-    return TCP.from_fields(syn=syn, ack=ack,
-                           options=[(Enum_Option.Multipath_TCP, args)],  # type: ignore[arg-type]
-                           **TCP_HEADER)
+    return TCP.build(syn=syn, ack=ack,
+                     options=[(Enum_Option.Multipath_TCP, args)],  # type: ignore[arg-type]
+                     **TCP_HEADER)
 
 
 def build_tcp_segment(option_octets: 'bytes', *, syn: 'bool', ack: 'bool') -> 'bytes':
@@ -263,10 +263,10 @@ class TCPMPTCPJoinFlagOrderingUnitTests(JoinLayoutMixin, unittest.TestCase):
         from pcapkit.const.tcp.option import Option as Enum_Option
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        tcp = TCP.from_fields(srcport=1, dstport=2, seq_no=0, ack=0, syn=True,
-                              options=[(Enum_Option.Multipath_TCP,
-                                        {'subtype': Enum_MPTCPOption.MP_JOIN, 'backup': False,
-                                         'addr_id': 1, 'token': 7, 'nonce': 9})])
+        tcp = TCP.build(srcport=1, dstport=2, seq_no=0, ack=0, syn=True,
+                        options=[(Enum_Option.Multipath_TCP,
+                                  {'subtype': Enum_MPTCPOption.MP_JOIN, 'backup': False,
+                                   'addr_id': 1, 'token': 7, 'nonce': 9})])
 
         data = tcp.info.options[Enum_Option.Multipath_TCP]
         self.assertEqual(data.subtype, Enum_MPTCPOption.MP_JOIN)
@@ -391,7 +391,7 @@ class TCPMPTCPJoinFlagOrderingUnitTests(JoinLayoutMixin, unittest.TestCase):
         from pcapkit.const.tcp.flags import Flags as Enum_Flags
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        tcp = TCP.from_fields(syn=False, ack=False, **TCP_HEADER)
+        tcp = TCP.build(syn=False, ack=False, **TCP_HEADER)
         self.assertEqual(bytes(tcp)[13], 0x00, 'no flag octet bit should be set')
 
         maker = TCP.__new__(TCP)
@@ -436,9 +436,9 @@ class TCPMPTCPJoinRoundTripUnitTests(unittest.TestCase):
 
                 # And the cycle closes: rebuilding from the parsed data reproduces the
                 # octets exactly, which is what ``EXPECTED_FAILURES`` measures.
-                again = bytes(TCP.from_fields(syn=option['syn'], ack=option['ack'],
-                                              options=[(Enum_Option.Multipath_TCP, data)],
-                                              **TCP_HEADER))
+                again = bytes(TCP.build(syn=option['syn'], ack=option['ack'],
+                                        options=[(Enum_Option.Multipath_TCP, data)],
+                                        **TCP_HEADER))
                 self.assertEqual(again, built)
 
 
@@ -690,11 +690,11 @@ class TCPMakeOtherOptionsUnitTests(unittest.TestCase):
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
         def capable(syn: 'bool', ack: 'bool') -> 'bytes':
-            tcp = TCP.from_fields(syn=syn, ack=ack,
-                                  options=[(Enum_Option.Multipath_TCP,
-                                            {'subtype': Enum_MPTCPOption.MP_CAPABLE,
-                                             'skey': 0x0102030405060708})],
-                                  **TCP_HEADER)
+            tcp = TCP.build(syn=syn, ack=ack,
+                            options=[(Enum_Option.Multipath_TCP,
+                                      {'subtype': Enum_MPTCPOption.MP_CAPABLE,
+                                       'skey': 0x0102030405060708})],
+                            **TCP_HEADER)
             return bytes(tcp)[20:]
 
         baseline = capable(True, False)
@@ -714,9 +714,9 @@ class TCPMakeOtherOptionsUnitTests(unittest.TestCase):
         from pcapkit.const.tcp.option import Option as Enum_Option
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        tcp = TCP.from_fields(syn=True, ack=False,
-                              options=[(Enum_Option.Maximum_Segment_Size, {'mss': 1460})],
-                              **TCP_HEADER)
+        tcp = TCP.build(syn=True, ack=False,
+                        options=[(Enum_Option.Maximum_Segment_Size, {'mss': 1460})],
+                        **TCP_HEADER)
         octets = bytes(tcp)
 
         self.assertEqual(octets[20:24], bytes([0x02, 0x04, 0x05, 0xB4]))

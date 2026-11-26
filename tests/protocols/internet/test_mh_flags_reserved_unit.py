@@ -135,7 +135,7 @@ class TestMHFlagsReserved(unittest.TestCase):
 
         if site in MESSAGES:
             data = {'flags_reserved': reserved['value']} if reserved else {}
-            return bytes(MH.from_fields(next=TransType.IPv6_NoNxt, type=Packet[MESSAGES[site]], data=data))
+            return bytes(MH.build(next=TransType.IPv6_NoNxt, type=Packet[MESSAGES[site]], data=data))
 
         args = {'reserved': reserved['value']} if reserved else {}
         if site in OPTIONS:
@@ -149,8 +149,8 @@ class TestMHFlagsReserved(unittest.TestCase):
         else:
             option = (Option.Quality_of_Service, {'attributes': [
                 (QoSAttribute.Per_Session_Agg_Max_DL_Bit_Rate, dict(args, rate=1000))]})
-        return bytes(MH.from_fields(next=TransType.IPv6_NoNxt, type=Packet.Binding_Refresh_Request,
-                                    data={'options': [option]}))
+        return bytes(MH.build(next=TransType.IPv6_NoNxt, type=Packet.Binding_Refresh_Request,
+                              data={'options': [option]}))
 
     def test_every_site_is_covered(self) -> None:
         self.assertEqual(set(FRAMES), set(MESSAGES) | set(OPTIONS)

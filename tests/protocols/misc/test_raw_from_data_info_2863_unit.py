@@ -86,7 +86,7 @@ class TestRawFromDataInfo(unittest.TestCase):
         from pcapkit.protocols.transport.udp.protocol import UDP
 
         port = next(port for port in range(1024, 65536) if port not in UDP.__proto__)
-        octets = UDP.from_fields(srcport=port, dstport=port, payload=b'xyz').data
+        octets = UDP.build(srcport=port, dstport=port, payload=b'xyz').data
         raw = UDP(octets, len(octets)).payload
         self.assertEqual(raw.info.protocol, port)
         self.assertIs(type(raw.info.protocol), int)
@@ -98,7 +98,7 @@ class TestRawFromDataInfo(unittest.TestCase):
 
         for alias in (TransType.TCP, 6, None):
             with self.subTest(alias=alias):
-                raw = Raw.from_fields(packet=b'abc', error='kept raw', alias=alias)
+                raw = Raw.build(packet=b'abc', error='kept raw', alias=alias)
                 self.assertEqual(raw.data, b'abc')
                 self.assertEqual((raw.info.protocol, raw.info.error), (alias, 'kept raw'))
                 self.assertIs(type(raw.info.protocol), type(alias))

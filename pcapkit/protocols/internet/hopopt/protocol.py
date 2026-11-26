@@ -392,7 +392,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         if extension:
             # NOTE: As an IPv6 extension header the upper layer belongs to the enclosing
             # IPv6 header, so hold NoPayload here so that membership does not raise (#2487).
-            self._next = NoPayload.from_fields()  # pylint: disable=attribute-defined-outside-init
+            self._next = NoPayload.build()  # pylint: disable=attribute-defined-outside-init
             return hopopt
         return self._decode_next_layer(hopopt, schema.next, length - hopopt.length)
 

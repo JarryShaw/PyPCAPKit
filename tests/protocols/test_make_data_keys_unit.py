@@ -41,7 +41,7 @@ class MakeDataKeysTests(unittest.TestCase):
     def test_l2tpv2_priority_survives_from_data(self) -> None:
         from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
-        octets = bytes(L2TPv2.from_fields(version=2, priority=True, tunnel_id=1, session_id=2))
+        octets = bytes(L2TPv2.build(version=2, priority=True, tunnel_id=1, session_id=2))
         parsed = L2TPv2(io.BytesIO(octets), len(octets))
         self.assertTrue(parsed.info.flags.prio)
 
@@ -57,9 +57,9 @@ class MakeDataKeysTests(unittest.TestCase):
         from pcapkit.protocols.misc.pcap.frame.protocol import Frame
         from pcapkit.protocols.misc.pcap.header.protocol import Header
 
-        header = Header.from_fields(network=1)
-        frame = Frame.from_fields(num=1, header=header.info, ts_sec=1234, ts_usec=5,
-                                  packet=b'\x00' * 14)
+        header = Header.build(network=1)
+        frame = Frame.build(num=1, header=header.info, ts_sec=1234, ts_usec=5,
+                            packet=b'\x00' * 14)
 
         # NOTE: The frame index and the global header are not part of the
         # frame's data, so they are passed to :meth:`from_data` alongside it.

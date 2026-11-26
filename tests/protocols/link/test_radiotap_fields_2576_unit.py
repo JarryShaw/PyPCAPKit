@@ -188,8 +188,8 @@ class TestRadiotapFields(unittest.TestCase):
             with self.subTest(data=type(data).__name__):
                 self.assertEqual(Radiotap.from_data(data).data.hex(), raw.hex())
         if reencodes:
-            made = Radiotap.from_fields(present=parsed.info.present, fields=parsed.info.decoded,
-                                        payload=raw[parsed.info.it_len:])
+            made = Radiotap.build(present=parsed.info.present, fields=parsed.info.decoded,
+                                  payload=raw[parsed.info.it_len:])
             self.assertEqual(made.data.hex(), raw.hex())
 
     def test_each_field_decodes_at_its_alignment(self) -> None:
@@ -492,10 +492,10 @@ class TestRadiotapFields(unittest.TestCase):
         expected = _radiotap([1 << 1], b'\x50')
         for value in (Flags.F_FCS | Flags.F_BADFCS, Flags.get(0x50), 0x50):
             with self.subTest(value=value):
-                self.assertEqual(Radiotap.from_fields(present=(1 << 1,), fields=[(1, {'flags': value})]).data, expected)
+                self.assertEqual(Radiotap.build(present=(1 << 1,), fields=[(1, {'flags': value})]).data, expected)
         for value in ('FCS', 0x100, True):
             with self.subTest(value=value), self.assertRaises(ProtocolError):
-                Radiotap.from_fields(present=(1 << 1,), fields=[(1, {'flags': value})])
+                Radiotap.build(present=(1 << 1,), fields=[(1, {'flags': value})])
 
     def test_make_from_type_and_mapping_pairs(self) -> None:
         """``make()`` takes a type as a member or an ``int``, and writes the padding."""
@@ -512,7 +512,7 @@ class TestRadiotapFields(unittest.TestCase):
             (29, {}),
             (0, {'mactime': 1}),
         ]
-        made = Radiotap.from_fields(present=present, fields=fields, payload=ACK)
+        made = Radiotap.build(present=present, fields=fields, payload=ACK)
         # Flags at octet 16, a pad, Channel, the signal, a pad, the vendor field
         # and its data, then TSFT on the 8-octet boundary at octet 32
         expected = _radiotap(list(present),
@@ -530,7 +530,7 @@ class TestRadiotapFields(unittest.TestCase):
         """Raw octets are written as given, whatever ``present`` says."""
         from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
-        made = Radiotap.from_fields(present=(1 << 31, 7), fields=b'\x01\x02\x03')
+        made = Radiotap.build(present=(1 << 31, 7), fields=b'\x01\x02\x03')
         self.assertEqual(made.data, _radiotap([1 << 31, 7], b'\x01\x02\x03'))
 
     def test_make_rejects_fields_that_do_not_fit(self) -> None:
@@ -562,7 +562,7 @@ class TestRadiotapFields(unittest.TestCase):
         }
         for name, (present, fields) in cases.items():
             with self.subTest(case=name), self.assertRaises(ProtocolError):
-                Radiotap.from_fields(present=present, fields=fields)
+                Radiotap.build(present=present, fields=fields)
 
     def test_unknown_entries_are_written_raw(self) -> None:
         """An ``Unknown`` entry, or one for a bit no field is defined for, ends the region."""
@@ -571,8 +571,8 @@ class TestRadiotapFields(unittest.TestCase):
         from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         unknown = Unknown(type=FieldType.TSFT, data=b'\x01\x02', reason='any')
-        self.assertEqual(Radiotap.from_fields(present=(1,), fields=[unknown]).data, _radiotap([1], b'\x01\x02'))
-        self.assertEqual(Radiotap.from_fields(present=(1 << 18,), fields=[(18, {'data': b'\x03'})]).data,
+        self.assertEqual(Radiotap.build(present=(1,), fields=[unknown]).data, _radiotap([1], b'\x01\x02'))
+        self.assertEqual(Radiotap.build(present=(1 << 18,), fields=[(18, {'data': b'\x03'})]).data,
                          _radiotap([1 << 18], b'\x03'))
 
     def test_the_layouts_match_three_parsers(self) -> None:

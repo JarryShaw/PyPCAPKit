@@ -91,7 +91,7 @@ class AHCutPayloadLengthTests(unittest.TestCase):
 
         with self.assertRaisesRegex(ProtocolError, r'^AH: invalid payload length: must describe the '
                                                    r'0-octet ICV exactly, not 0$'):
-            AH.from_fields(icv=b'', payload_length=0)
+            AH.build(icv=b'', payload_length=0)
 
 
 if __name__ == '__main__':

@@ -128,7 +128,7 @@ class TestNetlink(unittest.TestCase):
     def test_make_then_parse(self) -> None:
         from pcapkit.protocols.link.netlink.protocol import Netlink
 
-        made = Netlink.from_fields(nlmsg_type=3, nlmsg_flags=0x0101, nlmsg_seq=1, nlmsg_pid=0,
+        made = Netlink.build(nlmsg_type=3, nlmsg_flags=0x0101, nlmsg_seq=1, nlmsg_pid=0,
                       byteorder='little', payload=b'\xaa\xbb\xcc\xdd').data
         self.assertEqual(made, _nlmsghdr('little', nlmsg_type=3, nlmsg_flags=0x0101,
                                          nlmsg_seq=1, nlmsg_pid=0, payload=b'\xaa\xbb\xcc\xdd'))
@@ -141,7 +141,7 @@ class TestNetlink(unittest.TestCase):
     def test_make_computes_nlmsg_len_from_payload(self) -> None:
         from pcapkit.protocols.link.netlink.protocol import Netlink
 
-        made = Netlink.from_fields(payload=bytes(10))
+        made = Netlink.build(payload=bytes(10))
         self.assertEqual(made.info.nlmsg_len, 26)
 
     def test_make_defaults(self) -> None:
@@ -149,7 +149,7 @@ class TestNetlink(unittest.TestCase):
 
         from pcapkit.protocols.link.netlink.protocol import Netlink
 
-        made = Netlink.from_fields()
+        made = Netlink.build()
         self.assertEqual(made.data, struct.pack(
             ('<' if sys.byteorder == 'little' else '>') + 'IHHII', 16, 0, 0, 0, 0))
 
@@ -158,7 +158,7 @@ class TestNetlink(unittest.TestCase):
 
         for byteorder in ('little', 'big'):
             with self.subTest(byteorder=byteorder):
-                made = Netlink.from_fields(nlmsg_type=5, byteorder=byteorder, payload=b'\x01\x02')
+                made = Netlink.build(nlmsg_type=5, byteorder=byteorder, payload=b'\x01\x02')
                 self.assertEqual(made.data, _nlmsghdr(byteorder, nlmsg_type=5, payload=b'\x01\x02'))
                 parsed = Netlink(made.data, len(made.data))
                 self.assertEqual(parsed.info.byteorder, byteorder)
@@ -169,7 +169,7 @@ class TestNetlink(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
-            Netlink.from_fields(byteorder='middle')  # type: ignore[arg-type]
+            Netlink.build(byteorder='middle')  # type: ignore[arg-type]
 
     def test_make_rejects_what_does_not_fit(self) -> None:
         from pcapkit.protocols.link.netlink.protocol import Netlink
@@ -183,7 +183,7 @@ class TestNetlink(unittest.TestCase):
             {'nlmsg_len': -1}, {'nlmsg_len': 0x1_0000_0000}, {'nlmsg_len': True},
         ):
             with self.subTest(**kwargs), self.assertRaises(ProtocolError):
-                Netlink.from_fields(**kwargs)
+                Netlink.build(**kwargs)
 
     def test_make_explicit_nlmsg_len_is_written_as_given(self) -> None:
         """An explicit ``nlmsg_len`` is written as given, not recomputed --
@@ -192,7 +192,7 @@ class TestNetlink(unittest.TestCase):
         """
         from pcapkit.protocols.link.netlink.protocol import Netlink
 
-        made = Netlink.from_fields(nlmsg_len=999, payload=b'\x01\x02')
+        made = Netlink.build(nlmsg_len=999, payload=b'\x01\x02')
         self.assertEqual(made.info.nlmsg_len, 999)
 
     def test_id_and_index(self) -> None:

@@ -77,7 +77,7 @@ class TestUDPTrailerKept(unittest.TestCase):
     def test_make_writes_trailer_outside_length(self) -> None:
         from pcapkit.protocols.transport.udp.protocol import UDP
 
-        made = UDP.from_fields(srcport=53, dstport=53, payload=b'ab', trailer=b'pp')
+        made = UDP.build(srcport=53, dstport=53, payload=b'ab', trailer=b'pp')
         self.assertEqual(made.data, _udp(10)[:6] + b'\x00\x00' + b'ab' + b'pp')
         self.assertEqual(made.info.len, 10)
         self.assertEqual(made.info.trailer, b'pp')

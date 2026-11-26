@@ -55,7 +55,7 @@ class TestL2TPv2Type(unittest.TestCase):
         from pcapkit.const.l2tp.type import Type
         from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
-        made = L2TPv2.from_fields(tunnel_id=1, session_id=2)
+        made = L2TPv2.build(tunnel_id=1, session_id=2)
         self.assertEqual(made.data, bytes.fromhex('0002' '0001' '0002'))
         self.assertIs(made.info.flags.type, Type.Data)
 
@@ -63,9 +63,9 @@ class TestL2TPv2Type(unittest.TestCase):
         from pcapkit.const.l2tp.type import Type
         from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
-        self.assertEqual(L2TPv2.from_fields(type=Type.Control, tunnel_id=1, ns=1, nr=2).data, ZLB_ACK)
+        self.assertEqual(L2TPv2.build(type=Type.Control, tunnel_id=1, ns=1, nr=2).data, ZLB_ACK)
 
-        made = L2TPv2.from_fields(type=Type.Control, tunnel_id=1, session_id=2, payload=b'abcd')
+        made = L2TPv2.build(type=Type.Control, tunnel_id=1, session_id=2, payload=b'abcd')
         self.assertEqual(made.data, bytes.fromhex('c002' '000c' '0001' '0002') + b'abcd')
         self.assertTrue(made.info.flags.len)
         self.assertEqual(made.info.length, 12)
@@ -74,7 +74,7 @@ class TestL2TPv2Type(unittest.TestCase):
         from pcapkit.const.l2tp.type import Type
         from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
-        made = L2TPv2.from_fields(type=Type.Control, tunnel_id=1, ns=1, nr=2, total_length=99)
+        made = L2TPv2.build(type=Type.Control, tunnel_id=1, ns=1, nr=2, total_length=99)
         self.assertEqual(made.info.length, 99)
 
     def test_make_rejects_total_length_without_the_length_field(self) -> None:
@@ -82,7 +82,7 @@ class TestL2TPv2Type(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
-            L2TPv2.from_fields(total_length=12, length_flag=False)
+            L2TPv2.build(total_length=12, length_flag=False)
 
     def test_control_without_l_rebuilds_as_captured(self) -> None:
         from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2

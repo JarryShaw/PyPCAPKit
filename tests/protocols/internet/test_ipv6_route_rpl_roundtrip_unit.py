@@ -134,7 +134,7 @@ class TestIPv6RouteRPLRoundTrip(unittest.TestCase):
                 addrs = [ipaddress.IPv6Address(DST[:shared] + bytes([0x40 + j]) * (16 - shared))
                          for j in range(count)]
                 with self.subTest(shared=shared, count=count):
-                    made = IPv6_Route.from_fields(type=3, dst=dst, data={'ip': addrs}, seg_left=count).data
+                    made = IPv6_Route.build(type=3, dst=dst, data={'ip': addrs}, seg_left=count).data
                     self.assertEqual(self.rebuild(IPv6_Route, made), made)
                     packet = ipv6(made)
                     self.assertEqual(self.rebuild(IPv6, packet), packet)
@@ -149,7 +149,7 @@ class TestIPv6RouteRPLRoundTrip(unittest.TestCase):
         for dst in (None, ipaddress.IPv6Address(DST)):
             with self.subTest(dst=dst):
                 with self.assertRaisesRegex(ProtocolError, 'needs at least one address'):
-                    IPv6_Route.from_fields(type=3, dst=dst, data={'ip': []})
+                    IPv6_Route.build(type=3, dst=dst, data={'ip': []})
 
 
 if __name__ == '__main__':

@@ -226,7 +226,7 @@ class QuickStartFunctionTests(unittest.TestCase):
                     with warnings.catch_warnings():
                         warnings.simplefilter('ignore')
                         with self.assertRaises(ProtocolError) as caught:
-                            protocol.from_fields(options=[schema], **keywords)
+                            protocol.build(options=[schema], **keywords)
                     self.assertIn(f'unknown QS function: {func}', str(caught.exception))
 
     def test_an_assigned_function_constructs(self) -> None:
@@ -245,7 +245,7 @@ class QuickStartFunctionTests(unittest.TestCase):
                 if not label.endswith(kind):
                     continue
                 with self.subTest(case=label, func=func):
-                    packet = protocol.from_fields(options=[schema], **keywords)
+                    packet = protocol.build(options=[schema], **keywords)
                     code = OptionNumber.QS if protocol.__name__ == 'IPv4' else Option.Quick_Start
                     self.assertEqual(type(packet.info.options[code]).__name__,
                                      type(schema).__name__)
@@ -430,7 +430,7 @@ class CALIPSOLengthTests(unittest.TestCase):
                         option.pack()
                     self.assertIn(f'invalid CALIPSO option length: {length}', str(caught.exception))
                     with self.assertRaises(ProtocolError) as caught:
-                        protocol.from_fields(options=[option], next=59, payload=b'')
+                        protocol.build(options=[option], next=59, payload=b'')
                     self.assertIn(f'invalid CALIPSO option length: {length}', str(caught.exception))
 
     def test_the_reader_keeps_no_length_guard(self) -> None:

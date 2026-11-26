@@ -129,7 +129,7 @@ class TestIPv6OptionsRoundTrip(unittest.TestCase):
         for cls in self._protocols():
             with self.subTest(protocol=cls.__name__):
                 # RFC 6971 Errata ID 3937: the flags octet and the sequence number
-                made = cls.from_fields(next=59, options=[(Option.IP_DFF, {'version': 1, 'dup': True, 'seq': 0x1234})])
+                made = cls.build(next=59, options=[(Option.IP_DFF, {'version': 1, 'dup': True, 'seq': 0x1234})])
                 self.assertEqual(made.data, bytes.fromhex('3b00' 'ee03' '601234' '00'))
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore')
@@ -141,7 +141,7 @@ class TestIPv6OptionsRoundTrip(unittest.TestCase):
 
         for cls in self._protocols():
             with self.subTest(protocol=cls.__name__):
-                made = cls.from_fields(next=59, options=[(Option.CALIPSO, {
+                made = cls.build(next=59, options=[(Option.CALIPSO, {
                     'domain': 1, 'level': 5, 'checksum': b'\xab\xcd', 'bitmap': b'\x01' * 8,
                 })])
                 self.assertEqual(made.data, bytes.fromhex(
@@ -152,9 +152,9 @@ class TestIPv6OptionsRoundTrip(unittest.TestCase):
 
         for cls in self._protocols():
             with self.subTest(protocol=cls.__name__):
-                self.assertEqual(cls.from_fields(next=59).data, bytes.fromhex('3b00' '0104' '00000000'))
+                self.assertEqual(cls.build(next=59).data, bytes.fromhex('3b00' '0104' '00000000'))
                 # padding options in a list are fresh input, and are replaced
-                made = cls.from_fields(next=59, options=[
+                made = cls.build(next=59, options=[
                     (Option.Tunnel_Encapsulation_Limit, {'limit': 5}),
                     (Option.PadN, {'length': 0}),
                 ])

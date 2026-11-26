@@ -111,13 +111,13 @@ class TestLoopback(unittest.TestCase):
         for family, payload, name in FAMILIES:
             for byteorder in ('little', 'big'):
                 with self.subTest(family=family, byteorder=byteorder):
-                    made = Loopback.from_fields(family=family, byteorder=byteorder, payload=payload).data
+                    made = Loopback.build(family=family, byteorder=byteorder, payload=payload).data
                     self.assertEqual(made, _header(family, byteorder) + payload)
                     parsed = Loopback(made, len(made))
                     self.assertEqual((parsed.info.family, parsed.info.byteorder), (family, byteorder))
                     self.assertEqual(type(parsed.payload).__name__, name)
                     self._assert_rebuilds(parsed)
-        self.assertEqual(Loopback.from_fields().data, _header(2, sys.byteorder))
+        self.assertEqual(Loopback.build().data, _header(2, sys.byteorder))
 
     def test_make_rejects_what_does_not_fit(self) -> None:
         from pcapkit.protocols.link.loopback.protocol import Loopback
@@ -125,7 +125,7 @@ class TestLoopback(unittest.TestCase):
 
         for kwargs in ({'byteorder': 'native'}, {'family': -1}, {'family': 0x1_0000_0000}):
             with self.subTest(**kwargs), self.assertRaises(ProtocolError):
-                Loopback.from_fields(**kwargs)
+                Loopback.build(**kwargs)
 
     def test_make_names_an_unknown_byteorder(self) -> None:
         """The byte-order check is inline, not ``_make_uint``'s, with this prefix (#2614)."""
@@ -133,7 +133,7 @@ class TestLoopback(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
-            Loopback.from_fields(byteorder='native')
+            Loopback.build(byteorder='native')
         self.assertEqual(str(ctx.exception), "Loopback: invalid byte order: 'native'")
 
     def test_make_rejects_a_family_that_is_not_an_int(self) -> None:
@@ -146,7 +146,7 @@ class TestLoopback(unittest.TestCase):
         for family in (True, False, '2', 2.0, None):
             with self.subTest(family=family):
                 with self.assertRaises(ProtocolError) as ctx:
-                    Loopback.from_fields(family=family)
+                    Loopback.build(family=family)
                 self.assertEqual(str(ctx.exception), f'Loopback: invalid address family: {family!r}')
 
     def test_registered_for_null_and_loop(self) -> None:

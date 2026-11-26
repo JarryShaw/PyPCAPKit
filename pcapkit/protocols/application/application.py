@@ -122,7 +122,7 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
         # ``_decode_next_layer``; otherwise default to an empty payload
         if getattr(self, '_next', None) is None:
             #: pcapkit.protocols.misc.no_payload.protocol.NoPayload: Payload of current instance.
-            self._next = NoPayload.from_fields()
+            self._next = NoPayload.build()
             #: pcapkit.corekit.protochain.ProtoChain: Protocol chain of current instance.
             self._protos = ProtoChain(self.__class__, self.alias)
 

@@ -40,7 +40,7 @@ class TestHIPLocatorFlags(unittest.TestCase):
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip.protocol import HIP
 
-        octets = bytearray(HIP.from_fields(
+        octets = bytearray(HIP.build(
             parameters=[(Parameter.LOCATOR_SET,
                          {'locator_set': [{'ip': '2001:db8::1'}]})],
             extension=True, **HIP_BASE).data)
@@ -77,10 +77,10 @@ class TestHIPLocatorFlags(unittest.TestCase):
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip.protocol import HIP
 
-        built = HIP.from_fields(
+        built = HIP.build(
             parameters=[(Parameter.LOCATOR_SET,
-                         {'locator_set': [{'ip': '2001:db8::1', 'reserved': 0x7f,
-                                           'preferred': False}]})],
+                   {'locator_set': [{'ip': '2001:db8::1', 'reserved': 0x7f,
+                                     'preferred': False}]})],
             extension=True, **HIP_BASE)
         self.assertEqual(built.data[FLAGS_OFFSET], 0xfe)
         self.assertEqual(built.data, self._frame(0xfe))
@@ -89,9 +89,9 @@ class TestHIPLocatorFlags(unittest.TestCase):
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip.protocol import HIP
 
-        built = HIP.from_fields(
+        built = HIP.build(
             parameters=[(Parameter.LOCATOR_SET,
-                         {'locator_set': [{'ip': '2001:db8::1', 'preferred': True}]})],
+                   {'locator_set': [{'ip': '2001:db8::1', 'preferred': True}]})],
             extension=True, **HIP_BASE)
         self.assertEqual(built.data[FLAGS_OFFSET], 0x01)
 

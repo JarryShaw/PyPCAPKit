@@ -126,7 +126,7 @@ class TestSCTPStrayOctets(unittest.TestCase):
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             with self.assertRaisesRegex(ProtocolError, r"raw chunk b'\\x01' runs past the end of the data"):
-                SCTP.from_fields(chunks=[b'\x01'])
+                SCTP.build(chunks=[b'\x01'])
 
     def test_make_writes_the_trailer_under_the_checksum(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk as Enum_Chunk
@@ -134,8 +134,8 @@ class TestSCTPStrayOctets(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            raw = SCTP.from_fields(srcport=1, dstport=2, chunks=[(Enum_Chunk.Cookie_Acknowledgement, {})],
-                                   trailer=b'xyz').data
+            raw = SCTP.build(srcport=1, dstport=2, chunks=[(Enum_Chunk.Cookie_Acknowledgement, {})],
+                             trailer=b'xyz').data
         self.assertEqual(raw[12:], COOKIE_ACK + b'xyz')
         parsed = SCTP(raw, len(raw))
         self.assertEqual(parsed.info.trailer, b'xyz')

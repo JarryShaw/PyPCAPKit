@@ -62,8 +62,8 @@ class QuickStartRoundTripTests(unittest.TestCase):
                 with self.subTest(family=name, func=func.name):
                     with warnings.catch_warnings():
                         warnings.simplefilter('error')
-                        built = cls.from_fields(options=[(code, dict(func=func, rate=80, ttl=5, nonce=NONCE))],
-                                                **base)
+                        built = cls.build(options=[(code, dict(func=func, rate=80, ttl=5, nonce=NONCE))],
+                                          **base)
                         again = cls(built.data)
                     self.assertEqual(again.data, built.data)
 
@@ -88,8 +88,8 @@ class QuickStartRoundTripTests(unittest.TestCase):
                          Enum_QSFunction.Report_of_Approved_Rate):
                 for rate in (0, 80, 640):
                     with self.subTest(family=name, func=func.name, rate=rate):
-                        built = cls.from_fields(options=[(code, dict(func=func, rate=rate, ttl=5,
-                                                                     nonce=NONCE))], **base)
+                        built = cls.build(options=[(code, dict(func=func, rate=rate, ttl=5,
+                                                               nonce=NONCE))], **base)
                         option = list(cls(built.data).info.options.values())[0]
                         self.assertIs(type(option.rate), int)
                         self.assertEqual(option.rate, rate)

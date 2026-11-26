@@ -34,8 +34,8 @@ class TestARPHardwareAddressOctets(unittest.TestCase):
     """Pin the wire form of the ARP hardware address fields."""
 
     def test_make_packs_mac_addresses_as_octets(self) -> None:
-        proto = ARP.from_fields(sha='01:23:45:67:89:ab', spa='10.0.0.1',
-                                tha='fe-dc-ba-98-76-54', tpa='10.0.0.2')
+        proto = ARP.build(sha='01:23:45:67:89:ab', spa='10.0.0.1',
+                          tha='fe-dc-ba-98-76-54', tpa='10.0.0.2')
         self.assertEqual(proto.data, ARP_ETHERNET)
         self.assertEqual(proto.info.sha, '01:23:45:67:89:ab')
         self.assertEqual(proto.info.tha, 'fe:dc:ba:98:76:54')
@@ -54,7 +54,7 @@ class TestARPHardwareAddressOctets(unittest.TestCase):
             with self.subTest(htype=htype.name):
                 octets = bytes.fromhex(addr)
                 # the hex string the parser yields, and raw octets, both pack as octets
-                proto = ARP.from_fields(htype=htype, hlen=len(octets), sha=addr, tha=octets)
+                proto = ARP.build(htype=htype, hlen=len(octets), sha=addr, tha=octets)
                 self.assertEqual(proto.__header__.sha, octets)
                 self.assertEqual(proto.__header__.tha, octets)
                 parsed = ARP(proto.data)

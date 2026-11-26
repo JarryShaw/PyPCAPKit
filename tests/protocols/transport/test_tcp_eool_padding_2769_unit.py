@@ -89,7 +89,7 @@ class TestTCPEOOLPaddingRebuild(unittest.TestCase):
         for name, (segment, padding) in _cases().items():
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')  # the zero TCP checksum is not checked here
-                packet = IPv4.from_fields(src='192.0.2.1', dst='192.0.2.2', protocol=6, payload=segment).data
+                packet = IPv4.build(src='192.0.2.1', dst='192.0.2.2', protocol=6, payload=segment).data
                 parsed = IPv4(packet)
                 self.assertEqual(parsed.payload.info.padding, padding)
                 for source in ('info', 'to_dict'):
@@ -106,7 +106,7 @@ class TestTCPEOOLPaddingRebuild(unittest.TestCase):
 
         for size in range(4):
             with self.subTest(size=size):
-                made = TCP.from_fields(options=[(Option.End_of_Option_List, {})], padding=b'\xa5' * size)
+                made = TCP.build(options=[(Option.End_of_Option_List, {})], padding=b'\xa5' * size)
                 expected = b'\xa5' * size + bytes(3 - size)
                 self.assertEqual(made.data[20:24], b'\x00' + expected)
                 self.assertEqual(made.info.padding, expected)

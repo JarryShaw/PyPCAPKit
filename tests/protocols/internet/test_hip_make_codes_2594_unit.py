@@ -211,16 +211,16 @@ class HIPMakeCodeTests(unittest.TestCase):
             # ``extension=True`` keeps ``HIP.alias`` off ``self._info``, which
             # ``__post_init__`` assigns only once ``read`` has returned (#1184).
             if code is None and argument == 'parameters' and value is not None:
-                return HIP.from_fields(version=version, parameters=[(value, dict(extra))],
-                                       extension=True).data
+                return HIP.build(version=version, parameters=[(value, dict(extra))],
+                                 extension=True).data
             if code is None:
                 kwargs = {} if value is None else {argument: value}
-                return HIP.from_fields(version=version, extension=True, **kwargs).data
+                return HIP.build(version=version, extension=True, **kwargs).data
             args = dict(extra)
             if value is not None:
                 args[argument] = [value] if listed else value
-            return HIP.from_fields(version=version, parameters=[(Parameter[code], args)],
-                                   extension=True).data
+            return HIP.build(version=version, parameters=[(Parameter[code], args)],
+                             extension=True).data
 
         return version, build
 
@@ -332,16 +332,16 @@ class HIPMakeCodeTests(unittest.TestCase):
         from pcapkit.protocols.internet.hip.protocol import HIP
 
         def pair(value: 'Any') -> 'bytes':
-            return HIP.from_fields(version=2, parameters=[(value, {'contents': b'\x01'})],
-                                   extension=True).data
+            return HIP.build(version=2, parameters=[(value, {'contents': b'\x01'})],
+                             extension=True).data
 
         # the parsed data of an unassigned parameter, which any code takes
         _, param = list(self._parse(pair(0xFFFF)).info.parameters.items(multi=True))[0]
         self.assertEqual(param.type, Parameter.get(0xFFFF))
         return {
             'pair': pair,
-            'parsed': lambda value: HIP.from_fields(version=2, parameters=OrderedMultiDict([(value, param)]),
-                                                    extension=True).data,
+            'parsed': lambda value: HIP.build(version=2, parameters=OrderedMultiDict([(value, param)]),
+                                              extension=True).data,
         }
 
     def test_a_parameter_type_the_field_cannot_carry_is_refused(self) -> None:

@@ -343,9 +343,9 @@ class TestLinuxSLL1(unittest.TestCase):
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
 
-        made = LinuxSLL1.from_fields(packet_type=4, arphrd_type=Hardware.Ethernet,
-                                     link_addr=bytes.fromhex('001122334455'),
-                                     protocol_type=EtherType.Internet_Protocol_version_4, payload=IPV4).data
+        made = LinuxSLL1.build(packet_type=4, arphrd_type=Hardware.Ethernet,
+                               link_addr=bytes.fromhex('001122334455'),
+                               protocol_type=EtherType.Internet_Protocol_version_4, payload=IPV4).data
         self.assertEqual(made, _header(4, 1, bytes.fromhex('001122334455'), 6, 0x0800) + IPV4)
 
         parsed = LinuxSLL1(made, len(made))
@@ -356,19 +356,19 @@ class TestLinuxSLL1(unittest.TestCase):
     def test_make_defaults(self) -> None:
         from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
 
-        self.assertEqual(LinuxSLL1.from_fields().data, _header(0, 1, b'', 0, 0x0800))
+        self.assertEqual(LinuxSLL1.build().data, _header(0, 1, b'', 0, 0x0800))
 
     def test_make_rejects_what_does_not_fit(self) -> None:
         from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
-            LinuxSLL1.from_fields(link_addr=bytes(9))
+            LinuxSLL1.build(link_addr=bytes(9))
         # link_addr_length is a 2-octet field (0 to 0xFFFF).
         with self.assertRaises(ProtocolError):
-            LinuxSLL1.from_fields(link_addr_length=0x10000)
+            LinuxSLL1.build(link_addr_length=0x10000)
         with self.assertRaises(ProtocolError):
-            LinuxSLL1.from_fields(link_addr_length=-1)
+            LinuxSLL1.build(link_addr_length=-1)
 
     def test_link_addr_length_over_8_round_trips(self) -> None:
         """A ``link_addr_length`` over 8 parses and rebuilds."""
@@ -382,9 +382,9 @@ class TestLinuxSLL1(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
         # make() accepts the same length directly, not only via a round trip.
-        made = LinuxSLL1.from_fields(arphrd_type=Hardware.Ethernet,
-                                     link_addr=bytes.fromhex('0011223344556677'),
-                                     link_addr_length=20, protocol_type=0x0800, payload=IPV4).data
+        made = LinuxSLL1.build(arphrd_type=Hardware.Ethernet,
+                               link_addr=bytes.fromhex('0011223344556677'),
+                               link_addr_length=20, protocol_type=0x0800, payload=IPV4).data
         self.assertEqual(made, raw)
 
     def test_registered_against_frame_and_pcapng(self) -> None:

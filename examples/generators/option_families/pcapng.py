@@ -78,17 +78,17 @@ def _pcapng_context() -> 'tuple[Any, Any]':
     from pcapkit.foundation.engines.pcapng import Context
     from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-    section = PCAPNG.from_fields(num=0, sct=1, ctx=None,
-                                 type=Enum_BlockType.Section_Header_Block, block={})
+    section = PCAPNG.build(num=0, sct=1, ctx=None,
+                           type=Enum_BlockType.Section_Header_Block, block={})
     # ``Protocol.info`` is annotated as the generic data model for the protocol,
     # so a checker cannot see that a Section Header Block's is the one ``Context``
     # wants. The engine does exactly this, in ``PCAPNG.run`` of
     # pcapkit/foundation/engines/pcapng.py.
     section_info = section.info  # type: Any
     context = Context(section_info)
-    interface = PCAPNG.from_fields(num=1, sct=1, ctx=context,
-                                   type=Enum_BlockType.Interface_Description_Block,
-                                   block={'linktype': Enum_LinkType.ETHERNET, 'snaplen': 0x40000})
+    interface = PCAPNG.build(num=1, sct=1, ctx=context,
+                             type=Enum_BlockType.Interface_Description_Block,
+                             block={'linktype': Enum_LinkType.ETHERNET, 'snaplen': 0x40000})
     interface_info = interface.info  # type: Any
     context.interfaces.append(interface_info)
     return context, interface_info
@@ -117,7 +117,7 @@ def _pcapng_block(code: 'Any', block: 'dict[str, Any] | Any') -> 'Any':
     # A Section Header Block is what *starts* a section, so it is the one block
     # the engine reads with no context at all.
     context = None if code == Enum_BlockType.Section_Header_Block else _pcapng_context()[0]
-    return PCAPNG.from_fields(num=2, sct=1, ctx=context, type=code, block=block)
+    return PCAPNG.build(num=2, sct=1, ctx=context, type=code, block=block)
 
 
 #: Block type of a Section Header Block, as it appears on the wire. The value

@@ -66,7 +66,7 @@ class TestIPXRoundTrip(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            proto = IPX.from_fields(payload=b'hi')
+            proto = IPX.build(payload=b'hi')
         self.assertEqual(proto.data[2:4], bytes.fromhex('0020'))
 
 
@@ -99,7 +99,7 @@ class TestAHRoundTrip(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            proto = AH.from_fields(icv=bytes(12))
+            proto = AH.build(icv=bytes(12))
         self.assertEqual(proto.data[2:4], bytes(2))
 
 

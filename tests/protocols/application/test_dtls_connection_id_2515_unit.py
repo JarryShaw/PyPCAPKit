@@ -371,10 +371,10 @@ class InstanceMemoryTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         def build(**kwargs: 'Any') -> 'Any':
-            inner = DTLS.from_fields(content_type=ContentType.tls12_cid, epoch=1, sequence_number=0, cid=SERVER_CID,
-                                     content=bytes(range(32)))
-            return DTLS.from_fields(content_type=ContentType.change_cipher_spec, epoch=0, sequence_number=3,
-                                    content=b'\x01', payload=inner, **kwargs)
+            inner = DTLS.build(content_type=ContentType.tls12_cid, epoch=1, sequence_number=0, cid=SERVER_CID,
+                               content=bytes(range(32)))
+            return DTLS.build(content_type=ContentType.change_cipher_spec, epoch=0, sequence_number=3,
+                              content=b'\x01', payload=inner, **kwargs)
 
         context = DTLSContext()
         self.assertEqual(str(build(context=context).protochain), 'DTLS 1.2:DTLS 1.2')
@@ -625,8 +625,8 @@ class RoundTripTests(unittest.TestCase):
                 self.assertEqual(str(again.protochain), str(parsed.protochain))
                 self.assertEqual(_cid_layers(again), _cid_layers(parsed))
 
-        made = DTLS.from_fields(content_type=ContentType.tls12_cid, epoch=3, sequence_number=7, cid=b'\x0a\x0b',
-                                content=bytes(range(20)))
+        made = DTLS.build(content_type=ContentType.tls12_cid, epoch=3, sequence_number=7, cid=b'\x0a\x0b',
+                          content=bytes(range(20)))
         self.assertEqual(bytes(made).hex(), _cid_record(b'\x0a\x0b', bytes(range(20)), epoch=3,
                                                         sequence_number=7).hex())
         self.assertEqual((made.alias, made.length, made.info.cid, made.info.length), ('DTLS 1.2', 15, b'\x0a\x0b', 20))
@@ -636,10 +636,10 @@ class RoundTripTests(unittest.TestCase):
         from pcapkit.const.tls.content_type import ContentType
         from pcapkit.protocols.application.dtls.protocol import DTLS
 
-        inner = DTLS.from_fields(content_type=ContentType.tls12_cid, epoch=1, sequence_number=0, cid=SERVER_CID,
-                                 content=bytes(range(32)))
-        outer = DTLS.from_fields(content_type=ContentType.change_cipher_spec, epoch=0, sequence_number=3,
-                                 content=b'\x01', payload=inner)
+        inner = DTLS.build(content_type=ContentType.tls12_cid, epoch=1, sequence_number=0, cid=SERVER_CID,
+                           content=bytes(range(32)))
+        outer = DTLS.build(content_type=ContentType.change_cipher_spec, epoch=0, sequence_number=3,
+                           content=b'\x01', payload=inner)
         self.assertEqual(str(outer.protochain), 'DTLS 1.2:DTLS 1.2')
         self.assertEqual(_cid_layers(outer), ((SERVER_CID, 1, 0, 32),))
 

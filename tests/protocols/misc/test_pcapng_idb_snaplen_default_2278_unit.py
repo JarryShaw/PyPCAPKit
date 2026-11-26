@@ -33,8 +33,8 @@ class TestPCAPNGIDBSnaplen(PCAPNGTestCase):
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        return PCAPNG.from_fields(num=1, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
-                                  block={'linktype': LinkType.ETHERNET, **block})
+        return PCAPNG.build(num=1, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
+                            block={'linktype': LinkType.ETHERNET, **block})
 
     def test_default_is_no_limit(self) -> None:
         """The issue's case: the default writes 0, and the info says 0."""

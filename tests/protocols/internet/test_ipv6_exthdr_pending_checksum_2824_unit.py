@@ -82,19 +82,19 @@ class PendingChecksumTestCase(unittest.TestCase):
 
     def ipv6(self, nxt: int, payload: object, **kwargs: object) -> bytes:
         """The octets of an IPv6 packet from V6_SRC to V6_DST carrying ``payload``."""
-        return self.IPv6.from_fields(src=V6_SRC, dst=V6_DST, next=nxt, payload=payload, **kwargs).data
+        return self.IPv6.build(src=V6_SRC, dst=V6_DST, next=nxt, payload=payload, **kwargs).data
 
     def brr(self, **kwargs: object) -> object:
         """A Binding Refresh Request, Payload Proto 59."""
-        return self.MH.from_fields(next=59, type=self.MHPacket.Binding_Refresh_Request, **kwargs)
+        return self.MH.build(next=59, type=self.MHPacket.Binding_Refresh_Request, **kwargs)
 
     def home(self, nxt: int, payload: object) -> object:
         """A Destination Options header carrying a Home Address option of HOME."""
-        return self.IPv6_Opts.from_fields(next=nxt, options=[(self.Option.Home_Address, {'addr': HOME})], payload=payload)
+        return self.IPv6_Opts.build(next=nxt, options=[(self.Option.Home_Address, {'addr': HOME})], payload=payload)
 
     def segment(self, **kwargs: object) -> object:
         """A TCP segment carrying a few octets."""
-        return self.TCP.from_fields(srcport=40000, dstport=80, payload=b'pending', **kwargs)
+        return self.TCP.build(srcport=40000, dstport=80, payload=b'pending', **kwargs)
 
     def parse(self, octets: bytes) -> 'tuple[object, list[tuple[type, str]]]':
         """``octets`` parsed as IPv6, verified, and its ProtocolWarnings as ``(category, message)``."""
@@ -119,7 +119,7 @@ class ComputedTests(PendingChecksumTestCase):
 
     def test_a_mobility_header_behind_destination_options(self) -> None:
         # The issue's own case: left zero, it parsed as INVALID.
-        made = self.ipv6(60, self.IPv6_Opts.from_fields(next=135, payload=self.brr()))
+        made = self.ipv6(60, self.IPv6_Opts.build(next=135, payload=self.brr()))
         self.assertEqual(made[48:], MH_BRR)
         self.assertVerifies(made, 'MH')
 
@@ -135,22 +135,22 @@ class ComputedTests(PendingChecksumTestCase):
         self.assertVerifies(made, 'TCP')
 
     def test_a_routing_header_names_the_final_destination(self) -> None:
-        route = self.IPv6_Route.from_fields(next=6, type=self.Routing.Source_Route, seg_left=1, data={'ip': [FINAL]},
-                                            payload=self.segment())
+        route = self.IPv6_Route.build(next=6, type=self.Routing.Source_Route, seg_left=1, data={'ip': [FINAL]},
+                                      payload=self.segment())
         made = self.ipv6(43, route)
         tcp = made[40 + 24:]
         self.assertEqual(tcp[16:18], expected(pseudo6(V6_SRC, FINAL, len(tcp), 6), tcp, 16))
         self.assertVerifies(made, 'TCP')
 
         # With no segment left, the destination is the header's own.
-        route = self.IPv6_Route.from_fields(next=6, type=self.Routing.Source_Route, seg_left=0, data={'ip': [FINAL]},
-                                            payload=self.segment())
+        route = self.IPv6_Route.build(next=6, type=self.Routing.Source_Route, seg_left=0, data={'ip': [FINAL]},
+                                      payload=self.segment())
         tcp = self.ipv6(43, route)[40 + 24:]
         self.assertEqual(tcp[16:18], expected(pseudo6(V6_SRC, V6_DST, len(tcp), 6), tcp, 16))
 
         # A type 2 Routing header carries the home address a binding reaches (RFC 6275 section 6.4).
-        route = self.IPv6_Route.from_fields(next=135, type=self.Routing.Type_2_Routing_Header, seg_left=1,
-                                            data={'ip': HOME}, payload=self.brr())
+        route = self.IPv6_Route.build(next=135, type=self.Routing.Type_2_Routing_Header, seg_left=1,
+                                      data={'ip': HOME}, payload=self.brr())
         made = self.ipv6(43, route)
         mh = made[40 + 24:]
         self.assertEqual(mh[4:6], expected(pseudo6(V6_SRC, HOME, 8, 135), mh, 4))
@@ -160,10 +160,10 @@ class ComputedTests(PendingChecksumTestCase):
         # In RFC 6275 section 6.3's order: the Home Address option past the Routing header, ahead of AH.
         from pcapkit.protocols.internet.ah.protocol import AH
 
-        udp = self.UDP.from_fields(srcport=40000, dstport=40001, payload=b'chained')
-        chain = self.HOPOPT.from_fields(next=43, payload=self.IPv6_Route.from_fields(
+        udp = self.UDP.build(srcport=40000, dstport=40001, payload=b'chained')
+        chain = self.HOPOPT.build(next=43, payload=self.IPv6_Route.build(
             next=60, type=self.Routing.Source_Route, seg_left=1, data={'ip': [FINAL]},
-            payload=self.home(51, AH.from_fields(next=17, spi=0x1234, seq=1, icv=bytes(12), payload=udp))))
+            payload=self.home(51, AH.build(next=17, spi=0x1234, seq=1, icv=bytes(12), payload=udp))))
         made = self.ipv6(0, chain)
         datagram = made[40 + 8 + 24 + 24 + 24:]
         self.assertEqual(datagram[6:8], expected(pseudo6(HOME, FINAL, len(datagram), 17), datagram, 6))
@@ -175,23 +175,23 @@ class ComputedTests(PendingChecksumTestCase):
         from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
 
         group = ipaddress.ip_address('ff02::1:3')
-        report = ICMPv6.from_fields(type=Type.Multicast_Listener_Report, body=bytes(4) + group.packed)
-        made = self.ipv6(0, self.HOPOPT.from_fields(next=58, options=[(self.Option.Router_Alert, {})], payload=report))
+        report = ICMPv6.build(type=Type.Multicast_Listener_Report, body=bytes(4) + group.packed)
+        made = self.ipv6(0, self.HOPOPT.build(next=58, options=[(self.Option.Router_Alert, {})], payload=report))
         message = made[48:]
         self.assertEqual(message[2:4], expected(pseudo6(V6_SRC, V6_DST, len(message), 58), message, 2))
         self.assertVerifies(made, 'ICMPv6')
 
     def test_an_atomic_fragment_is_whole(self) -> None:
-        made = self.ipv6(44, self.IPv6_Frag.from_fields(next=6, payload=self.segment()))
+        made = self.ipv6(44, self.IPv6_Frag.build(next=6, payload=self.segment()))
         tcp = made[48:]
         self.assertEqual(tcp[16:18], expected(pseudo6(V6_SRC, V6_DST, len(tcp), 6), tcp, 16))
         self.assertVerifies(made, 'TCP')
 
     def test_a_jumbogram(self) -> None:
         # RFC 2675: the Payload Length is zero and the pseudo-header's length is 32 bits wide.
-        tcp = self.TCP.from_fields(srcport=40000, dstport=80, payload=bytes(70000))
-        hbh = self.HOPOPT.from_fields(next=6, options=[(self.Option.Jumbo_Payload, {'len': 8 + len(tcp.data)})],
-                                      payload=tcp)
+        tcp = self.TCP.build(srcport=40000, dstport=80, payload=bytes(70000))
+        hbh = self.HOPOPT.build(next=6, options=[(self.Option.Jumbo_Payload, {'len': 8 + len(tcp.data)})],
+                                payload=tcp)
         made = self.ipv6(0, hbh)
         segment = made[48:]
         self.assertEqual(made[4:6], b'\x00\x00')
@@ -206,8 +206,8 @@ class ComputedTests(PendingChecksumTestCase):
         from scapy.layers.inet6 import IPv6ExtHdrDestOpt, IPv6ExtHdrRouting
 
         ip = ScapyIPv6(src=str(V6_SRC), dst=str(V6_DST))
-        route = self.IPv6_Route.from_fields(next=6, type=self.Routing.Source_Route, seg_left=1, data={'ip': [FINAL]},
-                                            payload=self.TCP.from_fields(srcport=1, dstport=2, window=0, payload=b'hi'))
+        route = self.IPv6_Route.build(next=6, type=self.Routing.Source_Route, seg_left=1, data={'ip': [FINAL]},
+                                      payload=self.TCP.build(srcport=1, dstport=2, window=0, payload=b'hi'))
         self.assertEqual(self.ipv6(43, route), bytes(ip / IPv6ExtHdrRouting(addresses=[str(FINAL)], segleft=1)
                                                      / ScapyTCP(sport=1, dport=2, flags=0, window=0) / b'hi'))
         # scapy aligns the option at 8n+6 behind a PadN, so the Mobility Headers alone compare.
@@ -219,32 +219,32 @@ class LeftPendingTests(PendingChecksumTestCase):
     """What is written as given: an explicit checksum, and one no pseudo-header covers."""
 
     def test_an_explicit_checksum_is_kept(self) -> None:
-        made = self.ipv6(60, self.IPv6_Opts.from_fields(next=135, payload=self.brr(checksum=b'\xbe\xef')))
+        made = self.ipv6(60, self.IPv6_Opts.build(next=135, payload=self.brr(checksum=b'\xbe\xef')))
         self.assertEqual(made[52:54], b'\xbe\xef')
         made = self.ipv6(60, self.home(6, self.segment(checksum=b'\xbe\xef')))
         self.assertEqual(made[40 + 24 + 16:40 + 24 + 18], b'\xbe\xef')
         with mock.patch.object(self.config, 'CHECKSUM_COMPUTE', False):
-            made = self.ipv6(60, self.IPv6_Opts.from_fields(next=135, payload=self.brr()))
+            made = self.ipv6(60, self.IPv6_Opts.build(next=135, payload=self.brr()))
         self.assertEqual(made[52:54], b'\x00\x00')
         # Left out, it is computed.
-        self.assertEqual(self.ipv6(60, self.IPv6_Opts.from_fields(next=135, payload=self.brr()))[52:54], MH_BRR[4:6])
+        self.assertEqual(self.ipv6(60, self.IPv6_Opts.build(next=135, payload=self.brr()))[52:54], MH_BRR[4:6])
 
     def test_a_fragment_waits_for_reassembly(self) -> None:
         # RFC 8200 section 8.1: the checksum covers the reassembled packet.
         for kwargs in ({'mf': True}, {'offset': 1}):
             with self.subTest(**kwargs):
-                frag = self.IPv6_Frag.from_fields(next=6, payload=self.segment(), **kwargs)
+                frag = self.IPv6_Frag.build(next=6, payload=self.segment(), **kwargs)
                 made = self.ipv6(44, frag)
                 self.assertEqual(made[40:], frag.data)
         # The atomic fragment beside them is computed.
-        self.assertNotEqual(self.ipv6(44, self.IPv6_Frag.from_fields(next=6, payload=self.segment()))[64:66], b'\x00\x00')
+        self.assertNotEqual(self.ipv6(44, self.IPv6_Frag.build(next=6, payload=self.segment()))[64:66], b'\x00\x00')
 
     def test_a_layer_the_packet_does_not_reach(self) -> None:
         cases = {
             # The fixed header names the segment, so the header ahead of it is read as TCP.
-            'next header': (6, self.HOPOPT.from_fields(next=6, payload=self.segment())),
+            'next header': (6, self.HOPOPT.build(next=6, payload=self.segment())),
             # The segment is the Mobility Header's payload, which no pseudo-header names.
-            'behind a mobility header': (60, self.IPv6_Opts.from_fields(next=135, payload=self.MH.from_fields(
+            'behind a mobility header': (60, self.IPv6_Opts.build(next=135, payload=self.MH.build(
                 next=6, checksum=b'\xbe\xef', payload=self.segment()))),
         }
         for name, (nxt, payload) in cases.items():
@@ -252,7 +252,7 @@ class LeftPendingTests(PendingChecksumTestCase):
                 self.assertEqual(self.ipv6(nxt, payload)[40:], payload.data)
         # Nor past the headers the walk is limited to (#1604), which the packet parsed back
         # leaves to the IPv6 layer to warn of, once.
-        chain = self.HOPOPT.from_fields(next=60, payload=self.IPv6_Opts.from_fields(next=6, payload=self.segment()))
+        chain = self.HOPOPT.build(next=60, payload=self.IPv6_Opts.build(next=6, payload=self.segment()))
         with mock.patch.object(self.config, 'EXTENSION_HEADER_LIMIT', 1), \
                 warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
@@ -287,8 +287,8 @@ class QuietRefusalTests(PendingChecksumTestCase):
 
         cases = {
             # Type 200 is not parsed, so its final destination is unknown.
-            'unparsed routing type': (43, self.IPv6_Route.from_fields(next=6, type=200, seg_left=1, payload=self.segment())),
-            'first fragment': (44, self.IPv6_Frag.from_fields(next=6, mf=True, payload=self.segment())),
+            'unparsed routing type': (43, self.IPv6_Route.build(next=6, type=200, seg_left=1, payload=self.segment())),
+            'first fragment': (44, self.IPv6_Frag.build(next=6, mf=True, payload=self.segment())),
         }
         for name, (nxt, payload) in cases.items():
             with self.subTest(name), capture(logger) as recorder:
@@ -298,8 +298,8 @@ class QuietRefusalTests(PendingChecksumTestCase):
                 self.assertIs(sys.excepthook, self.sentinels[0])
                 self.assertIs(threading.excepthook, self.sentinels[1])
         # A Routing type parsed gives the final destination, so the same header computes.
-        route = self.IPv6_Route.from_fields(next=6, type=self.Routing.Source_Route, seg_left=1, data={'ip': [FINAL]},
-                                            payload=self.segment())
+        route = self.IPv6_Route.build(next=6, type=self.Routing.Source_Route, seg_left=1, data={'ip': [FINAL]},
+                                      payload=self.segment())
         self.assertNotEqual(self.ipv6(43, route)[40 + 24 + 16:40 + 24 + 18], b'\x00\x00')
 
 

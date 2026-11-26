@@ -3278,7 +3278,7 @@ class HIPUnitTests(unittest.TestCase):
 
         # and the header's own ``len`` is exact rather than exact-in-pairs:
         # 4 + 16 // 8 == 6, with nothing lost to the floor division.
-        rebuilt = bytes(HIP.from_fields(parameters=[(Parameter.SEQ, {'update_id': 0x01020304})] * 2,
+        rebuilt = bytes(HIP.build(parameters=[(Parameter.SEQ, {'update_id': 0x01020304})] * 2,
                            extension=True, next=6, packet=1, version=2,
                            checksum=b'\x00\x00', controls_anonymous=False,
                            shit=0, rhit=0, payload=b''))

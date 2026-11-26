@@ -177,7 +177,7 @@ class NoPayloadProtochainTests(unittest.TestCase):
         from pcapkit.protocols.misc.no_payload.protocol import NoPayload
         from pcapkit.protocols.protocol import ProtocolBase
 
-        self.assertIsNone(NoPayload.from_fields().protochain)
+        self.assertIsNone(NoPayload.build().protochain)
         self.assertEqual(NoPayload.protochain.fget.__annotations__['return'], 'None')
         self.assertEqual(ProtocolBase.protochain.fget.__annotations__['return'], 'ProtoChain')
 

@@ -30,8 +30,8 @@ def _build(arphrd_type: 'Any') -> 'Any':
     from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
 
     protocol_type, payload = generator._linux_sll_payload(arphrd_type)
-    record = bytes(LinuxSLL.from_fields(version=2, arphrd_type=arphrd_type, protocol_type=protocol_type,
-                                        payload=payload))
+    record = bytes(LinuxSLL.build(version=2, arphrd_type=arphrd_type, protocol_type=protocol_type,
+                                  payload=payload))
     capture = generator._pcap_bytes((record,), linktype=int(LinkType.LINUX_SLL2))
     return generator._extract_first(capture, '.pcap')
 

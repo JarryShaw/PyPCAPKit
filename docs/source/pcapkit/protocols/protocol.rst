@@ -27,7 +27,7 @@ The built-in families, those bases included, derive from
 .. versionchanged:: 1.8.0
 
    Calling the class parses a positional file, as :meth:`~Protocol.parse` does,
-   and constructs from keywords alone, as :meth:`~Protocol.from_fields` does
+   and constructs from keywords alone, as :meth:`~Protocol.build` does
    (:issue:`3081`). A construction's unknown keyword raises
    :exc:`~pcapkit.utilities.exceptions.UnexpectedKeyword`, a :exc:`TypeError`
    too, a parse refuses any field, every ``make`` takes its fields as keywords
@@ -65,7 +65,7 @@ The built-in families, those bases included, derive from
 
    .. automethod:: from_schema
    .. automethod:: parse
-   .. automethod:: from_fields
+   .. automethod:: build
    .. automethod:: from_data
 
    .. automethod:: read
@@ -178,7 +178,7 @@ Parsing and Construction
 ------------------------
 
 Parsing and construction, :meth:`~Protocol.from_schema`, :meth:`~Protocol.parse`,
-:meth:`~Protocol.from_fields` and :meth:`~Protocol.from_data` included, end in one
+:meth:`~Protocol.build` and :meth:`~Protocol.from_data` included, end in one
 path. Calling the class with a file parses, and with keywords alone constructs:
 
 .. mermaid::
@@ -191,7 +191,7 @@ path. Calling the class with a file parses, and with keywords alone constructs:
        INIT["\_\_init\_\_, or an override taking keywords of its own"] -->|"a file"| START
        INIT -->|"no file"| CALL["\_call\_fields<br/>a stop is a field where the class takes one,<br/>else refused, as a length is"]
        START["\_start\_parse<br/>refuses no octets and any field, checks the stops,<br/>takes \_\_next\_layer\_\_ over the keywords"]
-       FF["from\_fields(field=value, ...)<br/>construct"] --> MEM
+       FF["build(field=value, ...)<br/>construct"] --> MEM
        CALL --> MEM
        FD["from\_data(data)"] -->|"\_make\_data(data) gives the fields"| MEM
        MEM["\_construction\_member<br/>a versioned family's base picks its member"] --> CHK
@@ -212,7 +212,7 @@ path. Calling the class with a file parses, and with keywords alone constructs:
        click FS "protocol.html#pcapkit.protocols.protocol.Protocol.from_schema"
        click PA "protocol.html#pcapkit.protocols.protocol.Protocol.parse"
        click CALL "protocol.html#pcapkit.protocols.protocol.Protocol._call_fields"
-       click FF "protocol.html#pcapkit.protocols.protocol.Protocol.from_fields"
+       click FF "protocol.html#pcapkit.protocols.protocol.Protocol.build"
        click FD "protocol.html#pcapkit.protocols.protocol.Protocol.from_data"
        click MEM "protocol.html#pcapkit.protocols.protocol.Protocol._construction_member"
        click INIT "protocol.html#pcapkit.protocols.protocol.Protocol.__init__"
@@ -384,7 +384,7 @@ Internal Definitions
                   analyze
                   from_schema
                   parse
-                  from_fields
+                  build
                   from_data
                   read
                   make
@@ -448,7 +448,7 @@ Internal Definitions
 
       :meth:`~Protocol.id`, :meth:`~Protocol.register`,
       :meth:`~Protocol.analyze`, :meth:`~Protocol.from_schema`, :meth:`~Protocol.parse`,
-      :meth:`~Protocol.from_fields`, :meth:`~Protocol.from_data`, :meth:`~Protocol.read`,
+      :meth:`~Protocol.build`, :meth:`~Protocol.from_data`, :meth:`~Protocol.read`,
       :meth:`~Protocol.make`, :meth:`~Protocol.unpack`, :meth:`~Protocol.pack`,
       :meth:`~Protocol.decode`, :meth:`~Protocol.unquote`,
       :meth:`~Protocol.resolve_index`, :meth:`~Protocol.expand_comp`,

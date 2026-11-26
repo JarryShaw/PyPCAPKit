@@ -69,8 +69,8 @@ class TestPCAPNGSPBSnaplen(PCAPNGTestCase):
         context = self._context(snaplen=8)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            block = PCAPNG.from_fields(num=2, sct=1, ctx=context, type=BlockType.Simple_Packet_Block,
-                                       block={'packet_data': b'A' * 16})
+            block = PCAPNG.build(num=2, sct=1, ctx=context, type=BlockType.Simple_Packet_Block,
+                                 block={'packet_data': b'A' * 16})
             self.assertEqual(len(block.data), 24)
             self.assertRebuilds(block.data, context)
 

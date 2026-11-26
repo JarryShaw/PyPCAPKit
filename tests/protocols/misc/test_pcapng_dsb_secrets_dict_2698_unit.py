@@ -177,9 +177,9 @@ class TestPCAPNGDSBSecretsDict(PCAPNGTestCase):
             with self.subTest(secrets_type=hex(secrets_type)), warnings.catch_warnings():
                 # the made block is parsed back, which reports the malformed lines
                 warnings.simplefilter('ignore')
-                made = PCAPNG.from_fields(num=2, sct=1, ctx=self._context(), type=BlockType.Decryption_Secrets_Block,
-                                          block={'secrets_type': secrets_type,
-                                                 'secrets_data': dict(decoded[secrets_type], data=data)}).data
+                made = PCAPNG.build(num=2, sct=1, ctx=self._context(), type=BlockType.Decryption_Secrets_Block,
+                                    block={'secrets_type': secrets_type,
+                                           'secrets_data': dict(decoded[secrets_type], data=data)}).data
                 self.assertEqual(made.hex(), _dsb(secrets_type, whole).hex())
 
 

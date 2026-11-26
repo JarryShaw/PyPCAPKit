@@ -108,7 +108,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.const.sslv2.handshake_type import HandshakeType
         from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
-        proto = SSLv2.from_fields(
+        proto = SSLv2.build(
             msg_type=HandshakeType.CLIENT_HELLO,
             two_byte_header=True,
             body={
@@ -135,7 +135,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.const.sslv2.handshake_type import HandshakeType
         from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
-        proto = SSLv2.from_fields(
+        proto = SSLv2.build(
             msg_type=HandshakeType.CLIENT_HELLO,
             two_byte_header=False,
             is_escape=False,
@@ -164,7 +164,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.const.sslv2.handshake_type import HandshakeType
         from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
-        proto = SSLv2.from_fields(
+        proto = SSLv2.build(
             msg_type=HandshakeType.SERVER_HELLO,
             two_byte_header=True,
             body={
@@ -192,7 +192,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         # A SESSION-ID-HIT SERVER-HELLO carries no certificate or cipher specs.
-        proto = SSLv2.from_fields(
+        proto = SSLv2.build(
             msg_type=HandshakeType.SERVER_HELLO,
             two_byte_header=False,
             is_escape=True,
@@ -224,7 +224,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.const.sslv2.handshake_type import HandshakeType
         from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
-        proto = SSLv2.from_fields(
+        proto = SSLv2.build(
             msg_type=HandshakeType.SERVER_HELLO,
             two_byte_header=True,
             body={
@@ -250,7 +250,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.const.sslv2.handshake_type import HandshakeType
         from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
-        proto = SSLv2.from_fields(msg_type=HandshakeType.CLIENT_FINISHED, body=b'\x01\x02\x03\x04')
+        proto = SSLv2.build(msg_type=HandshakeType.CLIENT_FINISHED, body=b'\x01\x02\x03\x04')
         raw = proto.data
 
         parsed = SSLv2(raw, len(raw))
@@ -264,10 +264,10 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.const.sslv2.handshake_type import HandshakeType
         from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
-        first = SSLv2.from_fields(msg_type=HandshakeType.CLIENT_HELLO, two_byte_header=True, body={
+        first = SSLv2.build(msg_type=HandshakeType.CLIENT_HELLO, two_byte_header=True, body={
             'cipher_specs': b'\x01\x00\x80', 'session_id': b'', 'challenge': b'\xcc' * 16,
         })
-        second = SSLv2.from_fields(msg_type=HandshakeType.CLIENT_FINISHED, two_byte_header=True,
+        second = SSLv2.build(msg_type=HandshakeType.CLIENT_FINISHED, two_byte_header=True,
                       body=b'\x01\x02\x03\x04')
         combined = bytes(first) + bytes(second)
 
@@ -282,7 +282,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.protocols.application.sslv2.protocol import SSLv2
         from pcapkit.utilities.warnings import UnknownFieldWarning
 
-        proto = SSLv2.from_fields(msg_type=HandshakeType.CLIENT_FINISHED, body=b'\x01\x02\x03\x04')
+        proto = SSLv2.build(msg_type=HandshakeType.CLIENT_FINISHED, body=b'\x01\x02\x03\x04')
         raw = proto.data
         parsed = SSLv2(raw, len(raw))
 
@@ -323,8 +323,8 @@ class TestSSLv2RoundTrip(unittest.TestCase):
                 form = '2-octet' if two_byte_header else '3-octet'
                 refused = rf'SSLv2: record \({maximum + 1} octet\(s\)\) too long for the {form}'
                 with self.assertRaisesRegex(ProtocolError, refused):
-                    SSLv2.from_fields(msg_type=finished, two_byte_header=two_byte_header,
-                                      is_escape=is_escape, body=body + b'\x00')
+                    SSLv2.build(msg_type=finished, two_byte_header=two_byte_header,
+                                is_escape=is_escape, body=body + b'\x00')
 
     def test_zero_record_length_is_refused_rather_than_corrupting_the_next_record(self) -> None:
         """A conformant ``RECORD-LENGTH`` is always >= 1 (it counts
@@ -334,7 +334,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.protocols.application.sslv2.protocol import SSLv2
         from pcapkit.utilities.exceptions import ProtocolError
 
-        second_record = bytes(SSLv2.from_fields(msg_type=HandshakeType.CLIENT_FINISHED, two_byte_header=True,
+        second_record = bytes(SSLv2.build(msg_type=HandshakeType.CLIENT_FINISHED, two_byte_header=True,
                                    body=b'\xaa\xbb'))
         # 2-octet header, high bit set, RECORD-LENGTH = 0.
         malformed = bytes([0x80, 0x00]) + second_record
@@ -349,7 +349,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.protocols.application.sslv2.protocol import SSLv2
         from pcapkit.protocols.application.sslv2.schema import SSLv2 as Schema_SSLv2
 
-        second_record = bytes(SSLv2.from_fields(msg_type=HandshakeType.CLIENT_FINISHED, two_byte_header=True,
+        second_record = bytes(SSLv2.build(msg_type=HandshakeType.CLIENT_FINISHED, two_byte_header=True,
                                    body=b'\xaa\xbb'))
         for header in (b'\x80\x00', b'\x00\x00\x00'):
             with self.subTest(header=header):
@@ -369,9 +369,9 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         for padding in (256, 300, -1, True, False, '1', 1.0, None):
             with self.subTest(padding=padding):
                 with self.assertRaises(ProtocolError) as ctx:
-                    SSLv2.from_fields(msg_type=1, two_byte_header=False, padding=padding, body=b'')
+                    SSLv2.build(msg_type=1, two_byte_header=False, padding=padding, body=b'')
                 self.assertEqual(str(ctx.exception), f'SSLv2: invalid padding: {padding!r}')
-        self.assertEqual(SSLv2.from_fields(msg_type=1, two_byte_header=False, padding=255, body=b'').data[2],
+        self.assertEqual(SSLv2.build(msg_type=1, two_byte_header=False, padding=255, body=b'').data[2],
                          255)
 
     def test_ids_are_stable(self) -> None:
@@ -385,7 +385,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
 
         # ``CLIENT-FINISHED`` so the (deliberately empty) raw body does not
         # short-read against ``ClientHello``'s fixed fields.
-        proto = SSLv2.from_fields(msg_type=HandshakeType.CLIENT_FINISHED, body=b'')
+        proto = SSLv2.build(msg_type=HandshakeType.CLIENT_FINISHED, body=b'')
         self.assertEqual(proto.name, 'Secure Sockets Layer version 2')
         self.assertEqual(proto.alias, 'SSLv2')
 
@@ -395,7 +395,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.const.sslv2.handshake_type import HandshakeType
         from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
-        proto = SSLv2.from_fields()
+        proto = SSLv2.build()
         self.assertEqual(proto.info.msg_type, HandshakeType.CLIENT_HELLO)
         self.assertEqual(proto.info.body.cipher_specs, b'')
         self.assertEqual(proto.info.body.session_id, b'')
@@ -408,16 +408,16 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.const.sslv2.handshake_type import HandshakeType
         from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
-        first = SSLv2.from_fields(msg_type=HandshakeType.CLIENT_HELLO, body={
+        first = SSLv2.build(msg_type=HandshakeType.CLIENT_HELLO, body={
             'cipher_specs': b'\x01\x00\x80', 'session_id': b'', 'challenge': b'\xcc' * 16,
         })
-        second = SSLv2.from_fields(msg_type=HandshakeType.CLIENT_HELLO, body=first.info.body)
+        second = SSLv2.build(msg_type=HandshakeType.CLIENT_HELLO, body=first.info.body)
         self.assertEqual(second.data, first.data)
 
-        hello = SSLv2.from_fields(msg_type=HandshakeType.SERVER_HELLO, body={
+        hello = SSLv2.build(msg_type=HandshakeType.SERVER_HELLO, body={
             'certificate': b'\xdd' * 4, 'cipher_specs': b'\x01\x00\x80', 'connection_id': b'\x33' * 16,
         })
-        rebuilt = SSLv2.from_fields(msg_type=HandshakeType.SERVER_HELLO, body=hello.info.body)
+        rebuilt = SSLv2.build(msg_type=HandshakeType.SERVER_HELLO, body=hello.info.body)
         self.assertEqual(rebuilt.data, hello.data)
 
     def test_make_accepts_a_prebuilt_schema_body(self) -> None:
@@ -429,7 +429,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
             client_version=2, cipher_specs_length=0, session_id_length=0, challenge_length=16,
             cipher_specs=b'', session_id=b'', challenge=b'\xee' * 16,
         )
-        proto = SSLv2.from_fields(msg_type=HandshakeType.CLIENT_HELLO, body=schema)
+        proto = SSLv2.build(msg_type=HandshakeType.CLIENT_HELLO, body=schema)
         parsed = SSLv2(proto.data, len(proto.data))
         self.assertEqual(parsed.info.body.challenge, b'\xee' * 16)
 
@@ -439,14 +439,14 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaisesRegex(ProtocolError, r'SSLv2: a .* body must be given as bytes'):
-            SSLv2.from_fields(msg_type=HandshakeType.CLIENT_FINISHED, body={'foo': b'bar'})
+            SSLv2.build(msg_type=HandshakeType.CLIENT_FINISHED, body={'foo': b'bar'})
 
     def test_invalid_body_type_is_refused(self) -> None:
         from pcapkit.protocols.application.sslv2.protocol import SSLv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaisesRegex(ProtocolError, r'SSLv2: invalid body: '):
-            SSLv2.from_fields(msg_type=1, body=12345)
+            SSLv2.build(msg_type=1, body=12345)
 
     def test_make_rejects_out_of_range_session_id_hit(self) -> None:
         """``SESSION-ID-HIT`` is a single octet, so ``256``, ``300`` and ``-1``
@@ -457,13 +457,13 @@ class TestSSLv2RoundTrip(unittest.TestCase):
 
         for bad in (256, 300, -1):
             with self.assertRaisesRegex(ProtocolError, rf'^SSLv2: invalid session_id_hit: {bad}$'):
-                SSLv2.from_fields(msg_type=HandshakeType.SERVER_HELLO, body={
+                SSLv2.build(msg_type=HandshakeType.SERVER_HELLO, body={
                     'session_id_hit': bad, 'certificate_type': 0, 'certificate': b'',
                     'cipher_specs': b'', 'connection_id': b'\x00' * 16,
                 })
 
         for good in (0, 255):
-            proto = SSLv2.from_fields(msg_type=HandshakeType.SERVER_HELLO, body={
+            proto = SSLv2.build(msg_type=HandshakeType.SERVER_HELLO, body={
                 'session_id_hit': good, 'certificate_type': 0, 'certificate': b'',
                 'cipher_specs': b'', 'connection_id': b'\x00' * 16,
             })
@@ -480,24 +480,24 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.protocols.application.sslv2.protocol import SSLv2
         from pcapkit.utilities.exceptions import ProtocolError
 
-        hello = SSLv2.from_fields(msg_type=HandshakeType.SERVER_HELLO, body={
+        hello = SSLv2.build(msg_type=HandshakeType.SERVER_HELLO, body={
             'certificate': b'\xdd' * 4, 'cipher_specs': b'\x01\x00\x80', 'connection_id': b'\x33' * 16,
         })
         server_hello_body = hello.info.body
 
         with self.assertRaisesRegex(ProtocolError, r'ServerHello body must be given with msg_type=SERVER_HELLO'):
-            SSLv2.from_fields(msg_type=HandshakeType.CLIENT_FINISHED, body=server_hello_body)
+            SSLv2.build(msg_type=HandshakeType.CLIENT_FINISHED, body=server_hello_body)
 
         with self.assertRaisesRegex(ProtocolError, r'ServerHello body must be given with msg_type=SERVER_HELLO'):
-            SSLv2.from_fields(msg_type=HandshakeType.CLIENT_HELLO, body=server_hello_body)
+            SSLv2.build(msg_type=HandshakeType.CLIENT_HELLO, body=server_hello_body)
 
-        client_hello = SSLv2.from_fields(msg_type=HandshakeType.CLIENT_HELLO, body={
+        client_hello = SSLv2.build(msg_type=HandshakeType.CLIENT_HELLO, body={
             'cipher_specs': b'\x01\x00\x80', 'session_id': b'', 'challenge': b'\xcc' * 16,
         })
         client_hello_body = client_hello.info.body
 
         with self.assertRaisesRegex(ProtocolError, r'ClientHello body must be given with msg_type=CLIENT_HELLO'):
-            SSLv2.from_fields(msg_type=HandshakeType.SERVER_HELLO, body=client_hello_body)
+            SSLv2.build(msg_type=HandshakeType.SERVER_HELLO, body=client_hello_body)
 
     def test_server_hello_hand_built_wire_bytes_parses(self) -> None:
         """A hand-written ``SERVER-HELLO``, not derived from ``make()``, parsed
@@ -640,7 +640,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.const.sslv2.handshake_type import HandshakeType
         from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
-        hello = SSLv2.from_fields(msg_type=HandshakeType.SERVER_HELLO, body={
+        hello = SSLv2.build(msg_type=HandshakeType.SERVER_HELLO, body={
             'certificate_type': 1, 'certificate': b'\xaa' * 4,
             'cipher_specs': b'\x01\x00\x80', 'connection_id': b'\xbb' * 16,
         })
@@ -673,10 +673,10 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.const.sslv2.handshake_type import HandshakeType
         from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
-        self._assert_made_schema_round_trips(SSLv2.from_fields())
+        self._assert_made_schema_round_trips(SSLv2.build())
         for two_byte_header in (True, False):
             with self.subTest(two_byte_header=two_byte_header):
-                self._assert_made_schema_round_trips(SSLv2.from_fields(
+                self._assert_made_schema_round_trips(SSLv2.build(
                     msg_type=HandshakeType.CLIENT_HELLO, two_byte_header=two_byte_header, body={
                         'cipher_specs': b'\x01\x00\x80', 'session_id': b'\x11' * 16,
                         'challenge': b'\xcc' * 16,
@@ -688,10 +688,10 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.const.sslv2.handshake_type import HandshakeType
         from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
-        self._assert_made_schema_round_trips(SSLv2.from_fields(msg_type=HandshakeType.SERVER_HELLO))
+        self._assert_made_schema_round_trips(SSLv2.build(msg_type=HandshakeType.SERVER_HELLO))
         for two_byte_header in (True, False):
             with self.subTest(two_byte_header=two_byte_header):
-                self._assert_made_schema_round_trips(SSLv2.from_fields(
+                self._assert_made_schema_round_trips(SSLv2.build(
                     msg_type=HandshakeType.SERVER_HELLO, two_byte_header=two_byte_header, body={
                         'session_id_hit': 1, 'certificate_type': 1, 'certificate': b'\xdd' * 4,
                         'cipher_specs': b'\x01\x00\x80', 'connection_id': b'\x33' * 16,
@@ -715,11 +715,11 @@ class TestSSLv2RoundTrip(unittest.TestCase):
             connection_id=b'\x00' * 16,
         )
         with self.assertRaisesRegex(ProtocolError, r'^SSLv2: invalid session_id_hit: 256$'):
-            SSLv2.from_fields(msg_type=HandshakeType.SERVER_HELLO, body=schema)
+            SSLv2.build(msg_type=HandshakeType.SERVER_HELLO, body=schema)
         for hit in (False, True):
             with self.subTest(hit=hit):
                 schema.session_id_hit = hit
-                proto = SSLv2.from_fields(msg_type=HandshakeType.SERVER_HELLO, body=schema)
+                proto = SSLv2.build(msg_type=HandshakeType.SERVER_HELLO, body=schema)
                 self.assertEqual(proto.data[3], int(hit))  # 2-octet header, MSG-TYPE, the hit
 
     def test_client_hello_length_mismatch_falls_back_to_raw_body(self) -> None:
@@ -750,7 +750,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.protocols.application.sslv2.protocol import SSLv2
         from pcapkit.utilities.exceptions import ProtocolError
 
-        proto = SSLv2.from_fields(msg_type=HandshakeType.CLIENT_FINISHED, body=b'')
+        proto = SSLv2.build(msg_type=HandshakeType.CLIENT_FINISHED, body=b'')
         with self.assertRaisesRegex(ProtocolError, r'^SSLv2: invalid session_id_hit: 256$'):
             proto.make(msg_type=HandshakeType.SERVER_HELLO, body={'session_id_hit': 256})
 

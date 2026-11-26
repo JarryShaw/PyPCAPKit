@@ -121,12 +121,12 @@ class TestLinkTrailerKept(unittest.TestCase):
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
-        ipv4 = IPv4.from_fields(protocol=253, payload=b'abcd', trailer=b'\x00\x01')
+        ipv4 = IPv4.build(protocol=253, payload=b'abcd', trailer=b'\x00\x01')
         self.assertEqual(ipv4.info.len, 24)
         self.assertEqual(ipv4.data[-6:], b'abcd\x00\x01')
         self.assertEqual(ipv4.info.trailer, b'\x00\x01')
 
-        ipv6 = IPv6.from_fields(next=59, payload=b'abcd', trailer=b'\x01')
+        ipv6 = IPv6.build(next=59, payload=b'abcd', trailer=b'\x01')
         self.assertEqual(ipv6.info.payload, 4)
         self.assertEqual(ipv6.data[-5:], b'abcd\x01')
         self.assertEqual(ipv6.info.trailer, b'\x01')

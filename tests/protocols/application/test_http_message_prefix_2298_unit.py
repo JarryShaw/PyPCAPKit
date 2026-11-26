@@ -81,7 +81,7 @@ class TestHTTPv1StartLineMessages(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
-            HTTPv1.from_fields(method='GET', http_version='1.1')
+            HTTPv1.build(method='GET', http_version='1.1')
         self.assertEqual(str(ctx.exception), 'HTTP: invalid start line: a request needs a URI')
 
     def test_neither_or_both_of_method_and_status(self) -> None:
@@ -117,7 +117,7 @@ class TestHTTPv2SettingsMessage(unittest.TestCase):
         for settings, tail in ((42, '42'), ('x', "'x'"), (4.5, '4.5')):
             with self.subTest(settings=settings):
                 with self.assertRaises(ProtocolError) as ctx:
-                    bytes(HTTPv2.from_fields(type=Frame.SETTINGS, frame={'settings': settings}))
+                    bytes(HTTPv2.build(type=Frame.SETTINGS, frame={'settings': settings}))
                 self.assertEqual(str(ctx.exception),
                                  f'HTTP/2: [Type 4] invalid settings: {tail}')
 

@@ -189,12 +189,12 @@ class SourceListCutTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         sources = ['10.0.0.1', '10.0.0.2']
-        self.assertEqual(self.IGMPv3.from_fields(type=Type.IGMP_Membership_Query, sources=sources).info.num_sources, 2)
-        made = self.IGMPv3.from_fields(type=Type.IGMP_Membership_Query, sources=sources, num_sources=5)
+        self.assertEqual(self.IGMPv3.build(type=Type.IGMP_Membership_Query, sources=sources).info.num_sources, 2)
+        made = self.IGMPv3.build(type=Type.IGMP_Membership_Query, sources=sources, num_sources=5)
         self.assertEqual(made.data[10:12], (5).to_bytes(2, 'big'))
         for count in (1, 0x10000, True, '2'):
             with self.subTest(num_sources=count), self.assertRaisesRegex(ProtocolError, 'num_sources'):
-                self.IGMPv3.from_fields(type=Type.IGMP_Membership_Query, sources=sources, num_sources=count)
+                self.IGMPv3.build(type=Type.IGMP_Membership_Query, sources=sources, num_sources=count)
 
     def test_a_cut_rebuilds_as_captured(self) -> None:
         for message in (REPORT, *QUERIES):

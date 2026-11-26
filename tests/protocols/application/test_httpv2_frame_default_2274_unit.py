@@ -58,7 +58,7 @@ class TestHTTPv2DefaultFrame(unittest.TestCase):
         """Build the HTTP/2 frame of ``type`` on stream ``sid``."""
         from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
-        return HTTPv2.from_fields(type=type, sid=sid, **kwargs)
+        return HTTPv2.build(type=type, sid=sid, **kwargs)
 
     def test_default_builds_every_frame_type(self) -> None:
         from pcapkit.const.http.frame import Frame
@@ -139,7 +139,7 @@ class TestHTTPv2EmptySettings(unittest.TestCase):
 
         for label, frame in (('default', {}), ('explicit', {'settings': None})):
             with self.subTest(settings=label):
-                made = bytes(HTTPv2.from_fields(type=Frame.SETTINGS, sid=0, frame=frame))
+                made = bytes(HTTPv2.build(type=Frame.SETTINGS, sid=0, frame=frame))
                 self.assertEqual(made.hex(), DEFAULT_FRAMES['SETTINGS'][1].hex())
                 self.assertEqual(HTTPv2(made, len(made)).info.length, 0)
 
@@ -154,7 +154,7 @@ class TestHTTPv2EmptySettings(unittest.TestCase):
         from pcapkit.const.http.frame import Frame
         from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
-        made = bytes(HTTPv2.from_fields(type=Frame.SETTINGS, sid=0, frame={'ack': True}))
+        made = bytes(HTTPv2.build(type=Frame.SETTINGS, sid=0, frame={'ack': True}))
         self.assertEqual(made.hex(), '000000040100000000')
 
     def test_other_settings_types_are_still_rejected(self) -> None:
@@ -165,7 +165,7 @@ class TestHTTPv2EmptySettings(unittest.TestCase):
         for settings, tail in ((42, '42'), ('x', "'x'"), (4.5, '4.5')):
             with self.subTest(settings=settings):
                 with self.assertRaises(ProtocolError) as ctx:
-                    bytes(HTTPv2.from_fields(type=Frame.SETTINGS, frame={'settings': settings}))
+                    bytes(HTTPv2.build(type=Frame.SETTINGS, frame={'settings': settings}))
                 self.assertEqual(str(ctx.exception),
                                  f'HTTP/2: [Type 4] invalid settings: {tail}')
 

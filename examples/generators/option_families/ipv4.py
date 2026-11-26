@@ -54,7 +54,7 @@ def _ipv4_overrides() -> 'dict[Any, dict[str, Any]]':
 
 def _ipv4_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     from pcapkit.protocols.internet.ipv4.protocol import IPv4
-    return IPv4.from_fields(options=[(code, kwargs)], **IPV4_BASE)
+    return IPv4.build(options=[(code, kwargs)], **IPV4_BASE)
 
 
 def _ipv4_parse(octets: 'bytes') -> 'Any':
@@ -74,7 +74,7 @@ def _ipv4_extract(parsed: 'Any') -> 'Any':
 
 def _ipv4_rebuild(options: 'Any') -> 'Any':
     from pcapkit.protocols.internet.ipv4.protocol import IPv4
-    return IPv4.from_fields(options=options, **IPV4_BASE)
+    return IPv4.build(options=options, **IPV4_BASE)
 
 
 #: The families this module adds.

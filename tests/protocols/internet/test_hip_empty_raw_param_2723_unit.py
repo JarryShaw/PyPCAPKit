@@ -43,13 +43,13 @@ class TestHIPEmptyRawParam(unittest.TestCase):
         for parameters in ([b''], [ECHO_REQUEST_SIGNED, b''], [b'', ECHO_REQUEST_SIGNED]):
             with self.subTest(parameters=parameters):
                 with self.assertRaisesRegex(ProtocolError, r"invalid parameter: b'' holds no type field"):
-                    HIP.from_fields(parameters=parameters)
+                    HIP.build(parameters=parameters)
 
     def test_raw_parameter_builds_as_given(self) -> None:
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip.protocol import HIP
 
-        built = HIP.from_fields(parameters=[ECHO_REQUEST_SIGNED]).data
+        built = HIP.build(parameters=[ECHO_REQUEST_SIGNED]).data
         self.assertEqual(built[1], 5)  # Header Length: (40 + 8 - 8) / 8
         self.assertEqual(built[40:], ECHO_REQUEST_SIGNED + b'\x00\x00')
         self.assertIn(Parameter.ECHO_REQUEST_SIGNED, HIP(built).info.parameters)

@@ -84,17 +84,17 @@ class TestTwoOctetPadding(unittest.TestCase):
         protocols = {cls.__name__: cls for cls, _ in self._protocols()}
         built = {
             # 2 + a 4-octet Router Alert = 6, two short of 8
-            'HOPOPT': (protocols['HOPOPT'].from_fields(next=TransType.IPv6_NoNxt,
-                                                       options=[(IPv6_Option.Router_Alert, {'alert': 0})]),
+            'HOPOPT': (protocols['HOPOPT'].build(next=TransType.IPv6_NoNxt,
+                                                 options=[(IPv6_Option.Router_Alert, {'alert': 0})]),
                        '3b00' '05020000' '0100',
                        [(IPv6_Option.Router_Alert, 4), (IPv6_Option.PadN, 2)]),
-            'IPv6_Opts': (protocols['IPv6_Opts'].from_fields(next=TransType.IPv6_NoNxt,
-                                                             options=[(IPv6_Option.Router_Alert, {'alert': 0})]),
+            'IPv6_Opts': (protocols['IPv6_Opts'].build(next=TransType.IPv6_NoNxt,
+                                                       options=[(IPv6_Option.Router_Alert, {'alert': 0})]),
                           '3b00' '05020000' '0100',
                           [(IPv6_Option.Router_Alert, 4), (IPv6_Option.PadN, 2)]),
             # 6 + 2 octets of reserved + a 6-octet PadN = 14, two short of 16
-            'MH': (protocols['MH'].from_fields(next=TransType.IPv6_NoNxt, type=Packet.Binding_Refresh_Request,
-                                               checksum=b'\x00\x00', data={'options': [(MH_Option.PadN, {'length': 4})]}),
+            'MH': (protocols['MH'].build(next=TransType.IPv6_NoNxt, type=Packet.Binding_Refresh_Request,
+                                         checksum=b'\x00\x00', data={'options': [(MH_Option.PadN, {'length': 4})]}),
                    '3b01000000000000' '010400000000' '0100',
                    [(MH_Option.PadN, 6), (MH_Option.PadN, 2)]),
         }

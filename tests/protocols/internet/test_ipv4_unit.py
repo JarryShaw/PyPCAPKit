@@ -217,7 +217,7 @@ class IPv4UnitTests(unittest.TestCase):
             expected = proto.make(protocol=6, payload=payload).pack()
 
             # a protocol instance carrying the same octets packs identically ...
-            raw_payload = Raw.from_fields(packet=payload)
+            raw_payload = Raw.build(packet=payload)
             self.assertIsInstance(raw_payload, ProtocolBase)
             # ... and it is *not* a ``Protocol``, which is the whole of the
             # defect. Asserting the negative matters because a ``Protocol``
@@ -232,7 +232,7 @@ class IPv4UnitTests(unittest.TestCase):
                              expected)
 
             # ... and an empty one is the same as no payload at all
-            self.assertEqual(proto.make(protocol=6, payload=NoPayload.from_fields()).pack(),
+            self.assertEqual(proto.make(protocol=6, payload=NoPayload.build()).pack(),
                              proto.make(protocol=6, payload=b'').pack())
 
         # the shape ``from_data`` feeds to ``make``, named here so that routing
@@ -291,7 +291,7 @@ class IPv4UnitTests(unittest.TestCase):
             warnings.simplefilter('ignore')
             expected = header(payload).pack()
 
-            raw_payload = Raw.from_fields(packet=payload)
+            raw_payload = Raw.build(packet=payload)
             self.assertIsInstance(raw_payload, ProtocolBase)
             self.assertNotIsInstance(raw_payload, Protocol)
             self.assertEqual(header(raw_payload).pack(), expected)
@@ -357,7 +357,7 @@ class IPv4UnitTests(unittest.TestCase):
             warnings.simplefilter('ignore')
             # NOTE: Explicit checksums, which the IP layer writes as given rather
             # than computing them over its pseudo-header (#2473, #2474).
-            udp = UDP.from_fields(srcport=1234, dstport=53, payload=b'\xbb' * 8, checksum=b'\x00\x00')
+            udp = UDP.build(srcport=1234, dstport=53, payload=b'\xbb' * 8, checksum=b'\x00\x00')
             udp_octets = bytes(udp)
 
         # 8 octets of UDP header and the 8 the caller gave it
@@ -395,9 +395,9 @@ class IPv4UnitTests(unittest.TestCase):
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             others = [
-                TCP.from_fields(srcport=1234, dstport=80, payload=b'\xcc' * 8, checksum=b'\x00\x00'),
-                IPv4.from_fields(protocol=6, src='192.0.2.1', dst='198.51.100.1',
-                                 payload=b'\xcc' * 8),
+                TCP.build(srcport=1234, dstport=80, payload=b'\xcc' * 8, checksum=b'\x00\x00'),
+                IPv4.build(protocol=6, src='192.0.2.1', dst='198.51.100.1',
+                           payload=b'\xcc' * 8),
             ]
             for inner in others:
                 with self.subTest(payload=type(inner).__name__):
@@ -792,8 +792,8 @@ class IPv4UnitTests(unittest.TestCase):
         # a defect rather than an internal curiosity: ``make`` takes a
         # caller-built option schema and packs it.
         with self.assertRaises(FieldValueError):
-            IPv4.from_fields(src='127.0.0.1', dst='127.0.0.2', ttl=64, id=1,
-                             options=[option([True, 5], TSFlag.IP_with_Timestamp)], payload=b'')
+            IPv4.build(src='127.0.0.1', dst='127.0.0.2', ttl=64, id=1,
+                       options=[option([True, 5], TSFlag.IP_with_Timestamp)], payload=b'')
 
         # The control. A real address packs, and reads back as an address.
         real = option([int(ip_address('192.0.2.1')), 5], TSFlag.IP_with_Timestamp)
@@ -916,11 +916,11 @@ class IPv4UnitTests(unittest.TestCase):
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            datagram = IPv4.from_fields(src='127.0.0.1', dst='127.0.0.2', ttl=64, id=1,
-                                        options=[(OptionNumber.TS, {
-                                            'counts': 2,
-                                            'timestamp': [datetime.timedelta(seconds=1), 2000],
-                                        })], payload=b'')
+            datagram = IPv4.build(src='127.0.0.1', dst='127.0.0.2', ttl=64, id=1,
+                                  options=[(OptionNumber.TS, {
+                                      'counts': 2,
+                                      'timestamp': [datetime.timedelta(seconds=1), 2000],
+                                  })], payload=b'')
         self.assertEqual(
             [str(entry.message) for entry in caught
              if issubclass(entry.category, UnknownFieldWarning)], [],
@@ -942,13 +942,13 @@ class IPv4UnitTests(unittest.TestCase):
 
         # The other shape the maker accepts, which reaches the addressed branch of
         # ``post_process`` rather than the timestamp-only one.
-        with_ip = IPv4.from_fields(src='127.0.0.1', dst='127.0.0.2', ttl=64, id=1,
-                                   options=[(OptionNumber.TS, {
-                                       'counts': 1,
-                                       'timestamp': {
-                                           ip_address('192.0.2.1'): datetime.timedelta(seconds=3),
-                                       },
-                                   })], payload=b'')
+        with_ip = IPv4.build(src='127.0.0.1', dst='127.0.0.2', ttl=64, id=1,
+                             options=[(OptionNumber.TS, {
+                                 'counts': 1,
+                                 'timestamp': {
+                                     ip_address('192.0.2.1'): datetime.timedelta(seconds=3),
+                                 },
+                             })], payload=b'')
         addressed = with_ip.info.options[OptionNumber.TS]
         self.assertEqual(addressed.flag, TSFlag.IP_with_Timestamp)
         self.assertEqual(addressed.timestamp[ip_address('192.0.2.1')],

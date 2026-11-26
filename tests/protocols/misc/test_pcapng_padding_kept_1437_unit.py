@@ -114,14 +114,14 @@ class TestPCAPNGPaddingKept(PCAPNGTestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')  # one octet of Ethernet is too short
-            spb = PCAPNG.from_fields(num=2, sct=1, ctx=self._context(), type=BlockType.Simple_Packet_Block,
-                                     block={'packet_data': b'a'})
+            spb = PCAPNG.build(num=2, sct=1, ctx=self._context(), type=BlockType.Simple_Packet_Block,
+                               block={'packet_data': b'a'})
         self.assertEqual(spb.data.hex(), '03000000140000000100000061000000' '14000000')
 
         def shb(comment: 'dict[str, object]') -> 'str':
             block = {'byteorder': 'little', 'options': [(OptionType.opt_comment, comment)]}
-            return PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block,
-                                      block=block).data[24:32].hex()
+            return PCAPNG.build(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block,
+                                block=block).data[24:32].hex()
 
         self.assertEqual(shb({'comment': 'x'}), '0100010078000000')
         # an option given as keyword arguments takes its padding as one

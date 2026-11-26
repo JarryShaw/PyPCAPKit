@@ -322,7 +322,7 @@ class LazyAppTypeContractTests(unittest.TestCase):
                 pcapkit.const.reg.apptype.TCP
             at_register = loaded('tcp', 'udp')
             register_tcp(54321, ModuleDescriptor('pcapkit.protocols.application.ftp.protocol', 'FTP'))
-            raw = TCP.from_fields(srcport=40000, dstport=54321, payload=b'USER anonymous\\r\\n').data
+            raw = TCP.build(srcport=40000, dstport=54321, payload=b'USER anonymous\\r\\n').data
             parsed = TCP(raw, len(raw))
             emit(at_register=at_register, raw=raw.hex(), chain=str(parsed.protochain),
                  ports=[repr(parsed.info.srcport), repr(parsed.info.dstport)],

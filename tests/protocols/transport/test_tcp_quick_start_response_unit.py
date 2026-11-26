@@ -50,8 +50,8 @@ def qs() -> 'Option':
 def build(rate: 'int', payload: 'bytes' = b'') -> 'bytes':
     """Construct a segment that carries one Quick-Start Response option."""
     from pcapkit.protocols.transport.tcp.protocol import TCP
-    return TCP.from_fields(srcport=1, dstport=2, payload=payload,
-                           options=[(qs(), {'rate': rate, 'diff': 3, 'nonce': 0x1234})]).data
+    return TCP.build(srcport=1, dstport=2, payload=payload,
+                     options=[(qs(), {'rate': rate, 'diff': 3, 'nonce': 0x1234})]).data
 
 
 def parse(raw: 'bytes') -> 'TCP':
@@ -92,8 +92,8 @@ class QuickStartResponseTests(unittest.TestCase):
                     raw = build(rate, payload)
                     tcp = parse(raw)
                     self.assertEqual(tcp.info.options[QS].req_rate, rate)
-                    again = TCP.from_fields(srcport=1, dstport=2, payload=payload,
-                                            options=tcp.info.options).data
+                    again = TCP.build(srcport=1, dstport=2, payload=payload,
+                                      options=tcp.info.options).data
                     self.assertEqual(again, raw)
                     self.assertEqual(bytes(tcp.payload.data), payload)
 
@@ -135,7 +135,7 @@ class QuickStartResponseTests(unittest.TestCase):
             for value in values:
                 with self.subTest(field=keyword, value=value):
                     with self.assertRaisesRegex(ProtocolError, rf'^TCP: invalid Quick-Start {what}: {value!r}$'):
-                        TCP.from_fields(srcport=1, dstport=2, options=[(qs(), {'rate': 80, keyword: value})])
+                        TCP.build(srcport=1, dstport=2, options=[(qs(), {'rate': 80, keyword: value})])
 
     def test_ttl_diff_is_taken_modulo_256(self) -> 'None':
         """:rfc:`4782` Section 3.1 defines TTL Diff modulo 256, so its octet wraps."""
@@ -143,7 +143,7 @@ class QuickStartResponseTests(unittest.TestCase):
 
         for diff, octet in ((255, 0xff), (256, 0x00), (300, 0x2c), (-1, 0xff)):
             with self.subTest(diff=diff):
-                raw = TCP.from_fields(srcport=1, dstport=2, options=[(qs(), {'rate': 80, 'diff': diff})]).data
+                raw = TCP.build(srcport=1, dstport=2, options=[(qs(), {'rate': 80, 'diff': diff})]).data
                 self.assertEqual(raw[23], octet)
 
 

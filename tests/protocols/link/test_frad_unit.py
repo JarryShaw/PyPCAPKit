@@ -145,7 +145,7 @@ class TestFRAD(unittest.TestCase):
     def test_make_then_parse_direct(self) -> None:
         from pcapkit.protocols.link.frad.protocol import FRAD
 
-        made = FRAD.from_fields(dlci=50, nlpid=0xCC, payload=IPV4).data
+        made = FRAD.build(dlci=50, nlpid=0xCC, payload=IPV4).data
         self.assertEqual(made, _direct(0xCC, IPV4))
 
         parsed = FRAD(made, len(made))
@@ -156,7 +156,7 @@ class TestFRAD(unittest.TestCase):
     def test_make_then_parse_snap(self) -> None:
         from pcapkit.protocols.link.frad.protocol import FRAD
 
-        made = FRAD.from_fields(dlci=50, nlpid=0x80, snap_oui=b'\x00\x00\x00', snap_pid=0x0806,
+        made = FRAD.build(dlci=50, nlpid=0x80, snap_oui=b'\x00\x00\x00', snap_pid=0x0806,
                    payload=ARP_REQUEST).data
         self.assertEqual(made, _snap(b'\x00\x00\x00', 0x0806, ARP_REQUEST))
 
@@ -168,12 +168,12 @@ class TestFRAD(unittest.TestCase):
         from pcapkit.protocols.link.frad.protocol import FRAD
 
         # dlci=0, with ea2=1 per the 2-octet address form: 0x00 0x01.
-        self.assertEqual(FRAD.from_fields().data, b'\x00\x01\x03\xcc')
+        self.assertEqual(FRAD.build().data, b'\x00\x01\x03\xcc')
 
     def test_make_round_trips_every_bit_of_the_address(self) -> None:
         from pcapkit.protocols.link.frad.protocol import FRAD
 
-        made = FRAD.from_fields(dlci=1023, cr=1, fecn=1, becn=1, de=1, nlpid=0xCC, payload=IPV4)
+        made = FRAD.build(dlci=1023, cr=1, fecn=1, becn=1, de=1, nlpid=0xCC, payload=IPV4)
         parsed = FRAD(made.data, len(made.data))
         self.assertEqual((parsed.info.dlci, parsed.info.cr, parsed.info.fecn,
                          parsed.info.becn, parsed.info.de), (1023, 1, 1, 1, 1))
@@ -185,7 +185,7 @@ class TestFRAD(unittest.TestCase):
 
         for dlci in (-1, 1024, True, '50'):
             with self.subTest(dlci=dlci), self.assertRaises(ProtocolError):
-                FRAD.from_fields(dlci=dlci)
+                FRAD.build(dlci=dlci)
 
     def test_make_rejects_an_invalid_flag_bit(self) -> None:
         # NOTE: no bool cases: ``True == 1``, so a bit flag, unlike the numeric
@@ -195,7 +195,7 @@ class TestFRAD(unittest.TestCase):
 
         for kwargs in ({'cr': 2}, {'fecn': -1}, {'becn': 3}, {'de': 'x'}):
             with self.subTest(**kwargs), self.assertRaises(ProtocolError):
-                FRAD.from_fields(**kwargs)
+                FRAD.build(**kwargs)
 
     def test_make_rejects_a_float_flag_bit(self) -> None:
         """``1.0`` equals ``1`` but is no bit, so it raises ``ProtocolError``
@@ -207,7 +207,7 @@ class TestFRAD(unittest.TestCase):
             for bit in (0.0, 1.0):
                 with self.subTest(name=name, bit=bit):
                     with self.assertRaises(ProtocolError) as ctx:
-                        FRAD.from_fields(**{name: bit})
+                        FRAD.build(**{name: bit})
                     self.assertEqual(str(ctx.exception), f'FRAD: invalid {name}: {bit!r}')
 
     def test_make_tolerates_nlpid_zero_for_short_read_replay(self) -> None:
@@ -217,27 +217,27 @@ class TestFRAD(unittest.TestCase):
         """
         from pcapkit.protocols.link.frad.protocol import FRAD
 
-        FRAD.from_fields(nlpid=0)  # must not raise
+        FRAD.build(nlpid=0)  # must not raise
 
     def test_make_rejects_snap_fields_without_snap(self) -> None:
         from pcapkit.protocols.link.frad.protocol import FRAD
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
-            FRAD.from_fields(nlpid=0xCC, snap_oui=b'\x00\x00\x00')
+            FRAD.build(nlpid=0xCC, snap_oui=b'\x00\x00\x00')
         with self.assertRaises(ProtocolError):
-            FRAD.from_fields(nlpid=0xCC, snap_pid=0x0806)
+            FRAD.build(nlpid=0xCC, snap_pid=0x0806)
 
     def test_make_rejects_snap_without_snap_fields(self) -> None:
         from pcapkit.protocols.link.frad.protocol import FRAD
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
-            FRAD.from_fields(nlpid=0x80)
+            FRAD.build(nlpid=0x80)
         with self.assertRaises(ProtocolError):
-            FRAD.from_fields(nlpid=0x80, snap_oui=b'\x00\x00')  # wrong width
+            FRAD.build(nlpid=0x80, snap_oui=b'\x00\x00')  # wrong width
         with self.assertRaises(ProtocolError):
-            FRAD.from_fields(nlpid=0x80, snap_oui=b'\x00\x00\x00', snap_pid=0x1_0000)  # out of range
+            FRAD.build(nlpid=0x80, snap_oui=b'\x00\x00\x00', snap_pid=0x1_0000)  # out of range
 
     def test_id_and_index(self) -> None:
         """``__index__`` is ``LINKTYPE_FRELAY`` (#2627); LinuxSLL dispatches here

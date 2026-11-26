@@ -34,8 +34,8 @@ class TestIPv4TimestampDefault(unittest.TestCase):
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
-        return bytes(IPv4.from_fields(src='10.0.0.1', dst='10.0.0.2', ttl=64, id=0,
-                                      options=[(OptionNumber.TS, option)], payload=b''))
+        return bytes(IPv4.build(src='10.0.0.1', dst='10.0.0.2', ttl=64, id=0,
+                                options=[(OptionNumber.TS, option)], payload=b''))
 
     def test_default_timestamp_round_trips_byte_for_byte(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber

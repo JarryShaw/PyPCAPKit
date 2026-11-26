@@ -39,7 +39,7 @@ def _mh_message_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
 
     # ``data`` has to be a mapping for ``make`` to dispatch on the message
     # type; a Data object takes the other branch, which is what rebuild uses.
-    return MH.from_fields(type=code, data=dict(kwargs), **MH_BASE)
+    return MH.build(type=code, data=dict(kwargs), **MH_BASE)
 
 
 def _mh_parse(octets: 'bytes') -> 'Any':
@@ -53,7 +53,7 @@ def _mh_message_extract(parsed: 'Any') -> 'Any':
 
 def _mh_message_rebuild(message: 'Any') -> 'Any':
     from pcapkit.protocols.internet.mh.protocol import MH
-    return MH.from_fields(type=message.type, data=message, **MH_BASE)
+    return MH.build(type=message.type, data=message, **MH_BASE)
 
 
 def _mh_option_registry() -> 'Any':
@@ -123,7 +123,7 @@ def _mh_carrier() -> 'Any':
 
 def _mh_option_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     from pcapkit.protocols.internet.mh.protocol import MH
-    return MH.from_fields(type=_mh_carrier(), data={'options': [(code, dict(kwargs))]}, **MH_BASE)
+    return MH.build(type=_mh_carrier(), data={'options': [(code, dict(kwargs))]}, **MH_BASE)
 
 
 def _mh_option_extract(parsed: 'Any') -> 'Any':
@@ -133,7 +133,7 @@ def _mh_option_extract(parsed: 'Any') -> 'Any':
 
 def _mh_option_rebuild(options: 'Any') -> 'Any':
     from pcapkit.protocols.internet.mh.protocol import MH
-    return MH.from_fields(type=_mh_carrier(), data={'options': options}, **MH_BASE)
+    return MH.build(type=_mh_carrier(), data={'options': options}, **MH_BASE)
 
 
 def _mh_extension_registry() -> 'Any':
@@ -169,10 +169,10 @@ def _mh_extension_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
         'extensions': [(code, dict(kwargs))],
     }  # type: dict[str, Any]
     parameter = Data_CGAParameter(**fields)
-    return MH.from_fields(type=_mh_carrier(),
-                          data={'options': [(Enum_Option.CGA_Parameters,
-                                             {'parameters': [parameter]})]},
-                          **MH_BASE)
+    return MH.build(type=_mh_carrier(),
+                    data={'options': [(Enum_Option.CGA_Parameters,
+                                       {'parameters': [parameter]})]},
+                    **MH_BASE)
 
 
 #: The families this module adds.

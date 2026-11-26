@@ -87,7 +87,7 @@ class NoPayloadPathTests(unittest.TestCase):
 
         self.assertIs(NoPayload.__schema__, Schema_NoPayload)
         self.assertIs(NoPayload.__data__, Data_NoPayload)
-        self.assertIsInstance(NoPayload.from_fields().info, Data_NoPayload)
+        self.assertIsInstance(NoPayload.build().info, Data_NoPayload)
 
     def test_every_package_exports_the_new_modules_class(self) -> None:
         for package, home in PACKAGES:

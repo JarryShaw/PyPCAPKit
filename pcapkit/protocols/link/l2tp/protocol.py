@@ -357,7 +357,7 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
 
     @classmethod
     def _construction_member(cls, fields: 'dict[str, Any]') -> 'Type[Self]':
-        """The member :meth:`from_fields`, :meth:`from_data` and a call given no file construct.
+        """The member :meth:`build`, :meth:`from_data` and a call given no file construct.
 
         On this class, the member the ``version`` field names, which stays in
         ``fields``; on another, the class itself.

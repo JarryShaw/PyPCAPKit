@@ -63,7 +63,7 @@ class UnknownKeywordTests(unittest.TestCase):
                     cls(octets, len(octets), **{key: value})
 
     def test_no_octets_is_refused(self) -> None:
-        """``Proto(None)`` points at ``from_fields``, rather than constructing."""
+        """``Proto(None)`` points at ``build``, rather than constructing."""
         from pcapkit.protocols.application.http.protocol import HTTP
         from pcapkit.protocols.internet.icmp.protocol import ICMP
         from pcapkit.protocols.internet.igmp.protocol import IGMP
@@ -75,7 +75,7 @@ class UnknownKeywordTests(unittest.TestCase):
 
         for cls in (Ethernet, IP, IPv4, ICMP, IGMP, LinuxSLL, HTTP, L2TP):
             with self.subTest(cls=cls.__name__), self.assertRaisesRegex(
-                    TypeError, rf'^{cls.__name__}: nothing to parse; build one with {cls.__name__}\.from_fields\(\)$'):
+                    TypeError, rf'^{cls.__name__}: nothing to parse; build one with {cls.__name__}\.build\(\)$'):
                 cls(None)  # type: ignore[arg-type]
 
     def test_analyze_refuses_any_other_keyword(self) -> None:
@@ -158,11 +158,11 @@ class MemberVersionTests(unittest.TestCase):
 
         cases = (
             (IPv4, FRAME[14:], 4, 6, 'IPv4: version=6 names another member'),
-            (ICMPv4, ICMPv4.from_fields().data, 4, 6, 'ICMPv4: version=6 names another member'),
-            (IGMPv2, IGMPv2.from_fields(max_resp_time=100).data, 2, 3, 'IGMPv2: version=3 names another member'),
-            (LinuxSLL1, LinuxSLL1.from_fields().data, 1, 2, 'LinuxSLL1: version=2 names another member'),
+            (ICMPv4, ICMPv4.build().data, 4, 6, 'ICMPv4: version=6 names another member'),
+            (IGMPv2, IGMPv2.build(max_resp_time=100).data, 2, 3, 'IGMPv2: version=3 names another member'),
+            (LinuxSLL1, LinuxSLL1.build().data, 1, 2, 'LinuxSLL1: version=2 names another member'),
             (HTTPv1, b'GET / HTTP/1.1\r\n\r\n', 1, 2, 'HTTPv1: version=2 names another member'),
-            (L2TPv2, L2TPv2.from_fields().data, 2, 3, 'L2TP: invalid version: 3'),
+            (L2TPv2, L2TPv2.build().data, 2, 3, 'L2TP: invalid version: 3'),
         )
         for cls, octets, own, other, message in cases:
             with self.subTest(cls=cls.__name__):
@@ -171,7 +171,7 @@ class MemberVersionTests(unittest.TestCase):
                     cls(octets, len(octets), version=other)
 
     def test_a_subclass_outside_the_members_has_no_version(self) -> None:
-        """As for ``from_fields``, a parse of one names no member with ``version``."""
+        """As for ``build``, a parse of one names no member with ``version``."""
         from pcapkit.protocols.link.l2tp.protocol import L2TP
         from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
         from pcapkit.utilities.exceptions import ProtocolError
@@ -187,7 +187,7 @@ class MemberVersionTests(unittest.TestCase):
             def make(self, **kwargs: 'object') -> 'object':
                 raise NotImplementedError
 
-        octets = L2TPv2.from_fields().data
+        octets = L2TPv2.build().data
         with self.assertRaisesRegex(ProtocolError, '^Outside: no version of its own to match version=2$'):
             Outside(octets, len(octets), version=2)
 
@@ -198,7 +198,7 @@ class MemberVersionTests(unittest.TestCase):
         from pcapkit.protocols.internet.icmp.protocol import ICMP
         from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 
-        octets = ICMPv4.from_fields().data
+        octets = ICMPv4.build().data
         seen = []
         original = ICMPv4.read
 

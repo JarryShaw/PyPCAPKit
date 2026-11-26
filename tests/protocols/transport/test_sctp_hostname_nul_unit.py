@@ -85,12 +85,12 @@ class SCTPHostNameNulUnitTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
-            SCTP.from_fields(chunks=[(Chunk.Initiation, {
+            SCTP.build(chunks=[(Chunk.Initiation, {
                 'init_tag': 1,
                 'parameters': [(Parameter.Host_Name_Address, {'name': b'abcdefgh'})],
             })])
 
-        data = SCTP.from_fields(chunks=[(Chunk.Initiation, {
+        data = SCTP.build(chunks=[(Chunk.Initiation, {
             'init_tag': 1,
             'parameters': [(Parameter.Host_Name_Address, {'name': b'abcdefg\x00'})],
         })]).data

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-"""``Proto.from_fields(**fields)`` constructs a protocol (GitHub issue #2840).
+"""``Proto.build(**fields)`` constructs a protocol (GitHub issue #2840).
 
 The owner took the plan on #2840 that splits parsing from construction. This
 module pins the construct side:
 
-* :class:`FromFieldsTests` -- :meth:`~pcapkit.protocols.protocol.Protocol.from_fields`
+* :class:`BuildTests` -- :meth:`~pcapkit.protocols.protocol.Protocol.build`
   builds every edge round trip's case, as calling the class with its fields does
   (#3081), refuses a parse keyword, a stop,
   ``__context__`` and an undeclared ``packet`` with
@@ -19,7 +19,7 @@ module pins the construct side:
   ``_make_data`` gives, and the default ``_make_data`` leaves out an undeclared
   ``packet``;
 * :class:`NoLegacyKeywordTests` -- the out-of-band keywords ``Proto(**fields)``
-  took are gone, refused by the class call as by ``from_fields``.
+  took are gone, refused by the class call as by ``build``.
 
 This module is unit tier: it constructs its own octets and reads no capture.
 
@@ -76,13 +76,13 @@ def _make_cases() -> 'list[edge.MakeCase]':
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
-class FromFieldsTests(unittest.TestCase):
-    """``from_fields`` builds from fields, and from fields alone."""
+class BuildTests(unittest.TestCase):
+    """``build`` builds from fields, and from fields alone."""
 
     def setUp(self) -> 'None':
         reimport_once_per_class(self)
 
-    def test_the_class_call_builds_as_from_fields_does(self) -> 'None':
+    def test_the_class_call_constructs_as_build_does(self) -> 'None':
         """Each edge ``MakeCase`` builds the same octets through either form (#3081)."""
         cases = _make_cases()
         self.assertTrue(cases)
@@ -90,7 +90,7 @@ class FromFieldsTests(unittest.TestCase):
             with self.subTest(case=case.label), warnings.catch_warnings():
                 warnings.simplefilter('ignore')
                 cls = edge.resolve(case.cls)
-                built = cls.from_fields(**case.kwargs)
+                built = cls.build(**case.kwargs)
                 self.assertEqual(cls(built.data, len(built.data)).data, built.data)
                 self.assertEqual(cls(**case.kwargs).data, built.data)
 
@@ -104,7 +104,7 @@ class FromFieldsTests(unittest.TestCase):
                     '__context__', 'packet'):
             with self.subTest(key=key):
                 with self.assertRaises(UnexpectedKeyword) as context:
-                    TCP.from_fields(**TCP_FIELDS, **{key: None})
+                    TCP.build(**TCP_FIELDS, **{key: None})
                 message = str(context.exception)
                 self.assertIn(f'TCP: unexpected keyword(s): {key!r}', message)
                 if key in suggested:
@@ -118,13 +118,13 @@ class FromFieldsTests(unittest.TestCase):
         self.assertTrue(issubclass(UnexpectedKeyword, TypeError))
         self.assertTrue(issubclass(UnexpectedKeyword, UnsupportedCall))
         with self.assertRaises(TypeError):
-            TCP.from_fields(seq=1)
+            TCP.build(seq=1)
 
     def test_the_signature_is_context_and_fields(self) -> 'None':
-        """``from_fields(*, context=None, **fields)``, on the base every class inherits."""
+        """``build(*, context=None, **fields)``, on the base every class inherits."""
         from pcapkit.protocols.protocol import ProtocolBase
 
-        params = inspect.signature(ProtocolBase.from_fields).parameters
+        params = inspect.signature(ProtocolBase.build).parameters
         self.assertEqual([(name, param.kind) for name, param in params.items()],
                          [('context', inspect.Parameter.KEYWORD_ONLY),
                           ('fields', inspect.Parameter.VAR_KEYWORD)])
@@ -135,7 +135,7 @@ class FromFieldsTests(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
-        ipv4 = IPv4.from_fields(protocol=TransType.TCP, src='192.0.2.1', dst='192.0.2.2')
+        ipv4 = IPv4.build(protocol=TransType.TCP, src='192.0.2.1', dst='192.0.2.2')
         self.assertEqual(ipv4.info.protocol, TransType.TCP)
         self.assertIsNone(ipv4._exproto)  # pylint: disable=protected-access
         self.assertIsNone(ipv4._exlayer)  # pylint: disable=protected-access
@@ -146,11 +146,11 @@ class FromFieldsTests(unittest.TestCase):
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
         registry = ContextRegistry()
-        self.assertIs(TCP.from_fields(**TCP_FIELDS, context=registry)._exctx,  # pylint: disable=protected-access
+        self.assertIs(TCP.build(**TCP_FIELDS, context=registry)._exctx,  # pylint: disable=protected-access
                       registry)
 
     def test_esp_protects_with_the_context(self) -> 'None':
-        """``ESP.from_fields(encrypt=True, context=...)`` uses that context's Security Association."""
+        """``ESP.build(encrypt=True, context=...)`` uses that context's Security Association."""
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.context import ContextRegistry
         from pcapkit.protocols.internet.esp.protocol import ESP, ESPContext, Integrity, SecurityAssociation
@@ -158,14 +158,14 @@ class FromFieldsTests(unittest.TestCase):
 
         sa = SecurityAssociation(spi=0x77, integrity=Integrity.HMAC_SHA2_256_128, integrity_key=ESP_KEY)
         registry = ContextRegistry.make(ESPContext(sa))
-        built = ESP.from_fields(spi=0x77, seq=1, next=TransType.UDP, encrypt=True,
-                                payload=b'plaintext', context=registry)
+        built = ESP.build(spi=0x77, seq=1, next=TransType.UDP, encrypt=True,
+                          payload=b'plaintext', context=registry)
         wire = bytes(built)
         self.assertEqual(wire[-16:], hmac.new(ESP_KEY, wire[:-16], hashlib.sha256).digest()[:16])
         self.assertEqual(ESP(wire, len(wire), context=registry).info.plaintext, b'plaintext')
 
         with self.assertRaisesRegex(ProtocolError, 'no security association for SPI'):
-            ESP.from_fields(spi=0x77, seq=1, next=TransType.UDP, encrypt=True, payload=b'plaintext')
+            ESP.build(spi=0x77, seq=1, next=TransType.UDP, encrypt=True, payload=b'plaintext')
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -193,13 +193,13 @@ class VersionedBaseTests(unittest.TestCase):
         from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
         built = (
-            (IP.from_fields(version=4, src='192.0.2.1', dst='192.0.2.2'), IPv4),
-            (ICMP.from_fields(version=6), ICMPv6),
-            (IGMP.from_fields(version=2, max_resp_time=100), IGMPv2),
-            (L2TP.from_fields(version=2), L2TPv2),
-            (LinuxSLL.from_fields(version=2), LinuxSLL2),
-            (HTTP.from_fields(version=1, method='GET', uri='/'), HTTPv1),
-            (HTTP.from_fields(version=2, type=Enum_Frame.SETTINGS), HTTPv2),
+            (IP.build(version=4, src='192.0.2.1', dst='192.0.2.2'), IPv4),
+            (ICMP.build(version=6), ICMPv6),
+            (IGMP.build(version=2, max_resp_time=100), IGMPv2),
+            (L2TP.build(version=2), L2TPv2),
+            (LinuxSLL.build(version=2), LinuxSLL2),
+            (HTTP.build(version=1, method='GET', uri='/'), HTTPv1),
+            (HTTP.build(version=2, type=Enum_Frame.SETTINGS), HTTPv2),
         )
         for proto, member in built:
             with self.subTest(member=member.__name__):
@@ -212,8 +212,8 @@ class VersionedBaseTests(unittest.TestCase):
         for member, own, fields in ((IPv4, 4, {}), (ICMPv4, 4, {}), (IGMPv2, 2, {'max_resp_time': 100}),
                                     (LinuxSLL1, 1, {}), (L2TPv2, 2, {}), (HTTPv1, 1, {'method': 'GET', 'uri': '/'})):
             with self.subTest(own=member.__name__):
-                self.assertEqual(member.from_fields(version=own, **fields).data, member.from_fields(**fields).data)
-        self.assertEqual(IP.from_fields(version=4).data, IPv4.from_fields().data)
+                self.assertEqual(member.build(version=own, **fields).data, member.build(**fields).data)
+        self.assertEqual(IP.build(version=4).data, IPv4.build().data)
 
     def test_a_missing_or_foreign_version_is_refused(self) -> 'None':
         """No version through a base; another member's version on a member."""
@@ -232,19 +232,19 @@ class VersionedBaseTests(unittest.TestCase):
         from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 
         refused = (
-            (lambda: IP.from_fields(), 'IP: no version to build with'),
-            (lambda: ICMP.from_fields(), 'ICMP: no version to build with'),
-            (lambda: IGMP.from_fields(), 'IGMP: no version to build with'),
-            (lambda: L2TP.from_fields(), 'L2TP: no version to build with'),
-            (lambda: LinuxSLL.from_fields(), 'LinuxSLL: no version to build with'),
-            (lambda: HTTP.from_fields(method='GET'), 'HTTP: no version to build with'),
-            (lambda: IP.from_fields(version=5), 'IP: invalid version: 5'),
-            (lambda: IPv4.from_fields(version=6), 'IPv4: version=6 names another member'),
-            (lambda: ICMPv4.from_fields(version=6), 'ICMPv4: version=6 names another member'),
-            (lambda: IGMPv2.from_fields(version=3), 'IGMPv2: version=3 names another member'),
-            (lambda: LinuxSLL1.from_fields(version=2), 'LinuxSLL1: version=2 names another member'),
-            (lambda: HTTPv1.from_fields(version=2), 'HTTPv1: version=2 names another member'),
-            (lambda: HTTP.from_fields(version=1, preface=True, method='GET'),
+            (lambda: IP.build(), 'IP: no version to build with'),
+            (lambda: ICMP.build(), 'ICMP: no version to build with'),
+            (lambda: IGMP.build(), 'IGMP: no version to build with'),
+            (lambda: L2TP.build(), 'L2TP: no version to build with'),
+            (lambda: LinuxSLL.build(), 'LinuxSLL: no version to build with'),
+            (lambda: HTTP.build(method='GET'), 'HTTP: no version to build with'),
+            (lambda: IP.build(version=5), 'IP: invalid version: 5'),
+            (lambda: IPv4.build(version=6), 'IPv4: version=6 names another member'),
+            (lambda: ICMPv4.build(version=6), 'ICMPv4: version=6 names another member'),
+            (lambda: IGMPv2.build(version=3), 'IGMPv2: version=3 names another member'),
+            (lambda: LinuxSLL1.build(version=2), 'LinuxSLL1: version=2 names another member'),
+            (lambda: HTTPv1.build(version=2), 'HTTPv1: version=2 names another member'),
+            (lambda: HTTP.build(version=1, preface=True, method='GET'),
              'HTTP/1: connection preface is HTTP/2 only'),
         )
         for build, message in refused:
@@ -258,7 +258,7 @@ class VersionedBaseTests(unittest.TestCase):
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.utilities.exceptions import ProtocolError
 
-        info = IPv4.from_fields(src='192.0.2.1', dst='192.0.2.2').info
+        info = IPv4.build(src='192.0.2.1', dst='192.0.2.2').info
         self.assertEqual(IPv4.from_data(info, version=4).data, IPv4.from_data(info).data)
         with self.assertRaisesRegex(ProtocolError, 'IPv4: version=6 names another member'):
             IPv4.from_data(info, version=6)
@@ -307,11 +307,11 @@ class FromDataTests(unittest.TestCase):
         from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import UnexpectedKeyword
 
-        info = TCP.from_fields(**TCP_FIELDS).info
+        info = TCP.build(**TCP_FIELDS).info
         registry = ContextRegistry()
         rebuilt = TCP.from_data(info, context=registry)
         self.assertIs(rebuilt._exctx, registry)  # pylint: disable=protected-access
-        self.assertEqual(rebuilt.data, TCP.from_fields(**TCP_FIELDS).data)
+        self.assertEqual(rebuilt.data, TCP.build(**TCP_FIELDS).data)
         for key in ('__context__', '_layer', '_protocol'):
             with self.subTest(key=key):
                 with self.assertRaisesRegex(UnexpectedKeyword, repr(key)):
@@ -327,12 +327,12 @@ class FromDataTests(unittest.TestCase):
             def _make_data(cls, data: 'Any') -> 'dict[str, Any]':
                 return {**super()._make_data(data), 'no_such_field': 1}
 
-        info = TCP.from_fields(**TCP_FIELDS).info
+        info = TCP.build(**TCP_FIELDS).info
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
             rebuilt = Mismatched.from_data(info)
         self.assertIs(type(rebuilt), Mismatched)
-        self.assertEqual(rebuilt.data, TCP.from_fields(**TCP_FIELDS).data)
+        self.assertEqual(rebuilt.data, TCP.build(**TCP_FIELDS).data)
         messages = [str(item.message) for item in caught if isinstance(item.message, UnknownFieldWarning)]
         self.assertEqual(len(messages), 1, messages)
         self.assertIn("'no_such_field'", messages[0])
@@ -342,7 +342,7 @@ class FromDataTests(unittest.TestCase):
         from pcapkit.protocols.misc.no_payload.protocol import NoPayload
         from pcapkit.protocols.misc.raw.protocol import Raw
 
-        empty = NoPayload.from_fields()
+        empty = NoPayload.build()
         self.assertIn('packet', empty.info.to_dict())
         self.assertNotIn('packet', NoPayload._make_data(empty.info))  # pylint: disable=protected-access
 
@@ -371,7 +371,7 @@ class NoLegacyKeywordTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_out_of_band_keywords_are_refused(self) -> 'None':
-        """The class call refuses them as unknown construction keywords, as ``from_fields`` does (#3081)."""
+        """The class call refuses them as unknown construction keywords, as ``build`` does (#3081)."""
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import UnexpectedKeyword
@@ -382,18 +382,18 @@ class NoLegacyKeywordTests(unittest.TestCase):
                     UnexpectedKeyword, f"^TCP: unexpected keyword\\(s\\): '{key}'"):
                 TCP(**TCP_FIELDS, **{key: value})
 
-        with self.assertRaisesRegex(TypeError, r"^IPv4: nothing to parse; build one with IPv4\.from_fields\(\)$"):
+        with self.assertRaisesRegex(TypeError, r"^IPv4: nothing to parse; build one with IPv4\.build\(\)$"):
             IPv4(None, version=4)
 
-    def test_from_fields_and_from_data_suggest_context(self) -> 'None':
+    def test_build_and_from_data_suggest_context(self) -> 'None':
         """The context keyword they take is the one a misspelling is pointed to."""
         from pcapkit.protocols.transport.udp.protocol import UDP
         from pcapkit.utilities.exceptions import UnexpectedKeyword
 
-        info = UDP.from_fields().info
+        info = UDP.build().info
         cases = (
-            (lambda: UDP.from_fields(__context__=None), '__context__', 'context'),
-            (lambda: UDP.from_fields(contxt=1), 'contxt', 'context'),
+            (lambda: UDP.build(__context__=None), '__context__', 'context'),
+            (lambda: UDP.build(contxt=1), 'contxt', 'context'),
             (lambda: UDP.from_data(info, __context__=None), '__context__', 'context'),
         )
         for build, key, meant in cases:

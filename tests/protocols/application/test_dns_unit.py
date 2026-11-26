@@ -157,8 +157,8 @@ class DNSCompressionTests(DNSTestCase):
         kwargs = dict(id=9, qr=True, question=[{'name': 'example.org', 'type': RRType.MX}],
                       answer=[{'name': 'example.org', 'type': RRType.MX, 'ttl': 60,
                                'rdata': {'preference': 10, 'exchange': 'mail.example.org.'}}])
-        plain = DNS.from_fields(**kwargs).data
-        packed = DNS.from_fields(compress=True, **kwargs).data
+        plain = DNS.build(**kwargs).data
+        packed = DNS.build(compress=True, **kwargs).data
         # The owner is a pointer to the question's name, and the exchange a
         # label then a pointer to the same.
         self.assertEqual(packed[29:31], b'\xc0\x0c')
@@ -174,9 +174,9 @@ class DNSCompressionTests(DNSTestCase):
 
         for name in ('a.b', 'a.b.', (b'a', b'b'), {'labels': (b'a', b'b'), 'literal': 2, 'pointer': None}):
             with self.subTest(name=name):
-                dns = DNS.from_fields(question=[{'name': name}])
+                dns = DNS.build(question=[{'name': name}])
                 self.assertEqual(dns.info.question[0].name.labels, (b'a', b'b'))
-        self.assertEqual(DNS.from_fields(question=[{'name': '.'}]).info.question[0].name.labels, ())
+        self.assertEqual(DNS.build(question=[{'name': '.'}]).info.question[0].name.labels, ())
 
     def test_presentation_escapes(self) -> None:
         from pcapkit.protocols.application.dns.schema import name_to_text, text_to_labels
@@ -307,10 +307,10 @@ class DNSMakeTests(DNSTestCase):
         from pcapkit.const.dns.rcode import RCode
         from pcapkit.protocols.application.dns.protocol import DNS
 
-        dns = DNS.from_fields(id=0xABCD, qr=True, opcode=Opcode.Notify, aa=True, tc=True, rd=True, ra=True, z=1,
-                              ad=True, cd=True, rcode=RCode.Refused, trailer=b'\x01')
+        dns = DNS.build(id=0xABCD, qr=True, opcode=Opcode.Notify, aa=True, tc=True, rd=True, ra=True, z=1,
+                        ad=True, cd=True, rcode=RCode.Refused, trailer=b'\x01')
         self.assertEqual(dns.data, struct.pack('!6H', 0xABCD, 0xA7F5, 0, 0, 0, 0) + b'\x01')
-        self.assertEqual(DNS.from_fields(opcode=6, rcode=3).data[2:4], b'\x30\x03')
+        self.assertEqual(DNS.build(opcode=6, rcode=3).data[2:4], b'\x30\x03')
 
     def test_every_rdata_and_option_builds_from_keywords(self) -> None:
         from pcapkit.const.dns.option import Option
@@ -319,7 +319,7 @@ class DNSMakeTests(DNSTestCase):
 
         records = [{'type': code} for code in DNS.__rdata__] + [{'type': RRType.SPF, 'rdata': b'x'}]
         options = [{'code': code} for code in DNS.__option__] + [{'code': Option.Padding, 'data': bytes(3)}]
-        dns = DNS.from_fields(answer=records, additional=[{'type': RRType.OPT, 'options': options}])
+        dns = DNS.build(answer=records, additional=[{'type': RRType.OPT, 'options': options}])
         self.assertEqual(DNS(dns.data).data, dns.data)
         self.assertEqual(len(DNS(dns.data).info.additional[0].options), len(options))
 
@@ -351,7 +351,7 @@ class DNSMakeTests(DNSTestCase):
         with CaughtByCaller(ProtocolError):
             for kwargs in cases:
                 with self.subTest(kwargs=kwargs), self.assertRaises(ProtocolError):
-                    DNS.from_fields(**kwargs)
+                    DNS.build(**kwargs)
 
     def test_generic_form_opt_parses_as_opt(self) -> None:
         from pcapkit.const.dns.rr_class import RRClass
@@ -359,8 +359,8 @@ class DNSMakeTests(DNSTestCase):
         from pcapkit.protocols.application.dns.data import OPT
         from pcapkit.protocols.application.dns.protocol import DNS
 
-        dns = DNS.from_fields(additional=[{'name': '.', 'type': RRType.OPT, 'class': RRClass.get(1232), 'ttl': 0x8000,
-                                           'rdata': b''}])
+        dns = DNS.build(additional=[{'name': '.', 'type': RRType.OPT, 'class': RRClass.get(1232), 'ttl': 0x8000,
+                                     'rdata': b''}])
         opt = dns.info.additional[0]
         self.assertIsInstance(opt, OPT)
         self.assertEqual((opt.udp_payload_size, opt.do, opt.options), (1232, True, ()))
@@ -384,8 +384,8 @@ class DNSFramingTests(DNSTestCase):
         # The length is sniffed when not given, as a TCP segment carries it.
         self.assertEqual(DNS(framed).info.get('length'), len(QUERY))
         self.assertNotIn('length', DNS(QUERY).info)
-        self.assertEqual(DNS.from_fields(id=0x1234, framed=True).data, b'\x00\x0c\x12\x34' + bytes(10))
-        self.assertEqual(DNS.from_fields(message_length=99).data[:2], b'\x00\x63')
+        self.assertEqual(DNS.build(id=0x1234, framed=True).data, b'\x00\x0c\x12\x34' + bytes(10))
+        self.assertEqual(DNS.build(message_length=99).data[:2], b'\x00\x63')
 
     def test_tcp_segment_chains_messages(self) -> None:
         from pcapkit.protocols.transport.tcp.protocol import TCP
@@ -541,18 +541,18 @@ class DNSEdgeTests(DNSTestCase):
         from pcapkit.const.dns.rr_type import RRType
         from pcapkit.protocols.application.dns.protocol import DNS
 
-        dns = DNS.from_fields(rcode=2, additional=[{'name': 'a', 'type': RRType.A},
-                                                   {'type': RRType.OPT, 'extended_rcode': 1}])
+        dns = DNS.build(rcode=2, additional=[{'name': 'a', 'type': RRType.A},
+                                             {'type': RRType.OPT, 'extended_rcode': 1}])
         self.assertEqual(int(dns.rcode), 18)
-        self.assertIs(DNS.from_fields(rcode=2, additional=[{'type': RRType.A}]).rcode, RCode.ServFail)
+        self.assertIs(DNS.build(rcode=2, additional=[{'type': RRType.A}]).rcode, RCode.ServFail)
 
     def test_empty_unknown_rdata_and_option(self) -> None:
         from pcapkit.const.dns.option import Option
         from pcapkit.const.dns.rr_type import RRType
         from pcapkit.protocols.application.dns.protocol import DNS
 
-        dns = DNS.from_fields(answer=[{'type': RRType.SPF}],
-                              additional=[{'type': RRType.OPT, 'options': [{'code': Option.Padding}]}])
+        dns = DNS.build(answer=[{'type': RRType.SPF}],
+                        additional=[{'type': RRType.OPT, 'options': [{'code': Option.Padding}]}])
         self.assertEqual(dns.info.answer[0].rdata, b'')
         self.assertEqual(dns.info.additional[0].options[0].data, b'')
 
@@ -565,8 +565,8 @@ class DNSEdgeTests(DNSTestCase):
     def test_compression_reuses_a_recorded_name(self) -> None:
         from pcapkit.protocols.application.dns.protocol import DNS
 
-        name = DNS.from_fields(question=[{'name': 'example.com'}]).info.question[0].name
-        dns = DNS.from_fields(compress=True, question=[{'name': name}, {'name': 'www.example.com'}])
+        name = DNS.build(question=[{'name': 'example.com'}]).info.question[0].name
+        dns = DNS.build(compress=True, question=[{'name': name}, {'name': 'www.example.com'}])
         self.assertTrue(dns.data.endswith(b'\x03www\xc0\x0c\x00\x01\x00\x01'))
 
     def test_offsets_past_the_pointer_limit_are_not_recorded(self) -> None:
@@ -575,7 +575,7 @@ class DNSEdgeTests(DNSTestCase):
 
         bulk = {'type': RRType.TXT, 'rdata': {'strings': [b'x' * 255] * 65}}
         late = {'name': 'late.example', 'type': RRType.A}
-        dns = DNS.from_fields(compress=True, answer=[bulk, late, late])
+        dns = DNS.build(compress=True, answer=[bulk, late, late])
         first, second = dns.info.answer[1:]
         self.assertEqual((first.name.literal, first.name.pointer), (2, None))
         self.assertEqual((second.name.literal, second.name.pointer), (2, None))
@@ -610,10 +610,10 @@ class DNSRegistryTests(DNSTestCase):
 
             record = DNS(_answer(_rr(99, b'\xab\xcd'))).info.answer[0]
             self.assertEqual(record.rdata, 'abcd')
-            self.assertEqual(DNS.from_fields(answer=[{'type': RRType.SPF, 'rdata': 'ef'}]).data[-3:], b'\x00\x01\xef')
+            self.assertEqual(DNS.build(answer=[{'type': RRType.SPF, 'rdata': 'ef'}]).data[-3:], b'\x00\x01\xef')
             self.assertEqual(DNS(_answer(_rr(1, bytes(4)))).info.answer[0].rdata, bytes(4))
-            padded = DNS.from_fields(additional=[{'type': RRType.OPT, 'options': [{'code': Option.Padding,
-                                                                                   'data': [0, 0, 0]}]}])
+            padded = DNS.build(additional=[{'type': RRType.OPT, 'options': [{'code': Option.Padding,
+                                                                             'data': [0, 0, 0]}]}])
             self.assertEqual(padded.info.additional[0].options[0].data, 3)
 
             # Handing the shipped entries back restores the maps as shipped.

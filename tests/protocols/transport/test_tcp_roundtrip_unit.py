@@ -165,7 +165,7 @@ class TestTCPRoundTrip(unittest.TestCase):
                 kwargs = TCP._make_data(tcp.info)
                 kwargs['options'] = kept
 
-                rebuilt = TCP.from_fields(**kwargs).data
+                rebuilt = TCP.build(**kwargs).data
                 self.assertEqual(rebuilt[12] >> 4, offset)
                 self.assertEqual(rebuilt[offset * 4:], b'PAY')
 

@@ -138,7 +138,7 @@ class StandaloneHeaderCutTests(unittest.TestCase):
         try:
             with warnings.catch_warnings(), CaughtByCaller(ProtocolError):
                 warnings.simplefilter('ignore')
-                packets.insert(0, klass.from_fields(**MAKE.get(name, {})).data)
+                packets.insert(0, klass.build(**MAKE.get(name, {})).data)
         except (BaseError, TypeError):
             pass  # its defaults build nothing
         return packets
@@ -309,7 +309,7 @@ class StandaloneHeaderCutTests(unittest.TestCase):
             self.assertFalse(cut_on_its_own(header))
         finally:
             frame_depth.reset(token)
-        whole = IPv6.from_fields().__header__
+        whole = IPv6.build().__header__
         self.assertFalse(cut_on_its_own(whole))
         self.assertFalse(cut_on_its_own(whole, 'hextet'))
 

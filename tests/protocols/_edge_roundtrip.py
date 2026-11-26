@@ -175,7 +175,7 @@ def run_make(case: 'MakeCase') -> 'Outcome':
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
         try:
-            made = cls.from_fields(**case.kwargs).data
+            made = cls.build(**case.kwargs).data
         except Exception as exc:  # pylint: disable=broad-except
             return Outcome('MAKE', _describe(exc))
         try:

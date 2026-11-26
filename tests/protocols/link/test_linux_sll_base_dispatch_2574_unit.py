@@ -87,7 +87,7 @@ class LinuxSLLBaseDispatchTests(unittest.TestCase):
                         self.assertEqual(str(layer.protochain), str(self.member(version)(octets).protochain))
         self.assertEqual(str(LinuxSLL(OCTETS[2], version=2).protochain), 'LINUX_SLL2:IPv4:UDP')
 
-    def test_version_picks_the_member_from_fields(self) -> None:
+    def test_version_picks_the_member_built(self) -> None:
         """Each build is byte-exact against the member's own and parses back unchanged."""
         from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
 
@@ -99,14 +99,14 @@ class LinuxSLLBaseDispatchTests(unittest.TestCase):
         }
         for label, (fields, version) in cases.items():
             with self.subTest(fields=label):
-                layer = LinuxSLL.from_fields(version=version, **fields)
+                layer = LinuxSLL.build(version=version, **fields)
                 self.assertIs(type(layer), self.member(version))
-                self.assertEqual(layer.data, self.member(version).from_fields(**fields).data)
+                self.assertEqual(layer.data, self.member(version).build(**fields).data)
                 parsed = LinuxSLL(layer.data, version=version)
                 self.assertEqual(parsed.data, layer.data)
                 self.assertEqual(LinuxSLL.from_data(parsed.info).data, layer.data)
-        self.assertEqual(LinuxSLL.from_fields(version=1, **SHARED).data, OCTETS[1])
-        self.assertEqual(LinuxSLL.from_fields(version=2, **SHARED, interface_index=3).data, OCTETS[2])
+        self.assertEqual(LinuxSLL.build(version=1, **SHARED).data, OCTETS[1])
+        self.assertEqual(LinuxSLL.build(version=2, **SHARED, interface_index=3).data, OCTETS[2])
 
     def test_fields_without_version_raise(self) -> None:
         """Even ``reserved`` or ``interface_index``, which only LinuxSLL2 takes, pick nothing."""
@@ -118,7 +118,7 @@ class LinuxSLLBaseDispatchTests(unittest.TestCase):
                               ('reserved', {'reserved': 0})):
             with self.subTest(fields=label):
                 with self.assertRaisesRegex(ProtocolError, NO_VERSION_FIELDS):
-                    LinuxSLL.from_fields(**fields)
+                    LinuxSLL.build(**fields)
 
     def test_version_is_the_only_check(self) -> None:
         """A bad ``version`` raises; a field the member lacks fails the member's check."""
@@ -128,9 +128,9 @@ class LinuxSLLBaseDispatchTests(unittest.TestCase):
         for version in (0, 3, True, '2', 1.0, 2.0):
             with self.subTest(version=version):
                 with self.assertRaisesRegex(ProtocolError, f'^LinuxSLL: invalid version: {version!r}$'):
-                    LinuxSLL.from_fields(version=version)
+                    LinuxSLL.build(version=version)
         with self.assertRaisesRegex(UnsupportedCall, "^LinuxSLL1: unexpected keyword\\(s\\): 'interface_index'"):
-            LinuxSLL.from_fields(version=1, interface_index=3)
+            LinuxSLL.build(version=1, interface_index=3)
 
     def test_a_member_takes_version_only_as_its_own(self) -> None:
         """Building or parsing, ``version`` must name the member (#2840)."""
@@ -138,12 +138,12 @@ class LinuxSLLBaseDispatchTests(unittest.TestCase):
         from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
         from pcapkit.utilities.exceptions import ProtocolError
 
-        self.assertEqual(LinuxSLL1.from_fields(version=1).data, LinuxSLL1.from_fields().data)
-        self.assertEqual(LinuxSLL2.from_fields(version=2).data, LinuxSLL2.from_fields().data)
+        self.assertEqual(LinuxSLL1.build(version=1).data, LinuxSLL1.build().data)
+        self.assertEqual(LinuxSLL2.build(version=2).data, LinuxSLL2.build().data)
         with self.assertRaisesRegex(ProtocolError, '^LinuxSLL1: version=2 names another member$'):
-            LinuxSLL1.from_fields(version=2)
+            LinuxSLL1.build(version=2)
         with self.assertRaisesRegex(ProtocolError, '^LinuxSLL2: version=1 names another member$'):
-            LinuxSLL2.from_fields(version=1)
+            LinuxSLL2.build(version=1)
         with self.assertRaisesRegex(ProtocolError, '^LinuxSLL2: version=1 names another member$'):
             LinuxSLL2(OCTETS[2], version=1)
         self.assertEqual(LinuxSLL2(OCTETS[2], version=2).data, OCTETS[2])
@@ -165,7 +165,7 @@ class LinuxSLLBaseDispatchTests(unittest.TestCase):
                 raise NotImplementedError
 
         with self.assertRaisesRegex(ProtocolError, '^Outside: no version of its own to match version=2$'):
-            Outside.from_fields(version=2)
+            Outside.build(version=2)
 
     def test_from_data_on_the_base_gives_the_member(self) -> None:
         """By the data model's class; a ``dict`` carries none, and is refused."""
@@ -197,9 +197,9 @@ class LinuxSLLBaseDispatchTests(unittest.TestCase):
             """A concrete subclass of the base, through a member."""
 
         octets = OCTETS[2]
-        self.assertIs(type(LinuxSLL.from_fields(interface_index=3, version=2)), LinuxSLL2)
+        self.assertIs(type(LinuxSLL.build(interface_index=3, version=2)), LinuxSLL2)
         self.assertIs(type(Custom(octets)), Custom)
-        self.assertIs(type(Custom.from_fields(packet_type=0, version=2)), Custom)
+        self.assertIs(type(Custom.build(packet_type=0, version=2)), Custom)
         self.assertIs(type(Custom.from_data(Custom(octets).info)), Custom)
         with self.assertRaisesRegex(TypeError, 'abstract'):
             Abstract(octets)

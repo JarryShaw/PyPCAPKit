@@ -160,8 +160,8 @@ class HIPParameterDataRebuildTests(unittest.TestCase):
 
         # ``extension=True`` keeps ``HIP.alias`` off ``self._info``, which
         # ``__post_init__`` assigns only once ``read`` has returned (#1184).
-        return HIP.from_fields(parameters=[(code, value)], extension=True,
-                               **self._base(code)).data  # type: ignore[arg-type]
+        return HIP.build(parameters=[(code, value)], extension=True,
+                         **self._base(code)).data  # type: ignore[arg-type]
 
     def test_a_parsed_parameter_rebuilds_byte_for_byte(self) -> None:
         """#2352: the pair form reproduces the octets it was parsed from."""
@@ -190,10 +190,10 @@ class HIPParameterDataRebuildTests(unittest.TestCase):
                 octets = self._build(code, kwargs)
                 parameters = HIP(octets, len(octets), extension=True).info.parameters
 
-                whole = HIP.from_fields(parameters=parameters, extension=True,
-                                        **self._base(code)).data  # type: ignore[arg-type]
-                pairs = HIP.from_fields(parameters=list(parameters.items(multi=True)), extension=True,
-                                        **self._base(code)).data  # type: ignore[arg-type]
+                whole = HIP.build(parameters=parameters, extension=True,
+                                  **self._base(code)).data  # type: ignore[arg-type]
+                pairs = HIP.build(parameters=list(parameters.items(multi=True)), extension=True,
+                                  **self._base(code)).data  # type: ignore[arg-type]
                 self.assertEqual(pairs.hex(), whole.hex())
 
     def test_hip_transform_keeps_its_suites(self) -> None:

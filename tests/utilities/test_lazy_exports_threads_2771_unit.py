@@ -92,8 +92,8 @@ if spec['capture']:
         'from_data': from_data,
         'index': lambda: [ProtocolBase.get_protocol(name).__index__()
                           for name in ('DTLS', 'FTP', 'FTP_DATA', 'HTTP', 'TLS', 'L2TPv2')],
-        'compute': lambda: IPv4.from_fields(src='10.0.0.1', dst='10.0.0.2', protocol=17,
-                                            payload=UDP.from_fields(srcport=1, dstport=2, payload=b'ab')),
+        'compute': lambda: IPv4.build(src='10.0.0.1', dst='10.0.0.2', protocol=17,
+                                            payload=UDP.build(srcport=1, dstport=2, payload=b'ab')),
         'extract': lambda: pcapkit.extract(fin=spec['capture'], verbose=False),
     }
 

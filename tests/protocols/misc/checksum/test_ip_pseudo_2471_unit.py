@@ -74,7 +74,7 @@ class IPPseudoCapturedTests(unittest.TestCase):
         from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         ip = Ethernet(frame)[f'IPv{version}']
-        pseudo = IP_Pseudo.from_fields(ip=ip)
+        pseudo = IP_Pseudo.build(ip=ip)
 
         self.assertEqual(pseudo.data, expected)
         self.assertEqual(pseudo.version, version)
@@ -117,7 +117,7 @@ class IPPseudoUnitTests(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
 
-        pseudo = IP_Pseudo.from_fields(src='192.0.2.1', dst='198.51.100.2', protocol=TransType.UDP, upper_length=28)
+        pseudo = IP_Pseudo.build(src='192.0.2.1', dst='198.51.100.2', protocol=TransType.UDP, upper_length=28)
         self.assertEqual(pseudo.data, bytes.fromhex('c0000201' 'c6336402' '00' '11' '001c'))
         self.assertEqual(len(pseudo), 12)
         self.assertEqual(pseudo.length, 12)
@@ -127,7 +127,7 @@ class IPPseudoUnitTests(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
 
-        pseudo = IP_Pseudo.from_fields(src=self.SRC6, dst=self.DST6, protocol=TransType.TCP, upper_length=0x10203)
+        pseudo = IP_Pseudo.build(src=self.SRC6, dst=self.DST6, protocol=TransType.TCP, upper_length=0x10203)
         self.assertEqual(pseudo.data, self.ADDRS6 + bytes.fromhex('00010203' '000000' '06'))
         self.assertEqual(pseudo.length, 40)
         self.assertEqual(pseudo.src, ipaddress.IPv6Address(self.SRC6))
@@ -140,17 +140,17 @@ class IPPseudoUnitTests(unittest.TestCase):
 
         code = IP_Pseudo.resolve_index('spam', namespace={99: 'spam'})
         self.assertEqual(code, 99)
-        pseudo = IP_Pseudo.from_fields(src='10.0.0.1', dst='10.0.0.2', protocol=code, upper_length=0)
+        pseudo = IP_Pseudo.build(src='10.0.0.1', dst='10.0.0.2', protocol=code, upper_length=0)
         self.assertEqual(pseudo.data[9], 99)
         self.assertEqual(pseudo.read().protocol, 99)
         with self.assertRaises(ProtocolError):
-            IP_Pseudo.from_fields(src='10.0.0.1', dst='10.0.0.2', protocol='spam', upper_length=0)
+            IP_Pseudo.build(src='10.0.0.1', dst='10.0.0.2', protocol='spam', upper_length=0)
 
     def test_make_read_round_trip(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
 
-        for made in (IP_Pseudo.from_fields(src='10.0.0.1', dst='10.0.0.2', protocol=6, upper_length=40),
-                     IP_Pseudo.from_fields(src=self.SRC6, dst=self.DST6, protocol=17, upper_length=8)):
+        for made in (IP_Pseudo.build(src='10.0.0.1', dst='10.0.0.2', protocol=6, upper_length=40),
+                     IP_Pseudo.build(src=self.SRC6, dst=self.DST6, protocol=17, upper_length=8)):
             with self.subTest(version=made.version):
                 parsed = IP_Pseudo(made.data)
                 self.assertEqual(parsed.info, made.info)
@@ -170,9 +170,9 @@ class IPPseudoUnitTests(unittest.TestCase):
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
 
-        ip = IPv4.from_fields(src='10.0.0.1', dst='10.0.0.2', protocol=TransType.TCP, payload=bytes(20))
-        self.assertEqual(IP_Pseudo.from_fields(ip=ip).data, bytes.fromhex('0a000001' '0a000002' '00' '06' '0014'))
-        self.assertEqual(IP_Pseudo.from_fields(ip=ip, dst='10.0.0.3', upper_length=7).data,
+        ip = IPv4.build(src='10.0.0.1', dst='10.0.0.2', protocol=TransType.TCP, payload=bytes(20))
+        self.assertEqual(IP_Pseudo.build(ip=ip).data, bytes.fromhex('0a000001' '0a000002' '00' '06' '0014'))
+        self.assertEqual(IP_Pseudo.build(ip=ip, dst='10.0.0.3', upper_length=7).data,
                          bytes.fromhex('0a000001' '0a000003' '00' '06' '0007'))
 
     def test_ipv6_extension_headers_are_skipped(self) -> None:
@@ -184,7 +184,7 @@ class IPPseudoUnitTests(unittest.TestCase):
         udp = bytes.fromhex('0035' '0035' '0008' '0000')
         ip = IPv6(bytes.fromhex('60000000' '0010' '00' '40') + self.ADDRS6 + hopopt + udp)
 
-        self.assertEqual(IP_Pseudo.from_fields(ip=ip).data, self.ADDRS6 + bytes.fromhex('00000008' '000000' '11'))
+        self.assertEqual(IP_Pseudo.build(ip=ip).data, self.ADDRS6 + bytes.fromhex('00000008' '000000' '11'))
 
     def test_ipv6_routing_header_final_destination(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
@@ -197,17 +197,17 @@ class IPPseudoUnitTests(unittest.TestCase):
         ip = IPv6(bytes.fromhex('60000000' '0020' '2b' '40') + self.ADDRS6 + route + udp)
 
         expected = ipaddress.IPv6Address(self.SRC6).packed + final + bytes.fromhex('00000008' '000000' '11')
-        self.assertEqual(IP_Pseudo.from_fields(ip=ip).data, expected)
+        self.assertEqual(IP_Pseudo.build(ip=ip).data, expected)
 
         # Type 2 Routing header (RFC 6275), which carries one address.
         type2 = bytes.fromhex('1102' '0201' '00000000') + final
         ip2 = IPv6(bytes.fromhex('60000000' '0020' '2b' '40') + self.ADDRS6 + type2 + udp)
-        self.assertEqual(IP_Pseudo.from_fields(ip=ip2).data, expected)
+        self.assertEqual(IP_Pseudo.build(ip=ip2).data, expected)
 
         # NOTE: No segment left: the header's own destination is the final one.
         done = bytearray(ip.data)
         done[40 + 3] = 0
-        self.assertEqual(IP_Pseudo.from_fields(ip=IPv6(bytes(done))).data, self.ADDRS6 + bytes.fromhex('00000008' '000000' '11'))
+        self.assertEqual(IP_Pseudo.build(ip=IPv6(bytes(done))).data, self.ADDRS6 + bytes.fromhex('00000008' '000000' '11'))
 
     def test_rejections(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
@@ -220,11 +220,11 @@ class IPPseudoUnitTests(unittest.TestCase):
             IP_Pseudo(io.BytesIO(bytes(40)), 13)
         self.assertEqual(IP_Pseudo(io.BytesIO(bytes(41)), 40).version, 6)
         with self.assertRaisesRegex(ProtocolError, 'required without ip'):
-            IP_Pseudo.from_fields(src='10.0.0.1', dst='10.0.0.2', protocol=6)
+            IP_Pseudo.build(src='10.0.0.1', dst='10.0.0.2', protocol=6)
         with self.assertRaisesRegex(ProtocolError, 'unsupported enclosing layer Raw'):
-            IP_Pseudo.from_fields(ip=Raw(b''))
+            IP_Pseudo.build(ip=Raw(b''))
         with self.assertRaises(FieldValueError):
-            IP_Pseudo.from_fields(src='10.0.0.1', dst='::2', protocol=6, upper_length=0)
+            IP_Pseudo.build(src='10.0.0.1', dst='::2', protocol=6, upper_length=0)
         with self.assertRaises(UnsupportedCall):
             IP_Pseudo.__index__()
 
@@ -232,7 +232,7 @@ class IPPseudoUnitTests(unittest.TestCase):
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
         from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
-        pseudo = IP_Pseudo.from_fields(src='10.0.0.1', dst='10.0.0.2', protocol=6, upper_length=20)
+        pseudo = IP_Pseudo.build(src='10.0.0.1', dst='10.0.0.2', protocol=6, upper_length=20)
         self.assertEqual(pseudo.name, 'IP Pseudo-Header')
         self.assertIsInstance(pseudo.payload, NoPayload)
         self.assertEqual(pseudo.protochain.protocols, (IP_Pseudo,))
@@ -265,7 +265,7 @@ class IPPseudoBoundaryTests(unittest.TestCase):
     def verify(self, ip: object, expected: bytes) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
 
-        pseudo = IP_Pseudo.from_fields(ip=ip)
+        pseudo = IP_Pseudo.build(ip=ip)
         self.assertEqual(pseudo.data, expected)
         self.assertEqual(ones_complement_sum(pseudo.data + bytes(ip.payload)), 0xFFFF)  # type: ignore[attr-defined]
 
@@ -290,9 +290,9 @@ class IPPseudoBoundaryTests(unittest.TestCase):
         ip = self.ipv6(0x3C, opts + bytes.fromhex('003500350008a389'))
         self.verify(ip, bytes.fromhex('20010db8000000000000000000000077') + self.DST6
                     + bytes.fromhex('00000008' '000000' '11'))
-        self.assertEqual(IP_Pseudo.from_fields(ip=ip, src='2001:db8::1').data[:16], self.SRC6)
+        self.assertEqual(IP_Pseudo.build(ip=ip, src='2001:db8::1').data[:16], self.SRC6)
         padded = self.ipv6(0x3C, bytes.fromhex('1100' '0104' '00000000') + self.UDP)
-        self.assertEqual(IP_Pseudo.from_fields(ip=padded).data[:16], self.SRC6)
+        self.assertEqual(IP_Pseudo.build(ip=padded).data[:16], self.SRC6)
 
     def test_segment_routing_header(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
@@ -303,12 +303,12 @@ class IPPseudoBoundaryTests(unittest.TestCase):
                             '20010db8000000000000000000000099' '20010db8000000000000000000000002')
         ip = self.ipv6(0x2B, srh + self.UDP)
         with self.assertRaisesRegex(ProtocolError, 'Routing type 4 not parsed; give dst'):
-            IP_Pseudo.from_fields(ip=ip)
-        self.assertEqual(IP_Pseudo.from_fields(ip=ip, dst='2001:db8::99').data[16:32], srh[8:24])
+            IP_Pseudo.build(ip=ip)
+        self.assertEqual(IP_Pseudo.build(ip=ip, dst='2001:db8::99').data[16:32], srh[8:24])
 
         done = bytearray(srh)
         done[3] = 0
-        self.assertEqual(IP_Pseudo.from_fields(ip=self.ipv6(0x2B, bytes(done) + self.UDP)).data[16:32], self.DST6)
+        self.assertEqual(IP_Pseudo.build(ip=self.ipv6(0x2B, bytes(done) + self.UDP)).data[16:32], self.DST6)
 
     def test_fragments_need_the_reassembled_length(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
@@ -321,8 +321,8 @@ class IPPseudoBoundaryTests(unittest.TestCase):
         for ip in (first, later, more):
             with self.subTest(ip=ip):
                 with self.assertRaisesRegex(ProtocolError, 'fragment; give upper_length'):
-                    IP_Pseudo.from_fields(ip=ip)
-                self.assertEqual(IP_Pseudo.from_fields(ip=ip, upper_length=9).info.len, 9)
+                    IP_Pseudo.build(ip=ip)
+                self.assertEqual(IP_Pseudo.build(ip=ip, upper_length=9).info.len, 9)
 
         # An atomic fragment is a whole packet.
         atomic = self.ipv6(0x2C, bytes.fromhex('1100' '0000' '00000005') + bytes.fromhex('003500350008a3ff'))
@@ -337,8 +337,8 @@ class IPPseudoBoundaryTests(unittest.TestCase):
         for kwargs in ({}, {'protocol': 50}, {'upper_length': 24}):
             with self.subTest(**kwargs):
                 with self.assertRaisesRegex(ProtocolError, 'upper layer of IPv6 not parsed'):
-                    IP_Pseudo.from_fields(ip=ip, **kwargs)
-        self.assertEqual(IP_Pseudo.from_fields(ip=ip, protocol=50, upper_length=24).data[-8:],
+                    IP_Pseudo.build(ip=ip, **kwargs)
+        self.assertEqual(IP_Pseudo.build(ip=ip, protocol=50, upper_length=24).data[-8:],
                          bytes.fromhex('00000018' '000000' '32'))
 
     def test_jumbogram(self) -> None:
@@ -349,10 +349,10 @@ class IPPseudoBoundaryTests(unittest.TestCase):
         jumbo = 8 + 8 + 65536
         hopopt = bytes.fromhex('1100' 'c204') + jumbo.to_bytes(4, 'big')
         ip = self.ipv6(0x00, hopopt + bytes.fromhex('00350035' '00000000') + bytes(65536), payload=0)
-        self.assertEqual(IP_Pseudo.from_fields(ip=ip).data[32:], (jumbo - 8).to_bytes(4, 'big') + bytes.fromhex('000000' '11'))
+        self.assertEqual(IP_Pseudo.build(ip=ip).data[32:], (jumbo - 8).to_bytes(4, 'big') + bytes.fromhex('000000' '11'))
 
         with self.assertRaisesRegex(ProtocolError, 'Payload Length 0 and no Jumbo Payload option'):
-            IP_Pseudo.from_fields(ip=self.ipv6(0x11, self.UDP, payload=0))
+            IP_Pseudo.build(ip=self.ipv6(0x11, self.UDP, payload=0))
 
     def test_upper_length_range(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
@@ -362,19 +362,19 @@ class IPPseudoBoundaryTests(unittest.TestCase):
         for src, limit in (('10.0.0.1', 0xFFFF), ('::1', 0xFFFFFFFF)):
             dst = '10.0.0.2' if src == '10.0.0.1' else '::2'
             with self.subTest(src=src):
-                self.assertEqual(IP_Pseudo.from_fields(src=src, dst=dst, protocol=6, upper_length=limit).info.len, limit)
+                self.assertEqual(IP_Pseudo.build(src=src, dst=dst, protocol=6, upper_length=limit).info.len, limit)
                 for value in (limit + 1, -1):
                     with self.assertRaisesRegex(FieldValueError, f'length {value} out of range'):
-                        IP_Pseudo.from_fields(src=src, dst=dst, protocol=6, upper_length=value)
+                        IP_Pseudo.build(src=src, dst=dst, protocol=6, upper_length=value)
 
         # Total Length 0, as a TSO capture has it: the UDP Length field gives the length.
         ip = IPv4(bytes.fromhex('450000000001000040118e99c0000201c6336402') + self.UDP)
-        self.assertEqual(IP_Pseudo.from_fields(ip=ip).info.len, 8)
+        self.assertEqual(IP_Pseudo.build(ip=ip).info.len, 8)
 
         # Without one, the IP layer's length is negative.
         tcp = IPv4(bytes.fromhex('450000000001000040068e99c0000201c6336402') + bytes(20))
         with self.assertRaisesRegex(FieldValueError, 'length -20 out of range'):
-            IP_Pseudo.from_fields(ip=tcp)
+            IP_Pseudo.build(ip=tcp)
 
     def test_zero_is_the_layout_width(self) -> None:
         # One zero octet for IPv4 (RFC 793 section 3.1), three for IPv6 (RFC
@@ -382,19 +382,19 @@ class IPPseudoBoundaryTests(unittest.TestCase):
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
         from pcapkit.utilities.exceptions import ProtocolError
 
-        ipv4 = IP_Pseudo.from_fields(src='10.0.0.1', dst='10.0.0.2', protocol=6, upper_length=20, zero=b'\xff')
+        ipv4 = IP_Pseudo.build(src='10.0.0.1', dst='10.0.0.2', protocol=6, upper_length=20, zero=b'\xff')
         self.assertEqual(ipv4.data, bytes.fromhex('0a000001' '0a000002' 'ff' '06' '0014'))
         self.assertEqual(ipv4.info.zero, b'\xff')
-        ipv6 = IP_Pseudo.from_fields(src='::1', dst='::2', protocol=6, upper_length=20, zero=b'\xff' * 3)
+        ipv6 = IP_Pseudo.build(src='::1', dst='::2', protocol=6, upper_length=20, zero=b'\xff' * 3)
         self.assertEqual(ipv6.data[32:], bytes.fromhex('00000014' 'ffffff' '06'))
         self.assertEqual(ipv6.info.zero, b'\xff' * 3)
-        self.assertEqual(IP_Pseudo.from_fields(src='::1', dst='::2', protocol=6, upper_length=20).info.zero, bytes(3))
+        self.assertEqual(IP_Pseudo.build(src='::1', dst='::2', protocol=6, upper_length=20).info.zero, bytes(3))
 
         for src, dst, zero in (('10.0.0.1', '10.0.0.2', b'\xaa\xbb'), ('::1', '::2', b'\xaa\xbb\xcc\xdd'),
                                ('::1', '::2', b'\xaa'), ('10.0.0.1', '10.0.0.2', 1)):
             with self.subTest(src=src, zero=zero):
                 with self.assertRaisesRegex(ProtocolError, r'^IP_Pseudo: invalid zero octets: must be \d octets?'):
-                    IP_Pseudo.from_fields(src=src, dst=dst, protocol=6, upper_length=20, zero=zero)
+                    IP_Pseudo.build(src=src, dst=dst, protocol=6, upper_length=20, zero=zero)
 
     def test_each_value_is_required_without_ip(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
@@ -404,7 +404,7 @@ class IPPseudoBoundaryTests(unittest.TestCase):
         for missing in values:
             with self.subTest(missing=missing):
                 with self.assertRaisesRegex(ProtocolError, 'required without ip'):
-                    IP_Pseudo.from_fields(**{key: value for key, value in values.items() if key != missing})
+                    IP_Pseudo.build(**{key: value for key, value in values.items() if key != missing})
 
     def test_octets_must_match_the_length(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
@@ -474,11 +474,11 @@ class IPPseudoWalkTests(unittest.TestCase):
 
         # The UDP Length field is 8, though the IP layer carries 12 octets (RFC 768).
         ip = self.ipv6(17, self.UDP + bytes(4))
-        self.assertEqual(IP_Pseudo.from_fields(ip=ip).data[32:], bytes.fromhex('00000008' '000000' '11'))
+        self.assertEqual(IP_Pseudo.build(ip=ip).data[32:], bytes.fromhex('00000008' '000000' '11'))
 
         ipv4 = IPv4(bytes.fromhex('45000020' '00010000' '4011' '0000' 'c0000201' 'c6336402')
                     + self.UDP + bytes(4))
-        self.assertEqual(IP_Pseudo.from_fields(ip=ipv4).info.len, 8)
+        self.assertEqual(IP_Pseudo.build(ip=ipv4).info.len, 8)
 
     def test_source_route_final_destination(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
@@ -491,14 +491,14 @@ class IPPseudoWalkTests(unittest.TestCase):
                 with self.subTest(kind=kind, pointer=pointer):
                     ip = self.ipv4_route(kind, pointer, ['192.0.2.20', '192.0.2.30'])
                     self.assertEqual(ip.info.dst, ipaddress.IPv4Address('192.0.2.10'))  # type: ignore[attr-defined]
-                    self.assertEqual(IP_Pseudo.from_fields(ip=ip).data[4:8],  # type: ignore[arg-type]
+                    self.assertEqual(IP_Pseudo.build(ip=ip).data[4:8],  # type: ignore[arg-type]
                                      ipaddress.IPv4Address(final).packed)
 
     def test_source_route_without_addresses_keeps_the_header_destination(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
 
         ip = self.ipv4_route(131, 4, [])
-        self.assertEqual(IP_Pseudo.from_fields(ip=ip).data[4:8], ipaddress.IPv4Address('192.0.2.10').packed)
+        self.assertEqual(IP_Pseudo.build(ip=ip).data[4:8], ipaddress.IPv4Address('192.0.2.10').packed)
 
     def test_udp_length_after_an_atomic_fragment(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
@@ -510,7 +510,7 @@ class IPPseudoWalkTests(unittest.TestCase):
         # Tunnel Encapsulation Limit (type 4), then Pad1s; non-zero, so a wrong offset shows.
         dest_opts = bytes([17, 0, 4, 1, 5, 0, 0, 0])
         ip = self.ipv6(44, fragment + dest_opts + self.UDP)
-        self.assertEqual(IP_Pseudo.from_fields(ip=ip).data[32:], bytes.fromhex('00000008' '000000' '11'))
+        self.assertEqual(IP_Pseudo.build(ip=ip).data[32:], bytes.fromhex('00000008' '000000' '11'))
 
     def test_authentication_header_is_walked(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
@@ -521,11 +521,11 @@ class IPPseudoWalkTests(unittest.TestCase):
         # upper layer is UDP, and the length is the UDP header's alone.
         first = bytes([51, 4]) + bytes(22)
         second = bytes([17, 4]) + bytes(22)
-        pseudo = IP_Pseudo.from_fields(ip=self.ipv4(51, first + second + self.UDP))
+        pseudo = IP_Pseudo.build(ip=self.ipv4(51, first + second + self.UDP))
         self.assertEqual(pseudo.data[8:], bytes.fromhex('00' '11' '0008'))
         # A lone one cut short after its first octets.
         with self.assertRaisesRegex(ProtocolError, 'Authentication Header of IPv4 not parsed'):
-            IP_Pseudo.from_fields(ip=self.ipv4(51, bytes([17, 4]) + bytes(4)))
+            IP_Pseudo.build(ip=self.ipv4(51, bytes([17, 4]) + bytes(4)))
 
     def test_esp_is_never_walked(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
@@ -534,8 +534,8 @@ class IPPseudoWalkTests(unittest.TestCase):
         # ESP (RFC 4303): the upper layer is encrypted, so an IPv4 packet with
         # one needs its protocol and length given, as an IPv6 packet does.
         with self.assertRaisesRegex(ProtocolError, 'upper layer of IPv4 not parsed'):
-            IP_Pseudo.from_fields(ip=self.ipv4(50, bytes(16)))
-        self.assertEqual(IP_Pseudo.from_fields(ip=self.ipv4(50, bytes(16)), protocol=50, upper_length=24)
+            IP_Pseudo.build(ip=self.ipv4(50, bytes(16)))
+        self.assertEqual(IP_Pseudo.build(ip=self.ipv4(50, bytes(16)), protocol=50, upper_length=24)
                          .data[8:], bytes.fromhex('00' '32' '0018'))
 
     def test_authentication_header_over_tcp(self) -> None:
@@ -543,7 +543,7 @@ class IPPseudoWalkTests(unittest.TestCase):
 
         # AH (RFC 4302) of 24 octets naming TCP, then a 20-octet TCP header: the length
         # is the TCP octets alone, not the 44 that a walk ignoring the AH would count.
-        pseudo = IP_Pseudo.from_fields(ip=self.ipv4(51, bytes([6, 4]) + bytes(22) + bytes(20)))
+        pseudo = IP_Pseudo.build(ip=self.ipv4(51, bytes([6, 4]) + bytes(22) + bytes(20)))
         self.assertEqual(pseudo.info.len, 20)
         self.assertEqual(pseudo.protocol, 6)
 
@@ -553,7 +553,7 @@ class IPPseudoWalkTests(unittest.TestCase):
         # The UDP header follows the 24-octet AH; a walk that drops the AH reads the
         # Length field from the ICV, 0xAAAA, not 8. The 4 padding octets keep the two apart.
         ip = self.ipv4(51, bytes([17, 4]) + bytes([0xAA] * 22) + self.UDP + bytes(4))
-        self.assertEqual(IP_Pseudo.from_fields(ip=ip).data[8:], bytes.fromhex('00' '11' '0008'))
+        self.assertEqual(IP_Pseudo.build(ip=ip).data[8:], bytes.fromhex('00' '11' '0008'))
 
     def test_authentication_header_in_a_non_first_fragment_is_not_walked(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
@@ -569,8 +569,8 @@ class IPPseudoWalkTests(unittest.TestCase):
                   + ipaddress.IPv4Address('198.51.100.2').packed)
         fragment = IPv4(header + payload)
         with self.assertRaisesRegex(ProtocolError, 'upper layer of IPv4 not parsed'):
-            IP_Pseudo.from_fields(ip=fragment, upper_length=8)
-        self.assertEqual(IP_Pseudo.from_fields(ip=fragment, protocol=51, upper_length=8).data[8:],
+            IP_Pseudo.build(ip=fragment, upper_length=8)
+        self.assertEqual(IP_Pseudo.build(ip=fragment, protocol=51, upper_length=8).data[8:],
                          bytes.fromhex('00' '33' '0008'))
 
     def test_esp_under_ipv6_with_an_sa_is_never_walked(self) -> None:
@@ -588,14 +588,14 @@ class IPPseudoWalkTests(unittest.TestCase):
         ip = IPv6(bytes.fromhex('60000000') + len(packet).to_bytes(2, 'big') + bytes([50, 64])
                   + self.SRC6 + self.DST6 + packet, context=registry)
         with self.assertRaisesRegex(ProtocolError, 'upper layer of IPv6 not parsed'):
-            IP_Pseudo.from_fields(ip=ip)
+            IP_Pseudo.build(ip=ip)
 
     def test_truncated_udp_header_keeps_the_layer_length(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
 
         # Payload Length 8, but the octets end before the UDP header does.
         ip = self.ipv6(17, b'', payload=8)
-        self.assertEqual(IP_Pseudo.from_fields(ip=ip).data[32:], bytes.fromhex('00000008' '000000' '11'))
+        self.assertEqual(IP_Pseudo.build(ip=ip).data[32:], bytes.fromhex('00000008' '000000' '11'))
 
     def test_mobility_header_and_hip_are_the_upper_layer(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
@@ -603,13 +603,13 @@ class IPPseudoWalkTests(unittest.TestCase):
         # Mobility Header, Next Header TCP, 8 octets: the chain ends at it, so it is
         # the upper layer, and the TCP named inside it is not (RFC 6275 section 6.1.1).
         ip = self.ipv6(135, bytes([6, 0, 5, 0]) + bytes(4))
-        pseudo = IP_Pseudo.from_fields(ip=ip)
+        pseudo = IP_Pseudo.build(ip=ip)
         self.assertEqual(pseudo.data[32:], bytes.fromhex('00000008' '000000' '87'))
         self.assertEqual(pseudo.protocol, 135)
 
         # Headers after it are not walked past it: 8 octets of HIP ahead of 8 of UDP.
         ip = self.ipv6(139, bytes([17, 1, 0, 0, 0, 0, 0, 0]) + self.UDP)
-        pseudo = IP_Pseudo.from_fields(ip=ip)
+        pseudo = IP_Pseudo.build(ip=ip)
         self.assertEqual(pseudo.data[32:], bytes.fromhex('00000010' '000000' '8b'))
         self.assertEqual(pseudo.protocol, 139)
 
@@ -622,13 +622,13 @@ class IPPseudoWalkTests(unittest.TestCase):
             return b''.join(bytes([60 if index < count - 1 else 17, 0]) + bytes(6)
                             for index in range(count))
 
-        self.assertEqual(IP_Pseudo.from_fields(ip=self.ipv6(60, chain(32) + self.UDP)).info.len, 8)
+        self.assertEqual(IP_Pseudo.build(ip=self.ipv6(60, chain(32) + self.UDP)).info.len, 8)
         # It may hold a Home Address option, and it hides the upper layer (#2513).
         ip = self.ipv6(60, chain(33) + self.UDP)
         with self.assertRaisesRegex(ProtocolError, 'Destination Options of IPv6 not parsed; give src'):
-            IP_Pseudo.from_fields(ip=ip)
+            IP_Pseudo.build(ip=ip)
         with self.assertRaisesRegex(ProtocolError, 'upper layer of IPv6 not parsed'):
-            IP_Pseudo.from_fields(ip=ip, src='2001:db8::1')
+            IP_Pseudo.build(ip=ip, src='2001:db8::1')
 
     def test_truncated_headers_are_unparsed(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
@@ -636,10 +636,10 @@ class IPPseudoWalkTests(unittest.TestCase):
 
         # A Type 0 Routing header claiming two segments, cut by snaplen.
         with self.assertRaisesRegex(ProtocolError, 'Routing header of IPv6 not parsed; give dst'):
-            IP_Pseudo.from_fields(ip=self.ipv6(43, bytes([17, 2, 0, 1, 0, 0, 0, 0])))
+            IP_Pseudo.build(ip=self.ipv6(43, bytes([17, 2, 0, 1, 0, 0, 0, 0])))
         # A Fragment header cut by snaplen.
         with self.assertRaisesRegex(ProtocolError, 'upper layer of IPv6 not parsed'):
-            IP_Pseudo.from_fields(ip=self.ipv6(44, bytes([17, 0, 0, 0])))
+            IP_Pseudo.build(ip=self.ipv6(44, bytes([17, 0, 0, 0])))
 
     def test_malformed_extension_headers_raise_protocol_error(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
@@ -647,10 +647,10 @@ class IPPseudoWalkTests(unittest.TestCase):
 
         # Destination Options whose length runs past the payload.
         with self.assertRaisesRegex(ProtocolError, 'Destination Options of IPv6 not parsed; give src'):
-            IP_Pseudo.from_fields(ip=self.ipv6(60, bytes([17, 2]) + bytes(22), payload=8))
+            IP_Pseudo.build(ip=self.ipv6(60, bytes([17, 2]) + bytes(22), payload=8))
         # A Type 0 Routing header with an odd Hdr Ext Len.
         with self.assertRaisesRegex(ProtocolError, 'Routing header of IPv6 not parsed; give dst'):
-            IP_Pseudo.from_fields(ip=self.ipv6(43, bytes([17, 1, 0, 1, 0, 0, 0, 0]) + bytes(8)))
+            IP_Pseudo.build(ip=self.ipv6(43, bytes([17, 1, 0, 1, 0, 0, 0, 0]) + bytes(8)))
 
     def test_a_malformed_header_past_the_first_is_unparsed(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
@@ -669,8 +669,8 @@ class IPPseudoWalkTests(unittest.TestCase):
         for index, (header, value, ip) in enumerate(cases):
             with self.subTest(index):
                 with self.assertRaisesRegex(ProtocolError, f'{header} of IPv6 not parsed; give {value}'):
-                    IP_Pseudo.from_fields(ip=ip, protocol=17, upper_length=8)
-                pseudo = IP_Pseudo.from_fields(ip=ip, protocol=17, upper_length=8, **{value: '2001:db8::99'})
+                    IP_Pseudo.build(ip=ip, protocol=17, upper_length=8)
+                pseudo = IP_Pseudo.build(ip=ip, protocol=17, upper_length=8, **{value: '2001:db8::99'})
                 self.assertEqual(getattr(pseudo, value), ipaddress.IPv6Address('2001:db8::99'))
 
     def test_the_upper_layer_needs_its_protocol_and_length(self) -> None:
@@ -685,7 +685,7 @@ class IPPseudoWalkTests(unittest.TestCase):
             with self.subTest(value):
                 with self.assertRaisesRegex(ProtocolError, 'upper layer of IPv6 not parsed; '
                                                            'give protocol and upper_length'):
-                    IP_Pseudo.from_fields(ip=ip, **{value: '2001:db8::99'})
+                    IP_Pseudo.build(ip=ip, **{value: '2001:db8::99'})
 
     def test_last_fragment_needs_the_reassembled_length(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
@@ -694,8 +694,8 @@ class IPPseudoWalkTests(unittest.TestCase):
         # Fragment Offset 1 (8 octets), More Fragments clear: the last fragment of a packet.
         last = self.ipv6(44, bytes([17, 0]) + bytes.fromhex('0008' '00000005') + self.UDP)
         with self.assertRaisesRegex(ProtocolError, 'fragment; give upper_length'):
-            IP_Pseudo.from_fields(ip=last)
-        self.assertEqual(IP_Pseudo.from_fields(ip=last, upper_length=8).info.len, 8)
+            IP_Pseudo.build(ip=last)
+        self.assertEqual(IP_Pseudo.build(ip=last, upper_length=8).info.len, 8)
 
     def test_extension_header_lengths_are_summed(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
@@ -706,7 +706,7 @@ class IPPseudoWalkTests(unittest.TestCase):
         hop_by_hop = bytes([60, 0]) + bytes(6)
         dest_opts = bytes([58, 0]) + bytes(6)
         ip = self.ipv6(0, hop_by_hop + dest_opts + self.ICMPV6)
-        self.assertEqual(IP_Pseudo.from_fields(ip=ip).data[32:], bytes.fromhex('00000008' '000000' '3a'))
+        self.assertEqual(IP_Pseudo.build(ip=ip).data[32:], bytes.fromhex('00000008' '000000' '3a'))
 
     def test_duplicate_header_types_are_each_summed(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
@@ -715,7 +715,7 @@ class IPPseudoWalkTests(unittest.TestCase):
         first = bytes([60, 0]) + bytes(6)
         second = bytes([58, 0]) + bytes(6)
         ip = self.ipv6(60, first + second + self.ICMPV6)
-        self.assertEqual(IP_Pseudo.from_fields(ip=ip).data[32:], bytes.fromhex('00000008' '000000' '3a'))
+        self.assertEqual(IP_Pseudo.build(ip=ip).data[32:], bytes.fromhex('00000008' '000000' '3a'))
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -732,7 +732,7 @@ class PseudoHeaderTests(unittest.TestCase):
     def test_the_length_is_replaced(self) -> None:
         for src, dst, offset, width in (('192.0.2.1', '198.51.100.2', 10, 2),
                                         ('2001:db8::1', '2001:db8::2', 32, 4)):
-            pseudo = self.IP_Pseudo.from_fields(src=src, dst=dst, protocol=6, upper_length=0)
+            pseudo = self.IP_Pseudo.build(src=src, dst=dst, protocol=6, upper_length=0)
             with self.subTest(src=src):
                 self.assertIs(self.pseudo_header(pseudo, 0), pseudo.data)
                 octets = self.pseudo_header(pseudo, 0x1234)

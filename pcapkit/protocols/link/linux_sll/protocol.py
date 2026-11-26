@@ -328,7 +328,7 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
         .. versionchanged:: 1.8.0
 
            ``version`` is checked against the member, as
-           :meth:`from_fields` checks it, rather than handed on (:issue:`2840`).
+           :meth:`build` checks it, rather than handed on (:issue:`2840`).
 
         """
         if isinstance(file, NoValueType):
@@ -460,7 +460,7 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
 
     @classmethod
     def _construction_member(cls, fields: 'dict[str, Any]') -> 'Type[Self]':
-        """The member :meth:`from_fields`, :meth:`from_data` and a call given no file construct.
+        """The member :meth:`build`, :meth:`from_data` and a call given no file construct.
 
         On this class, the member ``version`` names; on another, the class itself, of
         which ``version`` must name the member it is or derives from. ``version`` is

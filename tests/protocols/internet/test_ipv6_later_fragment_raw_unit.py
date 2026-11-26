@@ -118,9 +118,9 @@ class TestIPv6LaterFragmentRaw(unittest.TestCase):
         from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.protocols.transport.udp.protocol import UDP
 
-        upper = UDP.from_fields(srcport=51234, dstport=5001, payload=bytes(range(0x40, 0x60))).data
-        header = IPv6_Frag.from_fields(next=17, offset=181, mf=True, id=110308).data
-        made = IPv6.from_fields(next=44, src='2001:db8::1', dst='2001:db8::2', payload=header + upper)
+        upper = UDP.build(srcport=51234, dstport=5001, payload=bytes(range(0x40, 0x60))).data
+        header = IPv6_Frag.build(next=17, offset=181, mf=True, id=110308).data
+        made = IPv6.build(next=44, src='2001:db8::1', dst='2001:db8::2', payload=header + upper)
 
         ipv6 = self._parse(made.data)
         self.assertNotIn('UDP', ipv6)

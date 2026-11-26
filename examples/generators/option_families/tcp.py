@@ -69,7 +69,7 @@ def _tcp_overrides() -> 'dict[Any, dict[str, Any]]':
 
 def _tcp_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     from pcapkit.protocols.transport.tcp.protocol import TCP
-    return TCP.from_fields(options=[(code, kwargs)], **TCP_BASE)
+    return TCP.build(options=[(code, kwargs)], **TCP_BASE)
 
 
 def _tcp_parse(octets: 'bytes') -> 'Any':
@@ -83,7 +83,7 @@ def _tcp_extract(parsed: 'Any') -> 'Any':
 
 def _tcp_rebuild(options: 'Any') -> 'Any':
     from pcapkit.protocols.transport.tcp.protocol import TCP
-    return TCP.from_fields(options=options, **TCP_BASE)
+    return TCP.build(options=options, **TCP_BASE)
 
 
 def _mptcp_registry() -> 'Any':
@@ -114,7 +114,7 @@ def _mptcp_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     # than repeated in every entry of the table above.
     args = dict(kwargs)
     args['subtype'] = code
-    return TCP.from_fields(options=[(Enum_Option.Multipath_TCP, args)], **TCP_BASE)
+    return TCP.build(options=[(Enum_Option.Multipath_TCP, args)], **TCP_BASE)
 
 
 #: The families this module adds.

@@ -191,7 +191,7 @@ class TestRadiotapShortTLV(unittest.TestCase):
                     self.assertIsInstance(item.data, Tagged)
                     self.assertEqual((item.data.tag, item.data.body, item.data.get('__short_read__')),
                                      (tag, body, record))
-                    self.assertEqual(Radiotap.from_fields(present=(PRESENT,), fields=parsed.info.decoded).data.hex(), raw.hex())
+                    self.assertEqual(Radiotap.build(present=(PRESENT,), fields=parsed.info.decoded).data.hex(), raw.hex())
 
     def test_from_data_rebuilds_a_short_item_as_captured(self) -> None:
         """``from_data`` of the info, and of its dict, writes the cut octets and decodes them again."""
@@ -226,7 +226,7 @@ class TestRadiotapShortTLV(unittest.TestCase):
             }
             for how, fields in given.items():
                 with self.subTest(case=case, fields=how):
-                    made = Radiotap.from_fields(present=(PRESENT,), fields=fields)
+                    made = Radiotap.build(present=(PRESENT,), fields=fields)
                     self.assertEqual(made.data.hex(), raw.hex())
 
     @contextlib.contextmanager
@@ -260,7 +260,7 @@ class TestRadiotapShortTLV(unittest.TestCase):
                 with self._assert_quiet():
                     parsed = Radiotap(raw, len(raw))
                     Radiotap.from_data(parsed.info)
-                    Radiotap.from_fields(present=(PRESENT,), fields=parsed.info.decoded)
+                    Radiotap.build(present=(PRESENT,), fields=parsed.info.decoded)
                 (item,) = parsed.info.decoded[28].tlvs
                 self.assertNotIsInstance(item.data, bytes)
 
@@ -277,7 +277,7 @@ class TestRadiotapShortTLV(unittest.TestCase):
                 with mock.patch.object(config, 'MAX_ZERO_PAD_LENGTH', 1), self._assert_quiet():
                     parsed = Radiotap(raw, len(raw))
                     self.assertEqual(Radiotap.from_data(parsed.info).data.hex(), raw.hex())
-                    self.assertEqual(Radiotap.from_fields(present=(PRESENT,), fields=parsed.info.decoded).data.hex(), raw.hex())
+                    self.assertEqual(Radiotap.build(present=(PRESENT,), fields=parsed.info.decoded).data.hex(), raw.hex())
                 (item,) = parsed.info.decoded[28].tlvs
                 self.assertEqual(item.data, data)
 
@@ -291,17 +291,17 @@ class TestRadiotapShortTLV(unittest.TestCase):
 
         usig = {'common': COMMON, 'value': 2, 'mask': 3}
         # whole, the item builds, so each refusal below is its record's
-        Radiotap.from_fields(present=(PRESENT,), fields=[(28, {'tlvs': [{'type': 33, 'data': usig}]})])
+        Radiotap.build(present=(PRESENT,), fields=[(28, {'tlvs': [{'type': 33, 'data': usig}]})])
         for record in (('nosuch', 0), ('mask', -1), ('mask', True), ('mask', '0'), ('mask',), 'mask'):
             with self.subTest(record=record):
                 with self.assertRaises(ProtocolError):
-                    Radiotap.from_fields(present=(PRESENT,),
-                                         fields=[(28, {'tlvs': [{'type': 33, 'data': {**usig, '__short_read__': record}}]})])
+                    Radiotap.build(present=(PRESENT,),
+                                   fields=[(28, {'tlvs': [{'type': 33, 'data': {**usig, '__short_read__': record}}]})])
 
         vendor = {'oui': bytes.fromhex('001374'), 'subtype': 1, 'presence_type': 5, 'data': b'\xaa',
                   '__short_read__': ('presence_type', 1)}
         with self.assertRaises(ProtocolError):
-            Radiotap.from_fields(present=(PRESENT,), fields=[(28, {'tlvs': [{'type': 30, 'data': vendor}]})])
+            Radiotap.build(present=(PRESENT,), fields=[(28, {'tlvs': [{'type': 30, 'data': vendor}]})])
 
 
 if __name__ == '__main__':

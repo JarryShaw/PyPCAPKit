@@ -319,7 +319,7 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
         .. versionchanged:: 1.8.0
 
            ``version`` is checked against the class, as
-           :meth:`from_fields` checks it, rather than handed on (:issue:`2840`).
+           :meth:`build` checks it, rather than handed on (:issue:`2840`).
 
         """
         if isinstance(file, NoValueType):
@@ -529,7 +529,7 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
 
     @classmethod
     def _construction_member(cls, fields: 'dict[str, Any]') -> 'Type[Self]':
-        """The version class :meth:`from_fields`, :meth:`from_data` and a call given no file construct.
+        """The version class :meth:`build`, :meth:`from_data` and a call given no file construct.
 
         On this class, the version class ``version`` names; on another, the class
         itself, whose :attr:`version` ``version`` must be. ``version`` is taken out

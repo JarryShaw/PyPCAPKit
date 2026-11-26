@@ -26,8 +26,8 @@ def _build(ppid: 'Any') -> 'Any':
     from pcapkit.const.sctp.chunk import Chunk
     from pcapkit.protocols.transport.sctp.protocol import SCTP
 
-    sctp = bytes(SCTP.from_fields(srcport=50000, dstport=80, vtag=0x11223344, chksum=b'\x00' * 4,
-                                  chunks=[(Chunk.Payload_Data, {'ppid': ppid, 'data': b'ngap-pdu'})]))
+    sctp = bytes(SCTP.build(srcport=50000, dstport=80, vtag=0x11223344, chksum=b'\x00' * 4,
+                            chunks=[(Chunk.Payload_Data, {'ppid': ppid, 'data': b'ngap-pdu'})]))
     frame = generator._ethernet(0x0800, generator._ip4(132, sctp))
     return generator._extract_first(generator._pcap_bytes((frame,), linktype=1), '.pcap')
 

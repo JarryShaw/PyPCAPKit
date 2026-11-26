@@ -261,7 +261,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         from pcapkit.protocols.application.http.protocol import HTTP
 
-        proto = HTTP.from_fields(version=1, http_version='1.1', method='GET', uri='/')
+        proto = HTTP.build(version=1, http_version='1.1', method='GET', uri='/')
         self.assertEqual(proto.data, b'GET / HTTP/1.1\r\n\r\n')
         self.assertEqual(proto.version, '1.1')
 
@@ -1088,7 +1088,7 @@ class HTTPUnitTests(unittest.TestCase):
 
         from pcapkit.protocols.application.httpv1.protocol import HTTPv1
 
-        request = HTTPv1.from_fields(method='GET', uri='/', http_version='1.1')
+        request = HTTPv1.build(method='GET', uri='/', http_version='1.1')
         self.assertEqual(request.data, b'GET / HTTP/1.1\r\n\r\n')
         self.assertEqual(request.info.receipt.method, 'GET')
         self.assertEqual(request.info.receipt.uri, '/')
@@ -1096,13 +1096,13 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual(len(request.info.header), 0)
 
         wire = b'HTTP/1.0 200 OK\r\n\r\nbody'
-        response = HTTPv1.from_fields(status=200, message='OK', http_version='1.0', body=b'body')
+        response = HTTPv1.build(status=200, message='OK', http_version='1.0', body=b'body')
         self.assertEqual(response.data, wire)
         self.assertEqual(response.info.receipt.status, 200)
         self.assertEqual(len(response.info.header), 0)
 
         parsed = HTTPv1(io.BytesIO(wire), len(wire))
-        self.assertEqual(HTTPv1.from_fields(**HTTPv1._make_data(parsed.info)).data, wire)
+        self.assertEqual(HTTPv1.build(**HTTPv1._make_data(parsed.info)).data, wire)
 
     def test_httpv1_from_data_round_trips_a_message_with_an_empty_body(self) -> None:
         """``from_data(info)`` rebuilds a message whose body is empty (#1050).

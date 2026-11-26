@@ -224,7 +224,7 @@ class IPv6OptionTests(_Case):
 
         for alias, cls in self._classes().items():
             self.assertWidth(alias, 'CALIPSO checksum', 2,
-                             lambda value, cls=cls: cls.from_fields(next=59, options=[(Option.CALIPSO, {'checksum': value})]).data,
+                             lambda value, cls=cls: cls.build(next=59, options=[(Option.CALIPSO, {'checksum': value})]).data,
                              lambda data, cls=cls: cls.from_data(cls(data, len(data), extension=True).info).data,
                              offset=10)
 
@@ -236,7 +236,7 @@ class IPv6OptionTests(_Case):
 
         for alias, cls in self._classes().items():
             self.assertWidth(alias, 'Quick-Start not-used octet', 1,
-                             lambda value, cls=cls: cls.from_fields(next=59, options=[(Option.Quick_Start, {
+                             lambda value, cls=cls: cls.build(next=59, options=[(Option.Quick_Start, {
                                  'func': QSFunction.Report_of_Approved_Rate, 'unused': value})]).data,
                              lambda data, cls=cls: cls.from_data(cls(data, len(data), extension=True).info).data,
                              offset=5)
@@ -249,7 +249,7 @@ class IPv4TimestampTests(_Case):
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
-        return IPv4.from_fields(protocol=253, options=[(OptionNumber.TS, args)]).data
+        return IPv4.build(protocol=253, options=[(OptionNumber.TS, args)]).data
 
     def _rebuild(self, data: 'bytes') -> 'bytes':
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
@@ -281,7 +281,7 @@ class IPv4TimestampTests(_Case):
         # RFC 791 section 3.1: the Header Checksum is octets 10 and 11.
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
-        self.assertWidth('IPv4', 'checksum', 2, lambda value: IPv4.from_fields(protocol=253, checksum=value).data,
+        self.assertWidth('IPv4', 'checksum', 2, lambda value: IPv4.build(protocol=253, checksum=value).data,
                          self._rebuild, offset=10)
 
 
@@ -312,8 +312,8 @@ class MHTests(_Case):
         from pcapkit.const.mh.packet import Packet
         from pcapkit.protocols.internet.mh.protocol import MH
 
-        return bytes(MH.from_fields(next=59, type=Packet.Binding_Refresh_Request,
-                                    data={'options': [(Option[name], args) for name, args in options]}, **kwargs))
+        return bytes(MH.build(next=59, type=Packet.Binding_Refresh_Request,
+                              data={'options': [(Option[name], args) for name, args in options]}, **kwargs))
 
     def _rebuild(self, data: 'bytes') -> 'bytes':
         from pcapkit.protocols.internet.mh.protocol import MH
@@ -338,7 +338,7 @@ class MHTests(_Case):
                 code = packets[name[len('_make_msg_'):]]
                 label = 'reserved octets' if arg == 'msg_reserved' else arg
                 self.assertWidth('MH', label, size,
-                                 lambda value, code=code, arg=arg: bytes(MH.from_fields(next=59, type=code, data={arg: value})),
+                                 lambda value, code=code, arg=arg: bytes(MH.build(next=59, type=code, data={arg: value})),
                                  self._rebuild, where=f'{name}.{arg}')
         self.assertIn('_make_msg_hot.token', swept)
 
@@ -402,7 +402,7 @@ class HIPTests(_Case):
         # RFC 7401 section 5.1: Checksum is octets 4 and 5.
         from pcapkit.protocols.internet.hip.protocol import HIP
 
-        self.assertWidth('HIPv2', 'checksum', 2, lambda value: bytes(HIP.from_fields(version=2, checksum=value)),
+        self.assertWidth('HIPv2', 'checksum', 2, lambda value: bytes(HIP.build(version=2, checksum=value)),
                          self._rebuild, offset=4)
 
     def test_parameter_octets(self) -> None:
@@ -422,7 +422,7 @@ class HIPTests(_Case):
                 label = names.get(arg, f'{name} {arg}')
                 base = self.BASE.get(name, {})
                 self.assertWidth('HIPv2', label, size,
-                                 lambda value, code=code, arg=arg, base=base: bytes(HIP.from_fields(
+                                 lambda value, code=code, arg=arg, base=base: bytes(HIP.build(
                                      version=2, parameters=[(code, {**base, arg: value})])),
                                  self._rebuild, where=f'{maker}.{arg}')
         self.assertIn('_make_param_payload_mic', swept)
@@ -441,13 +441,13 @@ class OtherMakerTests(_Case):
         for alias, cls, rows in (('ICMP', ICMPv4, ((3, 4, 4), (11, 4, 4), (12, 3, 5))),
                                  ('ICMPv6', ICMPv6, ((1, 4, 4), (3, 4, 4)))):
             rebuild = (lambda data, cls=cls: cls.from_data(cls(data).info).data)  # noqa: E731
-            self.assertWidth(alias, 'checksum', 2, lambda value, cls=cls: cls.from_fields(type=8 if cls is ICMPv4 else 128,
+            self.assertWidth(alias, 'checksum', 2, lambda value, cls=cls: cls.build(type=8 if cls is ICMPv4 else 128,
                                                                              checksum=value).data,
                              rebuild, offset=2)
             for kind, size, offset in rows:
                 with self.subTest(protocol=alias, type=kind):
                     self.assertWidth(alias, 'unused octets', size,
-                                     lambda value, cls=cls, kind=kind: cls.from_fields(type=kind, body={'unused': value}).data,
+                                     lambda value, cls=cls, kind=kind: cls.build(type=kind, body={'unused': value}).data,
                                      rebuild, offset=offset)
 
     def test_igmp_checksum_and_reserved(self) -> None:
@@ -458,11 +458,11 @@ class OtherMakerTests(_Case):
         from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         self.assertWidth('IGMPv2', 'checksum', 2,
-                         lambda value: IGMPv2.from_fields(type=Type.IGMP_Membership_Query, max_resp_time=1, checksum=value).data,
+                         lambda value: IGMPv2.build(type=Type.IGMP_Membership_Query, max_resp_time=1, checksum=value).data,
                          lambda data: IGMPv2.from_data(IGMPv2(data).info).data, offset=2)
         report = Type.IGMPv3_Membership_Report
         for arg, name, offset in (('checksum', 'checksum', 2), ('reserved_2', 'reserved_2', 4)):
-            self.assertWidth('IGMPv3', name, 2, lambda value, arg=arg: IGMPv3.from_fields(type=report, **{arg: value}).data,
+            self.assertWidth('IGMPv3', name, 2, lambda value, arg=arg: IGMPv3.build(type=report, **{arg: value}).data,
                              lambda data: IGMPv3.from_data(IGMPv3(data).info).data, offset=offset)
 
     def test_ipv6_frag_and_route_reserved(self) -> None:
@@ -472,13 +472,13 @@ class OtherMakerTests(_Case):
         from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         self.assertWidth('IPv6-Frag', 'reserved octet', 1,
-                         lambda value: IPv6_Frag.from_fields(next=59, reserved_octet=value).data,
+                         lambda value: IPv6_Frag.build(next=59, reserved_octet=value).data,
                          lambda data: IPv6_Frag.from_data(IPv6_Frag(data, len(data), extension=True).info).data,
                          offset=1)
         for kind, data in ((0, {'ip': ['2001:db8::1']}), (2, {'ip': '2001:db8::1'})):
             with self.subTest(type=kind):
                 self.assertWidth('IPv6-Route', 'reserved octets', 4,
-                                 lambda value, kind=kind, data=data: IPv6_Route.from_fields(
+                                 lambda value, kind=kind, data=data: IPv6_Route.build(
                                      next=59, type=kind, data={**data, 'reserved': value}).data,
                                  lambda octets: IPv6_Route.from_data(
                                      IPv6_Route(octets, len(octets), extension=True).info).data,
@@ -491,7 +491,7 @@ class OtherMakerTests(_Case):
 
         for arg, name, size, offset in (('chksum', 'checksum', 2, 0), ('dst', 'destination address', 12, 6),
                                         ('src', 'source address', 12, 18)):
-            self.assertWidth('IPX', name, size, lambda value, arg=arg: IPX.from_fields(**{arg: value}).data,
+            self.assertWidth('IPX', name, size, lambda value, arg=arg: IPX.build(**{arg: value}).data,
                              lambda data: IPX.from_data(IPX(data).info).data, offset=offset)
 
     def test_ospf_checksum_and_authentication_reserved(self) -> None:
@@ -501,11 +501,11 @@ class OtherMakerTests(_Case):
         from pcapkit.protocols.application.ospf.protocol import OSPF
 
         rebuild = (lambda data: OSPF.from_data(OSPF(data).info).data)  # noqa: E731
-        self.assertWidth('OSPF', 'checksum', 2, lambda value: OSPF.from_fields(checksum=value).data, rebuild, offset=12)
+        self.assertWidth('OSPF', 'checksum', 2, lambda value: OSPF.build(checksum=value).data, rebuild, offset=12)
         auth = {'key_id': 1, 'len': 16, 'seq': 1}
         self.assertWidth('OSPF', 'reserved octets', 2,
-                         lambda value: OSPF.from_fields(auth_type=Authentication.Cryptographic_authentication,
-                                                        auth_data={**auth, 'reserved': value}).data,
+                         lambda value: OSPF.build(auth_type=Authentication.Cryptographic_authentication,
+                                                  auth_data={**auth, 'reserved': value}).data,
                          rebuild, offset=16)
 
     def test_pcapng_zigbee_keys(self) -> None:
@@ -608,7 +608,7 @@ class CapturedOctetTests(_Case):
         for name, code, size in self._mh_messages():
             swept.append(name)
             mark = bytes(range(0xA1, 0xA1 + size))
-            data = bytes(MH.from_fields(next=59, type=code, data={'msg_reserved': mark}))
+            data = bytes(MH.build(next=59, type=code, data={'msg_reserved': mark}))
             with self.subTest(maker=name):
                 self.assertCutRebuilds(MH, data, mark, extension=True)
         for name in ('_make_msg_fna', '_make_msg_has', '_make_msg_sq', '_make_msg_lri', '_make_msg_upa'):
@@ -620,10 +620,10 @@ class CapturedOctetTests(_Case):
         from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
         from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
-        self.assertCutRebuilds(IPv6_Frag, IPv6_Frag.from_fields(next=59, reserved_octet=b'\xa1').data, b'\xa1',
+        self.assertCutRebuilds(IPv6_Frag, IPv6_Frag.build(next=59, reserved_octet=b'\xa1').data, b'\xa1',
                                extension=True)
         for kind, args in ((0, {'ip': ['2001:db8::1']}), (2, {'ip': '2001:db8::1'})):
-            data = IPv6_Route.from_fields(next=59, type=kind, data={**args, 'reserved': b'\xa1\xa2\xa3\xa4'}).data
+            data = IPv6_Route.build(next=59, type=kind, data={**args, 'reserved': b'\xa1\xa2\xa3\xa4'}).data
             with self.subTest(type=kind):
                 self.assertCutRebuilds(IPv6_Route, data, b'\xa1\xa2\xa3\xa4', extension=True)
 
@@ -634,8 +634,8 @@ class CapturedOctetTests(_Case):
         from pcapkit.const.ospf.authentication import Authentication
         from pcapkit.protocols.application.ospf.protocol import OSPF
 
-        data = OSPF.from_fields(auth_type=Authentication.Cryptographic_authentication,
-                                auth_data={'key_id': 1, 'len': 16, 'seq': 1, 'reserved': b'\xa1\xa2'}).data
+        data = OSPF.build(auth_type=Authentication.Cryptographic_authentication,
+                          auth_data={'key_id': 1, 'len': 16, 'seq': 1, 'reserved': b'\xa1\xa2'}).data
         self.assertEqual(data.index(b'\xa1\xa2'), 16)
         start = data.index(b'\xa1\xa2')
         for cut in range(start - 1, start + 2):
@@ -661,7 +661,7 @@ class CapturedOctetTests(_Case):
             mark = bytes(range(0xA1, 0xA1 + size))
             unit = 'octet' if size == 1 else 'octets'
             with self.subTest(maker=name):
-                found = self.assertEditRefused(MH, bytes(MH.from_fields(next=59, type=code, data={'msg_reserved': mark})),
+                found = self.assertEditRefused(MH, bytes(MH.build(next=59, type=code, data={'msg_reserved': mark})),
                                                mark, update('msg_reserved'),
                                                f'MH: invalid reserved octets: must be {size} {unit}',
                                                extension=True)
@@ -669,15 +669,15 @@ class CapturedOctetTests(_Case):
         mark = b'\xa1\xa2\xa3\xa4'
         for kind, args in ((0, {'ip': ['2001:db8::1']}), (2, {'ip': '2001:db8::1'})):
             with self.subTest(type=kind):
-                data = IPv6_Route.from_fields(next=59, type=kind, data={**args, 'reserved': mark}).data
+                data = IPv6_Route.build(next=59, type=kind, data={**args, 'reserved': mark}).data
                 self.assertTrue(self.assertEditRefused(IPv6_Route, data, mark, update('reserved'),
                                                        'IPv6-Route: invalid reserved octets: must be 4 octets',
                                                        extension=True))
-        self.assertTrue(self.assertEditRefused(IPv6_Frag, IPv6_Frag.from_fields(next=59, reserved_octet=b'\xa1').data, b'\xa1',
+        self.assertTrue(self.assertEditRefused(IPv6_Frag, IPv6_Frag.build(next=59, reserved_octet=b'\xa1').data, b'\xa1',
                                                update('reserved_octet'),
                                                'IPv6-Frag: invalid reserved octet: must be 1 octet', extension=True))
-        data = OSPF.from_fields(auth_type=Authentication.Cryptographic_authentication,
-                                auth_data={'key_id': 1, 'len': 16, 'seq': 1, 'reserved': b'\xa1\xa2'}).data
+        data = OSPF.build(auth_type=Authentication.Cryptographic_authentication,
+                          auth_data={'key_id': 1, 'len': 16, 'seq': 1, 'reserved': b'\xa1\xa2'}).data
         self.assertTrue(self.assertEditRefused(OSPF, data, b'\xa1\xa2',
                                                lambda info, value: info.auth.__update__({'reserved': value}),
                                                'OSPF: invalid reserved octets: must be 2 octets'))
@@ -694,7 +694,7 @@ class CapturedOctetTests(_Case):
         from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import ProtocolError
 
-        frag = IPv6_Frag.from_fields(next=59, reserved_octet=b'\xa1').data
+        frag = IPv6_Frag.build(next=59, reserved_octet=b'\xa1').data
         for value in (b'', b'\xff\xff'):
             with self.subTest(protocol='IPv6-Frag', width=len(value)):
                 info = IPv6_Frag(io.BytesIO(frag), len(frag), extension=True).info
@@ -703,7 +703,7 @@ class CapturedOctetTests(_Case):
                     IPv6_Frag.from_data(info)
                 self.assertEqual(str(caught.exception),
                                  f'IPv6-Frag: invalid reserved octet: must be 1 octet, not {value!r}')
-        hoti = bytes(MH.from_fields(next=59, type=Packet.Home_Test_Init, data={'msg_reserved': b'\xa1\xa2'}))
+        hoti = bytes(MH.build(next=59, type=Packet.Home_Test_Init, data={'msg_reserved': b'\xa1\xa2'}))
         for width in (0, 1, 3, 5):
             value = b'\xff' * width
             for form in ('from_data', 'message'):
@@ -714,11 +714,11 @@ class CapturedOctetTests(_Case):
                         if form == 'from_data':
                             MH.from_data(info)
                         else:
-                            MH.from_fields(next=59, type=Packet.Home_Test_Init, data={'message': info})
+                            MH.build(next=59, type=Packet.Home_Test_Init, data={'message': info})
                     self.assertEqual(str(caught.exception),
                                      f'MH: invalid reserved octets: must be 2 octets, not {value!r}')
         for kind, args in ((0, {'ip': ['2001:db8::1']}), (2, {'ip': '2001:db8::1'})):
-            route = IPv6_Route.from_fields(next=59, type=kind, data={**args, 'reserved': b'\xa1\xa2\xa3\xa4'}).data
+            route = IPv6_Route.build(next=59, type=kind, data={**args, 'reserved': b'\xa1\xa2\xa3\xa4'}).data
             for width in (1, 6):
                 value = b'\xff' * width
                 with self.subTest(protocol='IPv6-Route', type=kind, width=width):
@@ -728,8 +728,8 @@ class CapturedOctetTests(_Case):
                         IPv6_Route.from_data(info)
                     self.assertEqual(str(caught.exception),
                                      f'IPv6-Route: invalid reserved octets: must be 4 octets, not {value!r}')
-        ospf = OSPF.from_fields(auth_type=Authentication.Cryptographic_authentication,
-                                auth_data={'key_id': 1, 'len': 16, 'seq': 1, 'reserved': b'\xa1\xa2'}).data
+        ospf = OSPF.build(auth_type=Authentication.Cryptographic_authentication,
+                          auth_data={'key_id': 1, 'len': 16, 'seq': 1, 'reserved': b'\xa1\xa2'}).data
         for width in (0, 1, 5):
             value = b'\xff' * width
             with self.subTest(protocol='OSPF', width=width):

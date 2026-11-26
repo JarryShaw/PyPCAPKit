@@ -82,7 +82,7 @@ class TCPOptionsRoundTripUnitTests(unittest.TestCase):
         from pcapkit.const.tcp.option import Option as Enum_Option
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        tcp = TCP.from_fields(srcport=12345, dstport=12346, options=[
+        tcp = TCP.build(srcport=12345, dstport=12346, options=[
             (Enum_Option.Window_Scale, {'shift': 7}),
             (Enum_Option.Maximum_Segment_Size, {'mss': 1460}),
         ])
@@ -94,7 +94,7 @@ class TCPOptionsRoundTripUnitTests(unittest.TestCase):
         from pcapkit.const.tcp.option import Option as Enum_Option
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        tcp = TCP.from_fields(srcport=12345, dstport=12346, options=[
+        tcp = TCP.build(srcport=12345, dstport=12346, options=[
             (Enum_Option.No_Operation, {}),
             (Enum_Option.No_Operation, {}),
             (Enum_Option.Timestamps, {'tsval': 1, 'tsecr': 2}),

@@ -31,7 +31,7 @@ class PCAPHeaderMakeDataMagicUnitTests(unittest.TestCase):
 
         accepted = _declared_keywords(Header)
         self.assertIsNotNone(accepted)
-        made = Header._make_data(Header.from_fields(byteorder='big', nanosecond=True).info)
+        made = Header._make_data(Header.build(byteorder='big', nanosecond=True).info)
         self.assertEqual(set(made) - set(accepted), set())
 
     def test_from_data_round_trips_every_magic(self) -> None:
@@ -40,8 +40,8 @@ class PCAPHeaderMakeDataMagicUnitTests(unittest.TestCase):
 
         for (byteorder, nanosecond), magic in MAGIC.items():
             with self.subTest(byteorder=byteorder, nanosecond=nanosecond):
-                built = Header.from_fields(byteorder=byteorder, nanosecond=nanosecond,
-                                           thiszone=-3600, snaplen=1500, network=LinkType.ETHERNET)
+                built = Header.build(byteorder=byteorder, nanosecond=nanosecond,
+                                     thiszone=-3600, snaplen=1500, network=LinkType.ETHERNET)
                 self.assertEqual(built.data[:4], magic)
 
                 with warnings.catch_warnings():

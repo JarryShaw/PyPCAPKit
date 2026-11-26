@@ -173,7 +173,7 @@ class TestMHReservedPadding(unittest.TestCase):
         code = getattr(getattr(importlib.import_module(module), enum), name)
         base = {'next': 59, 'checksum': b'\x00\x00', 'payload': b''}
         if carrier == 'msg':
-            return bytes(MH.from_fields(type=code, data={}, **base))
+            return bytes(MH.build(type=code, data={}, **base))
         if carrier == 'opt':
             option = (code, {})
         elif carrier == 'fid':
@@ -183,7 +183,7 @@ class TestMHReservedPadding(unittest.TestCase):
         else:
             option = (Option.Access_Network_Identifier,
                       {'suboptions': [(code, {'location': b'\x01\x02'})]})
-        return bytes(MH.from_fields(type=Packet.Binding_Refresh_Request, data={'options': [option]}, **base))
+        return bytes(MH.build(type=Packet.Binding_Refresh_Request, data={'options': [option]}, **base))
 
     def test_reserved_octets_rebuild_as_captured(self) -> None:
         from pcapkit.protocols.internet.mh.protocol import MH
@@ -193,8 +193,8 @@ class TestMHReservedPadding(unittest.TestCase):
             with self.subTest(site=site):
                 self.assertNotEqual(raw_hex, zero_hex)
                 parsed = MH(io.BytesIO(raw), len(raw), extension=True).info
-                rebuilt = bytes(MH.from_fields(next=parsed.next, type=parsed.type, checksum=parsed.chksum,
-                                               data=parsed, payload=b''))
+                rebuilt = bytes(MH.build(next=parsed.next, type=parsed.type, checksum=parsed.chksum,
+                                         data=parsed, payload=b''))
                 self.assertEqual(rebuilt.hex(), raw_hex)
 
     def test_fresh_build_writes_zeros(self) -> None:
@@ -205,8 +205,8 @@ class TestMHReservedPadding(unittest.TestCase):
                 self.assertEqual(self.fresh(carrier, name).hex(), zero_hex)
                 zero = bytes.fromhex(zero_hex)
                 parsed = MH(io.BytesIO(zero), len(zero), extension=True).info
-                rebuilt = bytes(MH.from_fields(next=parsed.next, type=parsed.type, checksum=parsed.chksum,
-                                               data=parsed, payload=b''))
+                rebuilt = bytes(MH.build(next=parsed.next, type=parsed.type, checksum=parsed.chksum,
+                                         data=parsed, payload=b''))
                 self.assertEqual(rebuilt.hex(), zero_hex)
 
     def test_every_padding_site_has_a_case(self) -> None:

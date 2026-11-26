@@ -77,10 +77,10 @@ def ip_families() -> 'list[tuple[str, Callable[..., bytes], Callable[[bytes], An
     from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
     def ipv4(options: 'list') -> 'bytes':
-        return IPv4.from_fields(src='192.0.2.1', dst='192.0.2.2', protocol=TransType.UDP, options=options).data
+        return IPv4.build(src='192.0.2.1', dst='192.0.2.2', protocol=TransType.UDP, options=options).data
 
     def ipv6(cls: 'type') -> 'Callable[[list], bytes]':
-        return lambda options: cls.from_fields(next=TransType.UDP, options=options).data
+        return lambda options: cls.build(next=TransType.UDP, options=options).data
 
     def parse6(cls: 'type') -> 'Callable[[bytes], Any]':
         return lambda octets: cls(io.BytesIO(octets), len(octets), extension=True)
@@ -265,8 +265,8 @@ class RoundTripTests(_QSTestCase):
         code = Option.Quick_Start_Response
         for n, rate in RATES.items():
             with self.subTest(rate=rate):
-                data = TCP.from_fields(srcport=1, dstport=2, options=[(code, dict(rate=rate, diff=3, nonce=NONCE, reserved=0xa,
-                                                                                 nonce_reserved=RESERVED))]).data
+                data = TCP.build(srcport=1, dstport=2, options=[(code, dict(rate=rate, diff=3, nonce=NONCE, reserved=0xa,
+                                                                           nonce_reserved=RESERVED))]).data
                 # Section 4.2: Kind 27, Length 8, Resv. and Rate Request, TTL Diff, then the nonce word.
                 self.assertEqual(data[20:28], bytes([27, 8, 0xa0 | n, 3]) + NONCE_WORD)
 

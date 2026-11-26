@@ -66,7 +66,7 @@ def _hopopt_base() -> 'dict[str, Any]':
 
 def _hopopt_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
-    return HOPOPT.from_fields(options=[(code, kwargs)], **_hopopt_base())
+    return HOPOPT.build(options=[(code, kwargs)], **_hopopt_base())
 
 
 def _hopopt_parse(octets: 'bytes') -> 'Any':
@@ -81,12 +81,12 @@ def _ipv6_extract(parsed: 'Any') -> 'Any':
 
 def _hopopt_rebuild(options: 'Any') -> 'Any':
     from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
-    return HOPOPT.from_fields(options=options, **_hopopt_base())
+    return HOPOPT.build(options=options, **_hopopt_base())
 
 
 def _ipv6_opts_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
-    return IPv6_Opts.from_fields(options=[(code, kwargs)], **_hopopt_base())
+    return IPv6_Opts.build(options=[(code, kwargs)], **_hopopt_base())
 
 
 def _ipv6_opts_parse(octets: 'bytes') -> 'Any':
@@ -96,7 +96,7 @@ def _ipv6_opts_parse(octets: 'bytes') -> 'Any':
 
 def _ipv6_opts_rebuild(options: 'Any') -> 'Any':
     from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
-    return IPv6_Opts.from_fields(options=options, **_hopopt_base())
+    return IPv6_Opts.build(options=options, **_hopopt_base())
 
 
 def _ipv6_route_registry() -> 'Any':
@@ -120,7 +120,7 @@ def _ipv6_route_base() -> 'dict[str, Any]':
 
 def _ipv6_route_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
-    return IPv6_Route.from_fields(type=code, data=dict(kwargs), **_ipv6_route_base())
+    return IPv6_Route.build(type=code, data=dict(kwargs), **_ipv6_route_base())
 
 
 def _ipv6_route_parse(octets: 'bytes') -> 'Any':
@@ -136,8 +136,8 @@ def _ipv6_route_extract(parsed: 'Any') -> 'Any':
 
 def _ipv6_route_rebuild(info: 'Any') -> 'Any':
     from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
-    return IPv6_Route.from_fields(type=info.type, data=info, next=info.next,
-                                  seg_left=info.seg_left, payload=b'')
+    return IPv6_Route.build(type=info.type, data=info, next=info.next,
+                            seg_left=info.seg_left, payload=b'')
 
 
 #: The families this module adds.

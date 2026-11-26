@@ -168,7 +168,7 @@ class TestGRE(unittest.TestCase):
     def test_make_then_parse_base_header(self) -> None:
         from pcapkit.protocols.link.gre.protocol import GRE
 
-        made = GRE.from_fields(payload=IPV4).data
+        made = GRE.build(payload=IPV4).data
         self.assertEqual(made, _gre(0x0800, IPV4))
 
         parsed = GRE(made, len(made))
@@ -178,7 +178,7 @@ class TestGRE(unittest.TestCase):
     def test_make_then_parse_every_optional_field(self) -> None:
         from pcapkit.protocols.link.gre.protocol import GRE
 
-        made = GRE.from_fields(checksum=0xBEEF, key=0x11223344, sequence_number=99, payload=IPV4).data
+        made = GRE.build(checksum=0xBEEF, key=0x11223344, sequence_number=99, payload=IPV4).data
         self.assertEqual(made, _gre(0x0800, IPV4, checksum=0xBEEF, key=0x11223344,
                                     sequence_number=99))
 
@@ -190,7 +190,7 @@ class TestGRE(unittest.TestCase):
     def test_make_defaults(self) -> None:
         from pcapkit.protocols.link.gre.protocol import GRE
 
-        self.assertEqual(GRE.from_fields().data, _gre(0x0800, b''))
+        self.assertEqual(GRE.build().data, _gre(0x0800, b''))
 
     def test_make_infers_presence_from_the_value_given(self) -> None:
         """As :meth:`L2TPv2.make <pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.make>`
@@ -201,24 +201,24 @@ class TestGRE(unittest.TestCase):
         """
         from pcapkit.protocols.link.gre.protocol import GRE
 
-        self.assertFalse(GRE.from_fields().info.checksum_present)
-        self.assertTrue(GRE.from_fields(checksum=0).info.checksum_present)
-        self.assertTrue(GRE.from_fields(key=0).info.key_present)
-        self.assertTrue(GRE.from_fields(sequence_number=0).info.sequence_present)
+        self.assertFalse(GRE.build().info.checksum_present)
+        self.assertTrue(GRE.build(checksum=0).info.checksum_present)
+        self.assertTrue(GRE.build(key=0).info.key_present)
+        self.assertTrue(GRE.build(sequence_number=0).info.sequence_present)
 
     def test_make_rejects_reserved1_without_checksum(self) -> None:
         from pcapkit.protocols.link.gre.protocol import GRE
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
-            GRE.from_fields(reserved1=5)
+            GRE.build(reserved1=5)
 
     def test_make_rejects_reserved_bits_outside_the_mask(self) -> None:
         from pcapkit.protocols.link.gre.protocol import GRE
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
-            GRE.from_fields(reserved=0x8000)
+            GRE.build(reserved=0x8000)
 
     def test_make_rejects_what_does_not_fit(self) -> None:
         from pcapkit.protocols.link.gre.protocol import GRE
@@ -232,7 +232,7 @@ class TestGRE(unittest.TestCase):
             {'version': -1}, {'version': 8}, {'version': True},
         ):
             with self.subTest(**kwargs), self.assertRaises(ProtocolError):
-                GRE.from_fields(**kwargs)
+                GRE.build(**kwargs)
 
     def test_id_and_index(self) -> None:
         """``__index__`` is IANA protocol number 47 (#2627); LinuxSLL dispatches

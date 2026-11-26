@@ -59,12 +59,12 @@ class TestEmptyRawOption(unittest.TestCase):
             for options in ([b''], [RAW[name], b'']):
                 with self.subTest(protocol=name, options=options):
                     with self.assertRaisesRegex(ProtocolError, r"invalid option: b'' holds no type octet"):
-                        protocol.from_fields(options=options)
+                        protocol.build(options=options)
 
     def test_ipv4_raw_option_builds_as_given(self) -> None:
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
-        built = IPv4.from_fields(options=[RAW['IPv4']]).data
+        built = IPv4.build(options=[RAW['IPv4']]).data
         self.assertEqual(built[0] & 0x0F, 6)  # IHL: the 20-octet header and the option
         self.assertEqual(built[20:24], RAW['IPv4'])
 
@@ -72,10 +72,10 @@ class TestEmptyRawOption(unittest.TestCase):
         from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
         from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
-        built = HOPOPT.from_fields(options=[RAW['HOPOPT']]).data
+        built = HOPOPT.build(options=[RAW['HOPOPT']]).data
         self.assertEqual(built[1:], b'\x00' + RAW['HOPOPT'] + b'\x01\x00')
 
-        built = IPv6_Opts.from_fields(options=[RAW['IPv6_Opts']]).data
+        built = IPv6_Opts.build(options=[RAW['IPv6_Opts']]).data
         self.assertEqual(built[1:], b'\x00' + RAW['IPv6_Opts'] + b'\x01\x01\x00')
 
 

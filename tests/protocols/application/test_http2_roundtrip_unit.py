@@ -174,7 +174,7 @@ class TestHTTP2RoundTrip(unittest.TestCase):
         from pcapkit.const.http.frame import Frame
         from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
-        made = HTTPv2.from_fields(type=Frame.DATA, sid=1, frame={'padded': True, 'data': b'abc'})
+        made = HTTPv2.build(type=Frame.DATA, sid=1, frame={'padded': True, 'data': b'abc'})
         self.assertEqual(bytes(made), FRAMES['1244 DATA PADDED, Pad Length 0'])
 
     def test_make_accepts_frame_bytes(self) -> None:
@@ -195,7 +195,7 @@ class TestHTTP2RoundTrip(unittest.TestCase):
             (Frame(0xfa), 1, b'abc'),
         ):
             with self.subTest(type=frame_type):
-                made = HTTPv2.from_fields(type=frame_type, sid=sid, frame=payload)
+                made = HTTPv2.build(type=frame_type, sid=sid, frame=payload)
                 wire = len(payload).to_bytes(3, 'big') + bytes([int(frame_type), 0]) + sid.to_bytes(4, 'big') + payload
                 self.assertEqual(bytes(made), wire)
                 self.assertEqual(made.info.type, frame_type)
@@ -206,7 +206,7 @@ class TestHTTP2RoundTrip(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
-            HTTPv2.from_fields(type=Frame.PRIORITY, sid=1, frame=b'abc')
+            HTTPv2.build(type=Frame.PRIORITY, sid=1, frame=b'abc')
 
     def test_make_ping_rejects_wrong_width_opaque_data(self) -> None:
         from pcapkit.const.http.frame import Frame
@@ -216,8 +216,8 @@ class TestHTTP2RoundTrip(unittest.TestCase):
         for data in (b'abc', b'0123456789'):
             with self.subTest(data=data):
                 with self.assertRaises(ProtocolError):
-                    HTTPv2.from_fields(type=Frame.PING, sid=0, frame={'opaque_data': data})
-        self.assertEqual(bytes(HTTPv2.from_fields(type=Frame.PING, sid=0, frame={'opaque_data': b'01234567'}))[9:],
+                    HTTPv2.build(type=Frame.PING, sid=0, frame={'opaque_data': data})
+        self.assertEqual(bytes(HTTPv2.build(type=Frame.PING, sid=0, frame={'opaque_data': b'01234567'}))[9:],
                          b'01234567')
 
 
@@ -278,8 +278,8 @@ class TestHTTP2SegmentRoundTrip(unittest.TestCase):
                                         reserved=layer.info.reserved, sid=layer.info.sid,
                                         frame=layer.info, payload=schema)
                 first = layers[0].info
-                made = HTTPv2.from_fields(type=first.type, flags=first.flags.__value__, reserved=first.reserved,
-                                          sid=first.sid, frame=first, payload=schema, preface='preface' in first)
+                made = HTTPv2.build(type=first.type, flags=first.flags.__value__, reserved=first.reserved,
+                                    sid=first.sid, frame=first, payload=schema, preface='preface' in first)
                 self.assertEqual(bytes(made).hex(), wire.hex())
                 self.assertEqual(str(made.protochain), str(parsed.protochain))
                 self.assertEqual(str(HTTPv2(bytes(made), len(wire)).protochain), str(parsed.protochain))

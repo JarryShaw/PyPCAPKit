@@ -139,21 +139,21 @@ class ICMPv4ChecksumTests(ChecksumTestCase):
 
     def test_make_computes_the_checksum(self) -> None:
         body = {'id': 0x3f21, 'seq': 1, 'data': b'odd'}
-        made = self.ICMPv4.from_fields(type=self.ICMPv4Type.Echo, body=body).data
+        made = self.ICMPv4.build(type=self.ICMPv4Type.Echo, body=body).data
         self.assertEqual(made[2:4], expected(b'', made))
         icmp, messages = self.parse(made, self.ICMPv4)
         self.assertEqual((icmp.info.checksum_status, messages), (self.Status.VALID, []))
         self.assertEqual(self.ICMPv4.from_data(icmp.info).data, made)
         with mock.patch.object(self.config, 'CHECKSUM_COMPUTE', False):
-            self.assertEqual(self.ICMPv4.from_fields(type=self.ICMPv4Type.Echo, body=body).data[2:4], b'\x00\x00')
-        self.assertEqual(self.ICMPv4.from_fields(type=self.ICMPv4Type.Echo, body=body, checksum=b'\xbe\xef').data[2:4],
+            self.assertEqual(self.ICMPv4.build(type=self.ICMPv4Type.Echo, body=body).data[2:4], b'\x00\x00')
+        self.assertEqual(self.ICMPv4.build(type=self.ICMPv4Type.Echo, body=body, checksum=b'\xbe\xef').data[2:4],
                          b'\xbe\xef')
 
     @unittest.skipUnless(HAS_SCAPY, 'scapy not installed')
     def test_make_agrees_with_scapy(self) -> None:
         from scapy.layers.inet import ICMP
 
-        made = self.ICMPv4.from_fields(type=self.ICMPv4Type.Echo, body={'id': 7, 'seq': 2, 'data': b'ping'}).data
+        made = self.ICMPv4.build(type=self.ICMPv4Type.Echo, body={'id': 7, 'seq': 2, 'data': b'ping'}).data
         packet = ICMP(made)
         del packet.chksum
         self.assertEqual(bytes(packet), made)
@@ -203,10 +203,10 @@ class ICMPv6ChecksumTests(ChecksumTestCase):
 
     def make(self, **kwargs: object) -> bytes:
         """The octets of an IPv6 packet carrying an Echo Request made with ``kwargs``."""
-        icmp = self.ICMPv6.from_fields(type=self.ICMPv6Type.Echo_Request, body={'id': 7, 'seq': 2, 'data': b'odd'},
-                                       **kwargs)
-        return self.IPv6.from_fields(src='2001:db8::1', dst='2001:db8::2', next=self.TransType.IPv6_ICMP,
-                                     payload=icmp).data
+        icmp = self.ICMPv6.build(type=self.ICMPv6Type.Echo_Request, body={'id': 7, 'seq': 2, 'data': b'odd'},
+                                 **kwargs)
+        return self.IPv6.build(src='2001:db8::1', dst='2001:db8::2', next=self.TransType.IPv6_ICMP,
+                               payload=icmp).data
 
     def test_the_ipv6_layer_computes_it(self) -> None:
         made = self.make()
@@ -216,13 +216,13 @@ class ICMPv6ChecksumTests(ChecksumTestCase):
         self.assertEqual(self.IPv6.from_data(layer.info).data, made)
 
     def test_make_takes_the_pseudo_header(self) -> None:
-        pseudo = self.IP_Pseudo.from_fields(src='2001:db8::1', dst='2001:db8::2', protocol=self.TransType.IPv6_ICMP,
-                                            upper_length=0)
-        message = self.ICMPv6.from_fields(type=self.ICMPv6Type.Echo_Request, body={'id': 7, 'seq': 2, 'data': b'odd'},
-                                          pseudo=pseudo).data
+        pseudo = self.IP_Pseudo.build(src='2001:db8::1', dst='2001:db8::2', protocol=self.TransType.IPv6_ICMP,
+                                      upper_length=0)
+        message = self.ICMPv6.build(type=self.ICMPv6Type.Echo_Request, body={'id': 7, 'seq': 2, 'data': b'odd'},
+                                    pseudo=pseudo).data
         self.assertEqual(message, self.make()[40:])
         # Alone, with no pseudo-header to compute it over, it is left zero.
-        self.assertEqual(self.ICMPv6.from_fields(type=self.ICMPv6Type.Echo_Request).data[2:4], b'\x00\x00')
+        self.assertEqual(self.ICMPv6.build(type=self.ICMPv6Type.Echo_Request).data[2:4], b'\x00\x00')
 
     @unittest.skipUnless(HAS_SCAPY, 'scapy not installed')
     def test_make_agrees_with_scapy(self) -> None:

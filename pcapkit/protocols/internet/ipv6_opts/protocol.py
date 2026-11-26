@@ -384,7 +384,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         if extension:
             # NOTE: As an IPv6 extension header the upper layer belongs to the enclosing
             # IPv6 header, so hold NoPayload here so that membership does not raise (#2487).
-            self._next = NoPayload.from_fields()  # pylint: disable=attribute-defined-outside-init
+            self._next = NoPayload.build()  # pylint: disable=attribute-defined-outside-init
             return ipv6_opts
         return self._decode_next_layer(ipv6_opts, schema.next, length - ipv6_opts.length)
 

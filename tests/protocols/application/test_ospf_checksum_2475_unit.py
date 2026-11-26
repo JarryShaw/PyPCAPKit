@@ -95,14 +95,14 @@ class OSPFChecksumTests(unittest.TestCase):
     def test_cryptographic_authentication_leaves_it_unused(self) -> None:
         packet = BUILT[0][:14] + b'\x00\x02' + bytes([0, 0, 1, 16]) + bytes(4) + HELLO
         self.assertEqual(self.status(packet), (self.Status.NOT_COMPUTED, []))
-        made = self.OSPF.from_fields(type=self.Hello, router_id='192.0.2.1', auth_type=2,
-                                     auth_data={'key_id': 1, 'len': 16, 'seq': 0}, payload=HELLO).data
+        made = self.OSPF.build(type=self.Hello, router_id='192.0.2.1', auth_type=2,
+                               auth_data={'key_id': 1, 'len': 16, 'seq': 0}, payload=HELLO).data
         self.assertEqual(made[12:14], b'\x00\x00')
 
     def test_truncated_and_other_versions(self) -> None:
         self.assertEqual(self.status(BUILT[0][:-4]), (self.Status.TRUNCATED, []))
         self.assertEqual(self.status(b'\x03' + BUILT[0][1:]), (None, []))
-        self.assertEqual(self.OSPF.from_fields(version=3, payload=HELLO).data[12:14], b'\x00\x00')
+        self.assertEqual(self.OSPF.build(version=3, payload=HELLO).data[12:14], b'\x00\x00')
 
     def test_off_verifies_nothing(self) -> None:
         self.assertEqual(self.status(with_checksum(BUILT[0], b'\xb6\x95'), verify=False), (None, []))
@@ -117,7 +117,7 @@ class OSPFChecksumTests(unittest.TestCase):
     def test_make_computes_the_checksum(self) -> None:
         for packet, kwargs in zip(BUILT, ({}, {'auth_type': 1, 'auth_data': b'secret!!'})):
             with self.subTest(kwargs=kwargs):
-                made = self.OSPF.from_fields(type=self.Hello, router_id='192.0.2.1', payload=HELLO, **kwargs).data
+                made = self.OSPF.build(type=self.Hello, router_id='192.0.2.1', payload=HELLO, **kwargs).data
                 self.assertEqual(made, packet)
                 ospf, messages = self.parse(made)
                 self.assertEqual((ospf.info.checksum_status, messages), (self.Status.VALID, []))
@@ -127,15 +127,15 @@ class OSPFChecksumTests(unittest.TestCase):
     def test_make_agrees_with_scapy(self) -> None:
         from scapy.contrib.ospf import OSPF_Hdr
 
-        made = self.OSPF.from_fields(type=self.Hello, router_id='192.0.2.1', payload=HELLO).data
+        made = self.OSPF.build(type=self.Hello, router_id='192.0.2.1', payload=HELLO).data
         packet = OSPF_Hdr(made)
         del packet.chksum
         self.assertEqual(bytes(packet), made)
 
     def test_off_or_given_is_written_as_is(self) -> None:
         with mock.patch.object(self.config, 'CHECKSUM_COMPUTE', False):
-            self.assertEqual(self.OSPF.from_fields(payload=HELLO).data[12:14], b'\x00\x00')
-        self.assertEqual(self.OSPF.from_fields(checksum=b'\xbe\xef', payload=HELLO).data[12:14], b'\xbe\xef')
+            self.assertEqual(self.OSPF.build(payload=HELLO).data[12:14], b'\x00\x00')
+        self.assertEqual(self.OSPF.build(checksum=b'\xbe\xef', payload=HELLO).data[12:14], b'\xbe\xef')
 
 
 if __name__ == '__main__':

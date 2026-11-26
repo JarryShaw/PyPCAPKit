@@ -53,7 +53,7 @@ def _httpv2_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
     sid = 0 if int(code) in HTTPV2_CONNECTION_FRAMES else HTTPV2_STREAM
-    return HTTPv2.from_fields(type=code, sid=sid, frame=dict(kwargs))
+    return HTTPv2.build(type=code, sid=sid, frame=dict(kwargs))
 
 
 def _httpv2_parse(octets: 'bytes') -> 'Any':
@@ -73,7 +73,7 @@ def _httpv2_rebuild(frame: 'Any') -> 'Any':
     # frame type defines. So the raw flags octet is passed on, as
     # ``HTTP._make_data`` does, or a bit the type leaves undefined is dropped.
     # ``reserved`` is passed on for the same reason: ``make`` defaults it to 0.
-    return HTTPv2.from_fields(type=frame.type, sid=frame.sid, reserved=frame.reserved,
+    return HTTPv2.build(type=frame.type, sid=frame.sid, reserved=frame.reserved,
                 flags=frame.flags.__value__ if frame.flags is not None else 0,
                 frame=frame)
 

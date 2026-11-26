@@ -356,8 +356,8 @@ def _check_construction_keywords(cls: 'type', kwargs: 'Mapping[str, Any]', /, *,
     Args:
         cls: Protocol class being constructed.
         kwargs: Construction keywords to check: the fields
-            :meth:`Protocol.from_fields
-            <pcapkit.protocols.protocol.Protocol.from_fields>` is given, or the
+            :meth:`Protocol.build
+            <pcapkit.protocols.protocol.Protocol.build>` is given, or the
             caller's own keywords of :meth:`Protocol.from_data
             <pcapkit.protocols.protocol.Protocol.from_data>` and then those with
             :meth:`Protocol._make_data
@@ -393,7 +393,7 @@ def _check_construction_keywords(cls: 'type', kwargs: 'Mapping[str, Any]', /, *,
         return
 
     # NOTE: The check catches misspellings, so suggest the closest accepted name, e.g. ``seq_no``
-    # for ``seq``; ``from_fields`` and ``from_data`` take ``context`` too.
+    # for ``seq``; ``build`` and ``from_data`` take ``context`` too.
     candidates = declared | {'context'}
     report = []  # type: list[str]
     for key in unexpected:
@@ -421,15 +421,15 @@ def _nothing_to_parse(cls: 'type') -> 'TypeError':
         cls: Protocol class being parsed.
 
     Returns:
-        A :exc:`TypeError` naming ``cls`` and :meth:`Protocol.from_fields
-        <pcapkit.protocols.protocol.Protocol.from_fields>`, which builds one
+        A :exc:`TypeError` naming ``cls`` and :meth:`Protocol.build
+        <pcapkit.protocols.protocol.Protocol.build>`, which builds one
         instead (:issue:`2840`).
 
     .. versionadded:: 1.8.0
 
     """
     name = cls.__name__
-    return TypeError(f'{name}: nothing to parse; build one with {name}.from_fields()')
+    return TypeError(f'{name}: nothing to parse; build one with {name}.build()')
 
 
 def _fields_with_a_file(cls: 'type', fields: 'Mapping[str, Any]') -> 'TypeError':
@@ -746,7 +746,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: rather than declaring as a parameter, as :meth:`IPv6_Ext.read
     #: <pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read>` does with
     #: ``alias``. :func:`_declared_keywords` reads signatures, which miss such a
-    #: name, so the construction check of :meth:`from_fields` accepts only those
+    #: name, so the construction check of :meth:`build` accepts only those
     #: listed here, unioned over the MRO. Prefer a declared parameter, which also
     #: documents the keyword (:issue:`617`). This class lists ``__packet__``,
     #: which :meth:`pack` reads for every protocol.
@@ -962,6 +962,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     def make(self, **kwargs: 'Any') -> '_ST':
         """Make (construct) packet data.
 
+        ``make(**fields)`` builds the schema; :meth:`build` returns the protocol instance.
+
         Args:
             **kwargs: Arbitrary keyword arguments.
 
@@ -979,7 +981,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Warning:
             **Calling this method directly is not checked**, and discards an
-            undeclared keyword silently. The check lives in :meth:`from_fields`,
+            undeclared keyword silently. The check lives in :meth:`build`,
             :meth:`from_data` and a call of the class given no file, which hand
             the keywords on, so it covers ``SomeProtocol(...)`` and its
             :meth:`pack`, but not ``object.__new__(cls).make(**kwargs)``, as
@@ -1543,10 +1545,14 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         return call(file, length, layer=layer, protocol=protocol, context=context, **keywords)
 
     @classmethod
-    def from_fields(cls, *,
-                    context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
-                    **fields: 'Any') -> 'Self':
+    def build(cls, *,
+              context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+              **fields: 'Any') -> 'Self':
         """Construct a protocol instance from its fields.
+
+        ``build(**fields)`` returns the protocol instance; :meth:`make` builds its schema.
+        Unlike Scapy's ``Packet.build()``, which returns bytes, it returns an instance,
+        and :meth:`pack` is the bytes form.
 
         The fields are the keywords of :meth:`make`, and any other a hook of
         this protocol declares, as
@@ -1576,7 +1582,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         """
         klass = cls._construction_member(fields)
-        # NOTE: ``_construct``, inline, as a parse ends in ``NoPayload.from_fields()``
+        # NOTE: ``_construct``, inline, as a parse ends in ``NoPayload.build()``
         # and so would gain a frame (#1610).
         _check_construction_keywords(klass, fields)
         self = klass.__new__(klass)
@@ -1614,7 +1620,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Args:
             data: Protocol data.
-            context: Caller supplied context, as for :meth:`from_fields`.
+            context: Caller supplied context, as for :meth:`build`.
             **kwargs: Construction keywords that ``data`` does not carry, such as
                 the ``num`` and ``header`` of
                 :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`, or the
@@ -1627,7 +1633,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Raises:
             UnexpectedKeyword: If any of ``kwargs`` matches no parameter of the
-                protocol, as for :meth:`from_fields`.
+                protocol, as for :meth:`build`.
 
         Warns:
             UnknownFieldWarning: If a keyword :meth:`_make_data` returns matches
@@ -1643,7 +1649,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         if not isinstance(data, Data):
             data = cast('_PT', cls.__data__.from_dict(data))
 
-        # NOTE: The caller's own keywords are checked strictly, as for ``from_fields``;
+        # NOTE: The caller's own keywords are checked strictly, as for ``build``;
         # the rest came from ``_make_data``, so they warn, not raise.
         _check_construction_keywords(cls, kwargs)
         keywords = {**cls._make_data(data), **kwargs}
@@ -1705,7 +1711,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         """Parse a protocol instance from its octets, or construct one from its fields.
 
         Given ``file``, it parses, as :meth:`parse` does; given none, it
-        constructs, as :meth:`from_fields` does (:issue:`3081`).
+        constructs, as :meth:`build` does (:issue:`3081`).
 
         Args:
             file: Source packet stream; omitted to construct.
@@ -1740,7 +1746,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             FormatError: If ``layer`` names no layer.
             RegistryError: If ``protocol`` is no protocol name, class or instance.
             UnexpectedKeyword: Given no ``file``, if a field is none this
-                protocol declares, as for :meth:`from_fields`. A ``file=`` or
+                protocol declares, as for :meth:`build`. A ``file=`` or
                 ``length=`` keyword is such a field, never the positional
                 parameter of its name (:issue:`3081`).
 
@@ -1762,7 +1768,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
            ``protocol`` and ``context`` keyword-only. A parse refuses any other
            keyword, ``_layer``, ``_protocol``, ``__context__``, ``packet`` and
            ``__packet__`` included, and a construction checks its fields as
-           :meth:`from_fields` does. ``'none'`` and ``'null'`` no longer mean no
+           :meth:`build` does. ``'none'`` and ``'null'`` no longer mean no
            stop (:issue:`2840`, :issue:`3081`).
 
         """
@@ -2121,7 +2127,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         .. versionchanged:: 1.8.0
 
-           ``packet`` is left out unless declared, since :meth:`from_fields`
+           ``packet`` is left out unless declared, since :meth:`build`
            refuses it then (:issue:`2840`).
 
         """
@@ -2178,7 +2184,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
     @classmethod
     def _construction_member(cls, fields: 'dict[str, Any]') -> 'Type[Self]':  # pylint: disable=unused-argument
-        """The class :meth:`from_fields`, :meth:`from_data` and a call given no file construct.
+        """The class :meth:`build`, :meth:`from_data` and a call given no file construct.
 
         A versioned family's base overrides it to pick its member, taking out of
         ``fields`` a ``version`` that only names the member
@@ -2201,7 +2207,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                      fields: 'dict[str, Any]') -> 'dict[str, Any]':
         """The fields a call of this class given no file constructs from.
 
-        ``layer`` and ``protocol`` are fields where :meth:`from_fields` takes one of
+        ``layer`` and ``protocol`` are fields where :meth:`build` takes one of
         that name, as it does ``protocol`` on
         :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`, and stops
         otherwise, which a construction does not take (:issue:`2840`).
@@ -2241,7 +2247,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                    fields: 'dict[str, Any]') -> 'None':
         """Construct this instance from its fields.
 
-        :meth:`__init__` given no file calls it, and :meth:`from_fields` runs its
+        :meth:`__init__` given no file calls it, and :meth:`build` runs its
         steps inline, so a construction checks its fields the same way either way
         (:issue:`3081`).
 
@@ -2268,7 +2274,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                     ) -> 'None':
         """Set the stops, the context and the termination flag of this instance.
 
-        :meth:`_start_parse`, :meth:`_construct`, :meth:`from_fields` and
+        :meth:`_start_parse`, :meth:`_construct`, :meth:`build` and
         :meth:`from_data` each call it, and :meth:`__post_init__` is called after
         it rather than from it, so it adds no frame to a parse, which dissects its
         next layer from inside its own (:issue:`1610`).
@@ -3189,7 +3195,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 or name is None or name not in data):
             from pcapkit.protocols.misc.no_payload.protocol import \
                 NoPayload  # pylint: disable=import-outside-toplevel
-            return NoPayload.from_fields()
+            return NoPayload.build()
 
         token, rebuilt = frame_depth.set(frame_depth.get() + 1), rebuilding.set(True)
         try:

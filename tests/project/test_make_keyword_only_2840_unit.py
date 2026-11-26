@@ -2,7 +2,7 @@
 """Every ``make()`` takes its fields as keywords only (GitHub issue #2840).
 
 The owner took the plan on #2840 that splits parsing from construction:
-construction is ``Proto.from_fields(**fields)``, and each ``make()`` override takes
+construction is ``Proto.build(**fields)``, and each ``make()`` override takes
 its fields after a bare ``*`` and ends in ``**kwargs``, so adding a field moves no
 other and a positional call fails rather than filling the wrong field.
 

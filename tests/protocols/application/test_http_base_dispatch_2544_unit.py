@@ -114,11 +114,11 @@ class HTTPBaseDispatchTests(unittest.TestCase):
             with self.subTest(fields=label):
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore')
-                    layer = HTTP.from_fields(**fields)
-                    direct = klass.from_fields(**{key: val for key, val in fields.items() if key != 'version'})
+                    layer = HTTP.build(**fields)
+                    direct = klass.build(**{key: val for key, val in fields.items() if key != 'version'})
                 self.assertIs(type(layer), klass)
                 self.assertEqual(layer.data, direct.data)
-        self.assertTrue(HTTP.from_fields(version=2, preface=True, type=Frame.SETTINGS).data.startswith(_PREFACE))
+        self.assertTrue(HTTP.build(version=2, preface=True, type=Frame.SETTINGS).data.startswith(_PREFACE))
 
     def test_a_false_preface_is_the_default(self) -> None:
         """``preface=False`` builds what leaving it out builds, for either version."""
@@ -127,9 +127,9 @@ class HTTPBaseDispatchTests(unittest.TestCase):
         HTTP, HTTPv1, HTTPv2 = self.classes()
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            with_false = HTTP.from_fields(version=1, method='GET', uri='/', preface=False)
-            without = HTTP.from_fields(version=1, method='GET', uri='/')
-            frame = HTTP.from_fields(version=2, type=Frame.DATA, sid=1, preface=False)
+            with_false = HTTP.build(version=1, method='GET', uri='/', preface=False)
+            without = HTTP.build(version=1, method='GET', uri='/')
+            frame = HTTP.build(version=2, type=Frame.DATA, sid=1, preface=False)
         self.assertIs(type(with_false), HTTPv1)
         self.assertEqual(with_false.data, without.data)
         self.assertIs(type(frame), HTTPv2)
@@ -146,7 +146,7 @@ class HTTPBaseDispatchTests(unittest.TestCase):
                                 ({'version': 3}, 'invalid version')):
             with self.subTest(fields=fields):
                 with self.assertRaisesRegex(ProtocolError, message):
-                    HTTP.from_fields(**fields)
+                    HTTP.build(**fields)
 
     def test_from_data_on_the_base_gives_the_member(self) -> None:
         """A data model rebuilds through the base, a :obj:`dict` through its member."""
@@ -180,7 +180,7 @@ class HTTPBaseDispatchTests(unittest.TestCase):
             with self.subTest(fields=fields):
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore')
-                    made = HTTP.from_fields(**fields)
+                    made = HTTP.build(**fields)
                     parsed = HTTP(made.data)
                 self.assertIs(type(parsed), type(made))
                 self.assertEqual(parsed.data, made.data)

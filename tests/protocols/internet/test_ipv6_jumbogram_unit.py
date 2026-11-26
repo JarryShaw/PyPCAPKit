@@ -148,7 +148,7 @@ class TestIPv6Jumbogram(unittest.TestCase):
         from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         body = hbh(59, 8 + 70000) + bytes(70000)
-        proto = IPv6.from_fields(next=0, payload=body, trailer=b'\xee\xee')
+        proto = IPv6.build(next=0, payload=body, trailer=b'\xee\xee')
         self.assertEqual(proto.data[4:6], b'\x00\x00')
         self.assertEqual(proto.data[40:], body + b'\xee\xee')
 
@@ -203,7 +203,7 @@ class TestMakeJumbogram(unittest.TestCase):
         body = hbh(6, 70000) + TCP
         for label, payload in (('bytes', body), ('protocol', HOPOPT(body)), ('schema', HOPOPT(body).schema)):
             with self.subTest(payload=label):
-                proto = IPv6.from_fields(next=0, src='::1', dst='::2', payload=payload)
+                proto = IPv6.build(next=0, src='::1', dst='::2', payload=payload)
                 self.assertEqual(proto.data, ipv6(0, 0, body))
                 self.assertEqual(str(proto.protochain), 'IPv6:HOPOPT:TCP')
                 self.assertEqual((proto.info.payload, proto.info.raw_len), (0, 70000 - 8))
@@ -226,7 +226,7 @@ class TestMakeJumbogram(unittest.TestCase):
         ):
             with self.subTest(case=label):
                 with self.assertRaises(ProtocolError) as caught:
-                    IPv6.from_fields(next=0, **kwargs)
+                    IPv6.build(next=0, **kwargs)
                 self.assertEqual(str(caught.exception), f'IPv6: {message}')
 
     def test_no_leading_jumbo_payload_option_keeps_the_payload_length(self) -> None:
@@ -239,7 +239,7 @@ class TestMakeJumbogram(unittest.TestCase):
              bytes([0, 0, 1, 4, 0, 0, 0, 0]) + hbh(6, 70000) + TCP),
         ):
             with self.subTest(case=label):
-                proto = IPv6.from_fields(next=nxt, src='::1', dst='::2', payload=body)
+                proto = IPv6.build(next=nxt, src='::1', dst='::2', payload=body)
                 self.assertEqual(proto.data, ipv6(len(body), nxt, body))
                 self.assertEqual(IPv6.from_data(proto.info).data, proto.data)
 
@@ -249,12 +249,12 @@ class TestMakeJumbogram(unittest.TestCase):
         from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
-        hop = HOPOPT.from_fields(next=6, options=[(Option.Jumbo_Payload, {'len': 8 + len(TCP)})], payload=TCP)
+        hop = HOPOPT.build(next=6, options=[(Option.Jumbo_Payload, {'len': 8 + len(TCP)})], payload=TCP)
         self.assertEqual(hop.data, hbh(6, 8 + len(TCP)) + TCP)
         self.assertEqual(str(hop.protochain), 'HOPOPT:TCP')
         self.assertEqual(HOPOPT.from_data(hop.info).data, hop.data)
 
-        proto = IPv4.from_fields(protocol=0, payload=hop)
+        proto = IPv4.build(protocol=0, payload=hop)
         self.assertEqual(proto.data[2:4], (20 + len(hop.data)).to_bytes(2, 'big'))
         self.assertEqual(proto.data[20:], hop.data)
         self.assertEqual(str(proto.protochain), 'IPv4:HOPOPT:TCP')

@@ -181,12 +181,12 @@ class TestPPPoE(unittest.TestCase):
         from pcapkit.protocols.link.ppp.protocol import PPP
         from pcapkit.protocols.link.pppoe.protocol import PPPoE
 
-        padi = PPPoE.from_fields(code=Code.PADI_Initiation, tags=[(Tag.Service_Name, b''),
-                                                                  {'type': 0x0103, 'value': b'\xde\xad\xbe\xef'}])
+        padi = PPPoE.build(code=Code.PADI_Initiation, tags=[(Tag.Service_Name, b''),
+                                                            {'type': 0x0103, 'value': b'\xde\xad\xbe\xef'}])
         self.assertEqual(padi.data, PADI)
-        session = PPPoE.from_fields(session_id=0x1234, payload=PPP.from_fields(acfc=True, payload=IPV4))
+        session = PPPoE.build(session_id=0x1234, payload=PPP.build(acfc=True, payload=IPV4))
         self.assertEqual(session.data, SESSION)
-        padt = PPPoE.from_fields(code=0xA7, session_id=0x1234)
+        padt = PPPoE.build(code=0xA7, session_id=0x1234)
         self.assertEqual(padt.data, bytes.fromhex('11a712340000'))
         for made in (padi, session, padt):
             with self.subTest(code=made.info.code):
@@ -219,7 +219,7 @@ class TestPPPoE(unittest.TestCase):
         )
         for kwargs, message in cases:
             with self.subTest(kwargs=kwargs), self.assertRaisesRegex(ProtocolError, message):
-                PPPoE.from_fields(**kwargs)
+                PPPoE.build(**kwargs)
 
     ##########################################################################
     # Bindings.

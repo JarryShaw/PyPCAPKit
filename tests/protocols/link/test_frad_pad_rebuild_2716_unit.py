@@ -154,7 +154,7 @@ class FRADPadRebuildTests(unittest.TestCase):
         }
         for label, (kwargs, octets) in cases.items():
             with self.subTest(case=label):
-                made, messages = self.parse(lambda: self.FRAD.from_fields(dlci=50, **kwargs))  # pylint: disable=cell-var-from-loop
+                made, messages = self.parse(lambda: self.FRAD.build(dlci=50, **kwargs))  # pylint: disable=cell-var-from-loop
                 self.assertEqual((made.data.hex(), messages), (octets, []))
 
     def test_make_takes_the_pad(self) -> None:
@@ -167,7 +167,7 @@ class FRADPadRebuildTests(unittest.TestCase):
         }
         for label, (kwargs, octets) in cases.items():
             with self.subTest(case=label):
-                made, messages = self.parse(lambda: self.FRAD.from_fields(dlci=50, **kwargs))  # pylint: disable=cell-var-from-loop
+                made, messages = self.parse(lambda: self.FRAD.build(dlci=50, **kwargs))  # pylint: disable=cell-var-from-loop
                 self.assertEqual((made.data.hex(), messages), (octets, []))
                 self.assertIs(self.FRAD(made.data, len(made.data)).info.pad, kwargs['pad'])
 
@@ -176,7 +176,7 @@ class FRADPadRebuildTests(unittest.TestCase):
 
         with CaughtByCaller(self.ProtocolError), self.assertRaisesRegex(
                 self.ProtocolError, r'^FRAD: an nlpid of 0 reads as the pad, so pad cannot be False$'):
-            self.FRAD.from_fields(nlpid=0, pad=False)
+            self.FRAD.build(nlpid=0, pad=False)
 
 
 if __name__ == '__main__':

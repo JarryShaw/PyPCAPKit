@@ -275,7 +275,7 @@ class MLDRoundTripTests(unittest.TestCase):
             with self.subTest(message=name), warnings.catch_warnings():
                 warnings.simplefilter('ignore')
                 parsed = ICMPv6(io.BytesIO(packet), len(packet))
-                made = ICMPv6.from_fields(type=parsed.info.type, code=0, checksum=b'\xab\xcd', body=parsed.info)
+                made = ICMPv6.build(type=parsed.info.type, code=0, checksum=b'\xab\xcd', body=parsed.info)
                 self.assertEqual(bytes(made), packet)
 
 
@@ -290,12 +290,12 @@ class MLDMakeTests(unittest.TestCase):
 
         return bytes(object.__new__(ICMPv6).make(type=type_, checksum=b'\xab\xcd', body=body))
 
-    def test_mldv2_query_from_fields(self) -> None:
+    def test_mldv2_query_from_its_fields(self) -> None:
         packet = self.make(130, version=2, max_resp_delay=35096, multicast_address='ff02::1:3',
                            s_flag=True, qrv=2, qqi=125, sources=['2001:db8::1', '2001:db8::2'])
         self.assertEqual(packet.hex(), MLDV2_QUERY.hex())
 
-    def test_mldv1_messages_from_fields(self) -> None:
+    def test_mldv1_messages_from_their_fields(self) -> None:
         self.assertEqual(self.make(130, version=1, max_resp_delay=1000, multicast_address='ff02::1:3'),
                          MLDV1_QUERY)
         # Three octets past the 24 still read as MLDv1; four would not.
@@ -304,7 +304,7 @@ class MLDMakeTests(unittest.TestCase):
         self.assertEqual(self.make(131, multicast_address='ff02::1:3'), MLDV1_REPORT)
         self.assertEqual(self.make(132, multicast_address='ff02::1:3'), MLDV1_DONE)
 
-    def test_mldv2_report_from_fields(self) -> None:
+    def test_mldv2_report_from_its_fields(self) -> None:
         from pcapkit.const.igmp.record_type import RecordType
 
         packet = self.make(143, flags=0x8000, data=b'tail', records=[

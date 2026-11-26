@@ -144,11 +144,11 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         from pcapkit.foundation.engines.pcapng import Context
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        section = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
+        section = PCAPNG.build(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
         context = Context(section.info)  # type: Any
-        interface = PCAPNG.from_fields(num=1, sct=1, ctx=context,
-                                       type=BlockType.Interface_Description_Block,
-                                       block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
+        interface = PCAPNG.build(num=1, sct=1, ctx=context,
+                                 type=BlockType.Interface_Description_Block,
+                                 block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
         context.interfaces.append(interface.info)
         return context
 
@@ -160,10 +160,10 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
-            PCAPNG.from_fields(num=2, sct=1, ctx=self._context(),
-                               type=BlockType.Interface_Statistics_Block,
-                               block={'interface_id': 0, 'timestamp': 0,
-                                      'options': [(OptionType.if_name, {'name': 'eth0'})]})
+            PCAPNG.build(num=2, sct=1, ctx=self._context(),
+                         type=BlockType.Interface_Statistics_Block,
+                         block={'interface_id': 0, 'timestamp': 0,
+                                'options': [(OptionType.if_name, {'name': 'eth0'})]})
         self.assertEqual(str(ctx.exception),
                          'PCAP-NG: [if_name] option must be in Interface Description '
                          'Block, not Interface_Statistics_Block')
@@ -185,10 +185,10 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         PCAPNG._make_option_if_name = spy  # type: ignore[method-assign]
         try:
             with self.assertRaises(ProtocolError):
-                PCAPNG.from_fields(num=2, sct=1, ctx=self._context(),
-                                   type=BlockType.Interface_Statistics_Block,
-                                   block={'interface_id': 0, 'timestamp': 0,
-                                          'options': [(OptionType.if_name, {'name': 'eth0'})]})
+                PCAPNG.build(num=2, sct=1, ctx=self._context(),
+                             type=BlockType.Interface_Statistics_Block,
+                             block={'interface_id': 0, 'timestamp': 0,
+                                    'options': [(OptionType.if_name, {'name': 'eth0'})]})
         finally:
             PCAPNG._make_option_if_name = original  # type: ignore[method-assign]
 
@@ -239,11 +239,11 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
-            PCAPNG.from_fields(num=2, sct=1, ctx=self._context(),
-                               type=BlockType.Interface_Description_Block,
-                               block={'linktype': 1, 'snaplen': 65535,
-                                      'options': [(OptionType.if_name, {'name': 'eth0'}),
-                                                  (OptionType.if_name, {'name': 'eth1'})]})
+            PCAPNG.build(num=2, sct=1, ctx=self._context(),
+                         type=BlockType.Interface_Description_Block,
+                         block={'linktype': 1, 'snaplen': 65535,
+                                'options': [(OptionType.if_name, {'name': 'eth0'}),
+                                            (OptionType.if_name, {'name': 'eth1'})]})
         self.assertEqual(str(ctx.exception),
                          'PCAP-NG: [if_name] option must be only one, not 2')
 
@@ -255,10 +255,10 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
-            PCAPNG.from_fields(num=2, sct=1, ctx=self._context(),
-                               type=BlockType.Interface_Description_Block,
-                               block={'linktype': 1, 'snaplen': 65535,
-                                      'options': [(OptionType.if_tsresol, {'resolution': 3})]})
+            PCAPNG.build(num=2, sct=1, ctx=self._context(),
+                         type=BlockType.Interface_Description_Block,
+                         block={'linktype': 1, 'snaplen': 65535,
+                                'options': [(OptionType.if_tsresol, {'resolution': 3})]})
         self.assertEqual(str(ctx.exception),
                          'PCAP-NG: [if_tsresol] option resolution must be power '
                          'of 10 or 2, not 3')
@@ -271,10 +271,10 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
-            PCAPNG.from_fields(num=2, sct=1, ctx=self._context(),
-                               type=BlockType.Interface_Description_Block,
-                               block={'linktype': 1, 'snaplen': 65535,
-                                      'options': [(OptionType.if_tzone, {'tzone': 'UTC'})]})
+            PCAPNG.build(num=2, sct=1, ctx=self._context(),
+                         type=BlockType.Interface_Description_Block,
+                         block={'linktype': 1, 'snaplen': 65535,
+                                'options': [(OptionType.if_tzone, {'tzone': 'UTC'})]})
         self.assertEqual(str(ctx.exception),
                          'PCAP-NG: [if_tzone] option timezone must be int, '
                          'timedelta or timezone, not str')

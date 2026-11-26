@@ -504,7 +504,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         if extension:
             # NOTE: As an IPv6 extension header the upper layer belongs to the enclosing
             # IPv6 header, so hold NoPayload here so that membership does not raise (#2487).
-            self._next = NoPayload.from_fields()  # pylint: disable=attribute-defined-outside-init
+            self._next = NoPayload.build()  # pylint: disable=attribute-defined-outside-init
             return cast('_PT', generic_ext)
         return self._decode_next_layer(cast('_PT', generic_ext), next_header, length - ext_len,
                                        payload=rest[max(ext_len - 2, 0):])
@@ -542,7 +542,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             construction methods of every class in the MRO, plus any
             ``__keywords__``. Hiding them in ``**kwargs`` **breaks
             construction**: a plain
-            ``IPv6_Ext.from_fields(next=..., len=..., data=..., payload=...)``
+            ``IPv6_Ext.build(next=..., len=..., data=..., payload=...)``
             raises ``UnexpectedKeyword: IPv6_Ext: unexpected keyword(s)``. The
             ``__keywords__`` escape hatch would cover that too, but a set
             there is unioned down the MRO, so every subclass would accept

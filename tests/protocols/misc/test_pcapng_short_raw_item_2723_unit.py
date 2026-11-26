@@ -59,13 +59,13 @@ class TestPCAPNGShortRawItem(unittest.TestCase):
         from pcapkit.foundation.engines.pcapng import Context
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        section = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block,
-                                     block={'byteorder': order})
+        section = PCAPNG.build(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block,
+                               block={'byteorder': order})
         context = Context(section.info)  # type: Any
-        interface = PCAPNG.from_fields(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
-                                       block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
+        interface = PCAPNG.build(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
+                                 block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
         context.interfaces.append(interface.info)
-        return PCAPNG.from_fields(num=2, sct=1, ctx=context, type=BlockType[name], block=block).data
+        return PCAPNG.build(num=2, sct=1, ctx=context, type=BlockType[name], block=block).data
 
     def test_short_option_is_refused(self) -> None:
         from pcapkit.const.pcapng.option_type import OptionType

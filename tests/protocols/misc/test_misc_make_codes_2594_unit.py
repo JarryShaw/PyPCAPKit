@@ -103,10 +103,10 @@ class MiscMakeCodeTests(unittest.TestCase):
         from pcapkit.foundation.engines.pcapng import Context
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        section = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
+        section = PCAPNG.build(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
         context = Context(section.info)  # type: Any
-        interface = PCAPNG.from_fields(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
-                                       block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
+        interface = PCAPNG.build(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
+                                 block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
         context.interfaces.append(interface.info)
         return context
 
@@ -117,7 +117,7 @@ class MiscMakeCodeTests(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')  # the Packet Block is obsolete
-            return PCAPNG.from_fields(num=2, sct=1, ctx=self._context(), type=BlockType[name], block=block).data
+            return PCAPNG.build(num=2, sct=1, ctx=self._context(), type=BlockType[name], block=block).data
 
     def _option(self, name: 'str', option: 'str', args: 'dict[str, Any]') -> 'bytes':
         """The octets of the block named ``name`` carrying the option ``option`` made from ``args``."""
@@ -137,7 +137,7 @@ class MiscMakeCodeTests(unittest.TestCase):
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         builders = {
-            'PCAPNG.make': lambda value: PCAPNG.from_fields(num=0, sct=1, ctx=None, type=value, block={}).data,
+            'PCAPNG.make': lambda value: PCAPNG.build(num=0, sct=1, ctx=None, type=value, block={}).data,
             'PCAPNG._make_block_idb': lambda value: self._block(
                 'Interface_Description_Block', {'linktype': value, 'snaplen': 0x40000}),
             'PCAPNG._make_block_dsb': lambda value: self._block(
@@ -155,9 +155,9 @@ class MiscMakeCodeTests(unittest.TestCase):
                 'Packet_Block', 'pack_flags', {field: value}),
             'PCAPNG._make_option_pack_hash': lambda value: self._option(
                 'Packet_Block', 'pack_hash', {'algorithm': value, 'hash': b'\x01\x02\x03\x04'}),
-            'Header.make': lambda value: Header.from_fields(network=value, byteorder='little').data,
-            'IP_Pseudo.make': lambda value: IP_Pseudo.from_fields(src='10.0.0.1', dst='10.0.0.2', protocol=value,
-                                                                  upper_length=0).data,
+            'Header.make': lambda value: Header.build(network=value, byteorder='little').data,
+            'IP_Pseudo.make': lambda value: IP_Pseudo.build(src='10.0.0.1', dst='10.0.0.2', protocol=value,
+                                                            upper_length=0).data,
             'PCAPNG._make_pcapng_options': lambda value: self._block(
                 'Interface_Description_Block',
                 {'linktype': 1, 'snaplen': 0x40000, 'options': [(value, {'comment': 'eth0'})]}),
@@ -218,7 +218,7 @@ class MiscMakeCodeTests(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             BlockType.get(0x100)
-        octets = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=0x100, block={'data': b'ab'}).data
+        octets = PCAPNG.build(num=0, sct=1, ctx=None, type=0x100, block={'data': b'ab'}).data
         self.assertEqual(octets.hex(), '00010000100000006162000010000000')
         parsed = PCAPNG(octets, len(octets), num=0, sct=1, ctx=None)
         self.assertEqual(PCAPNG.from_data(parsed.info, num=0, sct=1, ctx=None).data.hex(), octets.hex())

@@ -39,8 +39,8 @@ class TestSMFDPDEmptyHAV(unittest.TestCase):
         for name, cls in _classes().items():
             with self.subTest(proto=name):
                 with self.assertRaisesRegex(ProtocolError, r'\[OptNo 8\] empty Hash Assist Value'):
-                    cls.from_fields(options=[(Option.SMF_DPD, {'mode': SMFDPDMode.H_DPD, 'hav': b''})],
-                                    next=TransType.IPv6_NoNxt, payload=b'')
+                    cls.build(options=[(Option.SMF_DPD, {'mode': SMFDPDMode.H_DPD, 'hav': b''})],
+                              next=TransType.IPv6_NoNxt, payload=b'')
 
     def test_one_octet_hav_still_builds(self) -> None:
         from pcapkit.const.ipv6.option import Option
@@ -49,8 +49,8 @@ class TestSMFDPDEmptyHAV(unittest.TestCase):
 
         for name, cls in _classes().items():
             with self.subTest(proto=name):
-                built = cls.from_fields(options=[(Option.SMF_DPD, {'mode': SMFDPDMode.H_DPD, 'hav': b'\x01'})],
-                                        next=TransType.IPv6_NoNxt, payload=b'')
+                built = cls.build(options=[(Option.SMF_DPD, {'mode': SMFDPDMode.H_DPD, 'hav': b'\x01'})],
+                                  next=TransType.IPv6_NoNxt, payload=b'')
                 # SMF_DPD, length 1, HAV 0x01 with the H-DPD bit set, then PadN.
                 self.assertEqual(built.data, bytes.fromhex('3b00080181010100'))
 

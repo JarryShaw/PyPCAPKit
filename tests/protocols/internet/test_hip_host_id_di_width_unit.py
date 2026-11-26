@@ -106,8 +106,8 @@ class HIPHostIDDIWidthTests(unittest.TestCase):
 
         options = {'hi_curve': ECDSACurve.NIST_P_256, 'hi_pub_key': PUB_KEY,
                    'di': DI, 'di_type': DITypes.FQDN}
-        built = HIP.from_fields(parameters=[(Parameter.HOST_ID, options)],
-                                extension=True, version=2, **HIP_BASE).data
+        built = HIP.build(parameters=[(Parameter.HOST_ID, options)],
+                          extension=True, version=2, **HIP_BASE).data
         self.assertEqual(built[40:], rfc_host_id())
 
         parsed = HIP(built, len(built), extension=True)
@@ -117,8 +117,8 @@ class HIPHostIDDIWidthTests(unittest.TestCase):
         self.assertEqual(param.di_len, len(DI))
         self.assertEqual(param.di, DI)
 
-        again = HIP.from_fields(parameters=parsed.info.parameters, extension=True,
-                                version=2, **HIP_BASE).data
+        again = HIP.build(parameters=parsed.info.parameters, extension=True,
+                          version=2, **HIP_BASE).data
         self.assertEqual(again, built)
 
 

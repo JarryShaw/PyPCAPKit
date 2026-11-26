@@ -42,9 +42,9 @@ class TestIPv6ExtHeaderRebuild(unittest.TestCase):
         from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         klass = getattr(importlib.import_module(f'pcapkit.protocols.internet.{mod}.protocol'), cls)
-        header = klass.from_fields(next=17, payload=b'').data
-        ipv6 = IPv6(IPv6.from_fields(next=code, src='2001:db8::1', dst='2001:db8::2',
-                                     payload=header + upper).data)
+        header = klass.build(next=17, payload=b'').data
+        ipv6 = IPv6(IPv6.build(next=code, src='2001:db8::1', dst='2001:db8::2',
+                               payload=header + upper).data)
         ext = next(iter(ipv6.extension_headers.values()))
         self.assertIs(type(ext), klass)
         return header, ext, ipv6
@@ -52,7 +52,7 @@ class TestIPv6ExtHeaderRebuild(unittest.TestCase):
     def test_extension_header_rebuilds_from_info(self) -> None:
         from pcapkit.protocols.transport.udp.protocol import UDP
 
-        upper = UDP.from_fields(srcport=1, dstport=2, payload=b'hello world!').data
+        upper = UDP.build(srcport=1, dstport=2, payload=b'hello world!').data
         for mod, cls, code in EXTENSIONS:
             with self.subTest(header=cls):
                 header, ext, _ = self._parse(mod, cls, code, upper)
@@ -64,7 +64,7 @@ class TestIPv6ExtHeaderRebuild(unittest.TestCase):
         from pcapkit.protocols.internet.ipv6.protocol import IPv6
         from pcapkit.protocols.transport.udp.protocol import UDP
 
-        upper = UDP.from_fields(srcport=1, dstport=2, payload=b'hello world!').data
+        upper = UDP.build(srcport=1, dstport=2, payload=b'hello world!').data
         for mod, cls, code in EXTENSIONS:
             with self.subTest(header=cls):
                 _, _, ipv6 = self._parse(mod, cls, code, upper)
@@ -76,9 +76,9 @@ class TestIPv6ExtHeaderRebuild(unittest.TestCase):
         from pcapkit.protocols.internet.ipv6.protocol import IPv6
         from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
 
-        header = IPv6_Frag.from_fields(next=17, offset=181, id=0x1234).data
-        ipv6 = IPv6(IPv6.from_fields(next=44, src='2001:db8::1', dst='2001:db8::2',
-                                     payload=header + bytes(range(256)) * 2).data)
+        header = IPv6_Frag.build(next=17, offset=181, id=0x1234).data
+        ipv6 = IPv6(IPv6.build(next=44, src='2001:db8::1', dst='2001:db8::2',
+                               payload=header + bytes(range(256)) * 2).data)
         ext = ipv6.extension_headers.get(44)
         self.assertEqual(ext.data, header)
         self.assertEqual(IPv6_Frag.from_data(ext.info).data, header)
@@ -89,8 +89,8 @@ class TestIPv6ExtHeaderRebuild(unittest.TestCase):
         from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
         from pcapkit.protocols.transport.udp.protocol import UDP
 
-        upper = UDP.from_fields(srcport=1, dstport=2, payload=b'hello world!').data
-        packet = HOPOPT.from_fields(next=17, payload=upper).data
+        upper = UDP.build(srcport=1, dstport=2, payload=b'hello world!').data
+        packet = HOPOPT.build(next=17, payload=upper).data
         hop = HOPOPT(packet)
         self.assertEqual(hop.data, packet)
         self.assertEqual(HOPOPT.from_data(hop.info).data, packet)

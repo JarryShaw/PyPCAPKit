@@ -46,8 +46,8 @@ class HIPv2OnlyParameterTests(unittest.TestCase):
     def _build(self, code: 'object', kwargs: 'dict[str, object]', version: 'int') -> 'bytes':
         from pcapkit.protocols.internet.hip.protocol import HIP
 
-        return HIP.from_fields(parameters=[(code, kwargs)], extension=True,
-                               version=version, **HIP_BASE).data
+        return HIP.build(parameters=[(code, kwargs)], extension=True,
+                         version=version, **HIP_BASE).data
 
     def test_building_at_version_1_raises(self) -> None:
         from pcapkit.utilities.exceptions import ProtocolError

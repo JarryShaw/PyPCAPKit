@@ -76,7 +76,7 @@ class TestExtensionModeRebuild(unittest.TestCase):
     def _header(klass: 'Any') -> bytes:
         """A whole header of ``klass``, followed by No Next Header."""
         extra = {'data': bytes(6)} if klass.__name__ == 'IPv6_Ext' else {}
-        return klass.from_fields(next=59, **extra).data
+        return klass.build(next=59, **extra).data
 
     def _assert_rebuilds(self, klass: 'Any', info: 'Any', data: bytes) -> None:
         """``klass`` rebuilds ``info`` and ``data`` from ``info`` and its dict alike.
@@ -115,7 +115,7 @@ class TestExtensionModeRebuild(unittest.TestCase):
             with self.subTest(header=name):
                 klass = family[name]
                 header = self._header(klass)
-                built = IPv6.from_fields(next=code, src='2001:db8::1', dst='2001:db8::2', payload=header)
+                built = IPv6.build(next=code, src='2001:db8::1', dst='2001:db8::2', payload=header)
                 ((proto, info),) = IPv6(built.data).info['__exthdr__']
                 self.assertIs(proto, klass)
                 self._assert_rebuilds(klass, info, header)
@@ -155,9 +155,9 @@ class TestExtensionModeRebuild(unittest.TestCase):
             with self.subTest(header=name):
                 with warnings.catch_warnings():
                     warnings.simplefilter('error', UnknownFieldWarning)
-                    built = klass.from_fields(next=59, alias=CODES['IPv6_Ext'])
+                    built = klass.build(next=59, alias=CODES['IPv6_Ext'])
                 self.assertEqual(built.data, self._header(klass))
-                self.assertEqual(built.info, klass.from_fields(next=59).info)
+                self.assertEqual(built.info, klass.build(next=59).info)
 
 
 if __name__ == '__main__':

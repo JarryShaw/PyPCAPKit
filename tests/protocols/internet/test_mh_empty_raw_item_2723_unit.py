@@ -49,8 +49,8 @@ def _build(options: 'list[Any]') -> 'bytes':
     from pcapkit.const.mh.packet import Packet
     from pcapkit.protocols.internet.mh.protocol import MH
 
-    return MH.from_fields(type=Packet.Binding_Refresh_Request, next=59, checksum=b'\x00\x00',
-                          data={'options': options}).data
+    return MH.build(type=Packet.Binding_Refresh_Request, next=59, checksum=b'\x00\x00',
+                    data={'options': options}).data
 
 
 def _lists() -> 'list[tuple[str, Any, str, str]]':
@@ -97,7 +97,7 @@ class TestMHEmptyRawItem(unittest.TestCase):
         for options in ([b''], [PADN, b''], [b'', PADN]):
             with self.subTest(options=options):
                 with self.assertRaisesRegex(ProtocolError, r"invalid option: b'' holds no type octet"):
-                    MH.from_fields(data={'options': options})
+                    MH.build(data={'options': options})
 
     def test_empty_sub_item_is_refused(self) -> None:
         from pcapkit.utilities.exceptions import ProtocolError

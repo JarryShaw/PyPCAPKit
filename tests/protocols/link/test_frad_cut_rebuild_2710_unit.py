@@ -138,7 +138,7 @@ class FRADCutRebuildTests(unittest.TestCase):
                 self.assertEqual((layer.info.nlpid, layer.info.len), (0, 5))
 
     def test_make_writes_the_pad_and_a_zero_nlpid(self) -> None:
-        made, messages = self.parse(lambda: self.FRAD.from_fields(dlci=50, nlpid=0))
+        made, messages = self.parse(lambda: self.FRAD.build(dlci=50, nlpid=0))
         self.assertEqual((made.data.hex(), messages), ('0c21030000', []))
 
     def test_another_address_form_is_refused(self) -> None:

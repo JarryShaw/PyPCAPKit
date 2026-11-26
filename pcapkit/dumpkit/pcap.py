@@ -209,7 +209,7 @@ class PCAPIO(DumperBase):
             **kwargs: arbitrary keyword arguments
 
         """
-        header = Header.from_fields(
+        header = Header.build(
             # NOTE: Header.make takes a member or a code (#2594); this method's
             # protocol also takes a name, so it is resolved here.
             network=Header.resolve_index(protocol, namespace=Enum_LinkType),

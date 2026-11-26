@@ -48,15 +48,15 @@ class TestHIPFromDataAlias(unittest.TestCase):
     def _octets(self, version: 'int') -> 'bytes':
         from pcapkit.protocols.internet.hip.protocol import HIP
 
-        return HIP.from_fields(parameters=self._parameters(), extension=True,
-                               version=version, **HIP_BASE).data
+        return HIP.build(parameters=self._parameters(), extension=True,
+                         version=version, **HIP_BASE).data
 
     def test_construct_standalone_header(self) -> None:
         from pcapkit.protocols.internet.hip.protocol import HIP
 
         for version in (1, 2):
             with self.subTest(version=version):
-                proto = HIP.from_fields(parameters=self._parameters(), version=version, **HIP_BASE)
+                proto = HIP.build(parameters=self._parameters(), version=version, **HIP_BASE)
                 self.assertEqual(proto.alias, f'HIPv{version}')
                 self.assertEqual(proto.data, self._octets(version))
 

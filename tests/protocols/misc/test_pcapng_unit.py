@@ -4201,8 +4201,8 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        block = PCAPNG.from_fields(num=0, sct=1, ctx=None,
-                                   type=BlockType.Section_Header_Block, block={})
+        block = PCAPNG.build(num=0, sct=1, ctx=None,
+                             type=BlockType.Section_Header_Block, block={})
 
         self.assertEqual(block.info.length, 28)
         self.assertEqual(len(bytes(block)), 28)

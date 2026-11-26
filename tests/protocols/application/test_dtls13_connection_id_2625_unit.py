@@ -524,8 +524,8 @@ class RoundTripTests(unittest.TestCase):
                 again = DTLS(made, len(made), context=DTLSContext(CLIENT_CID, SERVER_CID))
                 self.assertEqual(_cid_layers(again), _cid_layers(parsed))
 
-        made = DTLS.from_fields(ciphertext=True, epoch=2, sequence_number=0x1234, sequence_long=True, cid=b'\x0a\x0b',
-                                content=FRAGMENT)
+        made = DTLS.build(ciphertext=True, epoch=2, sequence_number=0x1234, sequence_long=True, cid=b'\x0a\x0b',
+                          content=FRAGMENT)
         self.assertEqual(bytes(made).hex(), _unified(b'\x0a\x0b', sequence=b'\x12\x34', epoch=2).hex())
         self.assertEqual((made.alias, made.length, made.info.cid, made.info.length), ('DTLS 1.3', 7, b'\x0a\x0b', 16))
 
@@ -535,9 +535,9 @@ class RoundTripTests(unittest.TestCase):
         from pcapkit.protocols.application.dtls.protocol import DTLS, DTLSContext
 
         def build(**kwargs: 'Any') -> 'Any':
-            inner = DTLS.from_fields(ciphertext=True, epoch=3, sequence_number=9, cid=SERVER_CID, content=FRAGMENT)
-            return DTLS.from_fields(content_type=ContentType.change_cipher_spec, epoch=0, sequence_number=3,
-                                    content=b'\x01', payload=inner, **kwargs)
+            inner = DTLS.build(ciphertext=True, epoch=3, sequence_number=9, cid=SERVER_CID, content=FRAGMENT)
+            return DTLS.build(content_type=ContentType.change_cipher_spec, epoch=0, sequence_number=3,
+                              content=b'\x01', payload=inner, **kwargs)
 
         context = DTLSContext()
         outer = build(context=context)

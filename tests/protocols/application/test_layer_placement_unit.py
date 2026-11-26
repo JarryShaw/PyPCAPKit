@@ -174,7 +174,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
         self.assertEqual(str(packet.protochain), 'FTP_DATA')
         self.assertIsInstance(packet.payload, NoPayload)
         self.assertEqual(bytes(FTP_DATA.from_data(packet.info)), b'binary-file-contents')
-        self.assertEqual(FTP_DATA.from_fields(packet=b'abc').data, b'abc')
+        self.assertEqual(FTP_DATA.build(packet=b'abc').data, b'abc')
 
         # its own index, TCP port 20, ahead of ``Application``'s refusal (#2627)
         self.assertIs(type(FTP_DATA.__index__()), int)

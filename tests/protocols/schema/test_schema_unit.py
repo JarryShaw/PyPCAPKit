@@ -180,7 +180,7 @@ class SchemaUnitTests(unittest.TestCase):
 
             def read(self, length: int | None = None, **kwargs: object) -> DummyData:
                 from pcapkit.protocols.misc.no_payload.protocol import NoPayload
-                self._next = NoPayload.from_fields()
+                self._next = NoPayload.build()
                 self._protos = ProtoChain(self.__class__, self.alias)
                 return DummyData()
 
@@ -193,7 +193,7 @@ class SchemaUnitTests(unittest.TestCase):
 
         self.assertEqual(bytes(PayloadOnlySchema(payload=b'bytes')), b'bytes')
         self.assertEqual(bytes(PayloadOnlySchema(payload=NestedSchema(marker=0x55))), b'\x55')
-        self.assertEqual(bytes(PayloadOnlySchema(payload=DummyProtocol.from_fields(packet=b'proto'))), b'proto')
+        self.assertEqual(bytes(PayloadOnlySchema(payload=DummyProtocol.build(packet=b'proto'))), b'proto')
 
         with self.assertRaises(ProtocolUnbound):
             bytes(PayloadOnlySchema(payload=object()))  # type: ignore[arg-type]

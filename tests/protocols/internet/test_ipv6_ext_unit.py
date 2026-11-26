@@ -181,7 +181,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.mh.protocol import MH, FastBindingAcknowledgmentStatus
 
-        mh_raw = bytearray(bytes(MH.from_fields(
+        mh_raw = bytearray(bytes(MH.build(
             next=TransType.UDP, checksum=b'\x12\x34', type=Packet.Fast_Binding_Acknowledgment,
             data={'status': FastBindingAcknowledgmentStatus.Insufficient_resources,
                   'key_mngt': True, 'seq': 0x1234, 'lifetime': 40, 'options': []})))
@@ -994,12 +994,12 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
-        built = IPv6_Ext.from_fields(next=TransType.TCP, len=0, payload=b'\x00' * 6, version=6)
+        built = IPv6_Ext.build(next=TransType.TCP, len=0, payload=b'\x00' * 6, version=6)
         self.assertEqual(bytes(built)[:2], bytes([int(TransType.TCP), 0]))
         self.assertEqual(len(bytes(built)), 8)
 
         # the defaults, when the caller supplies nothing at all
-        default = IPv6_Ext.from_fields(version=6)
+        default = IPv6_Ext.build(version=6)
         self.assertEqual(bytes(default)[:2], bytes([int(TransType.UDP), 0]))
 
     def test_an_absent_or_unregistered_alias_uses_the_generic_rule(self) -> None:
@@ -1037,8 +1037,8 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         self.assertTrue({'next', 'len', 'data'} <= _declared_keywords(IPv6_Ext))
-        self.assertEqual(bytes(IPv6_Ext.from_fields(next=TransType.TCP, len=0, data=b'\x00' * 6,
-                                                    version=6))[:2], bytes([int(TransType.TCP), 0]))
+        self.assertEqual(bytes(IPv6_Ext.build(next=TransType.TCP, len=0, data=b'\x00' * 6,
+                                              version=6))[:2], bytes([int(TransType.TCP), 0]))
 
         for klass in self._family():
             own = inspect.signature(klass.make).parameters
@@ -1048,9 +1048,9 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
                         self.assertIn(name, _declared_keywords(klass))
                         continue
                     with self.assertRaisesRegex(UnsupportedCall, f"unexpected keyword\\(s\\): '{name}'"):
-                        klass.from_fields(**{name: value})
+                        klass.build(**{name: value})
             with self.subTest(klass=klass.__name__, keyword='next'):
-                self.assertIsInstance(bytes(klass.from_fields(next=TransType.TCP)), bytes)
+                self.assertIsInstance(bytes(klass.build(next=TransType.TCP)), bytes)
 
     def test_length_hint_is_the_eight_octet_rfc_6564_minimum(self) -> None:
         """Eight: :rfc:`6564#section-4`'s Hdr Ext Len excludes the first 8

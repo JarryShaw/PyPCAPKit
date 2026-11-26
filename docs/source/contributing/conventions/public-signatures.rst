@@ -74,14 +74,15 @@ Protocols
 **Calling a protocol class with a file parses, and with keywords alone builds**, ruled
 on :issue:`3081` over the parse-only call of :issue:`2840`. Each shape has an explicit
 form, :meth:`~pcapkit.protocols.protocol.Protocol.parse` and
-:meth:`~pcapkit.protocols.protocol.Protocol.from_fields`:
+:meth:`~pcapkit.protocols.protocol.Protocol.build`, named on :issue:`3081` as a verb to
+pair with ``parse``:
 
 .. code-block:: python
 
    Proto(file, length=None, /, *, layer=None, protocol=None, context=None)
    Proto(*, context=None, **fields)
    Proto.parse(file, length=None, /, *, layer=None, protocol=None, context=None)
-   Proto.from_fields(*, context=None, **fields)
+   Proto.build(*, context=None, **fields)
 
 *  ``length`` is positional beside ``file``, as :issue:`2834` specified for the
    protocols: the one exception to rule 1, since it bounds the input rather than
@@ -150,7 +151,7 @@ rather than a keyword is wrong:
    * - a field, or an unknown keyword, given a file
      - :exc:`TypeError`, naming each
    * - no octets, as ``Proto(None)``
-     - :exc:`TypeError`, naming ``from_fields``
+     - :exc:`TypeError`, naming ``build``
    * - a stop that is no field, or a ``length``, given no file
      - :exc:`TypeError`, naming each
    * - a ``file`` or ``length`` keyword no field takes

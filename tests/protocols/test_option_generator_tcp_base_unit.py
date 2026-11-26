@@ -260,7 +260,7 @@ class TCPBaseKeywordTests(unittest.TestCase):
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
             with self.assertRaises(UnsupportedCall) as context:
-                TCP.from_fields(srcport=50000, dstport=80, no_such_tcp_field=12345)
+                TCP.build(srcport=50000, dstport=80, no_such_tcp_field=12345)
 
         self.assertIn('no_such_tcp_field', str(context.exception))
         # A warning would be the weaker fix the issue weighed and rejected; the
@@ -288,7 +288,7 @@ class TCPBaseKeywordTests(unittest.TestCase):
 
             with self.subTest(keyword=wrong):
                 with self.assertRaises(UnsupportedCall) as context:
-                    TCP.from_fields(**keywords)
+                    TCP.build(**keywords)
                 self.assertIn(repr(wrong), str(context.exception))
 
 
@@ -315,7 +315,7 @@ class TCPBaseHeaderTests(unittest.TestCase):
         """
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        return TCP.from_fields(**{**self.options.FAMILY_MODULES['tcp'].TCP_BASE, **overrides})
+        return TCP.build(**{**self.options.FAMILY_MODULES['tcp'].TCP_BASE, **overrides})
 
     def test_the_header_fields_are_the_ones_expected(self) -> None:
         """Every value the mapping states reaches the field it names.

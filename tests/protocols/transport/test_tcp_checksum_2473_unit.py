@@ -124,7 +124,7 @@ class TCPChecksumTests(unittest.TestCase):
 
     def test_behind_an_authentication_header(self) -> None:
         # IPv4 carries AH as its payload, ahead of the segment (RFC 4302 section 2.2).
-        segment = self.TCP.from_fields(srcport=40000, dstport=80, payload=b'signed', checksum=b'\x00\x00').data
+        segment = self.TCP.build(srcport=40000, dstport=80, payload=b'signed', checksum=b'\x00\x00').data
         ah = bytes([6, 4, 0, 0]) + (0x1234).to_bytes(4, 'big') + (1).to_bytes(4, 'big') + bytes(12)
         header = bytearray(b'\x45\x00' + (20 + len(ah) + len(segment)).to_bytes(2, 'big') + bytes(4)
                            + b'\x40\x33\x00\x00' + wire.IPV4_A + wire.IPV4_B)
@@ -136,7 +136,7 @@ class TCPChecksumTests(unittest.TestCase):
     def test_an_upper_layer_the_pseudo_header_does_not_name(self) -> None:
         # IPv6 walks a Mobility Header as an extension header, but it is the
         # pseudo-header's upper layer (RFC 6275 section 6.1.1), not the segment.
-        segment = self.TCP.from_fields(srcport=40000, dstport=80, checksum=b'\x00\x00').data
+        segment = self.TCP.build(srcport=40000, dstport=80, checksum=b'\x00\x00').data
         # The header's own checksum is valid over its pseudo-header, so it warns of nothing (#2813).
         mh_sum = wire.checksum(wire.IPV6_A + wire.IPV6_B + (8).to_bytes(4, 'big') + b'\x00\x00\x00\x87'
                                + bytes([6, 0, 0, 0, 0, 0, 0, 0]))
@@ -148,13 +148,13 @@ class TCPChecksumTests(unittest.TestCase):
         self.assertEqual((layer['TCP'].info.checksum_status, messages), (self.Status.NO_PSEUDO_HEADER, []))
 
     def test_ipv6_and_truncation(self) -> None:
-        segment = self.TCP.from_fields(srcport=80, dstport=40000, seq_no=1, ack=True, ack_no=2, payload=b'odd').data
+        segment = self.TCP.build(srcport=80, dstport=40000, seq_no=1, ack=True, ack_no=2, payload=b'odd').data
         with mock.patch.object(self.config, 'CHECKSUM_COMPUTE', True):
-            packet = self.IPv6.from_fields(src='2001:db8::1', dst='2001:db8::2', next=self.TransType.TCP, payload=segment).data
+            packet = self.IPv6.build(src='2001:db8::1', dst='2001:db8::2', next=self.TransType.TCP, payload=segment).data
         self.assertEqual(self.status(packet, cls=self.IPv6), (self.Status.NOT_COMPUTED, []))
 
-        made = self.IPv6.from_fields(src='2001:db8::1', dst='2001:db8::2', next=self.TransType.TCP,
-                                     payload=self.TCP.from_fields(srcport=80, dstport=40000, payload=b'odd')).data
+        made = self.IPv6.build(src='2001:db8::1', dst='2001:db8::2', next=self.TransType.TCP,
+                               payload=self.TCP.build(srcport=80, dstport=40000, payload=b'odd')).data
         self.assertEqual(made[56:58], expected(pseudo6(wire.IPV6_A, wire.IPV6_B, 23), made[40:]))
         self.assertEqual(self.status(made, cls=self.IPv6), (self.Status.VALID, []))
         self.assertEqual(self.status(made[:-1], cls=self.IPv6), (self.Status.TRUNCATED, []))
@@ -169,8 +169,8 @@ class TCPChecksumTests(unittest.TestCase):
     def make(self, compute: bool = True, **kwargs: object) -> bytes:
         """The octets of an IPv4 packet carrying a TCP segment made with ``kwargs``."""
         with mock.patch.object(self.config, 'CHECKSUM_COMPUTE', compute):
-            tcp = self.TCP.from_fields(srcport=40000, dstport=80, seq_no=7, syn=True, payload=b'hello', **kwargs)
-            return self.IPv4.from_fields(src='192.0.2.1', dst='198.51.100.2', ttl=64, protocol=self.TransType.TCP, payload=tcp).data
+            tcp = self.TCP.build(srcport=40000, dstport=80, seq_no=7, syn=True, payload=b'hello', **kwargs)
+            return self.IPv4.build(src='192.0.2.1', dst='198.51.100.2', ttl=64, protocol=self.TransType.TCP, payload=tcp).data
 
     def test_the_ip_layer_computes_it(self) -> None:
         octets = self.make()
@@ -183,10 +183,10 @@ class TCPChecksumTests(unittest.TestCase):
     def test_a_source_route_names_the_destination(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
 
-        tcp = self.TCP.from_fields(srcport=40000, dstport=80, payload=b'routed')
-        octets = self.IPv4.from_fields(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.TCP, payload=tcp,
-                                       options=[(OptionNumber.LSR, {'counts': 2, 'route': ['203.0.113.1'],
-                                                                    'remaining': ['203.0.113.9']})]).data
+        tcp = self.TCP.build(srcport=40000, dstport=80, payload=b'routed')
+        octets = self.IPv4.build(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.TCP, payload=tcp,
+                                 options=[(OptionNumber.LSR, {'counts': 2, 'route': ['203.0.113.1'],
+                                                              'remaining': ['203.0.113.9']})]).data
         hdr = (octets[0] & 0x0F) * 4
         prefix = octets[12:16] + bytes([203, 0, 113, 9]) + b'\x00\x06' + (len(octets) - hdr).to_bytes(2, 'big')
         self.assertEqual(octets[hdr + 16:hdr + 18], expected(prefix, octets[hdr:]))
@@ -196,8 +196,8 @@ class TCPChecksumTests(unittest.TestCase):
         with mock.patch.object(self.config, 'CHECKSUM_VERIFY', True), \
                 warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            ipv4 = self.IPv4.from_fields(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.TCP, checksum=b'\xbe\xef',
-                                         payload=self.TCP.from_fields(srcport=40000, dstport=80))
+            ipv4 = self.IPv4.build(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.TCP, checksum=b'\xbe\xef',
+                                   payload=self.TCP.build(srcport=40000, dstport=80))
         messages = [(item.category, str(item.message))
                     for item in caught if issubclass(item.category, self.ProtocolWarning)]
         self.assertEqual(len(messages), 1, messages)
@@ -206,8 +206,8 @@ class TCPChecksumTests(unittest.TestCase):
         self.assertIs(ipv4['TCP'].info.checksum_status, self.Status.VALID)
 
     def test_make_takes_the_pseudo_header(self) -> None:
-        pseudo = self.IP_Pseudo.from_fields(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.TCP, upper_length=0)
-        segment = self.TCP.from_fields(srcport=40000, dstport=80, payload=b'alone', pseudo=pseudo).data
+        pseudo = self.IP_Pseudo.build(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.TCP, upper_length=0)
+        segment = self.TCP.build(srcport=40000, dstport=80, payload=b'alone', pseudo=pseudo).data
         prefix = wire.IPV4_A + wire.IPV4_B + b'\x00\x06' + len(segment).to_bytes(2, 'big')
         self.assertEqual(segment[16:18], expected(prefix, segment))
 
@@ -224,7 +224,7 @@ class TCPChecksumTests(unittest.TestCase):
     def test_off_or_given_is_written_as_is(self) -> None:
         self.assertEqual(self.make(compute=False)[36:38], b'\x00\x00')
         self.assertEqual(self.make(checksum=b'\xbe\xef')[36:38], b'\xbe\xef')
-        alone = self.TCP.from_fields(srcport=40000, dstport=80)
+        alone = self.TCP.build(srcport=40000, dstport=80)
         self.assertEqual(alone.data[16:18], b'\x00\x00')
 
 

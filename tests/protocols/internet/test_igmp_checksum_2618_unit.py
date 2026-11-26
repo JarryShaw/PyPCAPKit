@@ -201,27 +201,27 @@ class IGMPChecksumMakeTests(IGMPChecksumTestCase):
             packet, version, _ = MESSAGES[name]
             cls = self.classes[version]
             with self.subTest(name):
-                self.assertEqual(cls.from_fields(**fields).data, packet)
-                self.assertEqual(self.IGMP.from_fields(version=int(version[-1]), **fields).data, packet)
-                layer, messages = self.parse(cls.from_fields(**fields).data, cls)
+                self.assertEqual(cls.build(**fields).data, packet)
+                self.assertEqual(self.IGMP.build(version=int(version[-1]), **fields).data, packet)
+                layer, messages = self.parse(cls.build(**fields).data, cls)
                 self.assertEqual((layer.info.checksum_status, messages), (self.Status.VALID, []))
                 # Off, it is left zero; given, it is written as given.
                 with mock.patch.object(self.config, 'CHECKSUM_COMPUTE', False):
-                    self.assertEqual(cls.from_fields(**fields).data, with_checksum(packet, b'\x00\x00'))
-                self.assertEqual(cls.from_fields(checksum=b'\xbe\xef', **fields).data, with_checksum(packet, b'\xbe\xef'))
+                    self.assertEqual(cls.build(**fields).data, with_checksum(packet, b'\x00\x00'))
+                self.assertEqual(cls.build(checksum=b'\xbe\xef', **fields).data, with_checksum(packet, b'\xbe\xef'))
 
     def test_the_computed_checksum_covers_the_payload(self) -> None:
         for name in ('v2-report', 'v3-report'):
             packet, version, _ = MESSAGES[name]
             with self.subTest(name):
-                made = self.classes[version].from_fields(payload=b'XY', **self.FIELDS[name]).data
+                made = self.classes[version].build(payload=b'XY', **self.FIELDS[name]).data
                 self.assertEqual(made, message(packet[:2], packet[4:] + b'XY'))
 
     def test_the_ipv4_payload_verifies(self) -> None:
         from pcapkit.const.reg.transtype import TransType
 
-        igmp = self.classes['IGMPv2'].from_fields(**self.FIELDS['v2-report'])
-        made = self.IPv4.from_fields(src='10.0.0.1', dst='239.1.2.3', protocol=TransType.IGMP, payload=igmp).data
+        igmp = self.classes['IGMPv2'].build(**self.FIELDS['v2-report'])
+        made = self.IPv4.build(src='10.0.0.1', dst='239.1.2.3', protocol=TransType.IGMP, payload=igmp).data
         self.assertEqual(made[20:], MESSAGES['v2-report'][0])
         self.assertEqual(self.status(made), (self.Status.VALID, []))
 
@@ -234,7 +234,7 @@ class IGMPChecksumMakeTests(IGMPChecksumTestCase):
             version = MESSAGES[name][1]
             # Octets past a Query change its version, so only a Report carries some.
             payload = b'XY' if 'report' in name else b''
-            made = self.classes[version].from_fields(payload=payload, **fields).data
+            made = self.classes[version].build(payload=payload, **fields).data
             with self.subTest(name):
                 packet = (IGMPv3 if version == 'IGMPv3' else IGMP)(made)
                 del packet.chksum

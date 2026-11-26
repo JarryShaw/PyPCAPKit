@@ -244,7 +244,7 @@ class TCPMPTCPCapablePublicConstructorUnitTests(unittest.TestCase):
         from pcapkit.const.tcp.option import Option as Enum_Option
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        tcp = TCP.from_fields(
+        tcp = TCP.build(
             options=[(Enum_Option.Multipath_TCP, {
                 'subtype': Enum_MPTCPOption.MP_CAPABLE,
                 'skey': 0x0102030405060708,
@@ -266,7 +266,7 @@ class TCPMPTCPCapablePublicConstructorUnitTests(unittest.TestCase):
         from pcapkit.const.tcp.option import Option as Enum_Option
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        tcp = TCP.from_fields(
+        tcp = TCP.build(
             options=[(Enum_Option.Multipath_TCP, {
                 'subtype': Enum_MPTCPOption.MP_CAPABLE,
                 'skey': 0x0102030405060708,
@@ -345,7 +345,7 @@ class TCPMPTCPCapableAllLengthsUnitTests(unittest.TestCase):
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
         octets, fields = ALL_LENGTHS[length]
-        made = TCP.from_fields(
+        made = TCP.build(
             options=[(Enum_Option.Multipath_TCP, {
                 'subtype': Enum_MPTCPOption.MP_CAPABLE, 'version': 1,
                 'flag_req': bool(octets[3] & 0x80), 'flag_hsa': bool(octets[3] & 0x01),

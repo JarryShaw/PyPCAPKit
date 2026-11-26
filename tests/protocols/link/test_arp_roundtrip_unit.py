@@ -112,10 +112,10 @@ class TestARPRoundTrip(unittest.TestCase):
             for addr in ('00:11:22:33:44', '', '00:11:22:33:44:55:66'):
                 with self.subTest(cls=name, addr=addr):
                     with self.assertRaises(ProtocolError):
-                        cls.from_fields(htype=1, sha=addr, tha=addr, spa='10.0.0.1', tpa='10.0.0.2')
+                        cls.build(htype=1, sha=addr, tha=addr, spa='10.0.0.1', tpa='10.0.0.2')
             with self.subTest(cls=name, addr='six octets'):
-                proto = cls.from_fields(htype=1, sha='00:11:22:33:44:55', tha='66:77:88:99:aa:bb',
-                                        spa='10.0.0.1', tpa='10.0.0.2')
+                proto = cls.build(htype=1, sha='00:11:22:33:44:55', tha='66:77:88:99:aa:bb',
+                                  spa='10.0.0.1', tpa='10.0.0.2')
                 self.assertEqual(proto.info.hlen, 6)
 
     def test_make_accepts_any_octets_with_explicit_hlen_or_other_htype(self) -> None:
@@ -126,13 +126,13 @@ class TestARPRoundTrip(unittest.TestCase):
             cls = self._cls(module, name)
             for hlen, addr in ((5, '00:11:22:33:44'), (0, ''), (8, '01:01:01:01:01:01:01:01')):
                 with self.subTest(cls=name, hlen=hlen):
-                    proto = cls.from_fields(htype=1, hlen=hlen, sha=addr, tha=addr,
-                                            spa='10.0.0.1', tpa='10.0.0.2')
+                    proto = cls.build(htype=1, hlen=hlen, sha=addr, tha=addr,
+                                      spa='10.0.0.1', tpa='10.0.0.2')
                     self.assertEqual(proto.info.hlen, hlen)
                     self.assertEqual(proto.info.sha, addr)
             with self.subTest(cls=name, htype='Fibre_Channel'):
-                proto = cls.from_fields(htype=Hardware.Fibre_Channel, sha='aabbcc', tha='ddeeff',
-                                        spa='10.0.0.1', tpa='10.0.0.2')
+                proto = cls.build(htype=Hardware.Fibre_Channel, sha='aabbcc', tha='ddeeff',
+                                  spa='10.0.0.1', tpa='10.0.0.2')
                 self.assertEqual(proto.info.hlen, 3)
 
     def test_ethernet_mac_still_validated(self) -> None:
