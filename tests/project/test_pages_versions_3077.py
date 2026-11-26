@@ -69,8 +69,9 @@ RELEASES = ('v0.9.0', 'v1.2.0', 'v1.10.0.dev1', 'v1.10.0a1', 'v1.10.0a2', 'v1.10
 #: Tags that name no docs version.
 NOT_RELEASES = ('conda-1.10.0', 'conda-v1.10.0', 'v1.10.0+local', 'vfoo', 'v1.10.0-rc1', '1.10.0')
 #: The versions built from a branch, in the map's order: ``develop`` as ``latest``,
-#: Stable Branch's mirror of ``main`` as ``stable``, and ``develop`` again as ``dev``.
-BRANCHES = ('latest', 'stable', 'dev')
+#: and Stable Branch's mirror of ``main`` as ``stable``. ``dev`` is none: it would
+#: duplicate ``latest`` (#3077).
+BRANCHES = ('latest', 'stable')
 #: Node.js, which runs the ``404.html`` script.
 NODE = shutil.which('node')
 #: Runs ``404.html``'s script with ``location`` and ``fetch`` stubbed, and prints
@@ -237,8 +238,8 @@ class TestTheNotFoundPage(unittest.TestCase):
              f'{READ_THE_DOCS}en/latest/pcapkit/foundation/extraction.html?q=1#the-extractor'),
             ('/PyPCAPKit/stable/pcapkit/index.html', '', '#pcapkit',
              f'{READ_THE_DOCS}en/stable/pcapkit/index.html#pcapkit'),
-            ('/PyPCAPKit/dev/', '', '', f'{READ_THE_DOCS}en/dev/'),
-            ('/PyPCAPKit/dev', '', '', f'{READ_THE_DOCS}en/dev/'),
+            ('/PyPCAPKit/stable/', '', '', f'{READ_THE_DOCS}en/stable/'),
+            ('/PyPCAPKit/stable', '', '', f'{READ_THE_DOCS}en/stable/'),
             ('/PyPCAPKit/v1.7.0/index.html', '', '#top', f'{READ_THE_DOCS}en/v1.7.0/index.html#top'),
         )
         for pathname, search, fragment, target in rows:
@@ -255,6 +256,13 @@ class TestTheNotFoundPage(unittest.TestCase):
         for pathname in ('/PyPCAPKit/', '/latest/index.html', '/pypcapkit/latest/index.html'):
             with self.subTest(pathname=pathname):
                 self.assertEqual(self.run_page(pathname), {'fetched': [], 'replaced': None})
+
+    def test_a_dev_path_stays_not_found(self) -> None:
+        """``latest`` builds ``develop``, so ``dev`` is no version: its paths get the plain page (#3077)."""
+        for pathname in ('/PyPCAPKit/dev/pcapkit/foundation/extraction.html', '/PyPCAPKit/dev/', '/PyPCAPKit/dev'):
+            with self.subTest(pathname=pathname):
+                self.assertEqual(self.run_page(pathname, '?q=1', '#top'),
+                                 {'fetched': ['/PyPCAPKit/versions.json'], 'replaced': None})
 
     def test_an_unreadable_map_stays_not_found(self) -> None:
         for flags in ({'ok': False}, {'offline': True}):
