@@ -93,15 +93,17 @@ from typing import TYPE_CHECKING, Generic, cast
 
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.link.link import Link
-from pcapkit.protocols.protocol import _PT, _ST
+from pcapkit.protocols.protocol import _PT, _ST, _nothing_to_parse
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import IO, Any, NoReturn, Optional, Type
+    from typing import IO, Any, Iterable, Mapping, NoReturn, Optional, Type
 
     from typing_extensions import Literal, Self
 
+    from pcapkit.corekit.context import ContextRegistry, ProtocolContext
     from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
+    from pcapkit.protocols.protocol import ProtocolBase
 
 __all__ = ['L2TP']
 
@@ -217,15 +219,54 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
         """
         raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
 
+    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = None, /, *,  # pylint: disable=super-init-not-called
+                 version: 'Optional[Literal[2]]' = None,
+                 layer: 'Optional[str]' = None,
+                 protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                 ) -> 'None':
+        """Parse a protocol instance from its octets.
+
+        Args:
+            file: Source packet stream.
+            length: Length of packet data.
+            version: Version of L2TP, ``2``: the member :meth:`__new__` picks,
+                which must be this class's own.
+            layer: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            protocol: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            context: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+
+        Raises:
+            ProtocolError: If no member reads ``version``, or it is not this
+                class's own version: that of the member it is or derives from,
+                which a subclass outside the members does not have.
+
+        .. versionchanged:: 1.8.0
+
+           Declares ``version``, checked against the member, where it was
+           handed on unread to the hooks (:issue:`2840`).
+
+        """
+        if version is not None and not isinstance(self, self._member_of_version(version)):
+            raise ProtocolError(f'{type(self).__name__}: no version of its own to match '
+                                f'version={version!r}')
+        # NOTE: ``_parse``, inline, as the base's ``__init__`` takes no ``version``, and
+        # calling ``_parse`` adds a frame per layer (#1610, #2840).
+        keywords = self._start_parse(file, layer, protocol, context, {})
+        self.__post_init__(file, length, **keywords)
+        self._info.__update__(packet=self.packet.payload)
+
     def __new__(cls, file: 'Optional[IO[bytes] | bytes]' = None,
                 length: 'Optional[int]' = None, **kwargs: 'Any') -> 'L2TP':
-        """Create the member a construction of this class describes.
+        """Create the member a parse of this class describes.
 
-        The ``version`` field names the member, on either path. Without it,
-        parsing octets gives the member the version nibble, bits 12 to 15 of
-        their first word, names, and building from fields is refused, since no
-        field picks a member. That member's ``__init__`` then runs with the same
-        arguments. A subclass of this class is created as itself.
+        The ``version`` keyword names the member. Without it, the octets give the
+        member the version nibble, bits 12 to 15 of their first word, names. That
+        member's ``__init__`` then runs with the same arguments. A subclass of
+        this class is created as itself.
 
         Args:
             file: Source packet stream, read here without being consumed.
@@ -236,17 +277,18 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
             An uninitialised instance of the member.
 
         Raises:
-            ProtocolError: If no member reads ``version``; or, without it, if
-                building from fields, or if the octets are shorter than the first
-                word or no member reads their version.
+            TypeError: If ``file`` is :obj:`None`, on this class.
+            ProtocolError: If no member reads ``version``; or, without it, if the
+                octets are shorter than the first word or no member reads their
+                version.
 
         """
         if cls is not L2TP:
             return super().__new__(cls, file, length, **kwargs)
+        if file is None:
+            raise _nothing_to_parse(L2TP)
         version = kwargs.get('version')
         if version is None:
-            if file is None:
-                raise ProtocolError('L2TP: no version to build with; pass version=2')
             if isinstance(file, bytes):
                 head = file[:2]
             else:

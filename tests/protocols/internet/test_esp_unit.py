@@ -491,7 +491,7 @@ class ESPProtocolTests(unittest.TestCase):
         packet = struct.pack('!II', 7, 3) + b'plaintext-payload' + bytes([1, 2, 2, 6])
         registry = ContextRegistry.make(ESPContext(SecurityAssociation(spi=7)))
 
-        esp = ESP(packet, len(packet), __context__=registry)
+        esp = ESP(packet, len(packet), context=registry)
         info = esp.info
         self.assertIs(info.status, ESPStatus.DECRYPTED)
         self.assertEqual(info.plaintext, b'plaintext-payload')
@@ -514,7 +514,7 @@ class ESPProtocolTests(unittest.TestCase):
         sa = SecurityAssociation(spi=0x4321, encryption=Cipher.AES_CBC,
                                  encryption_key=CASE5_KEY)
         esp = ESP(CASE5_ESP, len(CASE5_ESP),
-                  __context__=ContextRegistry.make(ESPContext(sa)))
+                  context=ContextRegistry.make(ESPContext(sa)))
         info = esp.info
 
         self.assertIs(info.status, ESPStatus.DECRYPTED)
@@ -542,7 +542,7 @@ class ESPProtocolTests(unittest.TestCase):
         sa = SecurityAssociation(spi=0x8765, encryption=Cipher.AES_CBC,
                                  encryption_key=CASE7_KEY)
         packet = CASE7_IP + CASE7_ESP
-        ipv4 = IPv4(packet, len(packet), __context__=ContextRegistry.make(ESPContext(sa)))
+        ipv4 = IPv4(packet, len(packet), context=ContextRegistry.make(ESPContext(sa)))
 
         esp = ipv4.payload
         self.assertIs(esp.info.status, ESPStatus.DECRYPTED)
@@ -569,7 +569,7 @@ class ESPProtocolTests(unittest.TestCase):
             sa = SecurityAssociation(spi=0x8765, encryption=Cipher.AES_CBC,
                                      encryption_key=CASE7_KEY, destination=destination)
             ipv4 = IPv4(packet, len(packet),
-                        __context__=ContextRegistry.make(ESPContext(sa)))
+                        context=ContextRegistry.make(ESPContext(sa)))
             return ipv4.payload.info.status
 
         # the outer IPv4 destination reaches ESP, so an SA pinned to the right
@@ -591,7 +591,7 @@ class ESPProtocolTests(unittest.TestCase):
         sa = SecurityAssociation(spi=0x0000a5f8, encryption=Cipher.AES_GCM_16,
                                  encryption_key=GCM128_KEYMAT)
         esp = ESP(GCM128_PACKET, len(GCM128_PACKET),
-                  __context__=ContextRegistry.make(ESPContext(sa)))
+                  context=ContextRegistry.make(ESPContext(sa)))
         info = esp.info
 
         self.assertIs(info.status, ESPStatus.DECRYPTED)
@@ -617,7 +617,7 @@ class ESPProtocolTests(unittest.TestCase):
         self.assertEqual(sa.salt, hx('11223344'))
 
         esp = ESP(GCM256_PACKET, len(GCM256_PACKET),
-                  __context__=ContextRegistry.make(ESPContext(sa)))
+                  context=ContextRegistry.make(ESPContext(sa)))
         info = esp.info
 
         self.assertIs(info.status, ESPStatus.DECRYPTED)
@@ -643,7 +643,7 @@ class ESPProtocolTests(unittest.TestCase):
         registry = ContextRegistry.make(ESPContext(sa))
 
         with mock.patch.object(esp_module, 'warn') as warned:
-            esp = ESP(CASE5_ESP, len(CASE5_ESP), __context__=registry)
+            esp = ESP(CASE5_ESP, len(CASE5_ESP), context=registry)
         info = esp.info
 
         # no garbage plaintext is produced, and the failure is announced
@@ -664,7 +664,7 @@ class ESPProtocolTests(unittest.TestCase):
         sa = SecurityAssociation(spi=0x0000a5f8, encryption=Cipher.AES_GCM_16,
                                  encryption_key=bytes(16) + hx('cafebabe'))
         esp = ESP(GCM128_PACKET, len(GCM128_PACKET),
-                  __context__=ContextRegistry.make(ESPContext(sa)))
+                  context=ContextRegistry.make(ESPContext(sa)))
 
         self.assertIs(esp.info.status, ESPStatus.AUTH_FAILED)
         self.assertIsNone(esp.info.plaintext)
@@ -690,7 +690,7 @@ class ESPProtocolTests(unittest.TestCase):
         # strict, unauthenticated -> the mismatch is treated as a wrong key
         strict = ContextRegistry.make(ESPContext(
             SecurityAssociation(spi=0x55, encryption=Cipher.AES_CBC, encryption_key=key)))
-        self.assertIs(ESP(packet, len(packet), __context__=strict).info.status,
+        self.assertIs(ESP(packet, len(packet), context=strict).info.status,
                       ESPStatus.DECRYPT_FAILED)
 
         # strict=False -> warn, but accept the payload
@@ -698,7 +698,7 @@ class ESPProtocolTests(unittest.TestCase):
             SecurityAssociation(spi=0x55, encryption=Cipher.AES_CBC, encryption_key=key,
                                 strict=False)))
         with mock.patch.object(esp_module, 'warn') as warned:
-            esp = ESP(packet, len(packet), __context__=lenient)
+            esp = ESP(packet, len(packet), context=lenient)
         self.assertIs(esp.info.status, ESPStatus.DECRYPTED)
         self.assertEqual(esp.info.plaintext, b'sixteen-byte-pay')
         self.assertEqual(esp.info.padding, bytes(14))
@@ -717,7 +717,7 @@ class ESPProtocolTests(unittest.TestCase):
         # only the SPI, the sequence number and 8 octets remain, which cannot
         # hold the 16-octet ICV the SA declares
         short = GCM128_PACKET[:16]
-        esp = ESP(short, len(short), __context__=registry)
+        esp = ESP(short, len(short), context=registry)
         self.assertIs(esp.info.status, ESPStatus.TRUNCATED)
         self.assertIn('shorter than the 16-octet ICV', esp.info.error)
         self.assertIsNone(esp.info.plaintext)
@@ -728,7 +728,7 @@ class ESPProtocolTests(unittest.TestCase):
             SecurityAssociation(spi=0x4321, encryption=Cipher.AES_CBC,
                                 encryption_key=CASE5_KEY)))
         clipped = CASE5_ESP[:-3]
-        esp = ESP(clipped, len(clipped), __context__=cbc)
+        esp = ESP(clipped, len(clipped), context=cbc)
         self.assertIs(esp.info.status, ESPStatus.DECRYPT_FAILED)
         self.assertIsNone(esp.info.plaintext)
 
@@ -749,7 +749,7 @@ class ESPProtocolTests(unittest.TestCase):
             self.assertIsNotNone(sa.unavailable())
 
             esp = ESP(CASE5_ESP, len(CASE5_ESP),
-                      __context__=ContextRegistry.make(ESPContext(sa)))
+                      context=ContextRegistry.make(ESPContext(sa)))
 
         info = esp.info
         self.assertIs(info.status, ESPStatus.UNSUPPORTED)
@@ -784,7 +784,7 @@ class ESPProtocolTests(unittest.TestCase):
                                          encryption_key=bytes(20))
             registry = ContextRegistry.make(ESPContext(sa))
 
-            info = ESP(packet, len(packet), __context__=registry).info
+            info = ESP(packet, len(packet), context=registry).info
             self.assertIs(info.status, ESPStatus.UNSUPPORTED)
             self.assertEqual(info.icv, tag)
             self.assertEqual(info.payload_data, body)
@@ -792,7 +792,7 @@ class ESPProtocolTests(unittest.TestCase):
 
             # one octet short of the declared 16-octet ICV
             short = struct.pack('!II', 0x1234, 8) + tag[:15]
-            short_info = ESP(short, len(short), __context__=registry).info
+            short_info = ESP(short, len(short), context=registry).info
             self.assertIs(short_info.status, ESPStatus.TRUNCATED)
 
     ##########################################################################
@@ -829,7 +829,7 @@ class ESPProtocolTests(unittest.TestCase):
         # pinned, so a change in the covered range cannot pass silently
         self.assertEqual(wire[-16:].hex(), '29003487091e61aebabd417e11ee3242')
 
-        esp = ESP(wire, len(wire), __context__=registry)
+        esp = ESP(wire, len(wire), context=registry)
         info = esp.info
         self.assertIs(info.status, ESPStatus.DECRYPTED)
         self.assertEqual(info.plaintext, INNER_TCP)
@@ -841,7 +841,7 @@ class ESPProtocolTests(unittest.TestCase):
 
         # a wrong integrity key is caught before decryption is attempted
         bad_auth = ContextRegistry.make(ESPContext(association(ikey=bytes(32))))
-        failed = ESP(wire, len(wire), __context__=bad_auth)
+        failed = ESP(wire, len(wire), context=bad_auth)
         self.assertIs(failed.info.status, ESPStatus.AUTH_FAILED)
         self.assertIsNone(failed.info.plaintext)
         self.assertIn('integrity check value does not verify', failed.info.error)
@@ -849,13 +849,13 @@ class ESPProtocolTests(unittest.TestCase):
         # a right integrity key with a wrong cipher key gets past the ICV and
         # is caught by the trailer instead
         bad_cipher = ContextRegistry.make(ESPContext(association(ckey=bytes(16))))
-        failed = ESP(wire, len(wire), __context__=bad_cipher)
+        failed = ESP(wire, len(wire), context=bad_cipher)
         self.assertIs(failed.info.status, ESPStatus.DECRYPT_FAILED)
         self.assertIsNone(failed.info.plaintext)
 
         # a corrupted ICV is a mismatch
         tampered = wire[:-1] + bytes([wire[-1] ^ 0xFF])
-        failed = ESP(tampered, len(tampered), __context__=registry)
+        failed = ESP(tampered, len(tampered), context=registry)
         self.assertIs(failed.info.status, ESPStatus.AUTH_FAILED)
 
     def test_compute_icv_requires_an_integrity_algorithm(self) -> None:
@@ -918,7 +918,7 @@ class ESPProtocolTests(unittest.TestCase):
                 # 8 octets of header, 16 of IV, then whole AES blocks
                 self.assertEqual((len(wire) - 24) % 16, 0)
 
-                esp = ESP(wire, len(wire), __context__=registry)
+                esp = ESP(wire, len(wire), context=registry)
                 self.assertIs(esp.info.status, ESPStatus.DECRYPTED)
                 self.assertEqual(esp.info.plaintext, bytes(size))
                 self.assertEqual(esp.info.next, TransType.UDP)
@@ -956,7 +956,7 @@ class ESPProtocolTests(unittest.TestCase):
                 built = ESP.from_fields(spi=0x88, seq=5, next=TransType.IPv4, encrypt=True,
                                         iv=bytes(range(8)), payload=INNER_TCP, context=registry)
                 wire = bytes(built)
-                esp = ESP(wire, len(wire), __context__=registry)
+                esp = ESP(wire, len(wire), context=registry)
 
                 self.assertIs(esp.info.status, ESPStatus.DECRYPTED)
                 self.assertEqual(esp.info.plaintext, INNER_TCP)
@@ -1031,7 +1031,7 @@ class ESPProtocolTests(unittest.TestCase):
                   + bytes.fromhex('20010db8' + '00' * 11 + '01'))
         packet = header + body
 
-        ipv6 = IPv6(packet, len(packet), __context__=registry)
+        ipv6 = IPv6(packet, len(packet), context=registry)
         esp = ipv6.info.esp
         self.assertIs(esp.status, ESPStatus.DECRYPTED)
         self.assertEqual(esp.next, TransType.TCP)

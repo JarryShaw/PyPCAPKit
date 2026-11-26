@@ -86,7 +86,7 @@ class AHICVPaddingTests(unittest.TestCase):
                 with self.subTest(**kwargs, icv=size), warnings.catch_warnings():
                     warnings.simplefilter('ignore')
                     made = self.make(icv, **kwargs)
-                    parsed = AH(io.BytesIO(made), len(made), **parse)
+                    parsed = AH._from_parent(io.BytesIO(made), len(made), **parse)  # pylint: disable=protected-access
                     self.assertEqual(parsed.data, made)
                     self.assertEqual(parsed.info.length, len(made))
                     self.assertEqual(parsed.info.icv[:size], icv)
@@ -168,7 +168,7 @@ class AHPayloadLengthTests(unittest.TestCase):
             header = ah_header(size)
             with self.subTest(size=size), warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                parsed = AH(io.BytesIO(header), len(header), version=6, extension=True)
+                parsed = AH._from_parent(io.BytesIO(header), len(header), version=6, extension=True)  # pylint: disable=protected-access
                 self.assertEqual(AH.from_data(parsed.info).data, header)
 
 

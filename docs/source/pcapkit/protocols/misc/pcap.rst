@@ -182,6 +182,7 @@ whose structure is:
 
    .. rubric:: Data Models
 
+   .. automethod:: __init__
    .. automethod:: __post_init__
    .. automethod:: __index__
 

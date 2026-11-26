@@ -126,7 +126,7 @@ class ICMPBaseDispatchTests(unittest.TestCase):
             ICMP.from_fields(version=4, pseudo=pseudo())
 
     def test_a_member_takes_version_only_as_its_own(self) -> None:
-        """Building, ``version`` must name the member; parsing, it is handed on unread."""
+        """Building or parsing, ``version`` must name the member (#2840)."""
         from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
         from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
         from pcapkit.utilities.exceptions import ProtocolError
@@ -137,7 +137,11 @@ class ICMPBaseDispatchTests(unittest.TestCase):
             ICMPv4.from_fields(version=6)
         with self.assertRaisesRegex(ProtocolError, '^ICMPv6: version=4 names another member$'):
             ICMPv6.from_fields(version=4)
-        self.assertEqual(ICMPv6(ECHO[6], version=4).data, ECHO[6])
+        with self.assertRaisesRegex(ProtocolError, '^ICMPv6: version=4 names another member$'):
+            ICMPv6(ECHO[6], version=4)
+        self.assertEqual(ICMPv6(ECHO[6], version=6).data, ECHO[6])
+        # NOTE: The enclosing IP layer's own version takes the private channel.
+        self.assertEqual(ICMPv6._from_parent(ECHO[6], len(ECHO[6]), version=4).data, ECHO[6])  # pylint: disable=protected-access
 
     def test_a_subclass_outside_the_members_has_no_version_of_its_own(self) -> None:
         """So it takes no ``version``, as a member takes no other's."""
@@ -159,7 +163,7 @@ class ICMPBaseDispatchTests(unittest.TestCase):
                 raise NotImplementedError
 
         with self.assertRaisesRegex(ProtocolError, '^Outside: no version of its own to match version=6$'):
-            Outside(version=6)
+            Outside.from_fields(version=6)
 
     def test_from_data_on_the_base_gives_the_member(self) -> None:
         from pcapkit.protocols.internet.icmp.protocol import ICMP

@@ -1578,7 +1578,7 @@ class IGMPDispatchTests(unittest.TestCase):
             IGMP.from_fields(version=1, qrv=2, qqic=125)
 
     def test_a_version_class_takes_version_only_as_its_own(self) -> None:
-        """Building, ``version`` must be the class's; parsing, it is handed on unread."""
+        """Building or parsing, ``version`` must be the class's (#2840)."""
         from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
         from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
         from pcapkit.utilities.exceptions import ProtocolError
@@ -1588,10 +1588,15 @@ class IGMPDispatchTests(unittest.TestCase):
             IGMPv1.from_fields(version=2)
         with self.assertRaisesRegex(ProtocolError, '^IGMPv2: version=3 names another member$'):
             IGMPv2.from_fields(version=3, max_resp_time=100)
-        # NOTE: The enclosing IP layer passes its own version, ``4``, under the
-        # same name, as ``test_ipv4_dispatches_igmp_to_each_version`` relies on.
         packet = IGMP_PACKETS['v2-report'][0]
-        self.assertEqual(IGMPv2(packet, version=4).data, packet)
+        with self.assertRaisesRegex(ProtocolError, '^IGMP: invalid version: 4$'):
+            IGMPv2(packet, version=4)
+        with self.assertRaisesRegex(ProtocolError, '^IGMPv2: version=3 names another member$'):
+            IGMPv2(packet, version=3)
+        self.assertEqual(IGMPv2(packet, version=2).data, packet)
+        # NOTE: The enclosing IP layer's own version, ``4``, takes the private channel,
+        # as ``test_ipv4_dispatches_igmp_to_each_version`` relies on.
+        self.assertEqual(IGMPv2._from_parent(packet, len(packet), version=4).data, packet)  # pylint: disable=protected-access
 
     def test_version_is_in_the_data_model_only(self) -> None:
         """Each data model carries ``version``; no octet does, and every round trip keeps it (#2574)."""
@@ -1665,7 +1670,7 @@ class IGMPDispatchTests(unittest.TestCase):
         # NOTE: A subclass outside the members states a version of its own, as
         # every IGMP class does, and takes no other in ``version``.
         with self.assertRaisesRegex(ProtocolError, '^Custom: version=1 names another member$'):
-            Custom(type=0x16, group='239.1.2.3', version=1)
+            Custom.from_fields(type=0x16, group='239.1.2.3', version=1)
 
     def test_ipv4_dispatches_igmp_to_each_version(self) -> None:
         from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1

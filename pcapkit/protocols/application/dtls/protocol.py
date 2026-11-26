@@ -47,11 +47,11 @@ The connection IDs a :class:`DTLSContext` learns belong to that instance. A
 new instance starts with none, and one the caller reuses keeps what it has
 learned. An extraction given none gets its own in its own registry, so it
 carries what its handshakes negotiate across its capture and no further.
-A registry passed as ``__context__`` to several parses carries its instance
+A registry passed as ``context`` to several parses carries its instance
 across them.
 
 A rebuild parses each layer's octets again, so ``from_data`` takes the same
-``__context__``. Without it the octets still rebuild exactly, and
+``context``. Without it the octets still rebuild exactly, and
 ``DTLS.from_data`` keeps its chain, but a record with a connection ID under a
 rebuilt UDP layer reads as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
 

@@ -28,13 +28,19 @@ The built-in families, those bases included, derive from
 
    A protocol is constructed with :meth:`~Protocol.from_fields`, whose unknown
    keyword raises :exc:`~pcapkit.utilities.exceptions.UnexpectedKeyword`, a
-   :exc:`TypeError` too, and every ``make`` takes its fields as keywords only
+   :exc:`TypeError` too, and every ``make`` takes its fields as keywords only.
+   Calling the class parses only, through a closed signature, so Python refuses
+   an unknown keyword, and :meth:`~Protocol.analyze` takes the same keywords
    (:issue:`2840`).
 
 .. versionremoved:: 1.8.0
 
    ``Protocol.__reconstructing__``, with no replacement: :meth:`~Protocol.from_data`
    no longer runs :meth:`~Protocol.__init__` (:issue:`2840`).
+
+   ``pcapkit.protocols.protocol.OUT_OF_BAND_KEYWORDS``, the keywords
+   ``Proto(**fields)`` took beyond the fields, with that call: build with
+   :meth:`~Protocol.from_fields`, which takes ``context`` (:issue:`2840`).
 
 .. autoclass:: pcapkit.protocols.protocol.Protocol
    :no-members:
@@ -96,6 +102,8 @@ The built-in families, those bases included, derive from
    .. automethod:: _packing_target
    .. automethod:: _construction_member
    .. automethod:: _initialise
+   .. automethod:: _start_parse
+   .. automethod:: _parse
 
    .. automethod:: _read_unpack
    .. automethod:: _read_octets
@@ -125,9 +133,12 @@ The built-in families, those bases included, derive from
    .. automethod:: _import_next_layer
    .. automethod:: _empty_next_layer
    .. automethod:: _parse_next_layer
+   .. automethod:: _analyze_from_parent
    .. automethod:: _analyze_next_layer
    .. automethod:: _from_parent
    .. automethod:: _next_layer_state
+   .. automethod:: _analyze_stop
+   .. automethod:: _check_stops
    .. automethod:: _get_context
 
    .. autoattribute:: _data
@@ -162,20 +173,21 @@ Parsing and Construction
 ------------------------
 
 Parsing and construction, :meth:`~Protocol.from_schema`, :meth:`~Protocol.from_fields`
-and :meth:`~Protocol.from_data` included, end in one path:
+and :meth:`~Protocol.from_data` included, end in one path. Calling the class parses;
+``from_fields`` and ``from_data`` construct:
 
 .. mermaid::
 
    flowchart TD
        FS["from\_schema(schema)"] -->|"\_\_header\_\_ = schema,<br/>then its octets"| P
-       P["Proto(file, length, ...)<br/>parse"] --> INIT
-       C["Proto(field=value, ...)"] --> INIT
-       INIT["\_\_init\_\_<br/>consumes \_layer, \_protocol and \_\_context\_\_"]
+       P["Proto(file, length, /, *,<br/>layer, protocol, context)"] --> INIT
+       INIT["\_\_init\_\_, or an override taking keywords of its own"] --> START
+       START["\_start\_parse<br/>refuses no octets, checks the stops,<br/>takes \_\_next\_layer\_\_ over the keywords"]
        FF["from\_fields(field=value, ...)<br/>construct"] --> MEM
        FD["from\_data(data)"] -->|"\_make\_data(data) gives the fields"| MEM
        MEM["\_construction\_member<br/>a versioned family's base picks its member"] --> CHK
-       INIT -->|construct| CHK["\_check\_construction\_keywords<br/>an undeclared keyword: UnexpectedKeyword,<br/>or a warning for one \_make\_data gives"]
-       INIT -->|parse| IN
+       CHK["\_check\_construction\_keywords<br/>an undeclared keyword: UnexpectedKeyword,<br/>or a warning for one \_make\_data gives"]
+       START --> IN
        CHK --> IN["\_initialise<br/>the stops and the context"]
        IN -->|construct| PACK["\_\_post\_init\_\_: pack(...)<br/>make() gives the schema, kept as \_\_header\_\_,<br/>and its octets"]
        IN -->|parse| OCT["\_\_post\_init\_\_: the octets given,<br/>or file.read(length)"]
@@ -193,6 +205,7 @@ and :meth:`~Protocol.from_data` included, end in one path:
        click FD "protocol.html#pcapkit.protocols.protocol.Protocol.from_data"
        click MEM "protocol.html#pcapkit.protocols.protocol.Protocol._construction_member"
        click INIT "protocol.html#pcapkit.protocols.protocol.Protocol.__init__"
+       click START "protocol.html#pcapkit.protocols.protocol.Protocol._start_parse"
        click IN "protocol.html#pcapkit.protocols.protocol.Protocol._initialise"
        click PACK "protocol.html#pcapkit.protocols.protocol.Protocol.pack"
        click UNP "protocol.html#pcapkit.protocols.protocol.Protocol.unpack"
@@ -201,6 +214,12 @@ and :meth:`~Protocol.from_data` included, end in one path:
 A rebuild of a header the capture cut short drops the header :meth:`~Protocol.pack`
 made, so :meth:`~Protocol.unpack` parses its octets back (:issue:`2761`), and inside a
 payload being rebuilt the parse's warnings are held and dropped (:issue:`2711`).
+
+A next layer is parsed through :meth:`~Protocol._from_parent`, which calls the class
+as a caller would, with the stops and the context, and puts the state the enclosing
+layer hands on, keyed as :data:`_NEXT_LAYER_KEYWORDS`, on
+:attr:`~Protocol.__next_layer__` for :meth:`~Protocol._start_parse` to take, so it
+reaches the hooks and never the public signature (:issue:`2840`).
 
 .. _protocol-next-layer-dispatch:
 
@@ -371,6 +390,8 @@ Internal Definitions
                   _packing_target
                   _construction_member
                   _initialise
+                  _start_parse
+                  _parse
                   _read_unpack
                   _read_octets
                   _read_uint
@@ -395,9 +416,12 @@ Internal Definitions
                   _decode_next_layer
                   _import_next_layer
                   _parse_next_layer
+                  _analyze_from_parent
                   _analyze_next_layer
                   _from_parent
                   _next_layer_state
+                  _analyze_stop
+                  _check_stops
                   _get_context
                   __init__
                   __post_init__
@@ -420,7 +444,8 @@ Internal Definitions
       :meth:`~Protocol._make_data`,
       :meth:`~Protocol._make_index`, :meth:`~Protocol._make_payload`,
       :meth:`~Protocol._packing_target`, :meth:`~Protocol._construction_member`,
-      :meth:`~Protocol._initialise`, :meth:`~Protocol._read_unpack`,
+      :meth:`~Protocol._initialise`, :meth:`~Protocol._start_parse`,
+      :meth:`~Protocol._parse`, :meth:`~Protocol._read_unpack`,
       :meth:`~Protocol._read_octets`, :meth:`~Protocol._read_uint`,
       :meth:`~Protocol._read_sint`, :meth:`~Protocol._read_vector`,
       :meth:`~Protocol._read_whole_vector`, :meth:`~Protocol._read_uints`,
@@ -434,8 +459,10 @@ Internal Definitions
       :meth:`~Protocol._lookup_registry`, :meth:`~Protocol._lookup_next_layer`,
       :meth:`~Protocol._decode_next_layer`,
       :meth:`~Protocol._import_next_layer`,
-      :meth:`~Protocol._parse_next_layer`, :meth:`~Protocol._analyze_next_layer`,
+      :meth:`~Protocol._parse_next_layer`, :meth:`~Protocol._analyze_from_parent`,
+      :meth:`~Protocol._analyze_next_layer`,
       :meth:`~Protocol._from_parent`, :meth:`~Protocol._next_layer_state`,
+      :meth:`~Protocol._analyze_stop`, :meth:`~Protocol._check_stops`,
       :meth:`~Protocol._get_context`,
       :meth:`~Protocol.__init__`, :meth:`~Protocol.__post_init__`,
       :meth:`~Protocol.__repr__`, :meth:`~Protocol.__str__`,
@@ -480,16 +507,21 @@ Internal Definitions
 
    .. autoproperty:: registry
 
-.. autodata:: pcapkit.protocols.protocol.OUT_OF_BAND_KEYWORDS
+.. autodata:: pcapkit.protocols.protocol._LAYERS
    :no-value:
 
 .. autodata:: pcapkit.protocols.protocol._NEXT_LAYER_KEYWORDS
+   :no-value:
+
+.. autodata:: pcapkit.protocols.protocol._analyze_state
    :no-value:
 
 .. autodata:: pcapkit.protocols.protocol._KEYWORD_CONSUMERS
    :no-value:
 
 .. autofunction:: pcapkit.protocols.protocol._declared_keywords
+
+.. autofunction:: pcapkit.protocols.protocol._nothing_to_parse
 
 Type Variables
 --------------

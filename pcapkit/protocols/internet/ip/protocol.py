@@ -27,13 +27,16 @@ protocol family [*]_, e.g.
 from typing import TYPE_CHECKING, Generic, cast
 
 from pcapkit.protocols.internet.internet import Internet
-from pcapkit.protocols.protocol import _PT, _ST
+from pcapkit.protocols.protocol import _PT, _ST, _nothing_to_parse
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
-    from typing import IO, Any, Optional, Type
+    from typing import IO, Any, Iterable, Mapping, Optional, Type
 
     from typing_extensions import Literal, Self
+
+    from pcapkit.corekit.context import ContextRegistry, ProtocolContext
+    from pcapkit.protocols.protocol import ProtocolBase
 
 __all__ = ['IP']
 
@@ -101,50 +104,50 @@ class IP(Internet[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-met
     # Data models.
     ##########################################################################
 
-    def __init__(self, file: 'Optional[IO[bytes] | bytes]' = None,
-                 length: 'Optional[int]' = None, *,
-                 version: 'Optional[Literal[4, 6]]' = None, **kwargs: 'Any') -> 'None':
-        """Initialisation.
+    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = None, /, *,  # pylint: disable=super-init-not-called
+                 version: 'Optional[Literal[4, 6]]' = None,
+                 layer: 'Optional[str]' = None,
+                 protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                 ) -> 'None':
+        """Parse a protocol instance from its octets.
 
         Args:
             file: Source packet stream.
             length: Length of packet data.
             version: Version of IP, ``4`` or ``6``: the member :meth:`__new__`
-                picks. Building from fields, it must be this class's own. Parsing,
-                it is handed on unread, as the enclosing IP layer passes its own
-                version under this name to the layer it carries.
-            **kwargs: As :meth:`Protocol.__init__
+                picks, which must be this class's own.
+            layer: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            protocol: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            context: As :meth:`Protocol.__init__
                 <pcapkit.protocols.protocol.Protocol.__init__>`.
 
         Raises:
-            ProtocolError: If, building from fields, ``version`` names neither
-                member, or is not this class's own version: that of the member
-                it is or derives from, which a subclass outside the members
-                does not have.
+            ProtocolError: If ``version`` names neither member, or is not this
+                class's own version: that of the member it is or derives from,
+                which a subclass outside the members does not have.
+
+        .. versionchanged:: 1.8.0
+
+           Parses only, and ``version`` is checked against the member, as
+           :meth:`from_fields` checks it (:issue:`2840`).
 
         """
-        if file is not None:
-            if version is not None:
-                kwargs['version'] = version
-        elif version is not None and not isinstance(self, self._member_of_version(version)):
-            from pcapkit.protocols.internet.ipv4.protocol import IPv4  # isort: skip # pylint: disable=import-outside-toplevel
-            from pcapkit.protocols.internet.ipv6.protocol import IPv6  # isort: skip # pylint: disable=import-outside-toplevel
-
-            if not isinstance(self, (IPv4, IPv6)):
-                raise ProtocolError(f'{type(self).__name__}: no version of its own to match '
-                                    f'version={version!r}')
-            raise ProtocolError(f'{type(self).__name__}: version={version!r} names another member')
-        super().__init__(file, length, **kwargs)  # type: ignore[arg-type]
+        if version is not None:
+            type(self)._construction_member({'version': version})
+        # NOTE: ``_parse``, as the base's ``__init__`` takes no ``version`` (#2840).
+        self._parse(file, length, layer=layer, protocol=protocol, context=context)
 
     def __new__(cls, file: 'Optional[IO[bytes] | bytes]' = None,
                 length: 'Optional[int]' = None, **kwargs: 'Any') -> 'IP':
-        """Create the member a construction of this class describes.
+        """Create the member a parse of this class describes.
 
-        The ``version`` keyword names the member, on either path. Without it,
-        parsing octets gives the member the Version field in their first four
-        bits names, and building from fields is refused, since no field picks a
-        member. That member's ``__init__`` then runs with the same arguments. A
-        subclass of this class is created as itself.
+        The ``version`` keyword names the member. Without it, the octets give the
+        member the Version field in their first four bits names. That member's
+        ``__init__`` then runs with the same arguments. A subclass of this class
+        is created as itself.
 
         Args:
             file: Source packet stream, read here without being consumed.
@@ -155,17 +158,17 @@ class IP(Internet[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-met
             An uninitialised instance of the member.
 
         Raises:
+            TypeError: If ``file`` is :obj:`None`, on this class.
             ProtocolError: If ``version`` names neither member; or, without it,
-                if building from fields, or if the octets are empty or name
-                neither version.
+                if the octets are empty or name neither version.
 
         """
         if cls is not IP:
             return super().__new__(cls, file, length, **kwargs)
+        if file is None:
+            raise _nothing_to_parse(IP)
         version = kwargs.get('version')
         if version is None:
-            if file is None:
-                raise ProtocolError('IP: no version to build with; pass version=4 or version=6')
             if isinstance(file, bytes):
                 head = file[:1]
             else:

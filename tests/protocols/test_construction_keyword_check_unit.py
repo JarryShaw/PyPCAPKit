@@ -42,20 +42,19 @@ keyword declared only by ``read`` travels through ``make`` as well.
 :class:`ForwardedKeywordTests` is where it is pinned; rejecting on ``make``'s
 signature alone would reject correct code.
 
-These are left alone on purpose, and each has a test saying so:
+Two things are outside it, and each has a test saying so:
 
-:meth:`ScopeTests.test_the_parse_path_is_unaffected`
-    Parsing. There the keywords are not field values but whatever the engines and
-    the ``_import_next_layer`` implementations forward -- ``alias``,
-    ``packet``, and the parse limits -- and a protocol cannot know which of its
-    ancestors' keywords its parent chose to pass on. Nothing was ever lost that
-    way either: a dropped parse keyword changes how a packet is read, not what
-    the octets say.
+:meth:`ScopeTests.test_the_parse_path_refuses_an_unknown_keyword`
+    Parsing. ``Proto(file, length, /, *, layer, protocol, context)`` has a
+    closed signature, so Python itself refuses an unknown parse keyword with a
+    :exc:`TypeError`, and the state the engines and the
+    ``_import_next_layer`` implementations hand on -- ``alias``, ``packet`` and
+    the rest -- travels through ``_from_parent`` instead (#2840).
 
-:meth:`ScopeTests.test_out_of_band_keywords_are_accepted_while_constructing`
-    The out-of-band keywords, which configure the call rather than naming a
-    field and are consumed before any ``make`` sees them. ``Proto(**fields)``
-    takes them, and ``from_fields`` does not (#2840).
+:meth:`ScopeTests.test_out_of_band_keywords_are_refused_while_constructing`
+    The out-of-band keywords ``_layer``, ``_protocol`` and ``__context__``,
+    which configured a ``Proto(**fields)`` call. That call is gone, and
+    ``from_fields`` refuses them and takes ``context`` (#2840).
 
 And one thing is softened rather than left alone, in :class:`ReconstructionTests`:
 :meth:`ProtocolBase.from_data <pcapkit.protocols.protocol.ProtocolBase.from_data>`
@@ -490,23 +489,23 @@ class ForwardedKeywordTests(unittest.TestCase):
 class ScopeTests(unittest.TestCase):
     """What the check deliberately leaves alone."""
 
-    def test_the_parse_path_is_unaffected(self) -> None:
-        """Dissection still tolerates a keyword nothing declares.
+    def test_the_parse_path_refuses_an_unknown_keyword(self) -> None:
+        """Dissection refuses a keyword its signature does not declare (#2840).
 
-        The engines and every ``_import_next_layer`` forward ``alias``,
-        ``packet`` and the parse limits down a chain whose members cannot know
-        what their parents chose to pass on, so rejecting there would break
-        dissection rather than catch a misspelling -- and nothing is lost either
-        way, because a dropped parse keyword changes how a packet is read, not
-        what its octets say.
+        The signature is closed, so the refusal is Python's own :exc:`TypeError`.
+        The state the engines and every ``_import_next_layer`` hand down a chain
+        -- ``alias`` among it -- takes ``_from_parent``, which still delivers it.
 
         """
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
         octets = bytes(TCP.from_fields(**GOOD_HEADER))
-        parsed = TCP(io.BytesIO(octets), len(octets),
-                     no_such_field=1, alias='whatever')
+        for keyword in ('no_such_field', 'alias'):
+            with self.subTest(keyword=keyword), \
+                    self.assertRaisesRegex(TypeError, f"unexpected keyword argument '{keyword}'"):
+                TCP(io.BytesIO(octets), len(octets), **{keyword: 1})
 
+        parsed = TCP._from_parent(io.BytesIO(octets), len(octets), alias='whatever')
         self.assertEqual(parsed.info.seq, 1)
         self.assertEqual(parsed.info.srcport.port, 50000)
 
@@ -541,31 +540,30 @@ class ScopeTests(unittest.TestCase):
         self.assertFalse(hasattr(schema, 'offst'))
         self.assertEqual([str(item.message) for item in caught], [])
 
-    def test_out_of_band_keywords_are_accepted_while_constructing(self) -> None:
-        """The keywords that configure the call rather than naming a field.
+    def test_out_of_band_keywords_are_refused_while_constructing(self) -> None:
+        """The keywords that configured a ``Proto(**fields)`` call are gone with it (#2840).
 
-        ``_layer``, ``_protocol``, ``__context__`` and ``__packet__`` are
-        consumed by :meth:`ProtocolBase.__init__
-        <pcapkit.protocols.protocol.ProtocolBase.__init__>` or by the schema
-        layer, so no ``make`` declares them and ``Proto(**fields)`` has to know
-        them by name, ``packet`` with them. A regression here would refuse a
-        caller that is setting a parse limit on something it is constructing.
-        :meth:`ProtocolBase.from_fields
-        <pcapkit.protocols.protocol.ProtocolBase.from_fields>` takes ``context``
-        and refuses the rest but ``__packet__`` (#2840).
+        ``Proto(**fields)`` no longer constructs: ``__init__`` takes octets. So
+        ``_layer``, ``_protocol`` and ``__context__``, which configured that call
+        rather than naming a field, are refused by :meth:`ProtocolBase.from_fields
+        <pcapkit.protocols.protocol.ProtocolBase.from_fields>`, which takes
+        ``context``, and ``OUT_OF_BAND_KEYWORDS`` that listed them is removed.
+        ``__packet__``, which the schema layer reads, is still taken.
 
         """
-        from pcapkit.protocols.protocol import OUT_OF_BAND_KEYWORDS
+        import pcapkit.protocols.protocol as module
         from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.utilities.exceptions import UnexpectedKeyword
 
-        segment = TCP(**GOOD_HEADER, _layer='Internet', _protocol='tcp',
-                      __context__=None, __packet__={})
+        with self.assertRaises(TypeError):
+            TCP(**GOOD_HEADER)
+        for keyword in ('_layer', '_protocol', '__context__'):
+            with self.subTest(keyword=keyword), self.assertRaises(UnexpectedKeyword):
+                TCP.from_fields(**GOOD_HEADER, **{keyword: None})
 
+        segment = TCP.from_fields(**GOOD_HEADER, context=None, __packet__={})
         self.assertEqual(segment.info.seq, 1)
-        self.assertEqual(segment._exlayer, 'Internet')
-        self.assertEqual(
-            OUT_OF_BAND_KEYWORDS,
-            frozenset({'_layer', '_protocol', '__context__', '__packet__', 'packet'}))
+        self.assertFalse(hasattr(module, 'OUT_OF_BAND_KEYWORDS'))
 
     def test_from_data_survives_the_injected_packet_keyword(self) -> None:
         """Rebuilding a parsed packet is not a caller misspelling something.
@@ -578,7 +576,7 @@ class ScopeTests(unittest.TestCase):
         that matters, because :meth:`ProtocolBase._make_payload
         <pcapkit.protocols.protocol.ProtocolBase._make_payload>` reaches it for the
         innermost layer of every packet: refusing ``packet`` breaks ``from_data``
-        for all of them. Measured with ``packet`` not out-of-band::
+        for all of them. Measured with ``_make_data`` keeping it::
 
             UnsupportedCall: NoPayload: unexpected keyword(s): 'packet'
 

@@ -97,6 +97,7 @@ which implements an extractor for PCAP-NG file format [*]_, and the
 
    .. rubric:: Data Models
 
+   .. automethod:: __init__
    .. automethod:: __post_init__
    .. automethod:: __length_hint__
    .. automethod:: __index__

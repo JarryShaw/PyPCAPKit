@@ -4,8 +4,8 @@
 * ``Transport.analyze`` looks the payload up by the port ``_decode_next_layer`` does: the
   lower one, unless only the higher one is registered.
 * A reassembled IP payload gets the datagram's addresses and IP version, as a frame's IP
-  layer hands its next layer, through ``_from_parent``; so does a payload ``analyze`` is
-  also given a keyword for its constructor.
+  layer hands its next layer, through ``_analyze_from_parent`` and ``_from_parent``, which
+  ``analyze``'s closed keywords leave the only route (#2840).
 * ``IPv6.analyze`` keeps a payload raw past a stop at the Fragment header it follows.
 
 Every capture is built in memory, as PCAP and as PCAP-NG; no sample capture is read.
@@ -180,7 +180,7 @@ class StateTests(_Case):
                     self.assertEqual({key: state['packet'][key] for key in ('src', 'dst')},
                                      {key: whole['packet'][key] for key in ('src', 'dst')})
 
-    def test_the_state_takes_the_channel_beside_a_constructor_keyword(self) -> None:
+    def test_the_state_takes_the_channel(self) -> None:
         """``IGMP.__new__`` does not read the enclosing IP ``version`` as its own (#2840)."""
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
@@ -191,10 +191,13 @@ class StateTests(_Case):
         whole = IPv4(_ipv4(octets, 2, df=True)[14:]).payload
         self.assertIs(type(whole), IGMPv2)
         with _spy(IGMPv2) as calls:
-            packet = IPv4.analyze(TransType.IGMP, octets, version=4, unread=True)
+            packet = IPv4._analyze_from_parent(TransType.IGMP, octets, version=4)  # pylint: disable=protected-access
         self.assertIs(type(packet), IGMPv2)
         self.assertEqual(packet.info, whole.info)
-        self.assertEqual((calls[0]['version'], calls[0]['unread']), (4, True))
+        self.assertEqual(calls[0]['version'], 4)
+        # NOTE: ``analyze`` takes the stops and the context alone.
+        with self.assertRaisesRegex(TypeError, "unexpected keyword argument 'version'"):
+            IPv4.analyze(TransType.IGMP, octets, version=4)
 
 
 class StopTests(_Case):

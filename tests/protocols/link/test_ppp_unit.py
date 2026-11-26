@@ -101,9 +101,10 @@ class TestPPP(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def _parse(self, data: bytes, **kwargs):  # type: ignore[no-untyped-def]
+    def _parse(self, data: bytes, **state):  # type: ignore[no-untyped-def]
+        """``data`` parsed as PPP, ``state`` as a frame's link layer hands it on."""
         from pcapkit.protocols.link.ppp.protocol import PPP
-        return PPP(data, len(data), **kwargs)
+        return PPP._from_parent(data, len(data), **state)  # pylint: disable=protected-access
 
     def _assert_rebuilds(self, layer) -> None:  # type: ignore[no-untyped-def]
         """``layer`` rebuilds byte-exactly from its info, and from ``info.to_dict()``."""

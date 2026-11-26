@@ -310,12 +310,20 @@ implementation is :mod:`pcapkit.protocols.internet.ipv4.protocol`:
    dispatcher's subclasses stay checked. Prefer a declared parameter to either,
    since it also documents the keyword.
 
-   Parsing is unaffected. :meth:`Protocol.from_data
-   <pcapkit.protocols.protocol.Protocol.from_data>` checks its caller's keywords
-   as strictly, ``context`` aside, but only warns with
+   :meth:`Protocol.from_data <pcapkit.protocols.protocol.Protocol.from_data>`
+   checks its caller's keywords as strictly, ``context`` aside, but only warns with
    :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for a key from your
    ``_make_data``, a disagreement between two of your own mappings rather than a
    caller's typo.
+
+   Parsing takes no field: calling the class is ``Proto(file, length, /, *, layer,
+   protocol, context)``, and Python refuses any other keyword. A parse that needs
+   an input of its own declares it on an ``__init__`` override, keyword-only and
+   before the stops, as :meth:`DNS.__init__
+   <pcapkit.protocols.application.dns.protocol.DNS.__init__>` declares ``framed``,
+   and calls :meth:`Protocol._parse <pcapkit.protocols.protocol.Protocol._parse>`.
+   What the layer carrying yours hands on, such as ``alias`` and ``packet``,
+   reaches your hooks as keywords, never the signature (:issue:`2840`).
 
    .. warning::
 

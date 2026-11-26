@@ -239,10 +239,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
             self._bound_read_ahead()
             block = P_PCAPNG(ext._ifile, num=ext._frnum+1, sct=len(self._ctx_list),
                              ctx=self._ctx, layer=ext._exlyr, protocol=ext._exptl,
-                             __context__=ext._exctx,
-                             __packet__={
-                                 'snaplen': self._get_snaplen(),
-                             })
+                             context=ext._exctx)
 
             # check block type
             if block.info.type == Enum_BlockType.Section_Header_Block:
@@ -484,20 +481,3 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         tag = self.PACKET_BLOCK_TYPES.get(block_type)
         if tag is not None:
             raise FormatError(f'PCAP-NG: [{tag}] section has no interface description block')
-
-    def _get_snaplen(self) -> 'int':
-        """Get snapshot length from the current context.
-
-        This method is used for providing the snapshot length to the ``__packet__``
-        argument when parsing a Simple Packet Block (SPB).
-
-        Notes:
-            If there is no interface, or interface 0's snaplen is zero, which
-            means no limit, return ``0xFFFF_FFFF_FFFF_FFFF``. A zero passed
-            through reads as a limit of no octets, and the block's padding
-            then becomes packet data (:issue:`1558`).
-
-        """
-        if self._ctx.interfaces and self._ctx.interfaces[0].snaplen:
-            return self._ctx.interfaces[0].snaplen
-        return 0xFFFF_FFFF_FFFF_FFFF

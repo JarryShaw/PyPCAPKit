@@ -86,7 +86,7 @@ def ip_datagram(datagram: 'IP_Datagram', *,
         return None
     klass = IPv6 if isinstance(datagram.id.src, IPv6Address) else IPv4
     # NOTE: Only those set, as the engine hands them (``EngineBase._setup_reassembly``).
-    options = (('layer', layer), ('protocol', protocol), ('__context__', context))
+    options = (('layer', layer), ('protocol', protocol), ('context', context))
     kwargs = {name: value for (name, value) in options if value is not None}  # type: dict[str, Any]
     return _analyze_payload(klass, datagram.id.proto, datagram.payload,
                             packet={'src': datagram.id.src, 'dst': datagram.id.dst}, **kwargs)
@@ -109,11 +109,12 @@ def _analyze_payload(protocol: 'Type[IP_Protocol]', proto: 'TransType',
         proto: The payload protocol type.
         payload: The reassembled payload.
         packet: The datagram's ``src`` and ``dst``. They and their IP version,
-            as ``version``, go to the ``analyze`` of a
-            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass, which
-            hands them to the payload as a frame's IP layer hands its next
+            as ``version``, go to a
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass's
+            :meth:`~pcapkit.protocols.protocol.ProtocolBase._analyze_from_parent`,
+            which hands them to the payload as a frame's IP layer hands its next
             layer; any other analyser, as a custom ``__protocol_type__`` may
-            be, is called without them (:issue:`2945`).
+            be, has its ``analyze`` called without them (:issue:`2945`).
         **kwargs: Keyword arguments for ``analyze``: the stops and context
             the engine parses its frames with, which the reassembly hands on,
             or those :func:`ip_datagram` is given.
@@ -123,6 +124,7 @@ def _analyze_payload(protocol: 'Type[IP_Protocol]', proto: 'TransType',
 
     """
     if packet is not None and isinstance(protocol, type) and issubclass(protocol, ProtocolBase):
-        # NOTE: Next-layer state, which ``analyze`` hands on through ``_from_parent`` (#2945).
-        kwargs.update(packet=dict(packet), version=packet['dst'].version)
+        # NOTE: Next-layer state, which takes the private route ``analyze`` closes (#2840, #2945).
+        return protocol._analyze_from_parent(proto, payload, packet=dict(packet),  # pylint: disable=protected-access
+                                             version=packet['dst'].version, **kwargs)
     return protocol.analyze(proto, payload, **kwargs)

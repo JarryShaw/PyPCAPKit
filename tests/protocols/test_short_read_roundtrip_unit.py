@@ -157,7 +157,8 @@ class TestShortReadRoundTrip(unittest.TestCase):
                     with warnings.catch_warnings():
                         warnings.simplefilter('ignore')
                         try:
-                            proto = cls(raw, len(raw), **kwargs)
+                            # NOTE: A case's keywords are state the enclosing layer hands on (#2840).
+                            proto = cls._from_parent(raw, len(raw), **kwargs)  # pylint: disable=protected-access
                         except BaseError:
                             continue
                         self.assertEqual(proto.data, raw)

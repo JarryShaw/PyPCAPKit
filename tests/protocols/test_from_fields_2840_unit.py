@@ -5,7 +5,7 @@ The owner took the plan on #2840 that splits parsing from construction. This
 module pins the construct side:
 
 * :class:`FromFieldsTests` -- :meth:`~pcapkit.protocols.protocol.Protocol.from_fields`
-  builds the octets ``Proto(**fields)`` builds, refuses a parse keyword, a stop,
+  builds every edge round trip's case, refuses a parse keyword, a stop,
   ``__context__`` and an undeclared ``packet`` with
   :exc:`~pcapkit.utilities.exceptions.UnexpectedKeyword`, which is a
   :exc:`TypeError` as well, takes ``context``, and hands a field named like a stop
@@ -17,8 +17,8 @@ module pins the construct side:
   ``context`` by name, refuses ``__context__`` and the stops, warns on a key its
   ``_make_data`` gives, and the default ``_make_data`` leaves out an undeclared
   ``packet``;
-* :class:`LegacyConstructionTests` -- ``Proto(**fields)`` keeps the keywords it
-  took, the out-of-band ones included, until the parse side closes ``__init__``.
+* :class:`NoLegacyConstructionTests` -- ``Proto(**fields)`` no longer constructs,
+  and the out-of-band keywords it took are gone with it.
 
 This module is unit tier: it constructs its own octets and reads no capture.
 
@@ -81,15 +81,18 @@ class FromFieldsTests(unittest.TestCase):
     def setUp(self) -> 'None':
         reimport_once_per_class(self)
 
-    def test_from_fields_builds_what_the_constructor_builds(self) -> 'None':
-        """Each edge ``MakeCase`` gives the same octets either way."""
+    def test_from_fields_is_the_only_constructor(self) -> 'None':
+        """Each edge ``MakeCase`` builds through ``from_fields``, and the constructor refuses it."""
         cases = _make_cases()
         self.assertTrue(cases)
         for case in cases:
             with self.subTest(case=case.label), warnings.catch_warnings():
                 warnings.simplefilter('ignore')
                 cls = edge.resolve(case.cls)
-                self.assertEqual(cls.from_fields(**case.kwargs).data, cls(**case.kwargs).data)
+                built = cls.from_fields(**case.kwargs)
+                self.assertEqual(cls(built.data, len(built.data)).data, built.data)
+                with self.assertRaises(TypeError):
+                    cls(**case.kwargs)
 
     def test_parse_keywords_stops_and_the_old_context_are_refused(self) -> 'None':
         """Each is refused by name, with the closest keyword it may have meant."""
@@ -159,7 +162,7 @@ class FromFieldsTests(unittest.TestCase):
                                 payload=b'plaintext', context=registry)
         wire = bytes(built)
         self.assertEqual(wire[-16:], hmac.new(ESP_KEY, wire[:-16], hashlib.sha256).digest()[:16])
-        self.assertEqual(ESP(wire, len(wire), __context__=registry).info.plaintext, b'plaintext')
+        self.assertEqual(ESP(wire, len(wire), context=registry).info.plaintext, b'plaintext')
 
         with self.assertRaisesRegex(ProtocolError, 'no security association for SPI'):
             ESP.from_fields(spi=0x77, seq=1, next=TransType.UDP, encrypt=True, payload=b'plaintext')
@@ -210,7 +213,7 @@ class VersionedBaseTests(unittest.TestCase):
                                     (LinuxSLL1, 1, {}), (L2TPv2, 2, {}), (HTTPv1, 1, {'method': 'GET', 'uri': '/'})):
             with self.subTest(own=member.__name__):
                 self.assertEqual(member.from_fields(version=own, **fields).data, member.from_fields(**fields).data)
-        self.assertEqual(IP.from_fields(version=4).data, IPv4(version=4).data)
+        self.assertEqual(IP.from_fields(version=4).data, IPv4.from_fields().data)
 
     def test_a_missing_or_foreign_version_is_refused(self) -> 'None':
         """No version through a base; another member's version on a member."""
@@ -361,31 +364,46 @@ class FromDataTests(unittest.TestCase):
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
-class LegacyConstructionTests(unittest.TestCase):
-    """``Proto(**fields)`` keeps the keywords it took (#2840, decision 11)."""
+class NoLegacyConstructionTests(unittest.TestCase):
+    """``Proto(**fields)`` no longer constructs, now ``__init__`` parses only (#2840)."""
 
     def setUp(self) -> 'None':
         reimport_once_per_class(self)
 
-    def test_out_of_band_and_init_keywords_still_build(self) -> 'None':
-        """The stops, ``__context__``, ``packet`` and a base's ``version`` are taken."""
+    def test_fields_and_out_of_band_keywords_are_refused(self) -> 'None':
+        """Python refuses them as unknown keywords of the parse signature."""
+        from pcapkit.protocols.internet.esp.protocol import ESP
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        legacy = TCP(**TCP_FIELDS, _layer='Internet', _protocol='tcp', __context__=None,
-                     __packet__={}, packet=b'dropped')
-        self.assertEqual(legacy.data, TCP.from_fields(**TCP_FIELDS).data)
-        self.assertEqual(IPv4(version=4).data, IPv4.from_fields().data)
+        calls = (
+            (TCP, TCP_FIELDS),
+            (TCP, {'_layer': 'Internet'}),
+            (TCP, {'_protocol': 'tcp'}),
+            (TCP, {'__context__': None}),
+            (TCP, {'packet': b'dropped'}),
+            (TCP, {'__packet__': {}}),
+            (ESP, {'spi': 0x77, 'encrypt': True}),
+        )
+        for cls, kwargs in calls:
+            key = next(iter(kwargs))
+            # NOTE: CPython names the first unexpected keyword; PyPy counts several.
+            message = f"unexpected keyword argument '{key}'"
+            if len(kwargs) > 1:
+                message = f'{message}|got {len(kwargs)} unexpected keyword arguments'
+            with self.subTest(key=key), self.assertRaisesRegex(TypeError, message):
+                cls(**kwargs)
 
-    def test_each_path_suggests_the_context_keyword_it_takes(self) -> 'None':
-        """``Proto(**fields)`` takes ``__context__``, and ``from_fields`` and ``from_data`` ``context``."""
+        with self.assertRaisesRegex(TypeError, r"^IPv4: nothing to parse; build one with IPv4\.from_fields\(\)$"):
+            IPv4(None, version=4)
+
+    def test_from_fields_and_from_data_suggest_context(self) -> 'None':
+        """The context keyword they take is the one a misspelling is pointed to."""
         from pcapkit.protocols.transport.udp.protocol import UDP
         from pcapkit.utilities.exceptions import UnexpectedKeyword
 
         info = UDP.from_fields().info
         cases = (
-            (lambda: UDP(context=None), 'context', '__context__'),
-            (lambda: UDP(contxt=1), 'contxt', '__context__'),
             (lambda: UDP.from_fields(__context__=None), '__context__', 'context'),
             (lambda: UDP.from_fields(contxt=1), 'contxt', 'context'),
             (lambda: UDP.from_data(info, __context__=None), '__context__', 'context'),
@@ -397,25 +415,13 @@ class LegacyConstructionTests(unittest.TestCase):
                 self.assertEqual(str(caught.exception),
                                  f'UDP: unexpected keyword(s): {key!r} (did you mean {meant!r}?)')
 
-    def test_an_undeclared_keyword_is_still_refused(self) -> 'None':
-        """With the same error ``from_fields`` raises."""
-        from pcapkit.protocols.transport.tcp.protocol import TCP
-        from pcapkit.utilities.exceptions import UnexpectedKeyword
+    def test_no_legacy_keyword_set_is_left(self) -> 'None':
+        """``OUT_OF_BAND_KEYWORDS`` and ``_legacy_keywords`` go, and ``legacy`` with them."""
+        import pcapkit.protocols.protocol as module
 
-        with self.assertRaisesRegex(UnexpectedKeyword, r"'seq' \(did you mean 'seq_no'\?\)"):
-            TCP(seq=1)
-
-    def test_esp_still_protects_with_the_old_context(self) -> 'None':
-        """``ESP(__context__=..., encrypt=True)`` builds what ``from_fields`` builds."""
-        from pcapkit.const.reg.transtype import TransType
-        from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet.esp.protocol import ESP, ESPContext, Integrity, SecurityAssociation
-
-        sa = SecurityAssociation(spi=0x77, integrity=Integrity.HMAC_SHA2_256_128, integrity_key=ESP_KEY)
-        registry = ContextRegistry.make(ESPContext(sa))
-        fields = {'spi': 0x77, 'seq': 1, 'next': TransType.UDP, 'encrypt': True, 'payload': b'plaintext'}
-        self.assertEqual(ESP(**fields, __context__=registry).data,
-                         ESP.from_fields(**fields, context=registry).data)
+        self.assertFalse(hasattr(module, 'OUT_OF_BAND_KEYWORDS'))
+        self.assertFalse(hasattr(module, '_legacy_keywords'))
+        self.assertNotIn('legacy', inspect.signature(module._check_construction_keywords).parameters)  # pylint: disable=protected-access
 
 
 if __name__ == '__main__':

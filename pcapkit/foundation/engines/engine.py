@@ -305,7 +305,7 @@ class EngineBase(Generic[_T], metaclass=EngineMeta):
         """The stops and context this engine parses its frames with, those set.
 
         Returns:
-            The extraction's ``layer``, ``protocol`` and ``__context__`` keywords,
+            The extraction's ``layer``, ``protocol`` and ``context`` keywords,
             only those set, so an ``analyze`` taking no keywords, as a custom
             ``__protocol_type__``'s may, is called as before when the extraction
             sets none; :data:`None` unless this engine is the extraction's, since a
@@ -320,12 +320,12 @@ class EngineBase(Generic[_T], metaclass=EngineMeta):
             return None
 
         keywords = {}  # type: dict[str, Any]
-        if ext._exlyr != 'none':
+        if ext._exlyr is not None:
             keywords['layer'] = ext._exlyr
-        if ext._exptl != 'null':
+        if ext._exptl is not None:
             keywords['protocol'] = ext._exptl
         if ext._exctx:
-            keywords['__context__'] = ext._exctx
+            keywords['context'] = ext._exctx
         return keywords
 
     def _reassemble(self, timestamp: 'float', *args: 'Any', **kwargs: 'Any') -> 'None':

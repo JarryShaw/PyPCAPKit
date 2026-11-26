@@ -223,7 +223,7 @@ class TestLoopback(unittest.TestCase):
 
         raw = _header(2, 'little') + IPV4
         frames = self._assert_capture(108, [(raw, 'Loopback:Raw')], ipv4=0)
-        parsed = Loopback(raw, len(raw), alias=LinkType.LOOP)
+        parsed = Loopback._from_parent(raw, len(raw), alias=LinkType.LOOP)  # pylint: disable=protected-access
         for layer in [frame.payload for frame in frames] + [parsed]:
             with self.subTest(layer=layer):
                 self.assertEqual((layer.info.family, layer.info.byteorder), (0x0200_0000, 'big'))
@@ -249,7 +249,7 @@ class TestLoopback(unittest.TestCase):
                 raw = _header(family, byteorder) + payload
                 for hint in ({}, {'alias': LinkType.NULL}, {'alias': LinkType.LOOP}):
                     with self.subTest(family=family, byteorder=byteorder, **hint):
-                        parsed = Loopback(raw, len(raw), **hint)
+                        parsed = Loopback._from_parent(raw, len(raw), **hint)  # pylint: disable=protected-access
                         if hint.get('alias') == LinkType.LOOP:
                             expected = (int.from_bytes(raw[:4], 'big'), 'big')
                         else:  # inferred; a family of 0 reads the same either way

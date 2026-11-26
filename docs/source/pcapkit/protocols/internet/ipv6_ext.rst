@@ -54,6 +54,7 @@ Octets      Bits        Name                    Description
 
    .. rubric:: Data Models
 
+   .. automethod:: __init__
    .. automethod:: __post_init__
    .. automethod:: __index__
 
@@ -183,7 +184,10 @@ missing ``next`` would end the walk (:issue:`891`); this module registers this
 class for that code instead. The registration is global, shared by every
 :class:`~pcapkit.protocols.internet.internet.Internet` subclass, so
 :meth:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.__post_init__` gates on
-``version == 6`` to keep an IPv4 payload of protocol number 140 out.
+``version == 6`` to keep an IPv4 payload of protocol number 140 out. That ``version``
+is the enclosing IP layer's, which reaches a header only from that layer, through
+:meth:`~pcapkit.protocols.protocol.Protocol._from_parent`; a header parsed on its own
+takes ``extension`` alone, and the gate reads its default of ``6`` (:issue:`2840`).
 
 A header with a dedicated class whose parser raises does not reach this class.
 :func:`~pcapkit.corekit.decorators.beholder` makes it plain

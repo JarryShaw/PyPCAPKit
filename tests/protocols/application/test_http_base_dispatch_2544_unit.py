@@ -146,7 +146,7 @@ class HTTPBaseDispatchTests(unittest.TestCase):
                                 ({'version': 3}, 'invalid version')):
             with self.subTest(fields=fields):
                 with self.assertRaisesRegex(ProtocolError, message):
-                    HTTP(**fields)
+                    HTTP.from_fields(**fields)
 
     def test_from_data_on_the_base_gives_the_member(self) -> None:
         """A data model rebuilds through the base, a :obj:`dict` through its member."""

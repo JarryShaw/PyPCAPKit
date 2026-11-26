@@ -190,7 +190,7 @@ class IPBaseDispatchTests(unittest.TestCase):
             IP.from_fields(version=6, ttl=3)
 
     def test_a_member_takes_version_only_as_its_own(self) -> None:
-        """Building, ``version`` must name the member; parsing, it is handed on unread."""
+        """Building or parsing, ``version`` must name the member (#2840)."""
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.protocols.internet.ipv6.protocol import IPv6
         from pcapkit.utilities.exceptions import ProtocolError
@@ -201,11 +201,15 @@ class IPBaseDispatchTests(unittest.TestCase):
             IPv4.from_fields(version=6)
         with self.assertRaisesRegex(ProtocolError, '^IPv6: version=4 names another member$'):
             IPv6.from_fields(version=4)
-        # NOTE: The enclosing IP layer hands its own version to the one it
-        # carries under this name, so IPv6 in IPv4 is parsed with ``version=4``.
+        with self.assertRaisesRegex(ProtocolError, '^IPv6: version=4 names another member$'):
+            IPv6(OCTETS['IPv6 UDP'][0], version=4)
+        self.assertIs(type(IPv6(OCTETS['IPv6 UDP'][0], version=6)), IPv6)
+        # NOTE: The enclosing IP layer hands its own version to the one it carries
+        # through the private channel, so IPv6 in IPv4 is no member check.
         six_in_four = ipv4(OCTETS['IPv6 UDP'][0], 41)
         self.assertEqual(str(IPv4(six_in_four).protochain), 'IPv4:IPv6:UDP:Raw')
-        self.assertIs(type(IPv6(OCTETS['IPv6 UDP'][0], version=4)), IPv6)
+        octets = OCTETS['IPv6 UDP'][0]
+        self.assertIs(type(IPv6._from_parent(octets, len(octets), version=4)), IPv6)  # pylint: disable=protected-access
 
     def test_a_subclass_outside_the_members_has_no_version_of_its_own(self) -> None:
         """So it takes no ``version``, as a member takes no other's."""
@@ -227,7 +231,7 @@ class IPBaseDispatchTests(unittest.TestCase):
                 raise NotImplementedError
 
         with self.assertRaisesRegex(ProtocolError, '^Outside: no version of its own to match version=4$'):
-            Outside(version=4)
+            Outside.from_fields(version=4)
 
     def test_from_data_on_the_base_gives_the_member(self) -> None:
         from pcapkit.protocols.internet.ip.protocol import IP

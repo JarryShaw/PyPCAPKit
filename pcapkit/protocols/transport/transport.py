@@ -25,12 +25,12 @@ from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from typing import IO, Any, DefaultDict, Optional, Type
+    from typing import IO, Any, DefaultDict, Iterable, Mapping, Optional, Type
 
     from typing_extensions import Literal, Self
 
     from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
-    from pcapkit.corekit.context import ContextRegistry
+    from pcapkit.corekit.context import ContextRegistry, ProtocolContext
 
 __all__ = ['Transport']
 
@@ -124,7 +124,11 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
         cls.__proto__[code] = entry
 
     @classmethod
-    def analyze(cls, ports: 'tuple[Enum_AppType, Enum_AppType]', payload: 'bytes', **kwargs: 'Any') -> 'ProtocolBase':  # type: ignore[override] # pylint: disable=arguments-renamed
+    def analyze(cls, ports: 'tuple[Enum_AppType, Enum_AppType]', payload: 'bytes', /, *,  # type: ignore[override] # pylint: disable=arguments-renamed
+                layer: 'Optional[str]' = None,
+                protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                ) -> 'ProtocolBase':
         """Analyse packet payload.
 
         Args:
@@ -134,8 +138,12 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
                 :attr:`TCP.dst <pcapkit.protocols.transport.tcp.protocol.TCP.dst>` read
                 off a parsed header, resolved the same way.
             payload: Packet payload.
-            **kwargs: Keyword arguments for the payload's constructor, such as
-                the stops and context a frame's next layer is parsed with.
+            layer: As :meth:`Protocol.analyze
+                <pcapkit.protocols.protocol.Protocol.analyze>`.
+            protocol: As :meth:`Protocol.analyze
+                <pcapkit.protocols.protocol.Protocol.analyze>`.
+            context: As :meth:`Protocol.analyze
+                <pcapkit.protocols.protocol.Protocol.analyze>`.
 
         Returns:
             Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`
@@ -174,6 +182,10 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             the process-wide registry -- see :meth:`Protocol._lookup_registry
             <pcapkit.protocols.protocol.Protocol._lookup_registry>`.
 
+        Raises:
+            FormatError: If ``layer`` names no layer.
+            RegistryError: If ``protocol`` is no protocol name, class or instance.
+
         .. versionchanged:: 1.5.0
 
            ``ports`` is a pair of
@@ -198,11 +210,12 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
 
            The port is the one a frame's next layer is looked up by, where it
            was the source port unless that was unregistered (:issue:`2945`).
+           ``ports`` and ``payload`` are positional-only, and the keywords are
+           ``layer``, ``protocol`` and ``context``, as for
+           :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>`
+           (:issue:`2840`).
 
         """
-        if TYPE_CHECKING:
-            protocol: 'Type[ProtocolBase]'
-
         # NOTE: Chosen among the ports that are numbers, so a missing one falls back to ``Raw``.
         numbers = tuple(port for port in ports if isinstance(port, (int, Enum_AppType)))
         if len(numbers) == 2:
@@ -210,11 +223,9 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
         else:
             port = numbers[0] if numbers else ports[1]
         code = int(port) if isinstance(port, Enum_AppType) else port
-        if cls._stops_next_layer(kwargs):
-            from pcapkit.protocols.misc.raw.protocol import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
-        else:
-            protocol = cls._dispatch_family(cls._lookup_next_layer(cls.__proto__, code), payload, len(payload))
-        return cls._analyze_next_layer(protocol, payload, code, **kwargs)
+        klass = (cls._analyze_stop(layer, protocol)
+                 or cls._dispatch_family(cls._lookup_next_layer(cls.__proto__, code), payload, len(payload)))
+        return cls._analyze_next_layer(klass, payload, code, layer=layer, protocol=protocol, context=context)
 
     @classmethod
     def from_data(cls, data: '_PT | dict[str, Any]', /, **kwargs: 'Any') -> 'Self':
