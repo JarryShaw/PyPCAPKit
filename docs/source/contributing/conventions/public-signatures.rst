@@ -71,19 +71,33 @@ from reading as those tunables.
 Protocols
 ~~~~~~~~~
 
-**Calling a protocol class parses, and** :meth:`~pcapkit.protocols.protocol.Protocol.from_fields`
-**builds**, ruled on :issue:`2840`:
+**Calling a protocol class with a file parses, and with keywords alone builds**, ruled
+on :issue:`3081` over the parse-only call of :issue:`2840`. Each shape has an explicit
+form, :meth:`~pcapkit.protocols.protocol.Protocol.parse` and
+:meth:`~pcapkit.protocols.protocol.Protocol.from_fields`:
 
 .. code-block:: python
 
    Proto(file, length=None, /, *, layer=None, protocol=None, context=None)
+   Proto(*, context=None, **fields)
+   Proto.parse(file, length=None, /, *, layer=None, protocol=None, context=None)
    Proto.from_fields(*, context=None, **fields)
 
 *  ``length`` is positional beside ``file``, as :issue:`2834` specified for the
    protocols: the one exception to rule 1, since it bounds the input rather than
    configuring the call.
-*  The parse signature is closed, so Python refuses any other keyword.
-   ``layer`` is a layer name and ``protocol`` a protocol name, class or instance,
+*  A parse takes no field and a construction no stop, so each keyword set is
+   closed. Given no file, ``layer`` and ``protocol`` are fields where the class
+   takes one of that name, as
+   :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`,
+   :class:`~pcapkit.protocols.link.ppp.protocol.PPP` and
+   :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo` take
+   ``protocol``, and are refused otherwise, as ``length`` is. A keyword is
+   always a keyword: ``file=`` and ``length=`` are fields too, never the
+   positional parameters of their names (:issue:`3081`). Each shape is an
+   overload, so a type checker reads ``protocol`` there as the field on a
+   construction and as the stop on a parse.
+*  ``layer`` is a layer name and ``protocol`` a protocol name, class or instance,
    and :obj:`None` is the only no stop, by rule 4.
 *  A parse that needs an input of its own takes it keyword-only, before the stops:
 
@@ -113,6 +127,8 @@ Protocols
           :class:`~pcapkit.protocols.link.netlink.protocol.Netlink`
         - ``byteorder``
 
+   A construction takes each as a field where the class's hooks do, and ``version``
+   names the member there too.
 *  What a layer hands the layer it carries -- the code it dispatched on, its
    packet data, its IP version -- travels through one private channel,
    :meth:`~pcapkit.protocols.protocol.Protocol._from_parent`, to the hooks, never
@@ -131,10 +147,15 @@ rather than a keyword is wrong:
 
    * - Misuse
      - Raises
-   * - an unknown parse keyword
-     - Python's own :exc:`TypeError`
+   * - a field, or an unknown keyword, given a file
+     - :exc:`TypeError`, naming each
    * - no octets, as ``Proto(None)``
      - :exc:`TypeError`, naming ``from_fields``
+   * - a stop that is no field, or a ``length``, given no file
+     - :exc:`TypeError`, naming each
+   * - a ``file`` or ``length`` keyword no field takes
+     - :exc:`~pcapkit.utilities.exceptions.UnexpectedKeyword`, saying to pass
+       them positionally to parse
    * - an unknown construction keyword
      - :exc:`~pcapkit.utilities.exceptions.UnexpectedKeyword`, a :exc:`TypeError`
        and an :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`

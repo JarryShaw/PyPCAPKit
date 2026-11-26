@@ -27,11 +27,12 @@ pseudo-header, so the base verifies it for each of them (:issue:`2618`).
 """
 
 import abc
-from typing import TYPE_CHECKING, Generic, cast
+from typing import TYPE_CHECKING, Generic, cast, overload
 
 from pcapkit.const.igmp.type import Type as Enum_Type
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.corekit.sentinels import NO_VALUE, NoValueType
 from pcapkit.protocols.internet.igmp.data import IGMP as Data_IGMP
 from pcapkit.protocols.internet.igmp.schema import IGMP as Schema_IGMP
 from pcapkit.protocols.internet.internet import Internet
@@ -272,16 +273,32 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
         """Return an estimated length for the object."""
         return 8
 
-    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = None, /, *,  # pylint: disable=super-init-not-called
+    if not TYPE_CHECKING:
+        # NOTE: For the docs' class signature (#1860): mypy rejects each overload of an abstract
+        # class's ``__init__``, so it reads the one below and refuses this base as ``abstract`` (#3081).
+        @overload  # pragma: no cover
+        def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., /, *,
+                     version: 'Optional[Literal[1, 2, 3]]' = ...,
+                     layer: 'Optional[str]' = ...,
+                     protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = ...,
+                     context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                     ) -> 'None': ...
+        @overload  # pragma: no cover
+        def __init__(self, *, version: 'Optional[Literal[1, 2, 3]]' = ...,
+                     context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                     **fields: 'Any') -> 'None': ...
+
+    def __init__(self, file: 'IO[bytes] | bytes | NoValueType' = NO_VALUE,  # pylint: disable=super-init-not-called
+                 length: 'Optional[int]' = None, /, *,
                  version: 'Optional[Literal[1, 2, 3]]' = None,
                  layer: 'Optional[str]' = None,
                  protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
                  context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
-                 ) -> 'None':
-        """Parse a protocol instance from its octets.
+                 **fields: 'Any') -> 'None':
+        """Parse a protocol instance from its octets, or construct one from its fields.
 
         Args:
-            file: Source packet stream.
+            file: Source packet stream; omitted to construct.
             length: Length of packet data.
             version: Version of IGMP, ``1``, ``2`` or ``3``: the class :meth:`__new__` picks, which must be this
                 class's own.
@@ -291,6 +308,8 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
                 <pcapkit.protocols.protocol.Protocol.__init__>`.
             context: As :meth:`Protocol.__init__
                 <pcapkit.protocols.protocol.Protocol.__init__>`.
+            **fields: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
 
         Raises:
             ProtocolError: If ``version`` names no version class, or is not this
@@ -299,25 +318,32 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
 
         .. versionchanged:: 1.8.0
 
-           Parses only, and ``version`` is checked against the class, as
+           ``version`` is checked against the class, as
            :meth:`from_fields` checks it, rather than handed on (:issue:`2840`).
 
         """
+        if isinstance(file, NoValueType):
+            if version is not None:
+                fields['version'] = version
+            self._construct(context, self._call_fields(length, layer, protocol, fields))
+            return
         if version is not None:
             type(self)._construction_member({'version': version})
         # NOTE: ``_parse``, as the base's ``__init__`` takes no ``version`` (#2840).
-        self._parse(file, length, layer=layer, protocol=protocol, context=context)
+        self._parse(file, length, fields, layer=layer, protocol=protocol, context=context)
 
-    def __new__(cls, file: 'Optional[IO[bytes] | bytes]' = None,
-                length: 'Optional[int]' = None, **kwargs: 'Any') -> 'IGMP':
-        """Create the version class a parse of this class describes.
+    def __new__(cls, file: 'Optional[IO[bytes] | bytes] | NoValueType' = NO_VALUE,
+                length: 'Optional[int]' = None, /, **kwargs: 'Any') -> 'IGMP':
+        """Create the version class a parse or a construction of this class describes.
 
         The ``version`` keyword names the class. Without it, the octets give the
-        class :meth:`_dispatch` picks. That class's ``__init__`` then runs with
-        the same arguments. A subclass of this class is created as itself.
+        class :meth:`_dispatch` picks, and fields are refused. That class's
+        ``__init__`` then runs with the same arguments. A subclass of this class
+        is created as itself.
 
         Args:
-            file: Source packet stream, read here without being consumed.
+            file: Source packet stream, read here without being consumed;
+                omitted to construct.
             length: Length of packet data.
             **kwargs: Arbitrary keyword arguments.
 
@@ -326,12 +352,16 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
 
         Raises:
             TypeError: If ``file`` is :obj:`None`, on this class.
-            ProtocolError: If ``version`` names no version class; or, without it,
-                if the octets are no version's message.
+            ProtocolError: On this class, if ``version`` names no version class;
+                if, without it, the octets are no version's message; or if fields
+                come without it.
 
         """
         if cls is not IGMP:
             return super().__new__(cls, file, length, **kwargs)
+        if isinstance(file, NoValueType):
+            member = cls._construction_member(kwargs)
+            return member.__new__(member)
         if file is None:
             raise _nothing_to_parse(IGMP)
         version = kwargs.get('version')
@@ -499,12 +529,11 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
 
     @classmethod
     def _construction_member(cls, fields: 'dict[str, Any]') -> 'Type[Self]':
-        """The version class :meth:`from_fields` and :meth:`from_data` construct.
+        """The version class :meth:`from_fields`, :meth:`from_data` and a call given no file construct.
 
-        Picked and checked as constructing this class directly does: on this
-        class, the version class ``version`` names; on another, the class
-        itself, whose :attr:`version` ``version`` must be. ``version`` is taken
-        out of ``fields``, as :meth:`make` does not read it.
+        On this class, the version class ``version`` names; on another, the class
+        itself, whose :attr:`version` ``version`` must be. ``version`` is taken out
+        of ``fields``, as :meth:`make` does not read it.
 
         Args:
             fields: Construction keywords.

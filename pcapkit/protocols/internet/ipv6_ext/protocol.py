@@ -133,6 +133,7 @@ from typing import TYPE_CHECKING, Generic, cast, overload
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.schema.extlen import ext_len_to_octets
+from pcapkit.corekit.sentinels import NO_VALUE, NoValueType
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.protocols.internet.ipv6_ext.data import IPv6_Ext as Data_IPv6_Ext
 from pcapkit.protocols.internet.ipv6_ext.schema import IPv6_Ext as Schema_IPv6_Ext
@@ -578,16 +579,30 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
     # Data models.
     ##########################################################################
 
-    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = None, /, *,  # pylint: disable=super-init-not-called
+    @overload  # pragma: no cover
+    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., /, *,
+                 extension: 'bool' = ...,
+                 layer: 'Optional[str]' = ...,
+                 protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = ...,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                 ) -> 'None': ...
+    @overload  # pragma: no cover
+    def __init__(self, *, extension: 'bool' = ...,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                 **fields: 'Any') -> 'None': ...
+
+    # NOTE: The ignore is the one on ``Protocol.__init__``, for ``**fields`` against ``/`` (#3081).
+    def __init__(self, file: 'IO[bytes] | bytes | NoValueType' = NO_VALUE,  # type: ignore[misc] # pylint: disable=super-init-not-called
+                 length: 'Optional[int]' = None, /, *,
                  extension: 'bool' = False,
                  layer: 'Optional[str]' = None,
                  protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
                  context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
-                 ) -> 'None':
-        """Parse a protocol instance from its octets.
+                 **fields: 'Any') -> 'None':
+        """Parse a protocol instance from its octets, or construct one from its fields.
 
         Args:
-            file: Source packet stream.
+            file: Source packet stream; omitted to construct.
             length: Length of packet data.
             extension: If the protocol is used as an IPv6 extension header. As
                 the next layer of an IP header, the one that header hands on.
@@ -597,16 +612,22 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
                 <pcapkit.protocols.protocol.Protocol.__init__>`.
             context: As :meth:`Protocol.__init__
                 <pcapkit.protocols.protocol.Protocol.__init__>`.
+            **fields: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
 
         .. versionchanged:: 1.8.0
 
-           Declares ``extension``, its only keyword besides the stops and the
-           context; the enclosing IP version reaches it from the layer
+           Declares ``extension``, its only parse keyword besides the stops
+           and the context; the enclosing IP version reaches it from the layer
            carrying it alone (:issue:`2840`).
 
         """
+        if isinstance(file, NoValueType):
+            fields['extension'] = extension
+            self._construct(context, self._call_fields(length, layer, protocol, fields))
+            return
         # NOTE: ``_parse``, inline, so a parse adds no frame per layer (#1610).
-        keywords = self._start_parse(file, layer, protocol, context, {'extension': extension})
+        keywords = self._start_parse(file, layer, protocol, context, {'extension': extension}, fields)
         self.__post_init__(file, length, **keywords)
         self._info.__update__(packet=self.packet.payload)
 

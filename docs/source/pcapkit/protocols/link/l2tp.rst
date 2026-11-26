@@ -72,7 +72,7 @@ since callers take element zero as canonical.
 Version Dispatch
 ----------------
 
-Parsing octets through the base, or building it with ``from_fields``, gives the
+Parsing octets through the base, or building it from fields, gives the
 member its ``version`` keyword names; without it, octets give the one their version
 nibble names, and fields are refused, since no field picks a member (:issue:`2574`).
 Parsing a member, ``version`` must be its own (:issue:`2840`).

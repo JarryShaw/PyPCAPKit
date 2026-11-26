@@ -17,13 +17,14 @@ the one whose data model it is handed (:issue:`2574`).
 
 """
 import collections
-from typing import TYPE_CHECKING, Generic, cast
+from typing import TYPE_CHECKING, Generic, cast, overload
 
 from pcapkit.const.linux.arphrd import ARPHRD as Enum_ARPHRD
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.fields.numbers import EnumField
 from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.corekit.sentinels import NO_VALUE, NoValueType
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.protocol import _PT, _ST, _nothing_to_parse
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
@@ -281,16 +282,32 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
         """
         raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
 
-    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = None, /, *,  # pylint: disable=super-init-not-called
+    if not TYPE_CHECKING:
+        # NOTE: For the docs' class signature (#1860): mypy rejects each overload of an abstract
+        # class's ``__init__``, so it reads the one below and refuses this base as ``abstract`` (#3081).
+        @overload  # pragma: no cover
+        def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., /, *,
+                     version: 'Optional[Literal[1, 2]]' = ...,
+                     layer: 'Optional[str]' = ...,
+                     protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = ...,
+                     context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                     ) -> 'None': ...
+        @overload  # pragma: no cover
+        def __init__(self, *, version: 'Optional[Literal[1, 2]]' = ...,
+                     context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                     **fields: 'Any') -> 'None': ...
+
+    def __init__(self, file: 'IO[bytes] | bytes | NoValueType' = NO_VALUE,  # pylint: disable=super-init-not-called
+                 length: 'Optional[int]' = None, /, *,
                  version: 'Optional[Literal[1, 2]]' = None,
                  layer: 'Optional[str]' = None,
                  protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
                  context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
-                 ) -> 'None':
-        """Parse a protocol instance from its octets.
+                 **fields: 'Any') -> 'None':
+        """Parse a protocol instance from its octets, or construct one from its fields.
 
         Args:
-            file: Source packet stream.
+            file: Source packet stream; omitted to construct.
             length: Length of packet data.
             version: Version of the header, ``1`` or ``2``: the member :meth:`__new__` picks, which must be this
                 class's own.
@@ -300,6 +317,8 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
                 <pcapkit.protocols.protocol.Protocol.__init__>`.
             context: As :meth:`Protocol.__init__
                 <pcapkit.protocols.protocol.Protocol.__init__>`.
+            **fields: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
 
         Raises:
             ProtocolError: If ``version`` names neither member, or is not this
@@ -308,18 +327,23 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
 
         .. versionchanged:: 1.8.0
 
-           Parses only, and ``version`` is checked against the member, as
+           ``version`` is checked against the member, as
            :meth:`from_fields` checks it, rather than handed on (:issue:`2840`).
 
         """
+        if isinstance(file, NoValueType):
+            if version is not None:
+                fields['version'] = version
+            self._construct(context, self._call_fields(length, layer, protocol, fields))
+            return
         if version is not None:
             type(self)._construction_member({'version': version})
         # NOTE: ``_parse``, as the base's ``__init__`` takes no ``version`` (#2840).
-        self._parse(file, length, layer=layer, protocol=protocol, context=context)
+        self._parse(file, length, fields, layer=layer, protocol=protocol, context=context)
 
-    def __new__(cls, file: 'Optional[IO[bytes] | bytes]' = None,
-                length: 'Optional[int]' = None, **kwargs: 'Any') -> 'LinuxSLL':
-        """Create the member a parse of this class describes.
+    def __new__(cls, file: 'Optional[IO[bytes] | bytes] | NoValueType' = NO_VALUE,
+                length: 'Optional[int]' = None, /, **kwargs: 'Any') -> 'LinuxSLL':
+        """Create the member a parse or a construction of this class describes.
 
         The ``version`` keyword names the member, and nothing else does: the
         header carries no version of its own. That member's ``__init__`` then
@@ -327,7 +351,7 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
         itself.
 
         Args:
-            file: Source packet stream.
+            file: Source packet stream; omitted to construct.
             length: Length of packet data.
             **kwargs: Arbitrary keyword arguments.
 
@@ -343,6 +367,9 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
         """
         if cls is not LinuxSLL:
             return super().__new__(cls, file, length, **kwargs)
+        if isinstance(file, NoValueType):
+            member = cls._construction_member(kwargs)
+            return member.__new__(member)
         if file is None:
             raise _nothing_to_parse(LinuxSLL)
         version = kwargs.get('version')
@@ -433,12 +460,11 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
 
     @classmethod
     def _construction_member(cls, fields: 'dict[str, Any]') -> 'Type[Self]':
-        """The member :meth:`from_fields` and :meth:`from_data` construct.
+        """The member :meth:`from_fields`, :meth:`from_data` and a call given no file construct.
 
-        Picked and checked as constructing this class directly does: on this
-        class, the member ``version`` names; on another, the class itself, of
-        which ``version`` must name the member it is or derives from. ``version``
-        is taken out of ``fields``, as :meth:`make` does not read it.
+        On this class, the member ``version`` names; on another, the class itself, of
+        which ``version`` must name the member it is or derives from. ``version`` is
+        taken out of ``fields``, as :meth:`make` does not read it.
 
         Args:
             fields: Construction keywords.

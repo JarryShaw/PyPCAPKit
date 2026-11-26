@@ -5,7 +5,8 @@ The owner took the plan on #2840 that splits parsing from construction. This
 module pins the construct side:
 
 * :class:`FromFieldsTests` -- :meth:`~pcapkit.protocols.protocol.Protocol.from_fields`
-  builds every edge round trip's case, refuses a parse keyword, a stop,
+  builds every edge round trip's case, as calling the class with its fields does
+  (#3081), refuses a parse keyword, a stop,
   ``__context__`` and an undeclared ``packet`` with
   :exc:`~pcapkit.utilities.exceptions.UnexpectedKeyword`, which is a
   :exc:`TypeError` as well, takes ``context``, and hands a field named like a stop
@@ -17,8 +18,8 @@ module pins the construct side:
   ``context`` by name, refuses ``__context__`` and the stops, warns on a key its
   ``_make_data`` gives, and the default ``_make_data`` leaves out an undeclared
   ``packet``;
-* :class:`NoLegacyConstructionTests` -- ``Proto(**fields)`` no longer constructs,
-  and the out-of-band keywords it took are gone with it.
+* :class:`NoLegacyKeywordTests` -- the out-of-band keywords ``Proto(**fields)``
+  took are gone, refused by the class call as by ``from_fields``.
 
 This module is unit tier: it constructs its own octets and reads no capture.
 
@@ -81,8 +82,8 @@ class FromFieldsTests(unittest.TestCase):
     def setUp(self) -> 'None':
         reimport_once_per_class(self)
 
-    def test_from_fields_is_the_only_constructor(self) -> 'None':
-        """Each edge ``MakeCase`` builds through ``from_fields``, and the constructor refuses it."""
+    def test_the_class_call_builds_as_from_fields_does(self) -> 'None':
+        """Each edge ``MakeCase`` builds the same octets through either form (#3081)."""
         cases = _make_cases()
         self.assertTrue(cases)
         for case in cases:
@@ -91,8 +92,7 @@ class FromFieldsTests(unittest.TestCase):
                 cls = edge.resolve(case.cls)
                 built = cls.from_fields(**case.kwargs)
                 self.assertEqual(cls(built.data, len(built.data)).data, built.data)
-                with self.assertRaises(TypeError):
-                    cls(**case.kwargs)
+                self.assertEqual(cls(**case.kwargs).data, built.data)
 
     def test_parse_keywords_stops_and_the_old_context_are_refused(self) -> 'None':
         """Each is refused by name, with the closest keyword it may have meant."""
@@ -364,35 +364,23 @@ class FromDataTests(unittest.TestCase):
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
-class NoLegacyConstructionTests(unittest.TestCase):
-    """``Proto(**fields)`` no longer constructs, now ``__init__`` parses only (#2840)."""
+class NoLegacyKeywordTests(unittest.TestCase):
+    """The keywords ``Proto(**fields)`` took beyond the fields are gone (#2840)."""
 
     def setUp(self) -> 'None':
         reimport_once_per_class(self)
 
-    def test_fields_and_out_of_band_keywords_are_refused(self) -> 'None':
-        """Python refuses them as unknown keywords of the parse signature."""
-        from pcapkit.protocols.internet.esp.protocol import ESP
+    def test_out_of_band_keywords_are_refused(self) -> 'None':
+        """The class call refuses them as unknown construction keywords, as ``from_fields`` does (#3081)."""
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.utilities.exceptions import UnexpectedKeyword
 
-        calls = (
-            (TCP, TCP_FIELDS),
-            (TCP, {'_layer': 'Internet'}),
-            (TCP, {'_protocol': 'tcp'}),
-            (TCP, {'__context__': None}),
-            (TCP, {'packet': b'dropped'}),
-            (TCP, {'__packet__': {}}),
-            (ESP, {'spi': 0x77, 'encrypt': True}),
-        )
-        for cls, kwargs in calls:
-            key = next(iter(kwargs))
-            # NOTE: CPython names the first unexpected keyword; PyPy counts several.
-            message = f"unexpected keyword argument '{key}'"
-            if len(kwargs) > 1:
-                message = f'{message}|got {len(kwargs)} unexpected keyword arguments'
-            with self.subTest(key=key), self.assertRaisesRegex(TypeError, message):
-                cls(**kwargs)
+        for key, value in (('_layer', 'Internet'), ('_protocol', 'tcp'), ('__context__', None),
+                           ('packet', b'dropped')):
+            with self.subTest(key=key), self.assertRaisesRegex(
+                    UnexpectedKeyword, f"^TCP: unexpected keyword\\(s\\): '{key}'"):
+                TCP(**TCP_FIELDS, **{key: value})
 
         with self.assertRaisesRegex(TypeError, r"^IPv4: nothing to parse; build one with IPv4\.from_fields\(\)$"):
             IPv4(None, version=4)

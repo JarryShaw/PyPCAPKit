@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-"""Every protocol parses through one closed signature (GitHub issue #2840).
+"""Every protocol parses and constructs through one signature (GitHub issues #2840, #3081).
 
 The owner took the plan on #2840 that splits parsing from construction, under the
-rules of #2834's ``public-signatures`` page. This module pins the parse side:
+rules of #2834's ``public-signatures`` page, and on #3081 let the class call do
+both again. This module pins the signature:
 
 * :class:`InitSignatureTests` -- ``ProtocolBase.__init__`` is
-  ``(file, length=None, /, *, layer=None, protocol=None, context=None)``, and every
-  registered protocol takes the same, with its class's own keyword-only extras
-  first, and no ``**kwargs``;
+  ``(file=NO_VALUE, length=None, /, *, layer=None, protocol=None, context=None,
+  **fields)``, and every registered protocol takes the same, with its class's own
+  keyword-only extras first;
 * :class:`AnalyzeSignatureTests` -- ``analyze`` and ``Transport.analyze`` take the
   keywords of ``__init__``, as a wrapper mirrors what it wraps.
 
@@ -80,11 +81,13 @@ class InitSignatureTests(unittest.TestCase):
 
     def expected(self, owner: str) -> 'list[tuple[str, Any, Any]]':
         """The shape of the ``__init__`` the class ``owner`` defines."""
-        positional = [('file', inspect.Parameter.POSITIONAL_ONLY, REQUIRED),
+        from pcapkit.corekit.sentinels import NO_VALUE
+
+        positional = [('file', inspect.Parameter.POSITIONAL_ONLY, NO_VALUE),
                       ('length', inspect.Parameter.POSITIONAL_ONLY, None)]
         keywords = [(name, inspect.Parameter.KEYWORD_ONLY, default)
                     for name, default in (*EXTRAS[owner], *((stop, None) for stop in STOPS))]
-        return positional + keywords
+        return positional + keywords + [('fields', inspect.Parameter.VAR_KEYWORD, REQUIRED)]
 
     def test_the_base_signature(self) -> None:
         from pcapkit.protocols.protocol import ProtocolBase
@@ -92,16 +95,14 @@ class InitSignatureTests(unittest.TestCase):
         self.assertEqual(_shape(ProtocolBase.__init__), self.expected('ProtocolBase'))
 
     def test_every_registered_protocol_takes_the_parse_signature(self) -> None:
-        """No ``**kwargs``, and an override's extras are the table's (#2840, decision 3)."""
+        """Ending in ``**fields``, and an override's extras are the table's (#2840, decision 3)."""
         classes = _registered()
         self.assertTrue(classes)
         for cls in classes:
             owner = next(klass for klass in cls.__mro__ if '__init__' in vars(klass))
             with self.subTest(cls=cls.__name__, owner=owner.__name__):
                 self.assertIn(owner.__name__, EXTRAS)
-                shape = _shape(cls.__init__)
-                self.assertNotIn(inspect.Parameter.VAR_KEYWORD, [kind for _, kind, _ in shape])
-                self.assertEqual(shape, self.expected(owner.__name__))
+                self.assertEqual(_shape(cls.__init__), self.expected(owner.__name__))
 
     def test_every_override_in_the_table_exists(self) -> None:
         """A row whose class no longer overrides ``__init__`` is stale."""

@@ -10,7 +10,7 @@ which is a base class for Internet Protocol (IP)
 protocol family [*]_, e.g.
 :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` and
 :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`. Parsing octets through the base,
-or building it with ``from_fields``, gives the one its ``version`` keyword names,
+or building it from fields, gives the one its ``version`` keyword names,
 which a member checks as its own on both paths (:issue:`2840`); without it, octets
 give the one their Version field names, and fields are refused. Its
 :meth:`~pcapkit.protocols.internet.ip.protocol.IP.from_data` reads the ``version`` of its

@@ -18,8 +18,8 @@ Version class                                               ``alias``      Schem
 =========================================================== ============== =========================================
 
 IGMPv1's :attr:`~pcapkit.protocols.internet.igmp.protocol.IGMP.alias` is the name
-:rfc:`1112` gives it. Parsing octets through the base, or building it with
-``from_fields``, gives the version class its ``version`` keyword names, which a
+:rfc:`1112` gives it. Parsing octets through the base, or building it from
+fields, gives the version class its ``version`` keyword names, which a
 class checks as its own on both paths (:issue:`2840`); without it, octets give the
 class the message classifies as, and fields are refused.
 :meth:`~pcapkit.protocols.internet.igmp.protocol.IGMP.from_data` gives the class

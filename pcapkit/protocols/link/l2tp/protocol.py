@@ -89,9 +89,10 @@ the version, L2TP states it in those four bits. The switch belongs on the
 .. [*] https://en.wikipedia.org/wiki/Layer_2_Tunneling_Protocol
 
 """
-from typing import TYPE_CHECKING, Generic, cast
+from typing import TYPE_CHECKING, Generic, cast, overload
 
 from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.corekit.sentinels import NO_VALUE, NoValueType
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.protocol import _PT, _ST, _nothing_to_parse
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
@@ -219,16 +220,32 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
         """
         raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
 
-    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = None, /, *,  # pylint: disable=super-init-not-called
+    if not TYPE_CHECKING:
+        # NOTE: For the docs' class signature (#1860): mypy rejects each overload of an abstract
+        # class's ``__init__``, so it reads the one below and refuses this base as ``abstract`` (#3081).
+        @overload  # pragma: no cover
+        def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., /, *,
+                     version: 'Optional[Literal[2]]' = ...,
+                     layer: 'Optional[str]' = ...,
+                     protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = ...,
+                     context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                     ) -> 'None': ...
+        @overload  # pragma: no cover
+        def __init__(self, *, version: 'Optional[Literal[2]]' = ...,
+                     context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = ...,  # pylint: disable=line-too-long
+                     **fields: 'Any') -> 'None': ...
+
+    def __init__(self, file: 'IO[bytes] | bytes | NoValueType' = NO_VALUE,  # pylint: disable=super-init-not-called
+                 length: 'Optional[int]' = None, /, *,
                  version: 'Optional[Literal[2]]' = None,
                  layer: 'Optional[str]' = None,
                  protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
                  context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
-                 ) -> 'None':
-        """Parse a protocol instance from its octets.
+                 **fields: 'Any') -> 'None':
+        """Parse a protocol instance from its octets, or construct one from its fields.
 
         Args:
-            file: Source packet stream.
+            file: Source packet stream; omitted to construct.
             length: Length of packet data.
             version: Version of L2TP, ``2``: the member :meth:`__new__` picks,
                 which must be this class's own.
@@ -237,6 +254,8 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
             protocol: As :meth:`Protocol.__init__
                 <pcapkit.protocols.protocol.Protocol.__init__>`.
             context: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            **fields: As :meth:`Protocol.__init__
                 <pcapkit.protocols.protocol.Protocol.__init__>`.
 
         Raises:
@@ -250,26 +269,33 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
            handed on unread to the hooks (:issue:`2840`).
 
         """
+        if isinstance(file, NoValueType):
+            # NOTE: ``version`` is a field of L2TPv2, which ``make`` writes.
+            if version is not None:
+                fields['version'] = version
+            self._construct(context, self._call_fields(length, layer, protocol, fields))
+            return
         if version is not None and not isinstance(self, self._member_of_version(version)):
             raise ProtocolError(f'{type(self).__name__}: no version of its own to match '
                                 f'version={version!r}')
         # NOTE: ``_parse``, inline, as the base's ``__init__`` takes no ``version``, and
         # calling ``_parse`` adds a frame per layer (#1610, #2840).
-        keywords = self._start_parse(file, layer, protocol, context, {})
+        keywords = self._start_parse(file, layer, protocol, context, {}, fields)
         self.__post_init__(file, length, **keywords)
         self._info.__update__(packet=self.packet.payload)
 
-    def __new__(cls, file: 'Optional[IO[bytes] | bytes]' = None,
-                length: 'Optional[int]' = None, **kwargs: 'Any') -> 'L2TP':
-        """Create the member a parse of this class describes.
+    def __new__(cls, file: 'Optional[IO[bytes] | bytes] | NoValueType' = NO_VALUE,
+                length: 'Optional[int]' = None, /, **kwargs: 'Any') -> 'L2TP':
+        """Create the member a parse or a construction of this class describes.
 
         The ``version`` keyword names the member. Without it, the octets give the
-        member the version nibble, bits 12 to 15 of their first word, names. That
-        member's ``__init__`` then runs with the same arguments. A subclass of
-        this class is created as itself.
+        member the version nibble, bits 12 to 15 of their first word, names, and
+        fields are refused. That member's ``__init__`` then runs with the same
+        arguments. A subclass of this class is created as itself.
 
         Args:
-            file: Source packet stream, read here without being consumed.
+            file: Source packet stream, read here without being consumed;
+                omitted to construct.
             length: Length of packet data.
             **kwargs: Arbitrary keyword arguments.
 
@@ -278,13 +304,16 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
 
         Raises:
             TypeError: If ``file`` is :obj:`None`, on this class.
-            ProtocolError: If no member reads ``version``; or, without it, if the
-                octets are shorter than the first word or no member reads their
-                version.
+            ProtocolError: On this class, if no member reads ``version``; if,
+                without it, the octets are shorter than the first word or no member
+                reads their version; or if fields come without it.
 
         """
         if cls is not L2TP:
             return super().__new__(cls, file, length, **kwargs)
+        if isinstance(file, NoValueType):
+            member = cls._construction_member(kwargs)
+            return member.__new__(member)
         if file is None:
             raise _nothing_to_parse(L2TP)
         version = kwargs.get('version')
@@ -328,11 +357,10 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
 
     @classmethod
     def _construction_member(cls, fields: 'dict[str, Any]') -> 'Type[Self]':
-        """The member :meth:`from_fields` and :meth:`from_data` construct.
+        """The member :meth:`from_fields`, :meth:`from_data` and a call given no file construct.
 
-        Picked as constructing this class directly does: on this class, the
-        member the ``version`` field names, which stays in ``fields``; on
-        another, the class itself.
+        On this class, the member the ``version`` field names, which stays in
+        ``fields``; on another, the class itself.
 
         Args:
             fields: Construction keywords.
