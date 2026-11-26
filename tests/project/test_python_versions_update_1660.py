@@ -614,6 +614,13 @@ class TestTheRewrite(unittest.TestCase):
         self.assertFalse((out / 'files').exists())
         self.assertIn('changed=false\npublish=false\n', output.read_text(encoding='utf-8'))
 
+    def test_the_log_names_each_ruleset_to_edit(self) -> None:
+        """``update`` prints each required context to change, with both rulesets that require it (#3093)."""
+        sources = save_sources(self, set_status(as_of_the_file(snapshot()), '3.11', 'end-of-life'))
+        status, printed = run_main(scratch(self), ['update', '--sources', str(sources)])
+        self.assertEqual(status, 0, printed)
+        self.assertIn('\nrulesets 23497679 and 28079111: remove Compat Python 3.11\n', printed)
+
     def test_a_second_run_after_a_change_writes_nothing(self) -> None:
         sources = three_eleven_ends_and_three_sixteen_ships(snapshot())
         root, plan, _ = plan_for(self, sources, write=True)
@@ -894,6 +901,7 @@ class TestThePullRequestBody(unittest.TestCase):
         self.assertIn('### Description of your *pull request* and other information', body)
         self.assertNotIn('&emsp; Explanation of your', body)
         self.assertIn(f'| `3.11` | supported | KTLO | {plan["changes"][0]["reason"]} |', body)
+        self.assertIn('**Before merging, edit rulesets 23497679 (`main`) and 28079111 (`develop`)**', body)
         self.assertIn('- remove `Compat Python 3.11`', body)
         self.assertIn('`Compat Python 3.11` -> `Compat Python 3.11 (KTLO)`', body)
         self.assertIn('`ktlo_311`', body)
@@ -906,7 +914,7 @@ class TestThePullRequestBody(unittest.TestCase):
         module = updater()
         _, plan, _ = plan_for(self, snapshot())
         description = module.describe_plan(plan, ('success', []), 'https://example.invalid/run')
-        self.assertIn('Ruleset 23497679 needs no edit', description)
+        self.assertIn('Rulesets 23497679 (`main`) and 28079111 (`develop`) need no edit', description)
         self.assertIn('passed on this tree', description)
         self.assertIn('| `pypy3.12` | -- | supported |', description)
 
