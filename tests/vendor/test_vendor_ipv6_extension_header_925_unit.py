@@ -54,12 +54,12 @@ crawl answers -- IANA can edit the registry at any time.
 from __future__ import annotations
 
 import importlib.util
-import pathlib
 import re
 import unittest
 from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
+from tests.vendor._crawler import ROOT, import_from_checkout, make_crawler, normalize
 
 if TYPE_CHECKING:
     from typing import Any
@@ -67,9 +67,6 @@ if TYPE_CHECKING:
 #: Test tier (#1958): renders a constant module from recorded data and compares it
 #: with the committed file, which the vendor scripts regenerate on one interpreter.
 __tier__ = 'LATEST'
-
-#: Repository root, i.e. the grandparent of the directory holding this file.
-ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: Every distribution importing :mod:`pcapkit.vendor` needs -- see
 #: :mod:`tests.vendor.test_ipx_packet_unit` for why all three are checked
@@ -162,29 +159,6 @@ def _comment_from_enum(enum: 'list[str]', name: 'str') -> 'str':
     raise AssertionError(f'no enum entry named {name!r}')
 
 
-def _normalize(context: 'str') -> 'str':
-    """Apply the whitespace normalisation :meth:`Vendor.__init__` writes files
-    through, so a byte comparison against the committed file does the same
-    the generator itself would have -- see
-    :mod:`tests.vendor.test_ipx_packet_unit` for the same helper.
-
-    Args:
-        context: Return value of :meth:`~pcapkit.vendor.default.Vendor.context`.
-
-    Returns:
-        The text as the generator would have written it to disk.
-
-    """
-    lines = []  # type: list[str]
-    for line in context.splitlines():
-        if line:
-            if line.strip():
-                lines.append(line.rstrip())
-        else:
-            lines.append(line)
-    return '\n'.join(lines) + '\n'
-
-
 @unittest.skipUnless(HAS_VENDOR_DEPS, f'vendor extra not installed ({", ".join(VENDOR_DEPS)})')
 class ExtensionHeaderVendorTests(unittest.TestCase):
     """The crawler: authoritative registry, 3-column parser, names preserved."""
@@ -194,30 +168,11 @@ class ExtensionHeaderVendorTests(unittest.TestCase):
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
+        self.vendor_module = import_from_checkout(self, 'pcapkit.vendor.ipv6.extension_header')[0]
 
-        import pcapkit.vendor.ipv6.extension_header as vendor_module
-
-        resolved = pathlib.Path(vendor_module.__file__).resolve()
-        if ROOT not in resolved.parents:
-            self.skipTest(f'{vendor_module.__name__} was imported from {resolved}, which is '
-                          f'outside {ROOT}; install this checkout with `pip install -e .` to '
-                          f'run this suite against it')
-
-        self.vendor_module = vendor_module
-
-    def _vendor(self) -> 'Any':
-        """A crawler instance with the attributes ``__init__`` would have set,
-        but without ``__init__``'s network fetch and file write -- see
-        :mod:`tests.vendor.test_ipx_packet_unit` for the same technique.
-
-        """
-        cls = self.vendor_module.ExtensionHeader
-        vendor = cls.__new__(cls)
-        vendor.NAME = cls.__name__
-        vendor.DOCS = cls.__doc__
-        lines = vendor.request(FIXTURE_CSV)
-        vendor.record = vendor.count(lines)
-        return vendor, lines
+    def _vendor(self) -> 'tuple[Any, list[str]]':
+        """The crawler set up from :data:`FIXTURE_CSV`, and the lines it split."""
+        return make_crawler(self.vendor_module.ExtensionHeader, FIXTURE_CSV)
 
     def test_link_points_at_the_authoritative_registry(self) -> None:
         # The root cause, stated as an assertion: the authoritative registry,
@@ -318,7 +273,7 @@ class ExtensionHeaderVendorTests(unittest.TestCase):
         # not prove the *live* registry still matches FIXTURE_CSV -- only
         # that the committed file is exactly what this fixture produces.
         vendor, lines = self._vendor()
-        generated = _normalize(vendor.context(lines))
+        generated = normalize(vendor.context(lines))
         committed = (ROOT / 'pcapkit' / 'const' / 'ipv6' / 'extension_header.py').read_text(encoding='utf-8')
         self.assertEqual(generated, committed,
                          'pcapkit/const/ipv6/extension_header.py no longer matches what '

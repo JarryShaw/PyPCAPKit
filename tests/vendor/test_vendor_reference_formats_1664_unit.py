@@ -21,11 +21,11 @@ separator artefacts.
 from __future__ import annotations
 
 import importlib.util
-import pathlib
 import unittest
 from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
+from tests.vendor._crawler import ROOT, import_from_checkout, make_crawler, normalize
 
 if TYPE_CHECKING:
     from typing import Any
@@ -33,9 +33,6 @@ if TYPE_CHECKING:
 #: Test tier (#1958): renders constant modules from recorded data and compares them
 #: with the committed files, which the vendor scripts regenerate on one interpreter.
 __tier__ = 'LATEST'
-
-#: Repository root, i.e. the grandparent of the directory holding this file.
-ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: Every distribution importing :mod:`pcapkit.vendor` needs -- see
 #: :mod:`tests.vendor.test_ipx_packet_unit` for why all three are checked.
@@ -191,48 +188,20 @@ TLS_LABEL_OLD = ('Value,Description,Reference,Comment\r\n'
 TLS_LABEL_NEW = TLS_LABEL_OLD.replace('[RFC', '[RFC ')
 
 
-def _normalize(context: 'str') -> 'str':
-    """Apply the whitespace normalisation :meth:`Vendor.__init__` writes files through."""
-    lines = []  # type: list[str]
-    for line in context.splitlines():
-        if line:
-            if line.strip():
-                lines.append(line.rstrip())
-        else:
-            lines.append(line)
-    return '\n'.join(lines) + '\n'
-
-
 @unittest.skipUnless(HAS_VENDOR_DEPS, f'vendor extra not installed ({", ".join(VENDOR_DEPS)})')
 class ReferenceFormatTests(unittest.TestCase):
     """Both of IANA's reference spellings render the same const file."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
-
-        import pcapkit.vendor.default as default
-
-        resolved = pathlib.Path(default.__file__).resolve()
-        if ROOT not in resolved.parents:
-            self.skipTest(f'{default.__name__} was imported from {resolved}, which is '
-                          f'outside {ROOT}; install this checkout with `pip install -e .`')
-
-    @staticmethod
-    def _vendor(cls: 'Any', text: 'str') -> 'tuple[Any, list[str]]':
-        """A crawler as ``__init__`` would set it up, without the fetch and the write."""
-        vendor = cls.__new__(cls)
-        vendor.NAME = cls.__name__
-        vendor.DOCS = cls.__doc__
-        lines = vendor.request(text)
-        vendor.record = vendor.count(lines)
-        return vendor, lines
+        import_from_checkout(self, 'pcapkit.vendor.default')
 
     def _context(self, cls: 'Any', text: 'str') -> 'str':
-        vendor, lines = self._vendor(cls, text)
-        return _normalize(vendor.context(lines))
+        vendor, lines = make_crawler(cls, text)
+        return normalize(vendor.context(lines))
 
     def _comments(self, cls: 'Any', text: 'str') -> 'list[str]':
-        vendor, lines = self._vendor(cls, text)
+        vendor, lines = make_crawler(cls, text)
         enum, _ = vendor.process(lines)
         return [entry.split('\n    ', 1)[0] for entry in enum]
 
@@ -326,7 +295,7 @@ class ReferenceFormatTests(unittest.TestCase):
 
         cells = {}
         for text in (APPTYPE_OLD, APPTYPE_NEW):
-            vendor, lines = self._vendor(AppType, text)
+            vendor, lines = make_crawler(AppType, text)
             line, _ = vendor.records(lines)
             cells[text] = {name: record.cells for name, record in line.items()}
         self.assertEqual(cells[APPTYPE_NEW], cells[APPTYPE_OLD])
