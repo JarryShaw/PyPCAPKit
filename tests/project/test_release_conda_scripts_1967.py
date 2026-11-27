@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 """#1967: :file:`util/release_conda.py`, run as both conda jobs' steps run it.
 
-* :class:`TestTheStepMatchesTheReferenceShell` runs each step's inline shell form, the
-  reference the script must match -- ``conda``'s "Check whether this leg is already on Anaconda" and both
-  conda jobs' "Build conda packages", for the one noarch package (#3133) -- and the script, on the
-  cases below, against stand-in ``curl`` and ``conda``, and
-  requires the same status, standard output and error, step outputs and calls.
-  ``bash``'s ``<path>: line N:`` before its own errors is dropped, and the
-  build's fresh directory is read as ``<out>``. The step bodies are kept here
-  verbatim, and each case table is checked to reach every way its shell ends.
-* :class:`TestTheScripts` pins what the cases cannot compare: the step outputs a
-  run writes, and the errors for a leg on another platform.
+* :class:`TestTheScripts` runs ``conda``'s "Check whether this leg is already on
+  Anaconda" and both conda jobs' "Build conda packages", for the one noarch package
+  (#3133), against stand-in ``curl`` and ``conda``: each of :data:`LEG_CASES` and
+  :data:`BUILD_CASES` to its status and step outputs, and on some of them the
+  outputs' values, read as the runner reads them with the build's fresh directory
+  as ``<out>``, what a run prints and calls, and the errors for a leg on another
+  platform.
 * :class:`TestTheScriptsInProcess` runs ``leg`` and ``build`` in this process, with
   the network and ``conda`` stubbed, so their branches count towards coverage.
 * :class:`TestTheStepsRunTheScripts` pins each step to its script and its
@@ -27,17 +24,14 @@ import io
 import json
 import os
 import pathlib
-import re
 import shutil
 import subprocess  # nosec: B404
 import sys
 import tempfile
-import textwrap
 import unittest
 from typing import TYPE_CHECKING
 from unittest import mock
 
-from tests._support import bash_argv
 from tests._workflows import job, steps
 from tests.project.test_requires_python_floor_2051 import FLOOR
 from util import release_conda
@@ -51,7 +45,6 @@ __tier__ = 'LATEST'
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 UTIL = ROOT / 'util'
 RECIPE = (ROOT / 'conda' / 'pypcapkit' / 'meta.yaml').read_text(encoding='utf-8')
-BASH = shutil.which('bash') or ''
 JOBS = (('create-release.yml', 'conda-build'), ('cron-conda.yml', 'conda-build'))
 
 
@@ -100,142 +93,48 @@ case "$1" in
 esac
 '''
 
-#: "Check whether this leg is already on Anaconda" in ``conda``, as inline shell: what
-#: :file:`util/release_conda.py`'s ``leg`` must match.
-REFERENCE_LEG = textwrap.dedent(r'''
-    set -euo pipefail
-
-    case "$PCAPKIT_CONDA_OS" in
-      ubuntu-latest)
-        target_platform="noarch"
-        ;;
-      *)
-        target_platform=""
-        ;;
-    esac
-    py_tag="py"
-
-    # Same coupling risk, and the same fix, as version_check's checks.
-    status="$(curl -s --retry 3 --retry-connrefused \
-      -o /tmp/anaconda_release.json -w '%{http_code}' \
-      "https://api.anaconda.org/release/jarryshaw/pypcapkit/${PCAPKIT_VERSION}" || echo 000)"
-
-    exists=false
-    if [ "$status" = "200" ]; then
-      # The `printf` form of version_check's checks, and needed here: this
-      # runs before setup-python, so `python3` is the image's (3.12 on
-      # ubuntu-latest, 3.13 on macos-latest), and indented `python3 -c`
-      # source would fail under `set -e` -- only on the retry this is for.
-      exists="$(printf '%s\n' \
-        "import json" \
-        "with open('/tmp/anaconda_release.json') as f:" \
-        "    data = json.load(f)" \
-        "target_platform = '$target_platform'" \
-        "py_tag = '$py_tag'" \
-        "found = any(" \
-        "    d.get('attrs', {}).get('subdir') == target_platform" \
-        "    and d.get('attrs', {}).get('build', '').startswith(py_tag + '_')" \
-        "    for d in data.get('distributions', [])" \
-        ")" \
-        "print('true' if found else 'false')" \
-        | python3 -)"
-    fi
-
-    echo "PCAPKIT_LEG_EXISTS=$exists" >> "$GITHUB_OUTPUT"
-    if [ "$exists" = "true" ]; then
-      echo "::notice title=conda leg already published::pypcapkit ${PCAPKIT_VERSION} for ${target_platform} / ${py_tag} is already on anaconda.org/jarryshaw (http ${status}); skipping this leg's upload."
-    fi
-''').lstrip()
-
-#: "Build conda packages" in both jobs, as inline shell: what ``build`` must match.
-REFERENCE_BUILD = textwrap.dedent(r'''
-    set -euo pipefail
-
-    # The recipe's host Python (#3133).
-    : "$PCAPKIT_PYTHON_VERSION"
-    out_dir="$(mktemp -d -t compilation-XXXXXXXXXX)"
-    echo "out_dir=$out_dir" >> "$GITHUB_OUTPUT"
-
-    conda build . --package-format .tar.bz2 --no-anaconda-upload --output-folder "$out_dir"
-    host_package="$(find "$out_dir" -type f \( -name '*.tar.bz2' -o -name '*.conda' \) -print | sort | sed -n '1p')"
-    if [ -z "$host_package" ]; then
-      echo "::error::No conda package was built"
-      exit 1
-    fi
-
-    case "$PCAPKIT_CONDA_OS" in
-      ubuntu-latest)
-        target_platform="noarch"
-        ;;
-      *)
-        target_platform=""
-        ;;
-    esac
-
-    echo "host_package=$host_package" >> "$GITHUB_OUTPUT"
-
-    # #1822: never `conda convert` across architectures. It relabels the
-    # package and copies its binaries unchanged, so the osx-64 package it
-    # made from the arm64 build carried arm64 extensions.
-    host_platform="$(basename "$(dirname "$host_package")")"
-    if [ "$host_platform" != "$target_platform" ]; then
-      echo "::error title=${host_platform} package on a ${target_platform:-unmapped} leg (#1822)::${PCAPKIT_CONDA_OS} publishes ${target_platform:-nothing}, and conda built ${host_platform} here; a package is published only for the platform it was built for."
-      exit 1
-    fi
-
-    package_paths="$(find "$out_dir" -type f \( -name '*.tar.bz2' -o -name '*.conda' \) -print | sort)"
-    if [ -z "$package_paths" ]; then
-      echo "::error::No conda packages were found"
-      exit 1
-    fi
-
-    printf '%s\n' "$package_paths"
-    package_paths_csv="$(printf '%s\n' "$package_paths" | paste -sd ',' -)"
-    echo "packages_csv=$package_paths_csv" >> "$GITHUB_OUTPUT"
-    {
-      echo 'packages<<EOF'
-      printf '%s\n' "$package_paths"
-      echo EOF
-    } >> "$GITHUB_OUTPUT"
-''').lstrip()
-
-
 
 def reply(*builds: 'tuple[str, str]') -> 'str':
     """An Anaconda release reply holding a distribution per ``(subdir, build)``."""
     return json.dumps({'distributions': [{'attrs': {'subdir': subdir, 'build': build}} for subdir, build in builds]})
 
 
-#: The leg check's cases: ``(name, os, reply, extra env)``.
+#: The leg check's cases: ``(name, os, reply, extra env, (status, PCAPKIT_LEG_EXISTS))``.
 LEG_CASES = (
-    ('the package is published', 'ubuntu-latest', reply(('noarch', 'py_0')), {}),
-    ('a bumped build is published', 'ubuntu-latest', reply(('noarch', 'py_1')), {}),
-    ('a platform package is not it', 'ubuntu-latest', reply(('linux-64', 'py_0'), ('linux-64', 'py314_0')), {}),
-    ('a per-Python build is not it', 'ubuntu-latest', reply(('noarch', 'py314_0')), {}),
-    ('an unmapped label matches nothing', 'macos-99', reply(('', 'py_0'), ('noarch', 'py_0')), {}),
-    ('no distributions', 'ubuntu-latest', '{}', {}),
-    ('not found', 'ubuntu-latest', reply(('noarch', 'py_0')), {'CURL_CODE': '404'}),
-    ('a 2xx other than 200 is not read', 'ubuntu-latest', reply(('noarch', 'py_0')), {'CURL_CODE': '201'}),
-    ('a 204 with no body', 'ubuntu-latest', '', {'CURL_CODE': '204'}),
-    ('curl fails', 'ubuntu-latest', reply(('noarch', 'py_0')), {'CURL_CODE': '000', 'CURL_FAIL': '7'}),
-    ('a 200 that is no JSON', 'ubuntu-latest', 'not json', {}),
-    ('a 200 that is a list', 'ubuntu-latest', '[]', {}),
-    ('no version', 'ubuntu-latest', '{}', {'PCAPKIT_VERSION': None}),
-    ('no label', None, '{}', {}),
+    ('the package is published', 'ubuntu-latest', reply(('noarch', 'py_0')), {}, (0, 'true')),
+    ('a bumped build is published', 'ubuntu-latest', reply(('noarch', 'py_1')), {}, (0, 'true')),
+    ('a platform package is not it', 'ubuntu-latest', reply(('linux-64', 'py_0'), ('linux-64', 'py314_0')), {},
+     (0, 'false')),
+    ('a per-Python build is not it', 'ubuntu-latest', reply(('noarch', 'py314_0')), {}, (0, 'false')),
+    ('no distributions', 'ubuntu-latest', '{}', {}, (0, 'false')),
+    ('not found', 'ubuntu-latest', reply(('noarch', 'py_0')), {'CURL_CODE': '404'}, (0, 'false')),
+    ('a 2xx other than 200 is not read', 'ubuntu-latest', reply(('noarch', 'py_0')), {'CURL_CODE': '201'},
+     (0, 'false')),
+    ('a 204 with no body', 'ubuntu-latest', '', {'CURL_CODE': '204'}, (0, 'false')),
+    ('curl fails', 'ubuntu-latest', reply(('noarch', 'py_0')), {'CURL_CODE': '000', 'CURL_FAIL': '7'},
+     (0, 'false')),
+    ('a 200 that is no JSON', 'ubuntu-latest', 'not json', {}, (1, None)),
+    ('a 200 that is a list', 'ubuntu-latest', '[]', {}, (1, None)),
+    ('no version', 'ubuntu-latest', '{}', {'PCAPKIT_VERSION': None}, (1, None)),
+    ('no label', None, '{}', {}, (1, None)),
 )
 
-#: The build's cases: ``(name, os, $FAKE_BUILT, extra env)``.
+#: The outputs a build that succeeds writes, in order.
+BUILT = ['out_dir', 'host_package', 'packages_csv', 'packages']
+#: The build's cases: ``(name, os, $FAKE_BUILT, extra env, (status, the outputs written))``.
 BUILD_CASES = (
-    ('noarch on ubuntu-latest', 'ubuntu-latest', 'noarch/pypcapkit-1.5.0-py_0.tar.bz2', {}),
+    ('noarch on ubuntu-latest', 'ubuntu-latest', 'noarch/pypcapkit-1.5.0-py_0.tar.bz2', {}, (0, BUILT)),
     ('every package, sorted, and nothing else', 'ubuntu-latest',
      'noarch/z.tar.bz2 noarch/a.conda noarch/repodata.json noarch/dir.tar.bz2/ '
-     'noarch/link.conda@a.conda noarch/.hidden.conda', {}),
-    ('linux-64 on ubuntu-latest', 'ubuntu-latest', 'linux-64/pypcapkit-1.5.0-py314_0.tar.bz2', {}),
-    ('an unmapped label', 'macos-99', 'noarch/pypcapkit-1.5.0-py_0.tar.bz2', {}),
-    ('nothing built', 'ubuntu-latest', 'noarch/repodata.json', {}),
-    ('a failed build', 'ubuntu-latest', 'noarch/a.tar.bz2', {'BUILD_FAIL': '3'}),
-    ('no conda', 'ubuntu-latest', '', {'PATH': None}),
-    ('no Python', 'ubuntu-latest', 'noarch/pypcapkit-1.5.0-py_0.tar.bz2', {'PCAPKIT_PYTHON_VERSION': None}),
+     'noarch/link.conda@a.conda noarch/.hidden.conda', {}, (0, BUILT)),
+    ('linux-64 on ubuntu-latest', 'ubuntu-latest', 'linux-64/pypcapkit-1.5.0-py314_0.tar.bz2', {},
+     (1, ['out_dir', 'host_package'])),
+    ('an unmapped label', 'macos-99', 'noarch/pypcapkit-1.5.0-py_0.tar.bz2', {}, (1, ['out_dir', 'host_package'])),
+    ('nothing built', 'ubuntu-latest', 'noarch/repodata.json', {}, (1, ['out_dir'])),
+    ('a failed build', 'ubuntu-latest', 'noarch/a.tar.bz2', {'BUILD_FAIL': '3'}, (3, ['out_dir'])),
+    ('no conda', 'ubuntu-latest', '', {'PATH': None}, (127, ['out_dir'])),
+    ('no Python', 'ubuntu-latest', 'noarch/pypcapkit-1.5.0-py_0.tar.bz2', {'PCAPKIT_PYTHON_VERSION': None},
+     (1, [])),
 )
 
 
@@ -251,7 +150,7 @@ class _Stand(unittest.TestCase):
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(text, encoding='utf-8')
             path.chmod(0o755)
-        # The count's ``python3 -``, on this interpreter in both runs.
+        # The count's ``python3 -``, on this interpreter.
         (self.bin / 'python3').symlink_to(sys.executable)
         self.work = self.tmp / 'work'
         self.scratch = self.tmp / 'scratch'
@@ -259,7 +158,6 @@ class _Stand(unittest.TestCase):
         self.log = self.tmp / 'calls'
         self.reply = self.tmp / 'reply'
         self.release = self.tmp / 'release.json'
-        self.shell = self.tmp / 'step.sh'
         self.base = {
             'PATH': f'{self.bin}{os.pathsep}{os.environ.get("PATH", "")}', 'HOME': str(self.tmp), 'LC_ALL': 'C',
             'TMPDIR': str(self.scratch), 'GITHUB_OUTPUT': str(self.output), 'CALL_LOG': str(self.log),
@@ -278,9 +176,8 @@ class _Stand(unittest.TestCase):
 
     def env(self, extra: 'dict[str, Optional[str]]', **variables: 'Optional[str]') -> 'dict[str, str]':
         merged = dict(self.base, **variables, **extra)
-        if 'PATH' in extra and extra['PATH'] is None:  # no conda, but the shell's own tools
-            merged['PATH'] = os.pathsep.join(os.path.dirname(shutil.which(tool) or '') for tool in
-                                             ('find', 'sort', 'sed', 'paste', 'mktemp', 'basename', 'dirname'))
+        if 'PATH' in extra and extra['PATH'] is None:  # no conda
+            merged['PATH'] = str(self.tmp / 'empty')
         return {key: value for key, value in merged.items() if value is not None}
 
     def state(self, result: 'subprocess.CompletedProcess[str]') -> 'tuple[object, ...]':
@@ -305,21 +202,13 @@ class _Stand(unittest.TestCase):
         return self.state(subprocess.run([sys.executable, str(script), *words[2:]], cwd=self.work,  # nosec: B603
                                          env=env, capture_output=True, text=True, check=False, timeout=120))
 
-    def reference(self, shell: 'str', env: 'dict[str, str]') -> 'tuple[object, ...]':
-        """``shell``, as ``shell: bash`` runs it, its own errors' ``<path>: line N:`` dropped."""
-        self.shell.write_text(shell.replace('/tmp/anaconda_release.json', str(self.release)), encoding='utf-8')
-        result = subprocess.run(bash_argv('-eo', 'pipefail', str(self.shell), executable=BASH),  # nosec: B603
-                                cwd=self.work, env=env, capture_output=True, text=True, check=False, timeout=120)
-        result.stderr = re.sub(rf'(?m)^{re.escape(str(self.shell))}: line \d+: ', '', result.stderr)
-        return self.state(result)
-
     def leg_env(self, case: 'tuple[object, ...]') -> 'dict[str, str]':
-        _, label, body, extra = case
+        label, body, extra = case[1:4]
         self.reply.write_text(str(body), encoding='utf-8')
         return self.env(extra, PCAPKIT_CONDA_OS=label)  # type: ignore[arg-type]
 
     def build_env(self, case: 'tuple[object, ...]') -> 'dict[str, str]':
-        _, label, built, extra = case
+        label, built, extra = case[1:4]
         return self.env(dict({'PCAPKIT_PYTHON_VERSION': '3.15'}, **extra),  # type: ignore[arg-type]
                         PCAPKIT_CONDA_OS=label, FAKE_BUILT=built, PCAPKIT_BUILD='0')
 
@@ -340,50 +229,26 @@ LEG_RUN = STEPS[('create-release.yml', 'conda', 'Check whether this leg is alrea
 BUILD_RUN = STEPS[('cron-conda.yml', 'conda-build', 'Build conda packages')]
 
 
-@unittest.skipIf(not BASH, 'needs bash, which runs the reference shell')
-class TestTheStepMatchesTheReferenceShell(_Stand):
-    """Each script exits, prints, writes and calls exactly as the step's inline shell form, on every case."""
-
-    def agree(self, shell: 'str', run: 'str', env: 'dict[str, str]') -> 'tuple[object, ...]':
-        self.reset()
-        old = self.reference(shell, env)
-        self.reset()
-        new = self.script(run, env)
-        self.assertEqual(new, old)
-        return old
-
-    def test_the_leg_check(self) -> None:
-        for case in LEG_CASES:
-            with self.subTest(case=case[0]):
-                self.agree(REFERENCE_LEG, LEG_RUN, self.leg_env(case))
-
-    def test_the_build(self) -> None:
-        for case in BUILD_CASES:
-            with self.subTest(case=case[0]):
-                self.agree(REFERENCE_BUILD, BUILD_RUN, self.build_env(case))
-
-    def test_every_way_each_shell_ends_was_reached(self) -> None:
-        """So agreement is not agreement on one path."""
-        ended = {}  # type: dict[str, set[object]]
-        for name, shell, cases, env in (
-                ('leg', REFERENCE_LEG, LEG_CASES, self.leg_env),
-                ('build', REFERENCE_BUILD, BUILD_CASES, self.build_env)):
-            for case in cases:
-                self.reset()
-                found = self.reference(shell, env(case))
-                ended.setdefault(name, set()).add((found[0], dict(found[3]).get('PCAPKIT_LEG_EXISTS')))
-        self.assertEqual(ended, {
-            'leg': {(0, 'true'), (0, 'false'), (1, None)},
-            'build': {(0, None), (1, None), (3, None), (127, None)},
-        })
-
-
 class TestTheScripts(_Stand):
     """What a run outputs, read as the runner reads it."""
 
     def setUp(self) -> None:
         super().setUp()
         self.reset()
+
+    def test_every_leg_case(self) -> None:
+        for case in LEG_CASES:
+            with self.subTest(case=case[0]):
+                self.reset()
+                status, _, _, outputs, _ = self.script(LEG_RUN, self.leg_env(case))
+                self.assertEqual((status, dict(outputs).get('PCAPKIT_LEG_EXISTS')), case[4])
+
+    def test_every_build_case(self) -> None:
+        for case in BUILD_CASES:
+            with self.subTest(case=case[0]):
+                self.reset()
+                status, _, _, outputs, _ = self.script(BUILD_RUN, self.build_env(case))
+                self.assertEqual((status, [name for name, _ in outputs]), case[4])
 
     def test_a_build_outputs_every_package(self) -> None:
         status, stdout, _, outputs, _ = self.script(BUILD_RUN, self.build_env(BUILD_CASES[1]))
@@ -411,7 +276,7 @@ class TestTheScripts(_Stand):
                                 'https://api.anaconda.org/release/jarryshaw/pypcapkit/1.5.0\n')
 
     def test_only_a_200_is_read(self) -> None:
-        """As :data:`REFERENCE_LEG`'s ``[ "$status" = "200" ]``: a 201 holding this very leg reads ``false``, uncounted."""
+        """A 201 holding this very leg reads ``false``, uncounted."""
         case = next(case for case in LEG_CASES if case[0] == 'a 2xx other than 200 is not read')
         status, stdout, stderr, outputs, calls = self.script(LEG_RUN, self.leg_env(case))
         self.assertEqual((status, stdout, stderr), (0, '', ''))

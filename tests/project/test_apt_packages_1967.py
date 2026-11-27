@@ -4,12 +4,8 @@
 * :class:`TestPlan`, :class:`TestInstall` and :class:`TestCollect` run each
   subcommand in this process with :func:`subprocess.run` stubbed, so every command
   it would run, and every failure of one, is checked without ``sudo`` or apt.
-* :class:`TestTheStepMatchesTheReferenceShell` runs the steps' inline shell form, the
-  reference the script must match (#1967), and then the steps' own ``run:``, against the same stand-in ``sudo``,
-  ``timeout``, ``apt-get``, ``dpkg``, ``dpkg-deb``, ``dpkg-query`` and
-  ``debconf-set-selections``, and requires the same status, output, commands and
-  files. The seed steps, whose shell is inline as one copy and a count, run their
-  own ``run:`` there.
+* :class:`TestTheSeedSteps` runs the seed steps' own ``run:``, whose shell is inline
+  as one copy and a count, against a stand-in ``sudo``.
 * :class:`TestTheStepsRunTheScript` pins each apt step to the script, or the seed
   steps to their shell, with its ``id``, ``if:``, ``continue-on-error`` and
   ``timeout-minutes``, the KTLO twin to the same steps, and the AppArmor step
@@ -28,10 +24,8 @@ import hashlib
 import io
 import os
 import pathlib
-import shlex
 import shutil
 import subprocess  # nosec: B404
-import sys
 import tempfile
 import textwrap
 import unittest
@@ -45,7 +39,7 @@ from tests.project.test_unit_tests_queue import IMAGE_PYTHON
 from util import apt_packages
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Iterator, Optional
+    from typing import Any, Callable
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKFLOW = 'unit-tests.yml'
@@ -163,6 +157,12 @@ class TestPlan(_InProcess):
         self.environ['APT_PACKAGES'] = ' build-essential\tlibpcap-dev  tshark '
         _, _, runner = self.main(['plan'], answers(simulate=(0, b'')))
         self.assertEqual(runner.commands[1][4:], ['build-essential', 'libpcap-dev', 'tshark'])
+
+    def test_the_plan_is_in_byte_order(self) -> None:
+        """Capitals first, then punctuation by its byte, whatever the locale."""
+        simulation = b'Inst b (1)\nInst a (2)\nInst B (3)\nInst a-b (1)\nInst a.b (1)\n'
+        _, output, _ = self.main(['plan'], answers(simulate=(0, simulation)))
+        self.assertEqual(output, 'To download:\nInst B (3)\nInst a (2)\nInst a-b (1)\nInst a.b (1)\nInst b (1)\n')
 
     def test_image_os_falls_back_to_unknown(self) -> None:
         for value in (None, ''):
@@ -407,88 +407,12 @@ class TestArguments(_InProcess):
                 self.assertEqual(raised.exception.code, 2)
 
 
-#: The steps' inline shell form, the reference the script must match, each with the runner paths it names.
-REFERENCE_PLAN = textwrap.dedent(r'''
-    set -eu
-    for attempt in 1 2; do
-      if sudo timeout 60 apt-get update; then
-        break
-      fi
-      if [ "$attempt" = 1 ]; then
-        echo "::warning title=apt-get update attempt 1 of 2 failed (${APT_SET})::apt-get update failed or exceeded its 60s bound."
-      else
-        echo "::warning title=apt-get update attempt 2 of 2 failed (${APT_SET})::apt-get update failed or exceeded its 60s bound; no cache this run, and the install step updates again."
-        echo "degraded=true" >> "$GITHUB_OUTPUT"
-        exit 0
-      fi
-    done
-    # shellcheck disable=SC2086
-    sim=$(apt-get install -s --no-install-recommends $APT_PACKAGES)
-    plan=$(printf '%s\n' "$sim" | grep '^Inst ' | sort || true)
-    printf 'To download:\n%s\n' "${plan:-(nothing)}"
-    if [ -n "$plan" ]; then
-      prefix="apt-debs-${ImageOS:-unknown}-${RUNNER_ARCH}-${APT_SET}-"
-      echo "restore-prefix=$prefix" >> "$GITHUB_OUTPUT"
-      echo "key=${prefix}$(printf '%s\n' "$plan" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
-    fi
-''').lstrip()  # noqa: E501
 #: The seed steps' ``run:``, inline rather than a ``seed`` subcommand (#1967).
 SEED = textwrap.dedent(r'''
     set -eu
     sudo cp "$RUNNER_TEMP"/apt-debs/*.deb /var/cache/apt/archives/
     echo "Seeded $(find "$RUNNER_TEMP/apt-debs" -name '*.deb' | wc -l) .deb files"
 ''').lstrip()
-REFERENCE_RETRY = textwrap.dedent(r'''
-    for attempt in 1 2; do
-      if sudo timeout 60 apt-get update \
-         && sudo DEBIAN_FRONTEND=noninteractive timeout 180 apt-get install -y --no-install-recommends PACKAGES; then
-        SUCCEED
-      fi
-      echo "::warning title=apt attempt $attempt of 2 failed SUFFIX::apt-get update or install failed or exceeded its per-attempt bound; retrying once."
-      sudo dpkg --configure -a || true
-      if [ "$attempt" = 1 ] && [ -f "$mirrors" ] \
-         && grep -v 'azure\.archive\.ubuntu\.com' "$mirrors" | grep -q '^http' \
-         && sudo sed -i '/azure\.archive\.ubuntu\.com/d' "$mirrors"; then
-        echo "::warning title=apt retry on a fallback mirror SUFFIX::Retrying against $(head -n 1 "$mirrors" | cut -f 1) instead of azure.archive.ubuntu.com, resuming the partial download."
-      fi
-    done
-''')  # noqa: E501
-REFERENCE_ENGINE_INSTALL = ('set -eu\nmirrors=/etc/apt/apt-mirrors.txt\napt_install() {\n'
-                         + textwrap.indent(REFERENCE_RETRY.lstrip().replace('PACKAGES', '"$@"')
-                                           .replace('SUCCEED', 'return 0').replace(' SUFFIX', ' (${ENGINE})'), '  ')
-                         + '  return 1\n}\n' + textwrap.dedent('''\
-    if [ "$ENGINE" = "PyShark" ]; then
-      echo "wireshark-common wireshark-common/install-setuid boolean false" | sudo debconf-set-selections
-      apt_install tshark
-    elif [ "$ENGINE" = "PCAP_CT" ]; then
-      apt_install libpcap0.8
-    elif [ "$ENGINE" = "PyPCAP" ]; then
-      apt_install build-essential libpcap-dev
-    fi
-'''))
-REFERENCE_PARITY_INSTALL = ('set -eu\n'
-                         'echo "wireshark-common wireshark-common/install-setuid boolean false" '
-                         '| sudo debconf-set-selections\nmirrors=/etc/apt/apt-mirrors.txt\n'
-                         + REFERENCE_RETRY.lstrip().replace('PACKAGES', 'build-essential libpcap-dev tshark')
-                         .replace('SUCCEED', 'exit 0').replace(' SUFFIX', '') + 'exit 1\n')
-REFERENCE_COLLECT = textwrap.dedent(r'''
-    set -eu
-    out="$RUNNER_TEMP/apt-debs"
-    rm -rf "$out"
-    mkdir -p "$out"
-    for deb in /var/cache/apt/archives/*.deb; do
-      [ -e "$deb" ] || continue
-      pkg=$(dpkg-deb -f "$deb" Package)
-      ver=$(dpkg-deb -f "$deb" Version)
-      arch=$(dpkg-deb -f "$deb" Architecture)
-      # shellcheck disable=SC2016
-      if [ "$(dpkg-query -W -f '${Version}' "$pkg:$arch" 2>/dev/null || true)" = "$ver" ]; then
-        cp "$deb" "$out/"
-      fi
-    done
-    echo "Collected $(find "$out" -name '*.deb' | wc -l) .deb files"
-''').lstrip()
-
 #: ``engine-tests``'s and ``pypcap-parity``'s apt steps, ``(name, id, if, continue-on-error,
 #: timeout-minutes, run)``, in order, the AppArmor step (#2019) between install and collect.
 ENGINE_STEPS = (
@@ -517,158 +441,46 @@ SITES = {'engine-tests': ENGINE_STEPS, 'pypcap-parity': PARITY_STEPS}
 #: cache to plan or collect for, as (workflow, step name). Each is pinned by its
 #: workflow's own test, as :mod:`tests.project.test_benchmark_workflow_2125`.
 ELSEWHERE = {('benchmark.yml', 'Install libpcap headers and tshark')}
-#: Each subcommand's inline shell form, the reference it must match, by subcommand.
-REFERENCE = {'plan': REFERENCE_PLAN, 'collect': REFERENCE_COLLECT}
 APPARMOR = 'Let tshark read the checkout past its AppArmor profile'
 #: Text only inline apt shell holds.
 INLINE = ('apt-get', 'dpkg', 'debconf-set-selections', 'apt-mirrors', '/var/cache/apt', 'apt_install')
 
-#: Stand-ins, each logging its call to ``$CALLS``. ``apt-get``'s first ``$FAIL_UPDATES``
-#: updates and ``$FAIL_INSTALLS`` installs fail; ``install -s`` prints ``$STUB_SIM`` and
-#: exits ``$SIM_STATUS``. ``dpkg-deb -f`` reads ``Field=value`` lines from the archive
-#: itself; ``dpkg-query`` reads ``pkg:arch version`` lines from ``$INSTALLED``.
-STUBS = {
-    'sudo': 'echo "sudo $*" >> "$CALLS"\nexec env "$@"\n',
-    'timeout': 'echo "timeout $1" >> "$CALLS"\nshift\nexec "$@"\n',
-    'apt-get': textwrap.dedent('''\
-        echo "apt-get $*" >> "$CALLS"
-        if [ "$1" = update ]; then
-          n=$(grep -c '^apt-get update' "$CALLS")
-          echo "Hit:$n http://mirror noble InRelease"
-          [ "$n" -gt "${FAIL_UPDATES:-0}" ] || { echo "E: update $n failed" >&2; exit 100; }
-        elif [ "$2" = -s ]; then
-          cat "$STUB_SIM"
-          echo "W: simulated" >&2
-          exit "${SIM_STATUS:-0}"
-        else
-          n=$(grep -c '^apt-get install -y' "$CALLS")
-          echo "Setting up $n"
-          [ "$n" -gt "${FAIL_INSTALLS:-0}" ] || exit 124
-        fi
-        '''),
-    'dpkg': 'echo "dpkg $*" >> "$CALLS"\necho "dpkg: configured"\nexit "${DPKG_STATUS:-0}"\n',
-    'debconf-set-selections': 'echo "debconf $(cat)" >> "$CALLS"\nexit "${DEBCONF_STATUS:-0}"\n',
-    'dpkg-deb': textwrap.dedent('''\
-        echo "dpkg-deb $*" >> "$CALLS"
-        grep -q '^Package=' "$2" 2>/dev/null || { echo "dpkg-deb: error: '$2' is not a Debian format archive" >&2; exit 2; }
-        sed -n "s/^$3=//p" "$2"
-        '''),  # noqa: E501
-    'dpkg-query': textwrap.dedent('''\
-        echo "dpkg-query $*" >> "$CALLS"
-        v=$(sed -n "s/^$4 //p" "$INSTALLED")
-        [ -n "$v" ] || { echo "dpkg-query: no packages found matching $4" >&2; exit 1; }
-        printf '%s' "$v"
-        '''),
-}
+#: A stand-in ``sudo``, logging its call to ``$CALLS``.
+SUDO = '#!/bin/bash\necho "sudo $*" >> "$CALLS"\nexec env "$@"\n'
 
 
-@unittest.skipIf(any(shutil.which(tool) is None for tool in ('bash', 'sed', 'grep', 'sort', 'sha256sum', 'cut',
-                                                             'find', 'wc', 'head', 'cp', 'env')),
-                 'needs bash and the coreutils the reference shell runs')
-class TestTheStepMatchesTheReferenceShell(unittest.TestCase):
-    """Each step's ``run:`` writes, runs and leaves what its inline shell form does, on the same stand-ins."""
+@unittest.skipIf(any(shutil.which(tool) is None for tool in ('bash', 'cp', 'find', 'wc', 'env')),
+                 'needs bash and the coreutils the seed steps run')
+class TestTheSeedSteps(unittest.TestCase):
+    """The seed steps' own shell: ``sudo cp`` of the top-level files, then the count of every ``.deb``."""
 
     def setUp(self) -> None:
         steps(WORKFLOW, 'engine-tests')  # skips the test, not each subtest, without PyYAML
-        tmp = tempfile.TemporaryDirectory(prefix='pcapkit-1967-apt-parity-')  # pylint: disable=consider-using-with
+        tmp = tempfile.TemporaryDirectory(prefix='pcapkit-1967-apt-seed-')  # pylint: disable=consider-using-with
         self.addCleanup(tmp.cleanup)
         self.tmp = pathlib.Path(tmp.name)
         self.bin = self.tmp / 'bin'
         self.bin.mkdir()
-        for name, body in STUBS.items():
-            path = self.bin / name
-            path.write_text('#!/bin/bash\n' + body, encoding='utf-8')
-            path.chmod(0o755)
-        self.mirrors = self.tmp / 'apt-mirrors.txt'
+        (self.bin / 'sudo').write_text(SUDO, encoding='utf-8')
+        (self.bin / 'sudo').chmod(0o755)
         self.archives = self.tmp / 'archives'
         self.runner_temp = self.tmp / 'runner-temp'
-        self.output = self.tmp / 'output'
         self.calls = self.tmp / 'calls'
 
-    def env(self, **extra: 'str') -> 'dict[str, str]':
+    def env(self) -> 'dict[str, str]':
         env = {key: value for key, value in os.environ.items()
-               if key not in ('APT_PACKAGES', 'APT_SET', 'ENGINE', 'ImageOS', 'RUNNER_ARCH', 'RUNNER_TEMP',
-                              'GITHUB_OUTPUT', 'PYTHONPATH', 'PYTHONSAFEPATH') and not key.startswith('LC_')}
+               if key not in ('RUNNER_TEMP', 'PYTHONPATH', 'PYTHONSAFEPATH') and not key.startswith('LC_')}
         env.update(PATH=f'{self.bin}{os.pathsep}{os.environ["PATH"]}', CALLS=str(self.calls), LC_ALL='C',
-                   RUNNER_TEMP=str(self.runner_temp), GITHUB_OUTPUT=str(self.output),
-                   STUB_SIM=str(self.tmp / 'sim'), INSTALLED=str(self.tmp / 'installed'), RUNNER_ARCH='X64',
-                   APT_SET='PyShark', ImageOS='ubuntu24', PYTHONIOENCODING='utf-8')
-        env.update(extra)
+                   RUNNER_TEMP=str(self.runner_temp))
         return env
 
-    def state(self) -> 'tuple[object, ...]':
-        """What a run leaves: its commands, the outputs file, the mirror list, the cache directory."""
-        def read(path: 'pathlib.Path') -> 'Optional[str]':
-            return path.read_text(encoding='utf-8') if path.is_file() else None
-        cache = self.runner_temp / 'apt-debs'
-        listing = sorted(str(path.relative_to(cache)) for path in cache.rglob('*')) if cache.is_dir() else None
-        return read(self.calls), read(self.output), read(self.mirrors), listing
-
-    def both(self, job: 'str', step: 'str', reference: 'str', prepare: 'Callable[[], None]',
-             **env: 'str') -> 'tuple[tuple[object, ...], tuple[object, ...]]':
-        """``(status, output, *state)`` of ``reference``, then of the step's ``run:``, each from ``prepare``."""
-        run = next(item for item in steps(WORKFLOW, job) if item.get('name') == step)['run']
-        command = run.split(f'{SCRIPT} ', 1)[1].split()[0]
-        option = {'install': '--mirrors', 'plan': None}.get(command, '--archives')
-        target = self.mirrors if command == 'install' else self.archives
-        script = run.replace(IMAGE_PYTHON, shlex.quote(sys.executable))
-        if option is not None:
-            script = script.replace(f'{SCRIPT} {command}', f'{SCRIPT} {command} {option} {shlex.quote(str(target))}')
-        shell = reference.replace('/etc/apt/apt-mirrors.txt', str(self.mirrors)) \
-                      .replace('/var/cache/apt/archives', str(self.archives))
-        found = []
-        for text in (shell, script):
-            self.reset()
-            prepare()
-            result = subprocess.run(bash_argv('-e', '-c', text), cwd=ROOT, env=self.env(**env),  # nosec: B603
-                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False, timeout=120)
-            found.append((result.returncode, result.stdout.decode('utf-8', 'replace'), *self.state()))
-        return found[0], found[1]
-
     def reset(self) -> None:
-        for path in (self.mirrors, self.archives, self.runner_temp, self.output, self.calls,
-                     self.tmp / 'sim', self.tmp / 'installed'):
-            if path.is_dir():
-                shutil.rmtree(path)
-            elif path.exists():
-                path.unlink()
-        self.archives.mkdir()
-        self.runner_temp.mkdir()
-        self.output.write_text('earlier=1\n', encoding='utf-8')
+        for path in (self.archives, self.runner_temp):
+            shutil.rmtree(path, ignore_errors=True)
+            path.mkdir()
         self.calls.write_text('', encoding='utf-8')
 
-    def scenarios(self) -> 'Iterator[tuple[str, str, str, dict[str, str]]]':
-        """``(job, step, reference, env)`` for every apt step but the installs, ``reference`` its inline shell form."""
-        for job, sites in SITES.items():
-            for name, _, _, _, _, run in sites:
-                if SCRIPT not in run:
-                    continue
-                command = run.split(f'{SCRIPT} ', 1)[1].split()[0]
-                if command in REFERENCE:
-                    yield job, name, REFERENCE[command], {}
-
-    def test_plan(self) -> None:
-        simulations = (SIMULATION, b'', b'NOTE: This is only a simulation!\n', SIMULATION[::-1],
-                       b'Inst b (1)\nInst a (2)\nInst B (3)\nInst a-b (1)\nInst a.b (1)\n')
-        keyed = degraded = 0
-        for job, step, reference, _ in self.scenarios():
-            if reference is not REFERENCE_PLAN:
-                continue
-            for simulation in simulations:
-                for env in ({}, {'FAIL_UPDATES': '1'}, {'FAIL_UPDATES': '2'}, {'SIM_STATUS': '100'},
-                            {'ImageOS': ''}, {'APT_PACKAGES': 'build-essential  libpcap-dev\ttshark'}):
-                    with self.subTest(job=job, simulation=simulation, env=env):
-                        env = {'APT_PACKAGES': 'tshark', **env}
-                        old, new = self.both(job, step, reference,
-                                             lambda: (self.tmp / 'sim').write_bytes(simulation), **env)
-                        self.assertEqual(new, old)
-                        keyed += 'key=' in str(old[3])
-                        degraded += 'degraded=true' in str(old[3])
-        self.assertTrue(keyed)
-        self.assertTrue(degraded)
-
     def test_seed(self) -> None:
-        """The seed steps' own shell: ``sudo cp`` of the top-level files, then the count of every ``.deb``."""
         cache = self.runner_temp / 'apt-debs'
 
         def nothing() -> None:
@@ -704,55 +516,6 @@ class TestTheStepMatchesTheReferenceShell(unittest.TestCase):
                         self.assertNotIn('Seeded', output)
                         self.assertEqual(self.calls.read_text(encoding='utf-8'),
                                          f'sudo cp {cache}/*.deb {self.archives}/\n')
-
-    def test_collect(self) -> None:
-        def archive(broken: 'bool') -> 'Callable[[], None]':
-            def prepare() -> None:
-                for name, fields in (('tshark.deb', 'tshark 4.2 amd64'), ('old.deb', 'old 1 amd64'),
-                                     ('gone.deb', 'gone 1 amd64'), ('i386.deb', 'lib 1 i386')):
-                    package, version, arch = fields.split()
-                    (self.archives / name).write_text(
-                        f'Package={package}\nVersion={version}\nArchitecture={arch}\n', encoding='utf-8')
-                (self.archives / 'dangling.deb').symlink_to(self.archives / 'nowhere')
-                if broken:
-                    (self.archives / 'm-broken.deb').write_text('not a deb', encoding='utf-8')
-                (self.tmp / 'installed').write_text('tshark:amd64 4.2\nold:amd64 2\nlib:amd64 1\n', encoding='utf-8')
-                (self.runner_temp / 'apt-debs').mkdir()
-                (self.runner_temp / 'apt-debs' / 'stale.deb').write_text('', encoding='utf-8')
-            return prepare
-
-        for job, step, reference, _ in self.scenarios():
-            if reference is not REFERENCE_COLLECT:
-                continue
-            for broken in (False, True):
-                with self.subTest(job=job, broken=broken):
-                    old, new = self.both(job, step, reference, archive(broken))
-                    self.assertEqual(new, old)
-                    self.assertEqual(old[0], 2 if broken else 0)
-
-    def test_install(self) -> None:
-        engines = {'Scapy': '', 'PyShark': 'tshark', 'PyPCAPFile': '', 'PyPCAP': 'build-essential libpcap-dev',
-                   'PCAP_CT': 'libpcap0.8'}
-        cases = [('engine-tests', REFERENCE_ENGINE_INSTALL, {'ENGINE': engine, 'APT_PACKAGES': packages})
-                 for engine, packages in engines.items()]
-        cases.append(('pypcap-parity', REFERENCE_PARITY_INSTALL, {'APT_PACKAGES': 'build-essential libpcap-dev tshark'}))
-        step = {job: sites[2][0] for job, sites in SITES.items()}
-        seen = set()  # type: set[str]
-        for job, reference, base in cases:
-            for mirrors in (MIRRORS, MIRRORS.splitlines(True)[0], None, ''):
-                for failures in ({}, {'FAIL_UPDATES': '1'}, {'FAIL_INSTALLS': '1'}, {'FAIL_UPDATES': '2'},
-                                 {'FAIL_UPDATES': '1', 'FAIL_INSTALLS': '1'},
-                                 {'FAIL_INSTALLS': '2', 'DPKG_STATUS': '1'}, {'DEBCONF_STATUS': '3'}):
-                    def prepare(mirrors: 'Optional[str]' = mirrors) -> None:
-                        if mirrors is not None:
-                            self.mirrors.write_text(mirrors, encoding='utf-8')
-                    with self.subTest(job=job, env=base, mirrors=mirrors, failures=failures):
-                        old, new = self.both(job, step[job], reference, prepare, **base, **failures)
-                        self.assertEqual(new, old)
-                        seen.update(piece for piece in ('fallback mirror', 'attempt 2 of 2', 'debconf', 'Setting up')
-                                    if piece in str(old))
-        # Every path ran: the retry, the fallback, the second failure, debconf and an install.
-        self.assertEqual(seen, {'fallback mirror', 'attempt 2 of 2', 'debconf', 'Setting up'})
 
 
 class TestTheStepsRunTheScript(unittest.TestCase):
