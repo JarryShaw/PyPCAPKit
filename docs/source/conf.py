@@ -11,8 +11,10 @@ import importlib
 import inspect
 import logging
 import os
+import pathlib
 import pkgutil
 import re
+import runpy
 import sys
 import typing
 from typing import TYPE_CHECKING
@@ -1351,10 +1353,13 @@ def link_pcap_module(app: 'Sphinx', doctree: 'document', docname: str) -> None:
         ref['internal'] = True
 
 
-#: The releases Read the Docs holds no build of, so the changelog links none
-#: (#3134). 1.4.0's only build failed after 900 seconds, Read the Docs' time limit
-#: (#3077).
-UNBUILT_RELEASES = frozenset({'1.4.0'})
+#: The script that writes the Pages redirects (#3077).
+PAGES_VERSIONS = pathlib.Path(__file__).resolve().parents[2] / 'util' / 'pages_versions.py'
+#: The releases Read the Docs holds no build of, so the changelog links none (#3134):
+#: the tags ``UNBUILT`` in ``PAGES_VERSIONS`` names, each ``v`` stripped, so the links
+#: and the redirects leave out one set (#3144). The script runs by its path, as
+#: nothing puts util/ on ``sys.path`` here.
+UNBUILT_RELEASES = frozenset(tag[1:] for tag in runpy.run_path(str(PAGES_VERSIONS))['UNBUILT'])
 #: A changelog entry's document, named for its release.
 CHANGELOG_ENTRY = re.compile(r'changelog/(?P<release>\d+(?:\.\d+)*)')
 

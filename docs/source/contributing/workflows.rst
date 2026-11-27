@@ -2528,10 +2528,11 @@ found.
 
 ``link_release_docs`` links each changelog entry to its release's build as the page is
 read -- after the entry's link on the index, and under its own page's title -- so no
-``.rst`` source names a URL. ``UNBUILT_RELEASES`` lists the releases Read the Docs holds
-no build of, which get none: a release whose tag build fails joins it, and leaves once a
-rebuild succeeds. On the tags that predate the switch, Read the Docs' flyout, which it
-injects only into the pages it serves, switches versions.
+``.rst`` source names a URL. A release whose tag is in ``UNBUILT`` gets none:
+:file:`docs/source/conf.py` reads that set from :file:`util/pages_versions.py`, so the
+links and the redirects leave out the same releases, and a rebuild that succeeds is one
+edit there (:issue:`3144`). On the tags that predate the switch, Read the Docs' flyout,
+which it injects only into the pages it serves, switches versions.
 
 .. mermaid::
 
