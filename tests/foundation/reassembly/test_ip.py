@@ -175,7 +175,10 @@ class IPOverlapConflictTests(unittest.TestCase):
         self.assertEqual(datagram.conflict, ())
 
     def test_conflicting_full_overlap_records_conflict_and_last_write_wins(self) -> None:
-        """Two block-aligned fragments claiming the same octets, with different data."""
+        """Two block-aligned fragments claiming the same octets, with different data.
+
+        ``completed`` and ``conflict`` are independent: the datagram completes
+        and still carries the conflict recorded before it."""
         reasm = self._reasm()
         reasm(self._packet(num=1, fo=0, mf=True, payload=b'AAAAAAAA', ident=2))
         reasm(self._packet(num=2, fo=0, mf=True, payload=b'BBBBBBBB', ident=2))
@@ -260,18 +263,6 @@ class IPOverlapConflictTests(unittest.TestCase):
         self.assertTrue(datagram.completed)
         self.assertEqual(datagram.payload, b'C' * 8 + b'ZZZZ')
         self.assertEqual(datagram.conflict, ((0, 7), (0, 7)))
-
-    def test_conflict_is_recorded_even_when_a_later_fragment_completes_the_datagram(self) -> None:
-        """``completed`` and ``conflict`` are independent: a clean completion
-        can still carry a recorded conflict from earlier in reassembly."""
-        reasm = self._reasm()
-        reasm(self._packet(num=1, fo=0, mf=True, payload=b'A' * 8, ident=7))
-        reasm(self._packet(num=2, fo=0, mf=True, payload=b'B' * 8, ident=7))
-        reasm(self._packet(num=3, fo=8, mf=False, payload=b'ZZZZ', ident=7))
-
-        datagram, = reasm.datagram
-        self.assertTrue(datagram.completed)
-        self.assertEqual(datagram.conflict, ((0, 7),))
 
     def test_conflict_stays_scoped_to_its_own_bufid(self) -> None:
         """Coverage gap named in #482's review: ``Buffer.conflict`` is created
