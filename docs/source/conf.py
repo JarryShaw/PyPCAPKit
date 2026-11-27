@@ -376,13 +376,13 @@ html_theme_options = {
     },
 }
 html_title = "PyPCAPKit"
-# furo's own sidebar list, from its ``theme.conf``, with a link to the versions on
-# Read the Docs under the brand (#3077). A Read the Docs build leaves it out, as
-# its flyout menu switches versions there.
+# furo's own sidebar list, from its ``theme.conf``, with the switch between the
+# documentation's versions under the brand (#3134). Read the Docs' flyout, which it
+# injects only into the pages it serves, is the switch of the builds that predate it.
 html_sidebars = {
     '**': [
         'sidebar/brand.html',
-        *([] if READTHEDOCS else ['sidebar/versions.html']),
+        'sidebar/versions.html',
         'sidebar/search.html',
         'sidebar/scroll-start.html',
         'sidebar/navigation.html',
@@ -400,6 +400,56 @@ if READTHEDOCS:
 else:
     ogp_site_url = 'https://jarryshaw.github.io/PyPCAPKit/'
 html_baseurl = ogp_site_url
+
+#: Where Read the Docs serves each version, under its slug, as
+#: ``util/pages_versions.py`` names it too (#3134).
+READ_THE_DOCS = 'https://pypcapkit.jarryshaw.me/en/'
+#: This build's version, by its Read the Docs slug: ``READTHEDOCS_VERSION`` there,
+#: and ``stable`` on GitHub Pages, whose build of ``main`` Read the Docs' ``stable``
+#: mirrors (#3134).
+DOCS_VERSION = os.environ['READTHEDOCS_VERSION'] if READTHEDOCS else 'stable'
+#: What Read the Docs builds it from: ``branch``, ``tag``, or ``external`` for a
+#: pull request.
+DOCS_VERSION_TYPE = os.environ.get('READTHEDOCS_VERSION_TYPE', '') if READTHEDOCS else 'branch'
+#: The release tags Read the Docs' automation rule builds as they are pushed (#3077).
+AUTOMATED_RELEASE = re.compile(r'v\d+\.\d+\.\d+(?:\.post\d+)?')
+
+# The release this build documents, by its slug: a tag build's own, and on
+# ``stable`` the one ``main`` last released, where Read the Docs builds it.
+if DOCS_VERSION_TYPE == 'tag':
+    DOCS_RELEASE = DOCS_VERSION  # type: Optional[str]
+elif DOCS_VERSION == 'stable' and AUTOMATED_RELEASE.fullmatch(f'v{release}'):
+    DOCS_RELEASE = f'v{release}'
+else:
+    DOCS_RELEASE = None
+
+# What the switch calls this build.
+if DOCS_VERSION_TYPE == 'external':
+    DOCS_VERSION_LABEL = f'pull request #{DOCS_VERSION}'
+elif DOCS_VERSION == 'stable':
+    DOCS_VERSION_LABEL = f'{release} (stable)'
+elif DOCS_VERSION == 'latest':
+    DOCS_VERSION_LABEL = 'latest (develop)'
+elif DOCS_VERSION_TYPE == 'tag' and DOCS_VERSION.startswith('v'):
+    DOCS_VERSION_LABEL = DOCS_VERSION[1:]
+else:
+    DOCS_VERSION_LABEL = DOCS_VERSION
+
+#: The switch's versions, as each slug and its label. Each opens the same page in
+#: that version on Read the Docs, bar this build's own.
+DOCS_SWITCH = [('stable', 'stable'), ('latest', 'latest (develop)'),
+               *([(DOCS_RELEASE, DOCS_RELEASE)] if DOCS_RELEASE else [])]
+
+# What ``_templates/sidebar/versions.html`` reads (#3134). Every key is a
+# ``docs_*`` one: a ``READTHEDOCS`` or ``versions`` key would turn on furo's own
+# Read the Docs templates, whose context Read the Docs does not supply.
+html_context = {
+    'docs_read_the_docs': READ_THE_DOCS,
+    'docs_version': DOCS_VERSION,
+    'docs_version_label': DOCS_VERSION_LABEL,
+    'docs_switch': DOCS_SWITCH,
+    'docs_on_read_the_docs': READTHEDOCS,
+}
 
 # Mermaid diagrams render at their natural size and shrink only to fit the page
 # width. The ``sphinxcontrib-mermaid`` defaults -- ``mermaid_height = '500px'`` with
@@ -1301,6 +1351,45 @@ def link_pcap_module(app: 'Sphinx', doctree: 'document', docname: str) -> None:
         ref['internal'] = True
 
 
+#: The releases Read the Docs holds no build of, so the changelog links none
+#: (#3134). 1.4.0's only build failed after 900 seconds, Read the Docs' time limit
+#: (#3077).
+UNBUILT_RELEASES = frozenset({'1.4.0'})
+#: A changelog entry's document, named for its release.
+CHANGELOG_ENTRY = re.compile(r'changelog/(?P<release>\d+(?:\.\d+)*)')
+
+
+def link_release_docs(app: 'Sphinx', doctree: 'document') -> None:
+    """Link each changelog entry to its release's documentation on Read the Docs.
+
+    On the changelog's index, each link to an entry's page is followed by one to
+    the release's build at ``/en/vX.Y.Z/``; on an entry's own page, a line under
+    the title links it. The links are written as each page is read, so no ``.rst``
+    source names a URL and a new entry is linked with no step of its own
+    (:issue:`3134`). A release in :data:`UNBUILT_RELEASES` gets none.
+
+    Args:
+        app: Sphinx application.
+        doctree: The doctree of the document just read.
+
+    """
+    docname = app.env.docname
+    if docname == 'changelog':
+        for xref in list(doctree.findall(addnodes.pending_xref)):
+            entry = CHANGELOG_ENTRY.fullmatch(xref.get('reftarget', '').lstrip('/'))
+            if xref.get('reftype') != 'doc' or entry is None or entry['release'] in UNBUILT_RELEASES:
+                continue
+            link = nodes.reference('', 'documentation', refuri=f"{READ_THE_DOCS}v{entry['release']}/")
+            xref.parent.insert(xref.parent.index(xref) + 1, [nodes.Text(' · '), link])
+        return
+    entry = CHANGELOG_ENTRY.fullmatch(docname)
+    section = next(doctree.findall(nodes.section), None)
+    if entry is None or entry['release'] in UNBUILT_RELEASES or section is None:
+        return
+    link = nodes.reference('', 'Documentation of this release', refuri=f"{READ_THE_DOCS}v{entry['release']}/")
+    section.insert(1, nodes.paragraph('', '', link))
+
+
 def follow_builtins_alias(app: 'Sphinx', modname: 'Optional[str]',  # pylint: disable=unused-argument
                           attribute: str) -> 'Optional[str]':
     """Keep viewcode on the module that binds a name whose object reports :mod:`builtins`.
@@ -1389,6 +1478,7 @@ def setup(app: 'Sphinx') -> None:
     app.connect('doctree-resolved', link_pcap_module)
     app.connect('doctree-read', resolve_builtins_exactly)
     app.connect('doctree-read', qualify_type_parameters)
+    app.connect('doctree-read', link_release_docs)
     # NB: either side of napoleon's ``autodoc-process-docstring`` handler, which
     # connects at the default 500.
     app.connect('autodoc-process-docstring', save_enum_member_docstring, priority=400)

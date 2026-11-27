@@ -589,7 +589,9 @@ tag, which the next publish lists -- the next push to ``main`` or the Saturday
 schedule. Read the Docs builds ``stable`` from the ``stable`` branch, which Stable
 Branch moves to ``main``'s head on each push there, ``latest`` from ``develop``, and
 the release's tag as a version of its own, from the :file:`.readthedocs.yaml` in its
-tree.
+tree. Until that build is done, the release's changelog entry and ``stable``'s version
+switch link a page Read the Docs does not have yet (:issue:`3134`); a tag build that
+fails is listed in ``UNBUILT_RELEASES`` (:ref:`documentation-hosting`).
 
 Precautions
 -----------
