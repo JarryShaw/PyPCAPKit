@@ -395,6 +395,7 @@ class Extractor(Generic[_P]):
         'tcp': ModuleDescriptor('pcapkit.foundation.reassembly.tcp.reassembly', 'TCP'),
         'dtls': ModuleDescriptor('pcapkit.foundation.reassembly.dtls.reassembly', 'DTLS'),
         'sctp': ModuleDescriptor('pcapkit.foundation.reassembly.sctp.reassembly', 'SCTP'),
+        'tls': ModuleDescriptor('pcapkit.foundation.reassembly.tls.reassembly', 'TLS'),
     }  # type: dict[str, ModuleDescriptor[ReassemblyBase] | Type[ReassemblyBase]]
 
     #: Flow tracing support mapping for extracting frames, keyed by lower-cased protocol
@@ -482,6 +483,7 @@ class Extractor(Generic[_P]):
         * ``tcp`` -- tuple of TCP payload fragment (:term:`reasm.tcp.datagram`)
         * ``dtls`` -- tuple of DTLS handshake message (:term:`reasm.dtls.datagram`)
         * ``sctp`` -- tuple of SCTP user message (:term:`reasm.sctp.datagram`)
+        * ``tls`` -- tuple of TLS record (:term:`reasm.tls.datagram`)
 
         Each is :data:`None` when its reassembly is disabled, and every other
         enabled reassembler adds the tuple of its datagrams, under the name it is

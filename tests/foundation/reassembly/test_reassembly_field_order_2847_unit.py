@@ -29,7 +29,7 @@ __tier__ = 'ALL'
 BOOKKEEPING = ('__map__', '__map_reverse__', '__multi__', '__keys__')
 
 #: The built-in fields of the record, which come first.
-BUILTINS = ('ipv4', 'ipv6', 'tcp', 'dtls', 'sctp')
+BUILTINS = ('ipv4', 'ipv6', 'tcp', 'dtls', 'sctp', 'tls')
 
 
 def scramble(info):  # type: ignore[no-untyped-def]
@@ -123,7 +123,7 @@ class DataOrderTests(_OrderCase):
     def pairs(self, **extra):  # type: ignore[no-untyped-def]
         """The record's pairs for ``ReassemblyData(tcp=('t',), **extra)``."""
         return [('ipv4', None), ('ipv6', None), ('tcp', ('t',)), ('dtls', None), ('sctp', None),
-                *extra.items()]
+                ('tls', None), *extra.items()]
 
     def test_built_ins_then_the_rest_as_given(self) -> None:
         for extra in ({}, {'late': (), 'early': ('e',)}, {'early': ('e',), 'late': ()}):
@@ -131,8 +131,10 @@ class DataOrderTests(_OrderCase):
                 self.assertOrder(scramble(self.Data(tcp=('t',), **extra)), self.pairs(**extra))
 
     def test_built_ins_given_out_of_order(self) -> None:
-        data = scramble(self.Data(dummy=('d',), sctp=('s',), dtls=(), tcp=('t',), ipv6=(), ipv4=('4',)))
+        data = scramble(self.Data(dummy=('d',), tls=('r',), sctp=('s',), dtls=(), tcp=('t',), ipv6=(),
+                                  ipv4=('4',)))
         self.assertOrder(data, [('ipv4', ('4',)), ('ipv6', ()), ('tcp', ('t',)), ('dtls', ()), ('sctp', ('s',)),
+                                ('tls', ('r',)),
                                 ('dummy', ('d',))])
 
     def test_from_dict(self) -> None:

@@ -57,6 +57,7 @@ from pcapkit.foundation.reassembly.tcp.data import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.tcp.data import Packet as TF_TCP_Packet
 from pcapkit.protocols.internet.ipv4.protocol import IPv4 as Protocol_IPv4
 from pcapkit.protocols.transport.tcp.protocol import TCP as Protocol_TCP
+from pcapkit.toolkit.pcap import _tls_segment
 from pcapkit.utilities import config
 from pcapkit.utilities.contextvars import beholding
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, stacklevel
@@ -74,7 +75,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     'packet2timestamp', 'ipv4_header', 'packet2chain', 'packet2dict',
-    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',
+    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tls_reassembly', 'tcp_traceflow',
 ]
 
 #: Message prefix shared by every message below, read off
@@ -848,6 +849,31 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
         len=len(payload),                     # payload length, header excludes
         timestamp=packet2timestamp(packet),   # capture timestamp
     )
+
+
+def tls_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None':
+    """Make data for TLS record reassembly.
+
+    A packet can be reassembled if it can be for TCP reassembly (see
+    :func:`tcp_reassembly`) and the port its TCP segment's next layer is looked up
+    by binds TLS (see :func:`pcapkit.toolkit.pcap._tls_segment`), whether its
+    payload opens a record or continues one.
+
+    Args:
+        packet: PyPCAPFile packet.
+        count: Packet index. If not provided, defaults to ``-1``.
+
+    Returns:
+        Data for TCP reassembly (:term:`reasm.tcp.packet`) if the ``packet`` can be
+        reassembled; otherwise :data:`None`.
+
+    See Also:
+        :class:`pcapkit.foundation.reassembly.tls.reassembly.TLS`
+
+    .. versionadded:: 1.9.0
+
+    """
+    return _tls_segment(tcp_reassembly(packet, count=count))
 
 
 def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',

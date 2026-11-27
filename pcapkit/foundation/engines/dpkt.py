@@ -451,6 +451,7 @@ class DPKT(EngineBase['DPKTPacket']):
         'ipv4': ModuleDescriptor('pcapkit.toolkit.dpkt', 'ipv4_reassembly'),
         'ipv6': ModuleDescriptor('pcapkit.toolkit.dpkt', 'ipv6_reassembly'),
         'tcp': ModuleDescriptor('pcapkit.toolkit.dpkt', 'tcp_reassembly'),
+        'tls': ModuleDescriptor('pcapkit.toolkit.dpkt', 'tls_reassembly'),
     }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
     #: Flow tracing adapters, each called as

@@ -7,7 +7,7 @@ Reassembly Base Class
 :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`, the abstract base
 class of a custom reassembly class, and
 :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`, which it and
-the built-in IP, TCP, DTLS and SCTP reassembly classes derive from. The algorithms
+the built-in IP, TCP, DTLS, SCTP and TLS reassembly classes derive from. The algorithms
 follow :rfc:`791` and :rfc:`815`.
 
 .. autoclass:: pcapkit.foundation.reassembly.reassembly.Reassembly

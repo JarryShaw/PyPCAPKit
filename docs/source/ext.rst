@@ -758,6 +758,7 @@ The reassembly and flow tracing classes, per protocol:
 | :class:`~pcapkit.protocols.application.dtls.protocol.DTLS` | :class:`pcapkit.foundation.reassembly.dtls.reassembly.DTLS` |                                                         |
 +------------------------------------------------------------+-------------------------------------------------------------+---------------------------------------------------------+
 | :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP`   | :class:`pcapkit.foundation.reassembly.sctp.reassembly.SCTP` |                                                         |
+| :class:`~pcapkit.protocols.application.tls.protocol.TLS`   | :class:`pcapkit.foundation.reassembly.tls.reassembly.TLS`   |                                                         |
 +------------------------------------------------------------+-------------------------------------------------------------+---------------------------------------------------------+
 
 .. seealso::

@@ -236,6 +236,7 @@ class WiringTests(unittest.TestCase):
         from pcapkit.foundation.reassembly.ip.data import Datagram as IP_Datagram
         from pcapkit.foundation.reassembly.sctp.data import Datagram as SCTP_Datagram
         from pcapkit.foundation.reassembly.tcp.data import Datagram as TCP_Datagram
+        from pcapkit.foundation.reassembly.tls.data import Datagram as TLS_Datagram
         from pcapkit.foundation.traceflow.data import Deferred as TraceFlowDeferred
         from pcapkit.foundation.traceflow.tcp.data import Index
 
@@ -261,6 +262,10 @@ class WiringTests(unittest.TestCase):
                                  unordered=False, ssn=0, mid=None, tsn=(1,), ppid=None, payload=b'payload',
                                  packet=packet)
 
+        def record(packet: 'object') -> 'DeferredPacket':
+            return TLS_Datagram(completed=Completion.COMPLETE, id=None, index=(1,), content_type=None,
+                                version=0x0303, length=7, fragment=b'payload', packet=packet)
+
         cases = (
             ('ip', lambda packet: datagram(IP_Datagram, packet), reassembly, traceflow,
              ('parsed', 'proto', b'payload')),
@@ -268,6 +273,7 @@ class WiringTests(unittest.TestCase):
              ('parsed', 'proto', b'payload')),
             ('dtls', message, reassembly, traceflow, ('parsed', 'proto', b'payload')),
             ('sctp', user_message, reassembly, traceflow, ('parsed', 'proto', b'payload')),
+            ('tls', record, reassembly, traceflow, ('parsed', 'proto', b'payload')),
             ('trace', index, traceflow, reassembly, ('reassembled',)),
         )
         for (label, build, own, other, expected) in cases:

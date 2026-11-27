@@ -551,7 +551,7 @@ class SCTPExtractorTests(unittest.TestCase):
         from pcapkit.protocols.transport.sctp.protocol import SCTP as SCTP_Protocol
 
         self.assertIsNone(ReassemblyData().sctp)
-        self.assertEqual(list(ReassemblyData()), ['ipv4', 'ipv6', 'tcp', 'dtls', 'sctp'])
+        self.assertEqual(list(ReassemblyData()), ['ipv4', 'ipv6', 'tcp', 'dtls', 'sctp', 'tls'])
         self.assertIsInstance(Extractor.make_reassembly('sctp'), SCTP)
         for protocol in ('sctp', 'SCTP', SCTP_Protocol):
             with self.subTest(protocol=protocol):
