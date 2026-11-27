@@ -15,6 +15,7 @@ import pathlib
 import re
 import signal
 import sys
+import threading
 import time
 import types
 import typing
@@ -571,6 +572,41 @@ def install_fake_payload_protocols(test: 'unittest.TestCase', raw_cls: type,
     null_module = types.ModuleType('pcapkit.protocols.misc.no_payload.protocol')
     null_module.NoPayload = null_cls
     sys.modules['pcapkit.protocols.misc.no_payload.protocol'] = null_module
+
+
+def install_hook_sentinels(test: 'unittest.TestCase') -> 'tuple[Callable[..., None], Callable[[object], None]]':
+    """Install stand-ins for :data:`sys.excepthook` and :data:`threading.excepthook`.
+
+    A loud error outside development mode installs :mod:`pcapkit`'s own hooks, so
+    a test asserting that an operation left both hooks alone compares them with
+    these stand-ins by identity. A cleanup on ``test`` puts back the hooks found here,
+    so neither the stand-ins nor a hook the test installed outlives it. Call it
+    after importing :mod:`pcapkit`, whose import installs tbtrim's hooks over
+    whatever is there (#2637).
+
+    Args:
+        test: The running test, which the restore is registered on.
+
+    Returns:
+        The stand-ins, as ``(sys hook, threading hook)``: the first hands its
+        arguments to :data:`sys.__excepthook__`, and the second does nothing.
+
+    """
+    saved = sys.excepthook, threading.excepthook
+
+    def restore() -> None:
+        sys.excepthook, threading.excepthook = saved
+
+    test.addCleanup(restore)
+
+    def sentinel(*args: 'object') -> None:
+        sys.__excepthook__(*args)  # type: ignore[arg-type]
+
+    def thread_sentinel(args: 'object') -> None:  # pylint: disable=unused-argument
+        pass
+
+    sys.excepthook, threading.excepthook = sentinel, thread_sentinel
+    return sentinel, thread_sentinel
 
 
 def _reset_abc_caches() -> None:
