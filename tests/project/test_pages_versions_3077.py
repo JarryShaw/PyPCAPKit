@@ -11,8 +11,8 @@
   per event: no push triggers it, every build writes the redirects, and the one
   publish cleans the whole site.
 * :class:`TestTheConf` runs the statements of :file:`docs/source/conf.py` that
-  follow the host, and :class:`TestTheVersionsLink` renders the sidebar
-  template, where Jinja2 is installed.
+  follow the host, and :class:`TestTheSwitch` renders the sidebar template with
+  each host's context, where Jinja2 is installed (#3134).
 
 No test reads Read the Docs itself, whose versions are the project's settings.
 
@@ -21,6 +21,8 @@ No test reads Read the Docs itself, whose versions are the project's settings.
 from __future__ import annotations
 
 import ast
+import functools
+import html.parser
 import importlib.util
 import json
 import os
@@ -98,6 +100,62 @@ def load_script() -> 'types.ModuleType':
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+@functools.lru_cache(maxsize=1)
+def conf_tree() -> 'ast.Module':
+    return ast.parse(CONF.read_text(encoding='utf-8'))
+
+
+@functools.lru_cache(maxsize=1)
+def conf_code() -> 'types.CodeType':
+    """The statements of conf.py that bind one of :data:`CONF_NAMES`, or branch on one."""
+    body = []
+    for node in conf_tree().body:
+        targets = {target.id for target in getattr(node, 'targets', []) if isinstance(target, ast.Name)}
+        inside = {name.id for name in ast.walk(node) if isinstance(name, ast.Name)}
+        if targets & CONF_NAMES or (isinstance(node, ast.If) and inside & CONF_NAMES):
+            body.append(node)
+    return compile(ast.Module(body=body, type_ignores=[]), str(CONF), 'exec')
+
+
+def conf_settings(release: 'str' = '1.8.1', **environ: 'str') -> 'dict[str, Any]':
+    """What those statements set, for ``release`` as ``pcapkit.__version__`` and ``environ`` as the environment."""
+    namespace = {'os': types.SimpleNamespace(environ=environ), 're': re, 'release': release}
+    exec(conf_code(), namespace)  # nosec: B102 - conf.py's own statements
+    return namespace
+
+
+def read_the_docs(version: 'str', kind: 'str') -> 'dict[str, str]':
+    """The variables Read the Docs sets for building ``version`` from a ``kind``."""
+    return {'READTHEDOCS': 'True', 'READTHEDOCS_VERSION': version, 'READTHEDOCS_VERSION_TYPE': kind,
+            'READTHEDOCS_CANONICAL_URL': f'{READ_THE_DOCS}en/{version}/'}
+
+
+#: The names conf.py binds from the host.
+CONF_NAMES = frozenset({
+    'READTHEDOCS', 'html_theme_options', 'html_sidebars', 'ogp_site_url', 'html_baseurl', 'html_css_files',
+    'READ_THE_DOCS', 'DOCS_VERSION', 'DOCS_VERSION_TYPE', 'AUTOMATED_RELEASE', 'DOCS_RELEASE',
+    'DOCS_VERSION_LABEL', 'DOCS_SWITCH', 'html_context',
+})
+#: The switch's branch versions, by slug and label, on every host (#3134).
+SWITCH = [('stable', 'stable'), ('latest', 'latest (develop)')]
+#: Each host's build, the environment it sets and the release it builds, and the
+#: version, label and switch versions conf.py gives it (#3134). A pre-release on
+#: ``main`` gets no release entry, as Read the Docs' automation rule builds none.
+HOSTS = (
+    ('GitHub Pages', {}, '1.8.1', 'stable', '1.8.1 (stable)', [*SWITCH, ('v1.8.1', 'v1.8.1')]),
+    ('GitHub Pages, a post-release', {}, '1.8.1.post1', 'stable', '1.8.1.post1 (stable)',
+     [*SWITCH, ('v1.8.1.post1', 'v1.8.1.post1')]),
+    ('GitHub Pages, a pre-release', {}, '1.9.0b1', 'stable', '1.9.0b1 (stable)', SWITCH),
+    ('Read the Docs stable', read_the_docs('stable', 'branch'), '1.8.1', 'stable', '1.8.1 (stable)',
+     [*SWITCH, ('v1.8.1', 'v1.8.1')]),
+    ('Read the Docs latest', read_the_docs('latest', 'branch'), '1.8.1', 'latest', 'latest (develop)', SWITCH),
+    ('Read the Docs tag', read_the_docs('v1.9.0', 'tag'), '1.9.0', 'v1.9.0', '1.9.0',
+     [*SWITCH, ('v1.9.0', 'v1.9.0')]),
+    ('Read the Docs pull request', read_the_docs('3134', 'external'), '1.8.1', '3134', 'pull request #3134',
+     SWITCH),
+)
 
 
 def github(event: 'str') -> 'dict[str, Any]':
@@ -349,77 +407,126 @@ class TestTheWorkflow(unittest.TestCase):
 class TestTheConf(unittest.TestCase):
     """What the host sets, by running the statements of conf.py that read it."""
 
-    NAMES = {'READTHEDOCS', 'html_theme_options', 'html_sidebars', 'ogp_site_url', 'html_baseurl', 'html_css_files'}
-    #: A version's URL, as Read the Docs gives it.
-    CANONICAL = f'{READ_THE_DOCS}en/latest/'
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        cls.tree = ast.parse(CONF.read_text(encoding='utf-8'))
-        body = []
-        for node in cls.tree.body:
-            targets = {target.id for target in getattr(node, 'targets', []) if isinstance(target, ast.Name)}
-            inside = {name.id for name in ast.walk(node) if isinstance(name, ast.Name)}
-            if targets & cls.NAMES or (isinstance(node, ast.If) and inside & cls.NAMES):
-                body.append(node)
-        cls.code = compile(ast.Module(body=body, type_ignores=[]), str(CONF), 'exec')
-
-    def settings(self, **environ: 'str') -> 'dict[str, Any]':
-        namespace = {'os': types.SimpleNamespace(environ=environ)}
-        exec(self.code, namespace)  # nosec: B102 - conf.py's own statements
-        return namespace
-
-    def test_read_the_docs_names_its_own_url_and_drops_the_link(self) -> None:
-        settings = self.settings(READTHEDOCS='True', READTHEDOCS_CANONICAL_URL=self.CANONICAL)
-        self.assertEqual((settings['ogp_site_url'], settings['html_baseurl']), (self.CANONICAL, self.CANONICAL))
-        self.assertNotIn('sidebar/versions.html', settings['html_sidebars']['**'])
-        self.assertEqual(settings['html_sidebars']['**'],
-                         [name for name in self.settings()['html_sidebars']['**'] if name != 'sidebar/versions.html'])
+    def test_read_the_docs_names_its_own_url_and_keeps_the_switch(self) -> None:
+        """#3134: every build shows the switch, Read the Docs' beside its flyout."""
+        pages = conf_settings()['html_sidebars']
+        for host, environ, release, *_ in HOSTS:
+            if not environ:
+                continue
+            settings = conf_settings(release, **environ)
+            canonical = environ['READTHEDOCS_CANONICAL_URL']
+            with self.subTest(host=host):
+                self.assertEqual((settings['ogp_site_url'], settings['html_baseurl']), (canonical, canonical))
+                self.assertEqual(settings['html_sidebars'], pages)
 
     def test_every_other_build_is_mains_at_the_root(self) -> None:
         """A build reads no folder: #3077's ``PAGES_FOLDER`` changes nothing."""
-        names = {name.id for name in ast.walk(self.tree) if isinstance(name, ast.Name)}
-        self.assertFalse(names & {'PAGES_FOLDER', 'html_context'})
+        names = {name.id for name in ast.walk(conf_tree()) if isinstance(name, ast.Name)}
+        self.assertNotIn('PAGES_FOLDER', names)
         for environ in ({}, {'PAGES_FOLDER': 'dev'}):
-            settings = self.settings(**environ)
+            settings = conf_settings(**environ)
             with self.subTest(environ=environ):
                 self.assertEqual((settings['ogp_site_url'], settings['html_baseurl']), (SITE, SITE))
                 self.assertEqual(settings['html_theme_options']['source_branch'], 'main')
+                self.assertEqual(settings['html_context']['docs_version'], 'stable')
+
+    def test_each_host_names_its_version_and_the_others(self) -> None:
+        """#3134: the version, its label, and the switch's versions, per host."""
+        for host, environ, release, version, label, switch in HOSTS:
+            with self.subTest(host=host):
+                self.assertEqual(conf_settings(release, **environ)['html_context'], {
+                    'docs_read_the_docs': f'{READ_THE_DOCS}en/', 'docs_version': version,
+                    'docs_version_label': label, 'docs_switch': switch, 'docs_on_read_the_docs': bool(environ)})
+
+    def test_the_context_turns_on_no_furo_template(self) -> None:
+        """furo's Read the Docs templates render on a ``READTHEDOCS`` or ``versions`` key (#3134)."""
+        for host, environ, release, *_ in HOSTS:
+            context = conf_settings(release, **environ)['html_context']
+            with self.subTest(host=host):
+                self.assertEqual([key for key in context if not key.startswith('docs_')], [])
 
     def test_the_redirects_name_the_same_sites(self) -> None:
         module = load_script()
-        self.assertEqual(module.SITE, self.settings()['ogp_site_url'])
+        settings = conf_settings()
+        self.assertEqual(module.SITE, settings['ogp_site_url'])
         self.assertEqual(module.READ_THE_DOCS, f'{READ_THE_DOCS}en/')
+        self.assertEqual(module.READ_THE_DOCS, settings['READ_THE_DOCS'])
 
-    def test_the_link_is_under_the_brand(self) -> None:
-        settings = self.settings()
-        sidebars = settings['html_sidebars']['**']
-        self.assertEqual(sidebars[:2], ['sidebar/brand.html', 'sidebar/versions.html'])
+    def test_the_switch_is_under_the_brand(self) -> None:
+        for host, environ, release, *_ in HOSTS:
+            settings = conf_settings(release, **environ)
+            with self.subTest(host=host):
+                self.assertEqual(settings['html_sidebars']['**'][:2], ['sidebar/brand.html', 'sidebar/versions.html'])
+                self.assertIn('versions.css', settings['html_css_files'])
         self.assertTrue(TEMPLATE.is_file())
-        self.assertIn('versions.css', settings['html_css_files'])
         self.assertTrue((CONF.parent / '_static' / 'versions.css').is_file())
 
 
+class Switch(html.parser.HTMLParser):
+    """The rendered switch: its label, each entry's text, URL and whether it is current, and its note."""
+
+    def __init__(self, text: 'str') -> None:
+        super().__init__()
+        self.nav = {}  # type: dict[str, Optional[str]]
+        self.label = ''
+        self.entries = []  # type: list[tuple[str, Optional[str], bool]]
+        self.notes = []  # type: list[str]
+        self.stack = []  # type: list[tuple[str, dict[str, Optional[str]]]]
+        self.feed(text)
+        self.close()
+
+    def handle_starttag(self, tag: 'str', attrs: 'list[tuple[str, Optional[str]]]') -> None:
+        if tag == 'nav':
+            self.nav = dict(attrs)
+        self.stack.append((tag, dict(attrs)))
+
+    def handle_endtag(self, tag: 'str') -> None:
+        self.stack.pop()
+
+    def handle_data(self, data: 'str') -> None:
+        if not data.strip() or not self.stack:
+            return
+        tag, attrs = self.stack[-1]
+        if tag == 'strong':
+            self.label += data
+        elif tag in ('a', 'span'):
+            self.entries.append((data, attrs.get('href'), attrs.get('aria-current') == 'page'))
+        elif tag == 'p' and 'sidebar-versions-note' in (attrs.get('class') or ''):
+            self.notes.append(data)
+
+
 @unittest.skipIf(jinja2 is None, 'Jinja2, which Sphinx installs, is not installed')
-class TestTheVersionsLink(unittest.TestCase):
+class TestTheSwitch(unittest.TestCase):
+    """The sidebar template, rendered with each host's ``html_context`` (#3134)."""
 
-    def links(self, pagename: 'str') -> 'list[tuple[str, str]]':
-        """Each link's title and the URL it resolves to from the page."""
+    PAGES = ('index', 'pcapkit/foundation/extraction')
+
+    def render(self, context: 'dict[str, Any]', pagename: 'str') -> 'Switch':
         template = jinja2.Environment(autoescape=True).from_string(TEMPLATE.read_text(encoding='utf-8'))
-        depth = pagename.count('/')
-        text = template.render(pagename=pagename, file_suffix='.html', content_root='../' * depth or './')
-        page = f'{SITE}{pagename}.html'
-        links = []
-        for anchor in text.split('<a ')[1:]:
-            href = anchor.split('href="', 1)[1].split('"', 1)[0]
-            title = anchor.split('>', 1)[1].split('<', 1)[0]
-            links.append((title, urllib.parse.urljoin(page, href)))
-        return links
+        return Switch(template.render(pagename=pagename, file_suffix='.html',
+                                      content_root='../' * pagename.count('/') or './', **context))
 
-    def test_one_link_names_read_the_docs_from_every_page(self) -> None:
-        for pagename in ('index', 'pcapkit/foundation/extraction'):
-            with self.subTest(pagename=pagename):
-                self.assertEqual(self.links(pagename), [('All versions on Read the Docs', READ_THE_DOCS)])
+    def test_each_version_opens_the_same_page_on_read_the_docs(self) -> None:
+        for host, environ, release, version, label, switch in HOSTS:
+            context = conf_settings(release, **environ)['html_context']
+            for pagename in self.PAGES:
+                rendered = self.render(context, pagename)
+                page = f'{SITE}{pagename}.html'
+                with self.subTest(host=host, pagename=pagename):
+                    self.assertEqual(rendered.nav, {'class': 'sidebar-versions', 'aria-label': 'Documentation versions'})
+                    self.assertEqual(rendered.label, label)
+                    self.assertEqual(
+                        [(text, href and urllib.parse.urljoin(page, href), current)
+                         for text, href, current in rendered.entries],
+                        [*((name, None, True) if slug == version else
+                           (name, f'{READ_THE_DOCS}en/{slug}/{pagename}.html', False) for slug, name in switch),
+                         ('all releases', f'{SITE}changelog.html', False)])
+
+    def test_only_github_pages_says_where_the_others_are(self) -> None:
+        for host, environ, release, *_ in HOSTS:
+            rendered = self.render(conf_settings(release, **environ)['html_context'], 'index')
+            with self.subTest(host=host):
+                self.assertEqual(rendered.notes, [] if environ else ['latest and each release are on Read the Docs'])
 
 
 if __name__ == '__main__':

@@ -1,5 +1,21 @@
-{#- A link to the versions on Read the Docs (#3077), as GitHub Pages serves main's
-    build alone. conf.py adds it to every build but Read the Docs' own. -#}
-<div class="sidebar-versions">
-  <a href="https://pypcapkit.jarryshaw.me/">All versions on Read the Docs</a>
-</div>
+{#- The switch between the documentation's versions (#3134). Each version opens
+    this page in it on Read the Docs, and "all releases" opens the changelog,
+    whose entries link their releases' builds. conf.py's html_context fills it. -#}
+<nav class="sidebar-versions" aria-label="Documentation versions">
+  <p>Version <strong>{{ docs_version_label }}</strong></p>
+  <ul>
+    {%- for slug, label in docs_switch %}
+    <li>
+      {%- if slug == docs_version -%}
+      <span aria-current="page">{{ label }}</span>
+      {%- else -%}
+      <a href="{{ docs_read_the_docs }}{{ slug }}/{{ pagename }}{{ file_suffix }}">{{ label }}</a>
+      {%- endif -%}
+    </li>
+    {%- endfor %}
+    <li><a href="{{ content_root }}changelog{{ file_suffix }}">all releases</a></li>
+  </ul>
+  {%- if not docs_on_read_the_docs %}
+  <p class="sidebar-versions-note">latest and each release are on Read the Docs</p>
+  {%- endif %}
+</nav>
