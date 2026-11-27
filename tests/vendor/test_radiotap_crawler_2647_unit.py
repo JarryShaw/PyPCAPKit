@@ -23,11 +23,11 @@ from __future__ import annotations
 import html
 import importlib
 import importlib.util
-import pathlib
 import unittest
 from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
+from tests.vendor._crawler import ROOT, import_from_checkout, make_crawler, normalize
 
 if TYPE_CHECKING:
     from typing import Any
@@ -35,9 +35,6 @@ if TYPE_CHECKING:
 #: Test tier (#1958): renders the constant modules from recorded data and compares them
 #: with the committed files, which the vendor scripts regenerate on one interpreter.
 __tier__ = 'LATEST'
-
-#: Repository root, i.e. the grandparent of the directory holding this file.
-ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: The distributions importing :mod:`pcapkit.vendor` with its crawlers needs.
 VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
@@ -142,18 +139,6 @@ def _page(name: 'str') -> 'str':
     return ''.join(parts)
 
 
-def _normalize(context: 'str') -> 'str':
-    """Apply the whitespace normalisation the generator writes files through."""
-    lines = []  # type: list[str]
-    for line in context.splitlines():
-        if line:
-            if line.strip():
-                lines.append(line.rstrip())
-        else:
-            lines.append(line)
-    return '\n'.join(lines) + '\n'
-
-
 @unittest.skipUnless(HAS_VENDOR_DEPS, f'vendor extra not installed ({", ".join(VENDOR_DEPS)})')
 class RadiotapMixedBitmapCrawlerTests(unittest.TestCase):
     """The known-bit registries of the mixed bitmaps, and their crawlers."""
@@ -163,13 +148,8 @@ class RadiotapMixedBitmapCrawlerTests(unittest.TestCase):
 
     def _crawler(self, module: 'str', name: 'str') -> 'Any':
         """The crawler class, skipping when it was imported from another tree."""
-        vendor_module = importlib.import_module(f'pcapkit.vendor.radiotap.{module}')
-        const_module = importlib.import_module(f'pcapkit.const.radiotap.{module}')
-        for found in (vendor_module, const_module):
-            resolved = pathlib.Path(found.__file__).resolve()
-            if ROOT not in resolved.parents:
-                self.skipTest(f'{found.__name__} was imported from {resolved}, which is outside '
-                              f'{ROOT}; install this checkout with `pip install -e .`')
+        vendor_module, _ = import_from_checkout(self, f'pcapkit.vendor.radiotap.{module}',
+                                                f'pcapkit.const.radiotap.{module}')
         return getattr(vendor_module, name)
 
     def test_the_registries_regenerate(self) -> None:
@@ -177,13 +157,9 @@ class RadiotapMixedBitmapCrawlerTests(unittest.TestCase):
         for module, name, page, _, _ in CRAWLERS:
             with self.subTest(crawler=name):
                 klass = self._crawler(module, name)
-                vendor = klass.__new__(klass)
-                vendor.NAME = klass.__name__
-                vendor.DOCS = klass.__doc__
-                data = vendor.request(_page(page))
-                vendor.record = vendor.count(data)
+                vendor, data = make_crawler(klass, _page(page))
                 path = ROOT / 'pcapkit' / 'const' / 'radiotap' / f'{module}.py'
-                self.assertEqual(_normalize(vendor.context(data)), path.read_text(encoding='utf-8'),
+                self.assertEqual(normalize(vendor.context(data)), path.read_text(encoding='utf-8'),
                                  f'regenerating {path.relative_to(ROOT)} would change it; run '
                                  '`pcapkit-vendor radiotap` and commit the result')
 

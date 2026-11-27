@@ -31,11 +31,11 @@ design, makes no network call.
 from __future__ import annotations
 
 import importlib.util
-import pathlib
 import unittest
 from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
+from tests.vendor._crawler import ROOT, import_from_checkout, make_crawler, normalize
 
 if TYPE_CHECKING:
     from typing import Any
@@ -43,9 +43,6 @@ if TYPE_CHECKING:
 #: Test tier (#1958): renders a constant module from recorded data and compares it
 #: with the committed file, which the vendor scripts regenerate on one interpreter.
 __tier__ = 'LATEST'
-
-#: Repository root, i.e. the grandparent of the directory holding this file.
-ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: Every distribution importing :mod:`pcapkit.vendor` with its crawlers needs.
 #: ``pcapkit.vendor.default`` imports ``requests`` at module scope, and several
@@ -84,33 +81,6 @@ EXPECTED_MEMBERS = (
 )
 
 
-def _normalize(context: 'str') -> 'str':
-    """Apply the whitespace normalisation the generator writes files through.
-
-    :meth:`pcapkit.vendor.default.Vendor.__init__` does not write what
-    :meth:`~pcapkit.vendor.default.Vendor.context` returns verbatim: it strips
-    trailing whitespace from every non-blank line, drops whitespace-only lines
-    outright, and ends the file with a newline courtesy of :func:`print`. Byte
-    comparison against the committed file has to do the same, or it reports a
-    difference that regeneration would not produce.
-
-    Args:
-        context: Return value of :meth:`~pcapkit.vendor.default.Vendor.context`.
-
-    Returns:
-        The text as the generator would have written it to disk.
-
-    """
-    lines = []  # type: list[str]
-    for line in context.splitlines():
-        if line:
-            if line.strip():
-                lines.append(line.rstrip())
-        else:
-            lines.append(line)
-    return '\n'.join(lines) + '\n'
-
-
 @unittest.skipUnless(HAS_VENDOR_DEPS, f'vendor extra not installed ({", ".join(VENDOR_DEPS)})')
 class IPXPacketVendorTests(unittest.TestCase):
     """The hand-maintained registry, and the crawler that does not crawl."""
@@ -121,39 +91,12 @@ class IPXPacketVendorTests(unittest.TestCase):
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
-
-        import pcapkit.const.ipx.packet as const_module
-        import pcapkit.vendor.ipx.packet as vendor_module
-
-        # Both modules have to come from this checkout for any of the comparisons
-        # below to mean anything: the generated text is compared against this
-        # repository's constant file, so a vendor module imported from an
-        # installed copy elsewhere would be comparing two trees. That is an
-        # environment mismatch rather than a defect, hence a skip.
-        for module in (vendor_module, const_module):
-            resolved = pathlib.Path(module.__file__).resolve()
-            if ROOT not in resolved.parents:
-                self.skipTest(f'{module.__name__} was imported from {resolved}, which is outside '
-                              f'{ROOT}; install this checkout with `pip install -e .` to run this '
-                              f'suite against it')
-
-        self.vendor_module = vendor_module
-        self.const_module = const_module
+        self.vendor_module, self.const_module = import_from_checkout(
+            self, 'pcapkit.vendor.ipx.packet', 'pcapkit.const.ipx.packet')
 
     def _vendor(self) -> 'Any':
-        """A crawler instance with the attributes ``__init__`` would have set.
-
-        ``Vendor.__init__`` regenerates and *writes* the constant file as a side
-        effect of construction, which a test has no business doing to the working
-        tree, so the four attributes it sets are set here instead.
-
-        """
-        vendor = self.vendor_module.Packet.__new__(self.vendor_module.Packet)
-        vendor.NAME = self.vendor_module.Packet.__name__
-        vendor.DOCS = self.vendor_module.Packet.__doc__
-        data = vendor.request()
-        vendor.record = vendor.count(data)
-        return vendor
+        """A crawler instance with the attributes ``__init__`` would have set."""
+        return make_crawler(self.vendor_module.Packet)[0]
 
     def test_link_is_none_so_nothing_is_fetched(self) -> None:
         # No LINK, stated as an assertion: Vendor._request() short-circuits to
@@ -184,7 +127,7 @@ class IPXPacketVendorTests(unittest.TestCase):
         # crawler must be a no-op against what is checked in, so an edit to DATA
         # that was never regenerated shows up here.
         vendor = self._vendor()
-        generated = _normalize(vendor.context(vendor.request()))
+        generated = normalize(vendor.context(vendor.request()))
         committed = (ROOT / 'pcapkit' / 'const' / 'ipx' / 'packet.py').read_text(encoding='utf-8')
         self.assertEqual(generated, committed,
                          'regenerating pcapkit/const/ipx/packet.py would change it; run '

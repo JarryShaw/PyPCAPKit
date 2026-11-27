@@ -35,11 +35,11 @@ network call.
 from __future__ import annotations
 
 import importlib.util
-import pathlib
 import unittest
 from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
+from tests.vendor._crawler import import_from_checkout
 
 if TYPE_CHECKING:
     from typing import Any
@@ -50,9 +50,6 @@ if TYPE_CHECKING:
 #: run on every leg in tests/vendor/test_vendor_snapshot_restore_unit.py and
 #: tests/vendor/test_vendor_variables_1726_unit.py.
 __tier__ = 'LATEST'
-
-#: Repository root, i.e. the grandparent of the directory holding this file.
-ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: Every distribution importing :mod:`pcapkit.vendor` needs -- see
 #: :mod:`tests.vendor.test_user_agent_unit` for why ``requests`` alone is not
@@ -113,18 +110,8 @@ class FTPReturnCodeEmptyRowTests(unittest.TestCase):
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
-
-        import pcapkit.vendor.ftp.return_code as vendor_module
-
-        # The module has to come from this checkout, or the guard under test is
-        # not the one being exercised. An environment mismatch, hence a skip.
-        resolved = pathlib.Path(vendor_module.__file__).resolve()
-        if ROOT not in resolved.parents:
-            self.skipTest(f'{vendor_module.__name__} was imported from {resolved}, which is '
-                          f'outside {ROOT}; install this checkout with `pip install -e .` to run '
-                          f'this suite against it')
-
-        self.vendor_module = vendor_module
+        # From this checkout, or the guard under test is not the one exercised.
+        self.vendor_module = import_from_checkout(self, 'pcapkit.vendor.ftp.return_code')[0]
 
     def _vendor(self) -> 'Any':
         """A crawler with the attributes ``__init__`` would have set.
