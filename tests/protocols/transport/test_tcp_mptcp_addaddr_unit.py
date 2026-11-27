@@ -51,9 +51,9 @@ import unittest
 import warnings
 
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
-from pcapkit.protocols.transport.tcp.schema import TCP as Schema_TCP
 from pcapkit.protocols.transport.tcp.protocol import TCP
 from pcapkit.utilities.warnings import UnknownFieldWarning
+from tests.protocols.transport._mptcp import build_tcp_segment
 
 #: A spec-correct ``ADD_ADDR`` option, RFC 8684 section 3.4.1: ``Kind`` ``0x1e``
 #: (Multipath TCP), ``Length`` ``8``, ``Subtype`` ``3``/``IPVer`` ``4`` (the :rfc:`6824`
@@ -69,39 +69,6 @@ ADD_ADDR_SPEC_OCTETS = bytes([0x1E, 0x08, 0x34, 0x01, 0xC0, 0x00, 0x02, 0x01])
 #: (``B``) flag set packed into one octet as ``0x51``, ``Address ID`` ``5``. Likewise
 #: hand-built rather than made.
 MP_PRIO_SPEC_OCTETS = bytes([0x1E, 0x04, 0x51, 0x05])
-
-
-def build_tcp_segment(option_octets: 'bytes') -> 'bytes':
-    """Pack a whole TCP segment carrying ``option_octets`` verbatim as its only option.
-
-    Goes through :class:`~pcapkit.protocols.transport.tcp.schema.TCP` (the schema, not
-    the protocol) directly, supplying ``option_octets`` to the ``options`` field as raw
-    bytes -- which :class:`~pcapkit.corekit.fields.collections.OptionField` packs
-    unchanged -- so nothing here calls a ``_make_mptcp_*`` maker. Everything but the
-    option itself (ports, sequence numbers, flags, the data offset computed from
-    ``option_octets``' own length) is unrelated to the Multipath TCP defect under test.
-
-    Args:
-        option_octets: The whole option, header octets included, already padded to a
-            multiple of 4 octets (both :data:`ADD_ADDR_SPEC_OCTETS` and
-            :data:`MP_PRIO_SPEC_OCTETS` are).
-
-    Returns:
-        The packed TCP segment.
-
-    """
-    if len(option_octets) % 4:
-        raise ValueError('option_octets must already be a multiple of 4 octets long')
-
-    schema = Schema_TCP(
-        srcport=50000, dstport=80, seq=1, ack=0,
-        offset={'offset': 5 + len(option_octets) // 4, 'reserved': 0, 'ns': 0},
-        flags={'cwr': 0, 'ece': 0, 'urg': 0, 'ack': 0, 'psh': 0, 'rst': 0, 'syn': 1, 'fin': 0},
-        window=8192, checksum=b'\x00\x00', urgent=0,
-        options=option_octets,
-        payload=b'',
-    )
-    return schema.pack()
 
 
 def make_addaddr(**kwargs: 'object') -> 'bytes':

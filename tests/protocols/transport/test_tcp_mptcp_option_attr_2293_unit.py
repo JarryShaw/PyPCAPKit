@@ -57,6 +57,8 @@ from __future__ import annotations
 
 import unittest
 
+from tests.protocols.transport._mptcp import build_tcp_segment
+
 #: Hand-built, spec-correct options, each starting at its ``kind`` octet and already a
 #: multiple of 4 octets long, keyed by the subtype they carry.
 #:
@@ -73,46 +75,6 @@ SPEC_OPTIONS = {
     'MP_FASTCLOSE': bytes([0x1E, 0x0C, 0x70, 0x00]) + b'\xCC' * 8,
     'unknown': bytes([0x1E, 0x03, 0xF5, 0x00]),
 }
-
-
-def build_tcp_segment(option_octets: 'bytes') -> 'bytes':
-    """Pack a whole SYN segment carrying ``option_octets`` verbatim as its only option.
-
-    Goes through :class:`~pcapkit.protocols.transport.tcp.schema.TCP` (the schema, not the
-    protocol) directly, so no ``_make_mptcp_*`` maker runs and the option bytes reach the
-    wire exactly as given -- which is what makes the parsed side of each comparison below an
-    independent starting point rather than something a maker produced.
-
-    Args:
-        option_octets: The whole option, header octets included, already padded to a multiple
-            of 4 octets.
-
-    Returns:
-        The packed TCP segment.
-
-    Note:
-        ``pcapkit`` is imported here, inside the function, rather than at module level, for
-        the reason
-        :func:`tests.protocols.transport.test_tcp_mptcp_subtype_unit.build_mptcp_option`'s own
-        docstring records: another module in this suite pops ``pcapkit``'s submodules out of
-        :data:`sys.modules`, so a name bound at collection time can end up pointing at a
-        schema class built from a stale ``Schema`` base.
-
-    """
-    from pcapkit.protocols.transport.tcp.schema import TCP as Schema_TCP
-
-    if len(option_octets) % 4:
-        raise ValueError('option_octets must already be a multiple of 4 octets long')
-
-    schema = Schema_TCP(
-        srcport=50000, dstport=80, seq=1, ack=0,
-        offset={'offset': 5 + len(option_octets) // 4, 'reserved': 0, 'ns': 0},
-        flags={'cwr': 0, 'ece': 0, 'urg': 0, 'ack': 0, 'psh': 0, 'rst': 0, 'syn': 1, 'fin': 0},
-        window=8192, checksum=b'\x00\x00', urgent=0,
-        options=option_octets,
-        payload=b'',
-    )
-    return schema.pack()
 
 
 def parse_and_rebuild(option_octets: 'bytes') -> 'tuple[object, object]':

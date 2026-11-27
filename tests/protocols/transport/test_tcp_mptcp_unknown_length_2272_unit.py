@@ -49,6 +49,8 @@ from __future__ import annotations
 import unittest
 import warnings
 
+from tests.protocols.transport._mptcp import TCP_BASE
+
 #: The smallest Multipath TCP option :rfc:`8684` section 3 permits: ``Kind`` ``0x1e``,
 #: ``Length`` ``3``, then the subtype nibble ``0xf``
 #: (:attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.Reserved_for_Private_Use`) beside an
@@ -65,16 +67,6 @@ UNKNOWN_PAYLOAD_CASES = (
     (b'\x05\x06', bytes([0x1E, 0x04, 0xF5, 0x06])),
     (b'\x05\x06\x07', bytes([0x1E, 0x05, 0xF5, 0x06, 0x07])),
 )
-
-#: Header fields shared by every constructed TCP segment in this module, matching
-#: :data:`tests.protocols.transport.test_tcp_mptcp_subtype_unit.TCP_BASE`.
-TCP_BASE = {
-    'srcport': 50000, 'dstport': 80, 'seq_no': 1, 'ack_no': 0,
-    'ns': False, 'cwr': False, 'ece': False, 'urg': False, 'ack': False,
-    'psh': False, 'rst': False, 'syn': True, 'fin': False,
-    'window': 8192, 'checksum': b'\x00\x00', 'urgent': 0,
-    'payload': b'',
-}
 
 
 def make_unknown(**kwargs: 'object') -> 'bytes':

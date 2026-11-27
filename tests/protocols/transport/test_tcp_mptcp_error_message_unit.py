@@ -37,25 +37,13 @@ from typing import TYPE_CHECKING
 import importlib.util
 
 from tests._support import reimport_once_per_class
+from tests.protocols.transport._mptcp import TCP_HEADER
 
 if TYPE_CHECKING:
     from typing import Any
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
-
-#: Header fields for a segment built through the public constructor, spelled with
-#: the parameter names :meth:`TCP.make <pcapkit.protocols.transport.tcp.protocol.TCP.make>`
-#: actually declares. The same mapping, and the same reason for not reusing
-#: :data:`examples.generators.option_families.tcp.TCP_BASE`, as
-#: :data:`tests.protocols.transport.test_tcp_mptcp_join_flag_ordering_unit.TCP_HEADER`.
-TCP_HEADER = {
-    'srcport': 50000, 'dstport': 80, 'seq_no': 1, 'ack_no': 0,
-    'ns': False, 'cwr': False, 'ece': False, 'urg': False,
-    'psh': False, 'rst': False, 'fin': False,
-    'window': 8192, 'checksum': b'\x00\x00', 'urgent': 0,
-    'payload': b'',
-}
 
 #: The rendering of a rejected MP_JOIN, in full. ``30`` is
 #: :attr:`Option.Multipath_TCP <pcapkit.const.tcp.option.Option.Multipath_TCP>`

@@ -32,70 +32,19 @@ Coverage
 
 Byte-exact packed assertions for both RFC-defined forms -- 12 octets without the receiver's
 key, 20 with it -- rather than asserting either component (the maker's arithmetic, or the
-schema's predicate) in isolation, per the pattern #565 established for ``ADD_ADDR``: this
-module also splices hand-built, spec-correct octets into a full segment via
-``Schema_TCP(options=..., ...)``, bypassing the makers entirely, so the *parse* direction is
-pinned independently of whatever the *pack* direction happens to produce.
-
-:class:`TCPMPTCPCapableAllLengthsUnitTests` covers all five lengths figure 4 defines -- 4,
-12, 20, 22 and 24 (#1042).
+schema's predicate) in isolation, per the pattern #565 established for ``ADD_ADDR``.
+:class:`TCPMPTCPCapableAllLengthsUnitTests` also splices hand-built, spec-correct octets into
+a full segment through :func:`~tests.protocols.transport._mptcp.build_tcp_segment`, bypassing
+the makers entirely, so the *parse* direction is pinned independently of whatever the *pack*
+direction happens to produce, for all five lengths figure 4 defines -- 4, 12, 20, 22 and 24
+(#1042).
 
 """
 from __future__ import annotations
 
 import unittest
 
-#: A spec-correct MP_CAPABLE without the receiver's key, RFC 8684 figure 4: ``Kind`` ``0x1e``,
-#: ``Length`` ``12``, ``Subtype`` ``0`` (MP_CAPABLE)/``Version`` ``1`` packed into ``0x01``,
-#: flag octet ``0x81``, then the sender's key, 8 octets of ``0xAA``. Hand-built, not made, so a
-#: symmetric pack/parse bug could not cancel itself out here -- the same octets
-#: :data:`tests.protocols.transport.test_tcp_mptcp_length_unit.MP_CAPABLE_OPTION` uses for the
-#: header-offset regression, extended here to a full parse.
-MP_CAPABLE_NO_KEY_SPEC_OCTETS = bytes([0x1E, 0x0C, 0x01, 0x81]) + b'\xAA' * 8
-
-#: The same option, with the receiver's key present: RFC 8684 figure 4's other conditional row
-#: (there is one MP_CAPABLE figure, not two -- both length forms come from it), ``Length``
-#: ``20``, the sender's key unchanged, and 8 octets of ``0xBB`` for the receiver's key.
-MP_CAPABLE_WITH_KEY_SPEC_OCTETS = bytes([0x1E, 0x14, 0x01, 0x81]) + b'\xAA' * 8 + b'\xBB' * 8
-
-
-def build_tcp_segment(option_octets: 'bytes') -> 'bytes':
-    """Pack a whole TCP segment carrying ``option_octets`` verbatim as its only option.
-
-    Goes through :class:`~pcapkit.protocols.transport.tcp.schema.TCP` (the schema, not the
-    protocol) directly, supplying ``option_octets`` to the ``options`` field as raw bytes,
-    which :class:`~pcapkit.corekit.fields.collections.OptionField` packs unchanged -- so
-    nothing here calls a ``_make_mptcp_*`` maker.
-
-    Args:
-        option_octets: The whole option, header octets included, already padded to a multiple
-            of 4 octets (both spec octets constants above are).
-
-    Returns:
-        The packed TCP segment.
-
-    Note:
-        ``Schema_TCP`` is imported here, inside the function, not at module level -- see
-        :func:`tests.protocols.transport.test_tcp_mptcp_subtype_unit.build_mptcp_option`'s
-        own docstring for why: a name bound to ``pcapkit`` at collection time can go stale
-        once another test module in this suite pops ``pcapkit``'s submodules out of
-        ``sys.modules`` and a later import re-creates them.
-
-    """
-    from pcapkit.protocols.transport.tcp.schema import TCP as Schema_TCP
-
-    if len(option_octets) % 4:
-        raise ValueError('option_octets must already be a multiple of 4 octets long')
-
-    schema = Schema_TCP(
-        srcport=50000, dstport=80, seq=1, ack=0,
-        offset={'offset': 5 + len(option_octets) // 4, 'reserved': 0, 'ns': 0},
-        flags={'cwr': 0, 'ece': 0, 'urg': 0, 'ack': 0, 'psh': 0, 'rst': 0, 'syn': 1, 'fin': 0},
-        window=8192, checksum=b'\x00\x00', urgent=0,
-        options=option_octets,
-        payload=b'',
-    )
-    return schema.pack()
+from tests.protocols.transport._mptcp import TCP_BASE, build_tcp_segment
 
 
 def make_capable(**kwargs: 'object') -> 'bytes':
@@ -169,74 +118,8 @@ class TCPMPTCPCapableMakerUnitTests(unittest.TestCase):
         self.assertEqual(packed[-8:], bytes(8))
 
 
-class TCPMPTCPCapableParseUnitTests(unittest.TestCase):
-    """Spec-correct MP_CAPABLE octets parse for both RFC 8684 forms.
-
-    Neither case here is built through a maker; both are spliced, as raw bytes, into a real
-    TCP segment and parsed back through :class:`TCP` proper -- so a pack-side bug and a
-    parse-side bug could not cancel each other out and hide behind a passing round trip.
-
-    """
-
-    def test_no_key_spec_octets_parse_correctly(self) -> None:
-        """RFC 8684 figure 4's 12-octet form parses, with ``rkey`` absent.
-
-        Guards against ``ProtocolError: TCP: [OptNo 30] invalid format`` from a
-        ``schema.length not in (20, 32)`` guard in ``_read_mptcp_capable`` (#566, #567) --
-        12 satisfies neither of those two (both wrong) accepted values.
-
-        """
-        from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
-        from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp.protocol import TCP
-
-        raw = build_tcp_segment(MP_CAPABLE_NO_KEY_SPEC_OCTETS)
-        tcp = TCP(raw, len(raw))
-        data = tcp.info.options[Enum_Option.Multipath_TCP]
-
-        self.assertEqual(data.kind, Enum_Option.Multipath_TCP)
-        self.assertEqual(data.length, 12)
-        self.assertEqual(data.subtype, Enum_MPTCPOption.MP_CAPABLE)
-        self.assertEqual(data.version, 1)
-        self.assertEqual(data.skey, 0xAAAAAAAAAAAAAAAA)
-        self.assertIsNone(data.rkey)
-
-    def test_with_key_spec_octets_parse_correctly(self) -> None:
-        """RFC 8684 figure 4's 20-octet form parses, with ``rkey`` present.
-
-        Guards against the receiver's key silently vanishing: a ``schema.length not in (20,
-        32)`` guard accepts 20, but ``rkey=schema.rkey if schema.length == 32 else None``
-        then discards the key anyway, since 20 is not 32 (#566, #567).
-
-        """
-        from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
-        from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp.protocol import TCP
-
-        raw = build_tcp_segment(MP_CAPABLE_WITH_KEY_SPEC_OCTETS)
-        tcp = TCP(raw, len(raw))
-        data = tcp.info.options[Enum_Option.Multipath_TCP]
-
-        self.assertEqual(data.kind, Enum_Option.Multipath_TCP)
-        self.assertEqual(data.length, 20)
-        self.assertEqual(data.subtype, Enum_MPTCPOption.MP_CAPABLE)
-        self.assertEqual(data.version, 1)
-        self.assertEqual(data.skey, 0xAAAAAAAAAAAAAAAA)
-        self.assertEqual(data.rkey, 0xBBBBBBBBBBBBBBBB)
-
-
 class TCPMPTCPCapablePublicConstructorUnitTests(unittest.TestCase):
     """Both RFC 8684 forms round-trip through the public ``TCP`` convenience constructor."""
-
-    #: Header fields shared by every constructed TCP segment in this class, matching
-    #: :data:`examples.generators.option_families.tcp.TCP_BASE`.
-    TCP_BASE = {
-        'srcport': 50000, 'dstport': 80, 'seq_no': 1, 'ack_no': 0,
-        'ns': False, 'cwr': False, 'ece': False, 'urg': False, 'ack': False,
-        'psh': False, 'rst': False, 'syn': True, 'fin': False,
-        'window': 8192, 'checksum': b'\x00\x00', 'urgent': 0,
-        'payload': b'',
-    }
 
     def test_no_key_round_trip_is_twelve_octets(self) -> None:
         """``rkey=None`` through ``TCP()`` packs a 12-octet option and reports no ``rkey``."""
@@ -250,7 +133,7 @@ class TCPMPTCPCapablePublicConstructorUnitTests(unittest.TestCase):
                 'skey': 0x0102030405060708,
                 'rkey': None,
             })],
-            **self.TCP_BASE,  # type: ignore[arg-type]
+            **TCP_BASE,  # type: ignore[arg-type]
         )
         data = tcp.info.options[Enum_Option.Multipath_TCP]
         packed = bytes(tcp)
@@ -272,7 +155,7 @@ class TCPMPTCPCapablePublicConstructorUnitTests(unittest.TestCase):
                 'skey': 0x0102030405060708,
                 'rkey': 0x1112131415161718,
             })],
-            **self.TCP_BASE,  # type: ignore[arg-type]
+            **TCP_BASE,  # type: ignore[arg-type]
         )
         data = tcp.info.options[Enum_Option.Multipath_TCP]
         packed = bytes(tcp)
@@ -329,9 +212,11 @@ class TCPMPTCPCapableAllLengthsUnitTests(unittest.TestCase):
 
     def _assert_parse(self, length: 'int') -> None:
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
+        from pcapkit.const.tcp.option import Option as Enum_Option
 
         _, fields = ALL_LENGTHS[length]
         data = self._parse(length)
+        self.assertEqual(data.kind, Enum_Option.Multipath_TCP)
         self.assertEqual(data.length, length)
         self.assertEqual(data.subtype, Enum_MPTCPOption.MP_CAPABLE)
         self.assertEqual(data.version, 1)
@@ -351,7 +236,7 @@ class TCPMPTCPCapableAllLengthsUnitTests(unittest.TestCase):
                 'flag_req': bool(octets[3] & 0x80), 'flag_hsa': bool(octets[3] & 0x01),
                 **fields,
             })],
-            **TCPMPTCPCapablePublicConstructorUnitTests.TCP_BASE,  # type: ignore[arg-type]
+            **TCP_BASE,  # type: ignore[arg-type]
         )
         packed = bytes(made)
         self.assertEqual(packed[20:20 + length], octets)
@@ -366,11 +251,23 @@ class TCPMPTCPCapableAllLengthsUnitTests(unittest.TestCase):
         self._assert_parse(4)
 
     def test_parse_length_12(self) -> None:
-        """SYN/ACK: the sender's key."""
+        """SYN/ACK: the sender's key.
+
+        Guards against ``ProtocolError: TCP: [OptNo 30] invalid format`` from a
+        ``schema.length not in (20, 32)`` guard in ``_read_mptcp_capable`` (#566, #567),
+        which 12 does not satisfy.
+
+        """
         self._assert_parse(12)
 
     def test_parse_length_20(self) -> None:
-        """ACK without data: both keys."""
+        """ACK without data: both keys.
+
+        Guards against the receiver's key silently vanishing: a ``schema.length not in (20,
+        32)`` guard accepts 20, but ``rkey=schema.rkey if schema.length == 32 else None``
+        then discards it anyway, since 20 is not 32 (#566, #567).
+
+        """
         self._assert_parse(20)
 
     def test_parse_length_22(self) -> None:
