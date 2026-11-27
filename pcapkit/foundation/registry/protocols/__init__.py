@@ -54,7 +54,7 @@ __all__ = [
 
     'register_transtype',
     'register_ipx',
-    'register_icmp_type',
+    'register_icmp_type', 'register_icmpv6_option',
     'register_ipv4_option', 'register_hip_parameter', 'register_hopopt_option',
     'register_ipv6_opts_option', 'register_ipv6_route_routing',
     'register_mh_message', 'register_mh_option', 'register_mh_extension',

@@ -29,6 +29,8 @@ Octets      Bits        Name                    Description
 
    .. autoattribute:: __type__
       :no-value:
+   .. autoattribute:: __option__
+      :no-value:
 
    .. rubric:: Properties
 
@@ -42,6 +44,7 @@ Octets      Bits        Name                    Description
    .. automethod:: read
    .. automethod:: make
    .. automethod:: register_type
+   .. automethod:: register_option
 
    .. rubric:: Data Models
 
@@ -59,7 +62,26 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_data_type_echo
    .. automethod:: _read_data_type_mld_query
    .. automethod:: _read_data_type_mldv1
+   .. automethod:: _read_data_type_router_solicitation
+   .. automethod:: _read_data_type_router_advertisement
+   .. automethod:: _read_data_type_neighbor_solicitation
+   .. automethod:: _read_data_type_neighbor_advertisement
+   .. automethod:: _read_data_type_redirect
    .. automethod:: _read_data_type_mldv2_report
+   .. automethod:: _read_opt_none
+   .. automethod:: _read_opt_link_layer_address
+   .. automethod:: _read_opt_prefix_information
+   .. automethod:: _read_opt_redirected_header
+   .. automethod:: _read_opt_mtu
+   .. automethod:: _read_opt_advertisement_interval
+   .. automethod:: _read_opt_home_agent_information
+   .. automethod:: _read_opt_nonce
+   .. automethod:: _read_opt_route_information
+   .. automethod:: _read_opt_rdnss
+   .. automethod:: _read_opt_ra_flags_extension
+   .. automethod:: _read_opt_dnssl
+   .. automethod:: _read_opt_captive_portal
+   .. automethod:: _read_opt_pref64
    .. automethod:: _make_data_type_none
    .. automethod:: _make_data_type_destination_unreachable
    .. automethod:: _make_data_type_packet_too_big
@@ -68,8 +90,31 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_data_type_echo
    .. automethod:: _make_data_type_mld_query
    .. automethod:: _make_data_type_mldv1
+   .. automethod:: _make_data_type_router_solicitation
+   .. automethod:: _make_data_type_router_advertisement
+   .. automethod:: _make_data_type_neighbor_solicitation
+   .. automethod:: _make_data_type_neighbor_advertisement
+   .. automethod:: _make_data_type_redirect
    .. automethod:: _make_data_type_mldv2_report
+   .. automethod:: _make_opt_none
+   .. automethod:: _make_opt_link_layer_address
+   .. automethod:: _make_opt_prefix_information
+   .. automethod:: _make_opt_redirected_header
+   .. automethod:: _make_opt_mtu
+   .. automethod:: _make_opt_advertisement_interval
+   .. automethod:: _make_opt_home_agent_information
+   .. automethod:: _make_opt_nonce
+   .. automethod:: _make_opt_route_information
+   .. automethod:: _make_opt_rdnss
+   .. automethod:: _make_opt_ra_flags_extension
+   .. automethod:: _make_opt_dnssl
+   .. automethod:: _make_opt_captive_portal
+   .. automethod:: _make_opt_pref64
    .. automethod:: _make_address_record
+   .. automethod:: _read_nd_options
+   .. automethod:: _make_nd_options
+   .. automethod:: _nd_option_maker
+   .. automethod:: _make_nd_length
    .. automethod:: _verify_pseudo_checksum
 
 Header Schemas
@@ -129,17 +174,127 @@ Header Schemas
    :members:
    :show-inheritance:
 
+Neighbor Discovery Schemas
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.RouterSolicitation
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.RouterAdvertisement
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.NeighborSolicitation
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.NeighborAdvertisement
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.Redirect
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.NDOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.UnknownOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.LinkLayerAddressOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.PrefixInformationOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.RedirectedHeaderOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.MTUOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.AdvertisementIntervalOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.HomeAgentInformationOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.NonceOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.RouteInformationOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.RDNSSOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.RAFlagsExtensionOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.DNSSLOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.CaptivePortalOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.PREF64Option
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.NDOptionField
+   :members:
+   :show-inheritance:
+
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: pcapkit.protocols.internet.icmpv6.schema.icmpv6_data_selector
 .. autofunction:: pcapkit.protocols.internet.icmpv6.schema.mldv2_query_present
 .. autofunction:: pcapkit.protocols.internet.icmpv6.schema.mldv2_record_count
+.. autofunction:: pcapkit.protocols.internet.icmpv6.schema.nd_option_length
+.. autofunction:: pcapkit.protocols.internet.icmpv6.schema.rdnss_address_length
+.. autofunction:: pcapkit.protocols.internet.icmpv6.schema.nd_options
 
 Type Stubs
 ~~~~~~~~~~
 
 .. autoclass:: pcapkit.protocols.internet.icmpv6.schema.MLDv2QueryFlags
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.RAFlags
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.NAFlags
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.PrefixInformationFlags
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.RouteInformationFlags
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.PREF64Lifetime
    :members:
    :show-inheritance:
 
@@ -191,6 +346,96 @@ Data Models
 .. autoclass:: pcapkit.protocols.internet.icmpv6.data.MulticastAddressRecord
    :members:
    :show-inheritance:
+
+Neighbor Discovery Models
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.RouterSolicitation
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.RouterAdvertisement
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.NeighborSolicitation
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.NeighborAdvertisement
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.Redirect
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.NDOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.UnknownOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.LinkLayerAddressOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.PrefixInformationOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.RedirectedHeaderOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.MTUOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.AdvertisementIntervalOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.HomeAgentInformationOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.NonceOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.RouteInformationOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.RDNSSOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.RAFlagsExtensionOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.DNSSLOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.CaptivePortalOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.PREF64Option
+   :members:
+   :show-inheritance:
+
+Constants
+---------
+
+.. module:: pcapkit.protocols.internet.icmpv6.const
+
+.. autodata:: pcapkit.protocols.internet.icmpv6.const.PREF64_PREFIX_LENGTH
 
 .. rubric:: Footnotes
 

@@ -480,9 +480,15 @@ UNRELATED = {
     'pcapkit/protocols/internet/hopopt/protocol.py': ((6, 16, 32), 'HOPOPT option fields, widths and sizes'),
     'pcapkit/protocols/internet/hopopt/schema.py': ((6, 16), 'HOPOPT option field sizes '
                                                    'and bit-fields'),
-    'pcapkit/protocols/internet/icmpv6/schema.py': ((16, 20), 'an IPv6 address is 16 octets, and '
+    'pcapkit/protocols/internet/icmpv6/const.py': ((32, 40), 'NAT64 prefix lengths a PREF64 option '
+                                                 'codes (RFC 8781 section 4)'),
+    'pcapkit/protocols/internet/icmpv6/protocol.py': ((6, 12, 16, 24), 'the IP version, an IPv6 address '
+                                                    'of 16 octets, the 12 a PREF64 option carries and '
+                                                    'the Route Information option sizes'),
+    'pcapkit/protocols/internet/icmpv6/schema.py': ((6, 12, 16, 20), 'an IPv6 address is 16 octets, '
                                                   'the fixed part of an MLDv2 multicast address '
-                                                  'record 20 (RFC 9777 section 5.2)'),
+                                                  'record 20 (RFC 9777 section 5.2), ND option field '
+                                                  'sizes and an RA flag bit (RFC 4861 section 4)'),
     'pcapkit/protocols/internet/igmp/protocol.py': ((12,), "the minimum overall length (RFC 3376 "
                                            "section 7.1) at which a Membership Query carries "
                                            "IGMPv3's source-list extension rather than being "

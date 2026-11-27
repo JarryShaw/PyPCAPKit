@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-"""The ``icmpv4-type`` and ``icmpv6-type`` families: ICMP and ICMPv6 message types.
+"""The ``icmpv4-type``, ``icmpv6-type`` and ``icmpv6-nd-option`` families.
+
+ICMP and ICMPv6 message types, and the Neighbor Discovery options of ICMPv6.
 
 A family module of :file:`examples/generators/options.py`, which loads it by
 path and binds ``generator`` to itself before this body runs (#2615).
@@ -40,6 +42,12 @@ MLD_SOURCE = '2001:db8::1'
 
 #: An MLDv1 Report or Done [:rfc:`2710#section-3`], whose defaults are all zero.
 MLDV1 = {'max_resp_delay': 0x1234, 'multicast_address': MLD_GROUP}
+
+#: A Source Link-layer Address option, on Ethernet [:rfc:`4861#section-4.6.1`].
+ND_SLLA = (1, {'link_layer_address': bytes.fromhex('001122334455')})
+#: A neighbor's address and a destination redirected [:rfc:`4861#section-4.5`].
+ND_TARGET = 'fe80::1'
+ND_DESTINATION = '2001:db8::1'
 
 
 def _icmpv4_registry() -> 'Any':
@@ -109,6 +117,17 @@ def _icmpv6_overrides() -> 'dict[Any, dict[str, Any]]':
         Enum_Type.Version_2_Multicast_Listener_Report: {'flags': 0x8000, 'records': [{
             'record_type': 4, 'multicast_address': MLD_GROUP, 'sources': [MLD_SOURCE], 'aux_data': b'AUX!',
         }]},
+        # Neighbor Discovery [RFC 4861 section 4], whose defaults are all zero.
+        Enum_Type.Router_Solicitation: {'options': [ND_SLLA]},
+        Enum_Type.Router_Advertisement: {
+            'cur_hop_limit': 64, 'm_flag': True, 'prf': 1, 'router_lifetime': 1800,
+            'reachable_time': 30000, 'retrans_timer': 1000, 'options': [ND_SLLA],
+        },
+        Enum_Type.Neighbor_Solicitation: {'target_address': ND_TARGET, 'options': [ND_SLLA]},
+        Enum_Type.Neighbor_Advertisement: {'r_flag': True, 's_flag': True, 'target_address': ND_TARGET,
+                                           'options': [(2, ND_SLLA[1])]},
+        Enum_Type.Redirect_Message: {'target_address': ND_TARGET, 'destination_address': ND_DESTINATION,
+                                     'options': [(4, {'data': ICMPV6_QUOTED})]},
     }
 
 
@@ -131,6 +150,52 @@ def _icmpv6_rebuild(message: 'Any') -> 'Any':
                               body=message)
 
 
+def _nd_option_registry() -> 'Any':
+    from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
+    return ICMPv6.__option__
+
+
+def _nd_option_overrides() -> 'dict[Any, dict[str, Any]]':
+    from pcapkit.const.icmpv6.nd_option import NDOption as Enum_NDOption
+    return {
+        Enum_NDOption.Source_Link_layer_Address: dict(ND_SLLA[1]),
+        Enum_NDOption.Target_Link_layer_Address: dict(ND_SLLA[1]),
+        Enum_NDOption.Prefix_Information: {'prefix_length': 64, 'l_flag': True, 'a_flag': True,
+                                           'valid_lifetime': 2592000, 'preferred_lifetime': 604800,
+                                           'prefix': '2001:db8:1::'},
+        Enum_NDOption.Redirected_Header: {'data': ICMPV6_QUOTED},
+        Enum_NDOption.MTU: {'mtu': 1500},
+        Enum_NDOption.Advertisement_Interval_Option: {'interval': 600000},
+        Enum_NDOption.Home_Agent_Information_Option: {'preference': 10, 'lifetime': 1800},
+        Enum_NDOption.Nonce_option: {'nonce': bytes(range(1, 7))},
+        Enum_NDOption.Route_Information_Option: {'prefix_length': 48, 'prf': 1, 'lifetime': 3600,
+                                                 'prefix': '2001:db8:2::'},
+        Enum_NDOption.Recursive_DNS_Server_Option: {'lifetime': 3600,
+                                                    'addresses': ['2001:db8::53', '2001:db8::35']},
+        # Bit 55, the last of IANA's Private Experimentation bits [RFC 5175 section 5].
+        Enum_NDOption.RA_Flags_Extension_Option: {'bits': bytes.fromhex('000000000001')},
+        Enum_NDOption.DNS_Search_List_Option: {'lifetime': 3600, 'domain_names': ['example.com', 'example.net']},
+        Enum_NDOption.DHCP_Captive_Portal: {'uri': b'https://portal.example/api'},
+        Enum_NDOption.PREF64_option: {'lifetime': 1800, 'prefix_length': 64, 'prefix': '2001:db8:64::'},
+    }
+
+
+def _nd_option_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
+    return _nd_option_message([(code, dict(kwargs))])
+
+
+def _nd_option_message(options: 'Any') -> 'Any':
+    """A Router Advertisement carrying ``options``, the message most of them go in."""
+    from pcapkit.const.icmpv6.type import Type as Enum_Type
+    from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
+    return ICMPv6.from_fields(type=Enum_Type.Router_Advertisement, code=0,
+                              body={'cur_hop_limit': 64, 'options': options})
+
+
+def _nd_option_extract(parsed: 'Any') -> 'Any':
+    return parsed.info.options
+
+
 #: The families this module adds.
 FAMILIES = (
     # NOTE: The ICMP families write no capture; their wire form is pinned against
@@ -140,5 +205,8 @@ FAMILIES = (
                      capture=None, envelope=None),
     generator.Family('icmpv6-type', _icmpv6_registry, _icmpv6_overrides,
                      _icmpv6_build, _icmpv6_parse, _icmp_extract, _icmpv6_rebuild,
+                     capture=None, envelope=None),
+    generator.Family('icmpv6-nd-option', _nd_option_registry, _nd_option_overrides,
+                     _nd_option_build, _icmpv6_parse, _nd_option_extract, _nd_option_message,
                      capture=None, envelope=None),
 )

@@ -74,6 +74,9 @@ IPHEADER_HOME = 'pcapkit.corekit.const.ipheader'
 #: The TCP header constants' home.
 TCPHEADER_HOME = 'pcapkit.corekit.const.tcpheader'
 
+#: The domain name constants' home.
+DOMAIN_NAME_HOME = 'pcapkit.corekit.const.domain_name'
+
 #: Each moved constant: its new home, its name, its old module, and whether the old
 #: module still reads it, so still binds it by import.
 MOVED = (
@@ -92,11 +95,16 @@ MOVED = (
     (IPHEADER_HOME, 'AH_HEADER_LEN', 'pcapkit.protocols.internet.ah.schema', True),
     (TCPHEADER_HOME, 'TCP_MIN_HEADER_LEN', 'pcapkit.protocols.transport.tcp.schema', True),
     (TCPHEADER_HOME, 'TCP_DATA_OFFSET_OCTET', 'pcapkit.protocols.transport.tcp.schema', False),
+    (DOMAIN_NAME_HOME, 'POINTER_LIMIT', 'pcapkit.protocols.application.dns.const', False),
 )
 
 #: Each moved helper, as :data:`MOVED` gives a constant (#2897).
 MOVED_HELPERS = (
     ('pcapkit.corekit.schema.byteorder', 'family_byteorder', 'pcapkit.protocols.link.loopback.protocol', True),
+    ('pcapkit.corekit.schema.domain_name', 'read_name', 'pcapkit.protocols.application.dns.schema', False),
+    ('pcapkit.corekit.schema.domain_name', 'make_name', 'pcapkit.protocols.application.dns.schema', False),
+    ('pcapkit.corekit.schema.domain_name', 'name_to_text', 'pcapkit.protocols.application.dns.schema', False),
+    ('pcapkit.corekit.schema.domain_name', 'text_to_labels', 'pcapkit.protocols.application.dns.schema', False),
 )
 
 #: A family base's module mapped to the members that reference its constants or
@@ -401,7 +409,7 @@ class TestNewHomes(unittest.TestCase):
                 self.assertIn(name, _assigned(ast.parse(_path(home).read_text(encoding='utf-8'))))
 
     def test_exported_there_and_nothing_else(self) -> 'None':
-        for home in (CAPTURE_HOME, IPHEADER_HOME, TCPHEADER_HOME):
+        for home in (CAPTURE_HOME, IPHEADER_HOME, TCPHEADER_HOME, DOMAIN_NAME_HOME):
             with self.subTest(home=home):
                 moved = sorted(name for new, name, _, _ in MOVED if new == home)
                 self.assertEqual(sorted(_all(home)), moved)

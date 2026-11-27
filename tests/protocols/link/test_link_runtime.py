@@ -65,11 +65,10 @@ class LinkProtocolRuntimeTests(unittest.TestCase):
         self.assertEqual(str(ipv6.src), 'fe80::a6:87f9:2793:16ee')
         self.assertEqual(str(ipv6.dst), 'fe80::1ccd:7c77:bac7:46b7')
         self.assertEqual(ipv6.info.limit, 255)
-        # Neighbor Solicitation (type 135) is Neighbor Discovery (RFC 4861),
-        # which is unimplemented, so it decodes as Unknown.
+        # A Neighbor Solicitation, type 135 (RFC 4861 section 4.3; #2934).
         self.assertEqual(type(icmpv6).__name__, 'ICMPv6')
         self.assertEqual(icmpv6.info.type, 135)
-        self.assertEqual(type(icmpv6.info).__name__, 'Unknown')
+        self.assertEqual(type(icmpv6.info).__name__, 'NeighborSolicitation')
         self.assertIn('IPv6', str(ipv6.protochain))
         self.assertEqual(ipv6.protochain.aliases[0], 'IPv6')
 

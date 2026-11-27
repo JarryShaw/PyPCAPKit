@@ -137,6 +137,13 @@ PURE = (
     ('pcapkit.protocols.application.ospf', 'Schema_CryptographicAuthentication'),
     ('pcapkit.protocols.application.ospf', 'Data_OSPF'),
     ('pcapkit.protocols.application.ospf', 'Data_CryptographicAuthentication'),
+    # #2934: the domain name codec ICMPv6's DNSSL option reads too, and its
+    # pointer limit, moved to pcapkit.corekit.
+    ('pcapkit.protocols.application.dns.schema', 'read_name'),
+    ('pcapkit.protocols.application.dns.schema', 'make_name'),
+    ('pcapkit.protocols.application.dns.schema', 'name_to_text'),
+    ('pcapkit.protocols.application.dns.schema', 'text_to_labels'),
+    ('pcapkit.protocols.application.dns.const', 'POINTER_LIMIT'),
 )
 
 #: Removed paths the old module still uses, as ``(old module, name, new home)``.
@@ -169,7 +176,7 @@ USED = (
     # const module. The old modules still read them, so they need no
     # versionremoved.
     ('pcapkit.protocols.application.dns.schema', 'HEADER_LENGTH', 'pcapkit.protocols.application.dns.const'),
-    ('pcapkit.protocols.application.dns.schema', 'POINTER_LIMIT', 'pcapkit.protocols.application.dns.const'),
+    ('pcapkit.protocols.application.dns.schema', 'POINTER_LIMIT', 'pcapkit.corekit.const.domain_name'),
     ('pcapkit.protocols.application.http.protocol', '_HTTP2_PREFACE', 'pcapkit.protocols.application.http.const'),
     ('pcapkit.protocols.internet.hip.schema', 'LOCATOR_SET_LEN', 'pcapkit.protocols.internet.hip.const'),
     ('pcapkit.protocols.link.ieee802_11.protocol', 'SUBTYPE', 'pcapkit.protocols.link.ieee802_11.const'),
@@ -295,6 +302,19 @@ SHIPPED = (
      'pcapkit/protocols/application/ospf/protocol.py', 'pcapkit/protocols/application/ospf.rst', '1.8.1'),
     ('pcapkit.protocols.application.ospf', 'Data_CryptographicAuthentication',
      'pcapkit/protocols/application/ospf/protocol.py', 'pcapkit/protocols/application/ospf.rst', '1.8.1'),
+    # #2934: shipped in 1.7.0 through 1.8.1, the four codec functions moved to
+    # pcapkit.corekit.schema.domain_name and POINTER_LIMIT to
+    # pcapkit.corekit.const.domain_name, both in 1.9.0.
+    ('pcapkit.protocols.application.dns.schema', 'read_name',
+     'pcapkit/protocols/application/dns/schema.py', 'pcapkit/protocols/application/dns.rst', '1.9.0'),
+    ('pcapkit.protocols.application.dns.schema', 'make_name',
+     'pcapkit/protocols/application/dns/schema.py', 'pcapkit/protocols/application/dns.rst', '1.9.0'),
+    ('pcapkit.protocols.application.dns.schema', 'name_to_text',
+     'pcapkit/protocols/application/dns/schema.py', 'pcapkit/protocols/application/dns.rst', '1.9.0'),
+    ('pcapkit.protocols.application.dns.schema', 'text_to_labels',
+     'pcapkit/protocols/application/dns/schema.py', 'pcapkit/protocols/application/dns.rst', '1.9.0'),
+    ('pcapkit.protocols.application.dns.const', 'POINTER_LIMIT',
+     'pcapkit/protocols/application/dns/const.py', 'pcapkit/protocols/application/dns.rst', '1.9.0'),
 )
 
 #: Shipped modules that moved whole, as ``(old module, the module recording its

@@ -83,6 +83,7 @@ CRAWLERS_WITH_CONSTANT_MISS_LINES = (
     'pcapkit/vendor/icmp/time_exceeded_code.py',
     'pcapkit/vendor/icmpv6/destination_unreachable_code.py',
     'pcapkit/vendor/icmpv6/parameter_problem_code.py',
+    'pcapkit/vendor/icmpv6/router_preference.py',
     'pcapkit/vendor/icmpv6/time_exceeded_code.py',
     'pcapkit/vendor/igmp/record_type.py',
     'pcapkit/vendor/ipv4/classification_level.py',
