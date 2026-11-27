@@ -21,13 +21,10 @@ from __future__ import annotations
 import sys
 import unittest
 import warnings
-from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
 from tests.foundation import _roundtrip as wire
-
-if TYPE_CHECKING:
-    from typing import Callable
+from tests.protocols._rebuild import depth
 
 #: Test tier (#1958): frame counts follow the interpreter's Python-level calls, so
 #: they are pinned on the latest CPython alone.
@@ -35,25 +32,6 @@ __tier__ = 'LATEST'
 
 #: The Python frames a layer of each kind adds to a parse, as ``develop`` measured them.
 FRAMES_PER_LAYER = {'802.1Q': 10, 'IPv4': 13}
-
-
-def depth(func: 'Callable[[], object]') -> int:
-    """How many Python frames deeper than its caller ``func()`` goes, as #1610's test counts."""
-    state = {'now': 0, 'most': 0}
-
-    def profile(frame: object, event: str, arg: object) -> None:  # pylint: disable=unused-argument
-        if event == 'call':
-            state['now'] += 1
-            state['most'] = max(state['most'], state['now'])
-        elif event == 'return':
-            state['now'] -= 1
-
-    sys.setprofile(profile)
-    try:
-        func()
-    finally:
-        sys.setprofile(None)
-    return state['most']
 
 
 def tagged(count: int) -> bytes:
