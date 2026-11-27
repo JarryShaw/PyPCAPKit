@@ -39,6 +39,18 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: Fixed-size octet fields a maker writes without ``_make_octets``, and why.
 EXEMPT = {
+    ('pcapkit/protocols/application/mstp/protocol.py', '_make_msti', 'regional_root_id'):
+        '_make_bridge_id refuses octets of any width but eight, and packs a Bridge Identifier into eight',
+    ('pcapkit/protocols/application/mstp/protocol.py', 'make', 'cist_bridge_id'):
+        '_make_bridge_id refuses octets of any width but eight, and packs a Bridge Identifier into eight',
+    ('pcapkit/protocols/application/mstp/protocol.py', 'make', 'cist_regional_root_id'):
+        '_make_bridge_id refuses octets of any width but eight, and packs a Bridge Identifier into eight',
+    ('pcapkit/protocols/application/mstp/protocol.py', 'make', 'cist_root_id'):
+        '_make_bridge_id refuses octets of any width but eight, and packs a Bridge Identifier into eight',
+    ('pcapkit/protocols/application/rstp/protocol.py', 'make', 'bridge_id'):
+        '_make_bridge_id refuses octets of any width but eight, and packs a Bridge Identifier into eight',
+    ('pcapkit/protocols/application/rstp/protocol.py', 'make', 'root_id'):
+        '_make_bridge_id refuses octets of any width but eight, and packs a Bridge Identifier into eight',
     ('pcapkit/protocols/application/httpv2/protocol.py', '_make_http_ping', 'data'):
         'its own length check refuses any width but eight',
     ('pcapkit/protocols/internet/icmpv6/protocol.py', '_make_opt_pref64', 'prefix'):

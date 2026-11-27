@@ -127,6 +127,9 @@ CRAWLERS_WITH_CONSTANT_MISS_LINES = (
     'pcapkit/vendor/reg/linktype.py',
     'pcapkit/vendor/sslv2/handshake_type.py',
     'pcapkit/vendor/sslv2/version.py',
+    'pcapkit/vendor/stp/bpdu_type.py',
+    'pcapkit/vendor/stp/port_role.py',
+    'pcapkit/vendor/stp/protocol_version.py',
     'pcapkit/vendor/tcp/checksum.py',
     'pcapkit/vendor/vlan/priority_level.py',
 )

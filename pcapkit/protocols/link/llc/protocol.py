@@ -77,7 +77,8 @@ class LLC(Link[Data_LLC, Schema_LLC],
     registered in the :attr:`self.__proto__ <pcapkit.protocols.link.llc.protocol.LLC.__proto__>`
     attribute. A DSAP :attr:`self.__paired__ <pcapkit.protocols.link.llc.protocol.LLC.__paired__>`
     flags is dispatched only when the SSAP, less its C/R bit, is the same
-    address, as :rfc:`1042` sets both to the SNAP SAP:
+    address, as :rfc:`1042` sets both to the SNAP SAP and IEEE 802.1D-2004
+    both to the Bridge Spanning Tree Protocol SAP:
 
     .. list-table::
        :header-rows: 1
@@ -85,6 +86,9 @@ class LLC(Link[Data_LLC, Schema_LLC],
        * - Index
          - Protocol
          - Paired
+       * - :attr:`~pcapkit.const.llc.lsap.LSAP.Bridge_Spanning_Tree_Protocol`
+         - :class:`pcapkit.protocols.application.stp.protocol.STP`
+         - yes
        * - :attr:`~pcapkit.const.llc.lsap.LSAP.SNAP`
          - :class:`pcapkit.protocols.link.snap.protocol.SNAP`
          - yes
@@ -112,6 +116,7 @@ class LLC(Link[Data_LLC, Schema_LLC],
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'),
         {
+            Enum_LSAP.Bridge_Spanning_Tree_Protocol: ModuleDescriptor('pcapkit.protocols.application.stp.protocol', 'STP'),
             Enum_LSAP.SNAP: ModuleDescriptor('pcapkit.protocols.link.snap.protocol', 'SNAP'),
         },
     )  # type: DefaultDict[int | Enum_LSAP, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
@@ -122,6 +127,7 @@ class LLC(Link[Data_LLC, Schema_LLC],
     #: hold is dispatched on alone. Written with the DSAP's entry in
     #: :attr:`__proto__` by :meth:`register`, through its ``paired`` keyword.
     __paired__ = {
+        Enum_LSAP.Bridge_Spanning_Tree_Protocol: True,
         Enum_LSAP.SNAP: True,
     }  # type: dict[int | Enum_LSAP, bool]
 

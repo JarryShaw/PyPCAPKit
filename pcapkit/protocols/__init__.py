@@ -80,6 +80,7 @@ __all__ = [
     'OSPF', 'OSPFv1', 'OSPFv2', 'OSPFv3',
     'RARP', 'DRARP',
     'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS',
+    'STP', 'STPv0', 'RSTP', 'MSTP',
 
     # Protocol Numbers
     'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE', 'APPTYPE',

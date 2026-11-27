@@ -29,6 +29,10 @@ protocol's layer is decided by function rather than encapsulation; see
    tls
    sslv3
    dtls
+   stp
+   stpv0
+   rstp
+   mstp
 
 .. todo::
 

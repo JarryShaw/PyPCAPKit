@@ -47,6 +47,7 @@ __tier__ = 'LATEST'
 #: Every list of schema items the sweep finds, as ``holder.field``, and its item schema.
 LISTS = {
     'application.httpv2:SettingsFrame.settings': 'application.httpv2:SettingPair',
+    'application.mstp:MSTP.msti': 'application.mstp:MSTIMessage',
     'application.ssl:ECHConfigContents.cipher_suites': 'application.ssl:HpkeSymmetricCipherSuite',
     'application.ssl:ECHConfigContents.extensions': 'application.ssl:ECHConfigExtension',
     'application.ssl:ECHEncryptedExtensions.retry_configs': 'application.ssl:ECHConfig',

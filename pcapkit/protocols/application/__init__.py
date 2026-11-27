@@ -48,11 +48,15 @@ if TYPE_CHECKING:
     from pcapkit.protocols.application.tls import TLS
     from pcapkit.protocols.application.sslv3 import SSLv3
     from pcapkit.protocols.application.dtls import DTLS
+    from pcapkit.protocols.application.stpv0 import STPv0
+    from pcapkit.protocols.application.rstp import RSTP
+    from pcapkit.protocols.application.mstp import MSTP
 
     # Base Classes
     from pcapkit.protocols.application.http import HTTP
     from pcapkit.protocols.application.ospf import OSPF
     from pcapkit.protocols.application.ssl import SSL
+    from pcapkit.protocols.application.stp import STP
 
 __all__ = [
     'APPTYPE',
@@ -63,6 +67,7 @@ __all__ = [
     'OSPF', 'OSPFv1', 'OSPFv2', 'OSPFv3',
     'RARP', 'DRARP',
     'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS',
+    'STP', 'STPv0', 'RSTP', 'MSTP',
 ]
 
 __getattr__, __dir__ = lazy_exports(__name__, globals(), {
@@ -85,4 +90,8 @@ __getattr__, __dir__ = lazy_exports(__name__, globals(), {
     'SSLv3': ('sslv3', 'SSLv3'),
     'TLS': ('tls', 'TLS'),
     'DTLS': ('dtls', 'DTLS'),
+    'STP': ('stp', 'STP'),
+    'STPv0': ('stpv0', 'STPv0'),
+    'RSTP': ('rstp', 'RSTP'),
+    'MSTP': ('mstp', 'MSTP'),
 })

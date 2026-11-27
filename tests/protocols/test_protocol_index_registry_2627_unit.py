@@ -108,8 +108,13 @@ EXPECTED = {
 
 #: Classes that keep another registry's code, in the same form. Netlink keeps
 #: ARPHRD_NETLINK, as LINKTYPE_NETLINK (253) names the SLL-framed form (#2627).
-#: SNAP keeps its LSAP, as none of the four registries names it (#2936).
+#: SNAP keeps its LSAP, as none of the four registries names it (#2936), and so does
+#: the STP family, at LSAP 0x42 (#3115).
 EXCEPTIONS = {
+    'pcapkit.protocols.application.mstp.protocol.MSTP': (LSAP, 0x42),
+    'pcapkit.protocols.application.rstp.protocol.RSTP': (LSAP, 0x42),
+    'pcapkit.protocols.application.stp.protocol.STP': (LSAP, 0x42),
+    'pcapkit.protocols.application.stpv0.protocol.STPv0': (LSAP, 0x42),
     'pcapkit.protocols.link.netlink.protocol.Netlink': (ARPHRD, 824),
     'pcapkit.protocols.link.snap.protocol.SNAP': (LSAP, 0xAA),
 }
