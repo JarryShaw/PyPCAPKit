@@ -112,6 +112,7 @@ CRAWLERS_WITH_CONSTANT_MISS_LINES = (
     'pcapkit/vendor/mh/lla_code.py',
     'pcapkit/vendor/mh/option.py',
     'pcapkit/vendor/mh/packet.py',
+    'pcapkit/vendor/ospfv1/packet.py',
     'pcapkit/vendor/pcapng/filter_type.py',
     'pcapkit/vendor/pcapng/hash_algorithm.py',
     'pcapkit/vendor/pcapng/option_type.py',

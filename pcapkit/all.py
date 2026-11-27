@@ -150,7 +150,7 @@ __all__ = [
     'IP_Pseudo',                                            # IP Pseudo-Header
     'DCCP', 'TCP', 'UDP', 'SCTP',                           # Transport Layer
     'DNS', 'FTP', 'FTP_DATA',                               # Application Layer
-    'HTTP', 'HTTPv1', 'HTTPv2', 'NGAP', 'OSPF', 'RARP', 'DRARP',
+    'HTTP', 'HTTPv1', 'HTTPv2', 'NGAP', 'OSPF', 'OSPFv1', 'OSPFv2', 'OSPFv3', 'RARP', 'DRARP',
     'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS',
     'Schema', 'schema',                                     # Protocol Schema
     'Data', 'data',                                         # Protocol Data

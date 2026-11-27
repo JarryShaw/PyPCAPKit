@@ -19,6 +19,9 @@ protocol's layer is decided by function rather than encapsulation; see
    ftp_data
    ngap
    ospf
+   ospfv1
+   ospfv2
+   ospfv3
    rarp
    drarp
    ssl

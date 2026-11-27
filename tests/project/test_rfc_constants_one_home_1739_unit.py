@@ -450,12 +450,19 @@ UNRELATED = {
     'pcapkit/protocols/application/httpv2/schema.py': ((6, 32),
                                                        'an HTTP/2 setting size and a flag bit'),
     'pcapkit/protocols/application/ospf/protocol.py': ((16, 24),
-                                              'OSPF header length; 16 is the bit width of the '
-                                              'packet length, and the offset of the '
-                                              'Authentication field the checksum leaves out '
-                                              '(RFC 2328 appendix A.3.1), not a PCAP record '
-                                              'header'),
-    'pcapkit/protocols/application/ospf/schema.py': ((24,), 'the OSPF header length'),
+                                              'the 24-octet OSPFv1 and OSPFv2 header length, and '
+                                              'the offset 16 of the Authentication field their '
+                                              'checksum leaves out (RFC 2328 appendix A.3.1), not '
+                                              'a PCAP record header'),
+    'pcapkit/protocols/application/ospfv1/protocol.py': ((24,), 'the OSPFv1 header length (RFC 1131 '
+                                                        'section A.2)'),
+    'pcapkit/protocols/application/ospfv1/schema.py': ((24,), 'the OSPFv1 header length'),
+    'pcapkit/protocols/application/ospfv2/protocol.py': ((24,), 'the OSPFv2 header length'),
+    'pcapkit/protocols/application/ospfv2/schema.py': ((24,), 'the OSPFv2 header length'),
+    'pcapkit/protocols/application/ospfv3/protocol.py': ((16,), 'the OSPFv3 header length (RFC 5340 '
+                                                        'appendix A.3.1), not a PCAP record header'),
+    'pcapkit/protocols/application/ospfv3/schema.py': ((16,), 'the OSPFv3 header length, not a PCAP '
+                                                      'record header'),
     'pcapkit/protocols/internet/ah/protocol.py': ((6, 20), 'the IP version number the ICV is padded '
                                          "for (#2886), and AH's length estimate, its 12-octet "
                                          'fixed part plus a minimal ICV, not the fixed part itself'),

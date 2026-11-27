@@ -39,7 +39,9 @@ if TYPE_CHECKING:
     from pcapkit.protocols.application.httpv1 import HTTPv1
     from pcapkit.protocols.application.httpv2 import HTTPv2
     from pcapkit.protocols.application.ngap import NGAP
-    from pcapkit.protocols.application.ospf import OSPF
+    from pcapkit.protocols.application.ospfv1 import OSPFv1
+    from pcapkit.protocols.application.ospfv2 import OSPFv2
+    from pcapkit.protocols.application.ospfv3 import OSPFv3
     from pcapkit.protocols.application.rarp import RARP
     from pcapkit.protocols.application.drarp import DRARP
     from pcapkit.protocols.application.sslv2 import SSLv2
@@ -49,6 +51,7 @@ if TYPE_CHECKING:
 
     # Base Classes
     from pcapkit.protocols.application.http import HTTP
+    from pcapkit.protocols.application.ospf import OSPF
     from pcapkit.protocols.application.ssl import SSL
 
 __all__ = [
@@ -57,7 +60,7 @@ __all__ = [
     'FTP', 'FTP_DATA',
     'HTTP', 'HTTPv1', 'HTTPv2',
     'NGAP',
-    'OSPF',
+    'OSPF', 'OSPFv1', 'OSPFv2', 'OSPFv3',
     'RARP', 'DRARP',
     'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS',
 ]
@@ -72,6 +75,9 @@ __getattr__, __dir__ = lazy_exports(__name__, globals(), {
     'HTTPv2': ('httpv2', 'HTTPv2'),
     'NGAP': ('ngap', 'NGAP'),
     'OSPF': ('ospf', 'OSPF'),
+    'OSPFv1': ('ospfv1', 'OSPFv1'),
+    'OSPFv2': ('ospfv2', 'OSPFv2'),
+    'OSPFv3': ('ospfv3', 'OSPFv3'),
     'RARP': ('rarp', 'RARP'),
     'DRARP': ('drarp', 'DRARP'),
     'SSL': ('ssl', 'SSL'),

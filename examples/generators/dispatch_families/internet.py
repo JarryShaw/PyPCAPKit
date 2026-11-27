@@ -130,7 +130,7 @@ def _payload(code: 'int') -> 'bytes':
                                      controls_anonymous=False, shit=0, rhit=0, payload=_tcp(9999)))
     if code == TransType.OSPFIGP:
         from pcapkit.protocols.application.ospf.protocol import OSPF
-        return bytes(OSPF.from_fields())
+        return bytes(OSPF.from_fields(version=2))
     if code == TransType.Shim6:
         # #904: no dedicated dissector exists for Shim6 -- IPv6_Ext
         # parses only the two octets RFC 6564 §4 guarantees (next header,

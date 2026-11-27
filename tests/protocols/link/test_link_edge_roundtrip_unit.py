@@ -50,6 +50,12 @@ def ospf(type_: int = 1, plen: 'int | None' = None, auth: int = 0,
                        b'\xab\xcd', auth) + auth_data + body
 
 
+def ospfv3(instance_id: int = 0, reserved: int = 0, body: bytes = b'') -> bytes:
+    """An OSPFv3 header (RFC 5340 A.3.1), then ``body``; Packet Length counts both (#3105)."""
+    return struct.pack('!BBH4s4s2sBB', 3, 1, 16 + len(body), bytes([1, 2, 3, 4]), bytes(4),
+                       b'\xab\xcd', instance_id, reserved) + body
+
+
 CASES = (
     # -- Ethernet ----------------------------------------------------------
     Case('ethernet/header-only-unknown-type', ETHERNET, MACS + b'\x88\xb5'),
@@ -109,7 +115,10 @@ CASES = (
          ospf(auth=2, auth_data=b'\x00\x00\x01\x10\x00\x00\x00\x07', body=bytes(4)) + b'\x11' * 16),
     Case('ospf/packet-length-short-of-the-data', OSPF, ospf(plen=24) + b'zz'),
     Case('ospf/packet-length-past-the-data', OSPF, ospf(plen=200)),
+    Case('ospf/version-1', OSPF, ospf(version=1, auth=1, auth_data=b'password')),
     Case('ospf/version-3', OSPF, ospf(version=3)),
+    Case('ospf/v3-hello-header-only', OSPF, ospfv3()),
+    Case('ospf/v3-instance-id-255-reserved-set', OSPF, ospfv3(instance_id=255, reserved=0xff, body=bytes(20))),
     Case('ospf/lsu-body', OSPF, ospf(type_=4, body=bytes(range(20)))),
 )
 
@@ -128,8 +137,11 @@ MAKE_CASES = (
     MakeCase('loopback/make/ipv6-darwin-big', LOOPBACK, {'family': 30, 'byteorder': 'big', 'payload': b'xy'}),
     MakeCase('loopback/make/unassigned-family-little', LOOPBACK,
              {'family': 0xffff, 'byteorder': 'little', 'payload': b'xy'}),
-    MakeCase('ospf/make/default', OSPF, {}),
-    MakeCase('ospf/make/unassigned-codes', OSPF, {'type': 200, 'auth_type': 9}),
+    MakeCase('ospf/make/default', OSPF, {'version': 2}),
+    MakeCase('ospf/make/unassigned-codes', OSPF, {'version': 2, 'type': 200, 'auth_type': 9}),
+    MakeCase('ospf/make/v1-simple-password', OSPF, {'version': 1, 'auth_type': 1, 'auth_data': b'password'}),
+    MakeCase('ospf/make/v3-instance-id-reserved', OSPF,
+             {'version': 3, 'instance_id': 255, 'reserved': b'\xff', 'payload': b'xy'}),
 )
 
 REJECTED = {

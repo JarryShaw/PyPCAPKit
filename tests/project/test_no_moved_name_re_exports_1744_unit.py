@@ -132,6 +132,11 @@ PURE = (
     ('pcapkit.foundation.traceflow.data', 'TCP_Packet'),
     ('pcapkit.foundation.reassembly.ip', 'logger'),
     ('pcapkit.foundation.traceflow.tcp', 'logger'),
+    # #3105: shipped in 1.6.x, the OSPF header gone to the ospfv2 package.
+    ('pcapkit.protocols.application.ospf', 'Schema_OSPF'),
+    ('pcapkit.protocols.application.ospf', 'Schema_CryptographicAuthentication'),
+    ('pcapkit.protocols.application.ospf', 'Data_OSPF'),
+    ('pcapkit.protocols.application.ospf', 'Data_CryptographicAuthentication'),
 )
 
 #: Removed paths the old module still uses, as ``(old module, name, new home)``.
@@ -281,6 +286,15 @@ SHIPPED = (
      'pcapkit/foundation/reassembly/ip/__init__.py', 'pcapkit/foundation/reassembly/ip/ip.rst', '1.7.0'),
     ('pcapkit.foundation.traceflow.tcp', 'logger',
      'pcapkit/foundation/traceflow/tcp/__init__.py', 'pcapkit/foundation/traceflow/tcp.rst', '1.7.0'),
+    # #3105: shipped in 1.6.x, the OSPF header gone to the ospfv2 package.
+    ('pcapkit.protocols.application.ospf', 'Schema_OSPF',
+     'pcapkit/protocols/application/ospf/protocol.py', 'pcapkit/protocols/application/ospf.rst', '1.8.1'),
+    ('pcapkit.protocols.application.ospf', 'Schema_CryptographicAuthentication',
+     'pcapkit/protocols/application/ospf/protocol.py', 'pcapkit/protocols/application/ospf.rst', '1.8.1'),
+    ('pcapkit.protocols.application.ospf', 'Data_OSPF',
+     'pcapkit/protocols/application/ospf/protocol.py', 'pcapkit/protocols/application/ospf.rst', '1.8.1'),
+    ('pcapkit.protocols.application.ospf', 'Data_CryptographicAuthentication',
+     'pcapkit/protocols/application/ospf/protocol.py', 'pcapkit/protocols/application/ospf.rst', '1.8.1'),
 )
 
 #: Shipped modules that moved whole, as ``(old module, the module recording its
@@ -310,6 +324,11 @@ MOVED_MODULES = (
      'pcapkit/foundation/traceflow/index.rst', '1.7.0'),
     ('pcapkit.foundation.traceflow.data.tcp', 'pcapkit.foundation.traceflow.tcp.data',
      'pcapkit/foundation/traceflow/tcp.rst', '1.7.0'),
+    # #3105: shipped in 1.6.x, moved whole into the ospfv2 package.
+    ('pcapkit.protocols.application.ospf.schema', 'pcapkit.protocols.application.ospf.protocol',
+     'pcapkit/protocols/application/ospf.rst', '1.8.1'),
+    ('pcapkit.protocols.application.ospf.data', 'pcapkit.protocols.application.ospf.protocol',
+     'pcapkit/protocols/application/ospf.rst', '1.8.1'),
 )
 
 
