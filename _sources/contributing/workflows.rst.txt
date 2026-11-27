@@ -1424,7 +1424,41 @@ warnings:
   other shards of that split 2.3-8.1 (:issue:`2739`). So those two are split again by
   that job's JUnit seconds, at ``test_igmp*`` and ``test_tls*``, which leaves every
   other shard fewer JUnit seconds there than ``tests/const`` took, whose largest
-  worker peaked at 2.05 GiB. The runs share the step's ``timeout``, scope and
+  worker peaked at 2.05 GiB. ``tests/protocols`` outgrew its heap too
+  (:issue:`3146`). Jobs 140219500063 and 140372705752, on ``3719f8496`` and
+  ``38c6519da``, and 140399757924, on :pr:`3141`'s ``90d1dfcfb``, lost 1, 2 and 2
+  workers, all in that run and 988-1454 s into it, with no OOM kill and no
+  ``MemoryError``. Each was 16-24 minutes old and last sampled at 2.43-2.71 GiB RSS.
+  The run took 1107-1478 s, and its JUnit seconds came to 3.9-4.4 times
+  ``tests/const``'s, against 2.2-2.4 in jobs 139948577089 and 140112918875, which
+  lost none: ``3719f8496`` is 1.8.0's merge, which brought :issue:`2840`'s and
+  :issue:`3081`'s tests. ``tests/protocols/application`` ran 928 s in job
+  140301451397, on ``a1164edd2``, its largest worker reaching 2.48 GiB, within that
+  range, so it is split too. Both are split by job 140372705752's JUnit seconds, so
+  that no new run takes more than ``tests/const``'s 981.6 there. By the estimate
+  above, with 46-110 s in place of the 50, as the three jobs' shards that lost no
+  worker took, the rest aside, no new run takes more than 6.8 minutes in any of them,
+  against the 9.8 at which :issue:`2713`'s first worker went down. The leg took
+  8772 s of the ``timeout``'s 10800 in job 140372705752, and comes to 8950-9220 s
+  there (estimate). ``tests/protocols``' own files are cut by name range,
+  ``test_[a-o]*``, ``test_protocol_[a-m]*``, the other ``test_p*``, ``test_q*`` and
+  ``test_t*``, rather than around the slowest files: a glob around those leaves the
+  directory's run every module added after it, which is how that run doubled, while
+  ranges over the names spread new modules over several runs. In run order, each
+  taking what the runs above it leave:
+
+  .. mermaid::
+
+     flowchart TD
+         SUB["tests/protocols' subdirectories, application/test_[o-s]* among them"]
+         SUB --> A["tests/protocols/test_[a-o]*"]
+         A --> PM["tests/protocols/test_protocol_[a-m]*"]
+         PM --> PO["tests/protocols/test_p*"]
+         PO --> Q["tests/protocols/test_q*"]
+         Q --> T["tests/protocols/test_t*"]
+         T --> D["tests/protocols: schema/ and the names no range takes"]
+
+  The runs share the step's ``timeout``, scope and
   watcher, so the caps hold over the whole tier; on ``timeout``'s SIGINT the run in
   progress writes its JUnit file and no later one starts. Each shard's run writes a
   JUnit file of its own beside ``junit.xml``, such as ``junit-tests-protocols.xml``,
@@ -2449,7 +2483,10 @@ its root, so ``clean`` keeps them, and fails rather than overwrite a page:
    * - ``versions.json``
      - each version's path segment, mapped to its Read the Docs URL: ``latest``,
        ``stable``, then every ``v*`` release tag ``origin`` lists, pre- and
-       post-releases included, in version order. A ``conda-*`` tag is none.
+       post-releases included, in version order. A ``conda-*`` tag is none, and
+       neither is a tag in ``UNBUILT``, which Read the Docs holds no build of
+       (:issue:`3135`): a tag whose build fails joins that set, and leaves it once a
+       rebuild succeeds.
    * - ``404.html``
      - the page GitHub Pages serves for a missing path. Under a segment
        ``versions.json`` lists, it sends the reader to the same page on Read the
@@ -2459,13 +2496,52 @@ its root, so ``clean`` keeps them, and fails rather than overwrite a page:
 **Read the Docs** builds the ``pypcapkit`` project outside GitHub Actions, at
 https://pypcapkit.jarryshaw.me/: ``stable``, at ``/en/stable/``, from the ``stable``
 branch, `Stable Branch (#3077)`_'s mirror of ``main``; ``latest``, at ``/en/latest/``,
-from ``develop``; and each release tag at ``/en/<tag>/`` from the first that carries
-:file:`.readthedocs.yaml`, since a version builds from that file in its own tree. It
-installs as the Pages build does. Every other build's sidebar links to it under the
-brand; there its own flyout menu switches versions, so :file:`docs/source/conf.py`
-leaves the link out and takes the canonical URL from ``READTHEDOCS_CANONICAL_URL``. No
-``dev`` version duplicates ``latest``, as the owner ruled in session, recorded on
-:issue:`3077`, so a Pages path under ``/dev/`` is not found.
+from ``develop``; and each release tag at ``/en/<tag>/``. A version builds from the
+:file:`.readthedocs.yaml` in its own tree, so a tag that carries none is served from an
+``rtd/<tag>`` branch, the tag plus that file, under the tag's slug. Its automation rule
+builds each final and ``.postN`` tag as it is pushed. It installs as the Pages build
+does, and :file:`docs/source/conf.py` takes its canonical URL from
+``READTHEDOCS_CANONICAL_URL``. No ``dev`` version duplicates ``latest``, as the owner
+ruled in session, recorded on :issue:`3077`, so a Pages path under ``/dev/`` is not
+found.
 
-:file:`tests/project/test_pages_versions_3077.py` and
-:file:`tests/project/test_readthedocs_config_3077.py` pin both.
+**The version switch** sits under the sidebar brand of GitHub Pages, of Read the Docs'
+``stable`` and ``latest``, and of each tag that carries it (:issue:`3134`).
+:file:`docs/source/conf.py` sets its ``html_context`` from ``READTHEDOCS_VERSION`` and
+``READTHEDOCS_VERSION_TYPE``, taking any build off Read the Docs for ``stable``, and
+:file:`docs/source/_templates/sidebar/versions.html` renders it:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
+
+   * - Entry
+     - Opens
+   * - ``stable``, ``latest (develop)``
+     - the same page in that version on Read the Docs, bar the build's own, so a Read
+       the Docs reader stays there
+   * - ``vX.Y.Z``
+     - the same page in the build's release: a tag's own, or on ``stable`` the one
+       ``main`` last released, where the automation rule builds it
+   * - ``all releases``
+     - the changelog
+
+``link_release_docs`` links each changelog entry to its release's build as the page is
+read -- after the entry's link on the index, and under its own page's title -- so no
+``.rst`` source names a URL. ``UNBUILT_RELEASES`` lists the releases Read the Docs holds
+no build of, which get none: a release whose tag build fails joins it, and leaves once a
+rebuild succeeds. On the tags that predate the switch, Read the Docs' flyout, which it
+injects only into the pages it serves, switches versions.
+
+.. mermaid::
+
+   flowchart TD
+       B["A build carrying the switch:<br/>GitHub Pages, or Read the Docs'<br/>stable, latest or a tag"]
+       B -->|"each other version"| V["The same page in that version,<br/>on Read the Docs"]
+       B -->|"all releases"| C["The changelog"]
+       C -->|"each entry's link"| T["The release's build,<br/>/en/vX.Y.Z/ on Read the Docs"]
+       T -->|"a tag older than the switch"| F["Read the Docs' flyout"]
+
+:file:`tests/project/test_pages_versions_3077.py`,
+:file:`tests/project/test_readthedocs_config_3077.py` and
+:file:`tests/project/test_changelog_release_docs_3134.py` pin them.

@@ -20,7 +20,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../_static/mermaid.css?v=10b7d883" />
-    <link rel="stylesheet" type="text/css" href="../_static/versions.css?v=cb5dadd8" />
+    <link rel="stylesheet" type="text/css" href="../_static/versions.css?v=3fef6c9a" />
     
     
 
@@ -201,9 +201,16 @@
   
   <span class="sidebar-brand-text">PyPCAPKit</span>
   
-</a><div class="sidebar-versions">
-  <a href="https://pypcapkit.jarryshaw.me/">All versions on Read the Docs</a>
-</div><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+</a><nav class="sidebar-versions" aria-label="Documentation versions">
+  <p>Version <strong>1.8.1 (stable)</strong></p>
+  <ul>
+    <li><span aria-current="page">stable</span></li>
+    <li><a href="https://pypcapkit.jarryshaw.me/en/latest/contributing/workflows.html">latest (develop)</a></li>
+    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.8.1/contributing/workflows.html">v1.8.1</a></li>
+    <li><a href="../changelog.html">all releases</a></li>
+  </ul>
+  <p class="sidebar-versions-note">latest and each release are on Read the Docs</p>
+</nav><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
@@ -1981,7 +1988,7 @@ nor the check names.</p>
 so <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">unit</span> <span class="pre">tests</span></code> holds the tests to what leaves the runner alive, and a breach
 fails the step, which <code class="docutils literal notranslate"><span class="pre">Containment</span> <span class="pre">summary</span></code> and <code class="docutils literal notranslate"><span class="pre">Experimental</span> <span class="pre">summary</span></code> report as
 warnings:</p>
-<ul class="simple">
+<ul>
 <li><p>GraalPy alone gets <code class="docutils literal notranslate"><span class="pre">GRAAL_PYTHON_VM_ARGS=--vm.Xmx2g</span> <span class="pre">--vm.XX:+ExitOnOutOfMemoryError</span></code>,
 a 2 GiB heap for every GraalPy process, xdist workers included, and <code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">3</span></code>, a CPU
 of the runner’s 4 left to the JIT and the runner; 3.14t runs <code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">logical</span></code>. A
@@ -2023,11 +2030,43 @@ and 13.9 minutes, their largest worker reaching 2.25 and 2.48 GiB RSS, and the
 other shards of that split 2.3-8.1 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2739">#2739</a>). So those two are split again by
 that job’s JUnit seconds, at <code class="docutils literal notranslate"><span class="pre">test_igmp*</span></code> and <code class="docutils literal notranslate"><span class="pre">test_tls*</span></code>, which leaves every
 other shard fewer JUnit seconds there than <code class="docutils literal notranslate"><span class="pre">tests/const</span></code> took, whose largest
-worker peaked at 2.05 GiB. The runs share the step’s <code class="docutils literal notranslate"><span class="pre">timeout</span></code>, scope and
+worker peaked at 2.05 GiB. <code class="docutils literal notranslate"><span class="pre">tests/protocols</span></code> outgrew its heap too
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3146">#3146</a>). Jobs 140219500063 and 140372705752, on <code class="docutils literal notranslate"><span class="pre">3719f8496</span></code> and
+<code class="docutils literal notranslate"><span class="pre">38c6519da</span></code>, and 140399757924, on <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/3141">#3141</a>’s <code class="docutils literal notranslate"><span class="pre">90d1dfcfb</span></code>, lost 1, 2 and 2
+workers, all in that run and 988-1454 s into it, with no OOM kill and no
+<code class="docutils literal notranslate"><span class="pre">MemoryError</span></code>. Each was 16-24 minutes old and last sampled at 2.43-2.71 GiB RSS.
+The run took 1107-1478 s, and its JUnit seconds came to 3.9-4.4 times
+<code class="docutils literal notranslate"><span class="pre">tests/const</span></code>’s, against 2.2-2.4 in jobs 139948577089 and 140112918875, which
+lost none: <code class="docutils literal notranslate"><span class="pre">3719f8496</span></code> is 1.8.0’s merge, which brought <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2840">#2840</a>’s and
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3081">#3081</a>’s tests. <code class="docutils literal notranslate"><span class="pre">tests/protocols/application</span></code> ran 928 s in job
+140301451397, on <code class="docutils literal notranslate"><span class="pre">a1164edd2</span></code>, its largest worker reaching 2.48 GiB, within that
+range, so it is split too. Both are split by job 140372705752’s JUnit seconds, so
+that no new run takes more than <code class="docutils literal notranslate"><span class="pre">tests/const</span></code>’s 981.6 there. By the estimate
+above, with 46-110 s in place of the 50, as the three jobs’ shards that lost no
+worker took, the rest aside, no new run takes more than 6.8 minutes in any of them,
+against the 9.8 at which <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2713">#2713</a>’s first worker went down. The leg took
+8772 s of the <code class="docutils literal notranslate"><span class="pre">timeout</span></code>’s 10800 in job 140372705752, and comes to 8950-9220 s
+there (estimate). <code class="docutils literal notranslate"><span class="pre">tests/protocols</span></code>’ own files are cut by name range,
+<code class="docutils literal notranslate"><span class="pre">test_[a-o]*</span></code>, <code class="docutils literal notranslate"><span class="pre">test_protocol_[a-m]*</span></code>, the other <code class="docutils literal notranslate"><span class="pre">test_p*</span></code>, <code class="docutils literal notranslate"><span class="pre">test_q*</span></code> and
+<code class="docutils literal notranslate"><span class="pre">test_t*</span></code>, rather than around the slowest files: a glob around those leaves the
+directory’s run every module added after it, which is how that run doubled, while
+ranges over the names spread new modules over several runs. In run order, each
+taking what the runs above it leave:</p>
+<pre  class="mermaid">
+        flowchart TD
+    SUB[&quot;tests/protocols' subdirectories, application/test_[o-s]* among them&quot;]
+    SUB --&gt; A[&quot;tests/protocols/test_[a-o]*&quot;]
+    A --&gt; PM[&quot;tests/protocols/test_protocol_[a-m]*&quot;]
+    PM --&gt; PO[&quot;tests/protocols/test_p*&quot;]
+    PO --&gt; Q[&quot;tests/protocols/test_q*&quot;]
+    Q --&gt; T[&quot;tests/protocols/test_t*&quot;]
+    T --&gt; D[&quot;tests/protocols: schema/ and the names no range takes&quot;]
+    </pre><p>The runs share the step’s <code class="docutils literal notranslate"><span class="pre">timeout</span></code>, scope and
 watcher, so the caps hold over the whole tier; on <code class="docutils literal notranslate"><span class="pre">timeout</span></code>’s SIGINT the run in
 progress writes its JUnit file and no later one starts. Each shard’s run writes a
 JUnit file of its own beside <code class="docutils literal notranslate"><span class="pre">junit.xml</span></code>, such as <code class="docutils literal notranslate"><span class="pre">junit-tests-protocols.xml</span></code>,
-and <code class="docutils literal notranslate"><span class="pre">Upload</span> <span class="pre">test</span> <span class="pre">timings</span></code> takes them all. 3.14t’s leg runs pytest once.</p></li>
+and <code class="docutils literal notranslate"><span class="pre">Upload</span> <span class="pre">test</span> <span class="pre">timings</span></code> takes them all. 3.14t’s leg runs pytest once.</p>
+</li>
 <li><p><code class="docutils literal notranslate"><span class="pre">timeout</span> <span class="pre">--signal=INT</span> <span class="pre">--kill-after=3m</span> <span class="pre">180m</span></code> ends pytest under the step’s 190-minute
 cap, so it still writes the junit XML, and exits 124; <code class="docutils literal notranslate"><span class="pre">prlimit</span> <span class="pre">--fsize=2147483648</span></code>
 caps any file at 2 GiB. The <code class="docutils literal notranslate"><span class="pre">timeout</span></code> is GNU’s, <code class="docutils literal notranslate"><span class="pre">gnutimeout</span></code> where it exists
@@ -3029,7 +3068,10 @@ its root, so <code class="docutils literal notranslate"><span class="pre">clean<
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">versions.json</span></code></p></td>
 <td><p>each version’s path segment, mapped to its Read the Docs URL: <code class="docutils literal notranslate"><span class="pre">latest</span></code>,
 <code class="docutils literal notranslate"><span class="pre">stable</span></code>, then every <code class="docutils literal notranslate"><span class="pre">v*</span></code> release tag <code class="docutils literal notranslate"><span class="pre">origin</span></code> lists, pre- and
-post-releases included, in version order. A <code class="docutils literal notranslate"><span class="pre">conda-*</span></code> tag is none.</p></td>
+post-releases included, in version order. A <code class="docutils literal notranslate"><span class="pre">conda-*</span></code> tag is none, and
+neither is a tag in <code class="docutils literal notranslate"><span class="pre">UNBUILT</span></code>, which Read the Docs holds no build of
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3135">#3135</a>): a tag whose build fails joins that set, and leaves it once a
+rebuild succeeds.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">404.html</span></code></p></td>
 <td><p>the page GitHub Pages serves for a missing path. Under a segment
@@ -3043,15 +3085,61 @@ found.</p></td>
 <p><strong>Read the Docs</strong> builds the <code class="docutils literal notranslate"><span class="pre">pypcapkit</span></code> project outside GitHub Actions, at
 <a class="reference external" href="https://pypcapkit.jarryshaw.me/">https://pypcapkit.jarryshaw.me/</a>: <code class="docutils literal notranslate"><span class="pre">stable</span></code>, at <code class="docutils literal notranslate"><span class="pre">/en/stable/</span></code>, from the <code class="docutils literal notranslate"><span class="pre">stable</span></code>
 branch, <a class="reference internal" href="#stable-branch-3077">Stable Branch (#3077)</a>’s mirror of <code class="docutils literal notranslate"><span class="pre">main</span></code>; <code class="docutils literal notranslate"><span class="pre">latest</span></code>, at <code class="docutils literal notranslate"><span class="pre">/en/latest/</span></code>,
-from <code class="docutils literal notranslate"><span class="pre">develop</span></code>; and each release tag at <code class="docutils literal notranslate"><span class="pre">/en/&lt;tag&gt;/</span></code> from the first that carries
-<code class="file docutils literal notranslate"><span class="pre">.readthedocs.yaml</span></code>, since a version builds from that file in its own tree. It
-installs as the Pages build does. Every other build’s sidebar links to it under the
-brand; there its own flyout menu switches versions, so <code class="file docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code>
-leaves the link out and takes the canonical URL from <code class="docutils literal notranslate"><span class="pre">READTHEDOCS_CANONICAL_URL</span></code>. No
-<code class="docutils literal notranslate"><span class="pre">dev</span></code> version duplicates <code class="docutils literal notranslate"><span class="pre">latest</span></code>, as the owner ruled in session, recorded on
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3077">#3077</a>, so a Pages path under <code class="docutils literal notranslate"><span class="pre">/dev/</span></code> is not found.</p>
-<p><code class="file docutils literal notranslate"><span class="pre">tests/project/test_pages_versions_3077.py</span></code> and
-<code class="file docutils literal notranslate"><span class="pre">tests/project/test_readthedocs_config_3077.py</span></code> pin both.</p>
+from <code class="docutils literal notranslate"><span class="pre">develop</span></code>; and each release tag at <code class="docutils literal notranslate"><span class="pre">/en/&lt;tag&gt;/</span></code>. A version builds from the
+<code class="file docutils literal notranslate"><span class="pre">.readthedocs.yaml</span></code> in its own tree, so a tag that carries none is served from an
+<code class="docutils literal notranslate"><span class="pre">rtd/&lt;tag&gt;</span></code> branch, the tag plus that file, under the tag’s slug. Its automation rule
+builds each final and <code class="docutils literal notranslate"><span class="pre">.postN</span></code> tag as it is pushed. It installs as the Pages build
+does, and <code class="file docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code> takes its canonical URL from
+<code class="docutils literal notranslate"><span class="pre">READTHEDOCS_CANONICAL_URL</span></code>. No <code class="docutils literal notranslate"><span class="pre">dev</span></code> version duplicates <code class="docutils literal notranslate"><span class="pre">latest</span></code>, as the owner
+ruled in session, recorded on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3077">#3077</a>, so a Pages path under <code class="docutils literal notranslate"><span class="pre">/dev/</span></code> is not
+found.</p>
+<p><strong>The version switch</strong> sits under the sidebar brand of GitHub Pages, of Read the Docs’
+<code class="docutils literal notranslate"><span class="pre">stable</span></code> and <code class="docutils literal notranslate"><span class="pre">latest</span></code>, and of each tag that carries it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3134">#3134</a>).
+<code class="file docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code> sets its <code class="docutils literal notranslate"><span class="pre">html_context</span></code> from <code class="docutils literal notranslate"><span class="pre">READTHEDOCS_VERSION</span></code> and
+<code class="docutils literal notranslate"><span class="pre">READTHEDOCS_VERSION_TYPE</span></code>, taking any build off Read the Docs for <code class="docutils literal notranslate"><span class="pre">stable</span></code>, and
+<code class="file docutils literal notranslate"><span class="pre">docs/source/_templates/sidebar/versions.html</span></code> renders it:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 24.0%" />
+<col style="width: 76.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Entry</p></th>
+<th class="head"><p>Opens</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">stable</span></code>, <code class="docutils literal notranslate"><span class="pre">latest</span> <span class="pre">(develop)</span></code></p></td>
+<td><p>the same page in that version on Read the Docs, bar the build’s own, so a Read
+the Docs reader stays there</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">vX.Y.Z</span></code></p></td>
+<td><p>the same page in the build’s release: a tag’s own, or on <code class="docutils literal notranslate"><span class="pre">stable</span></code> the one
+<code class="docutils literal notranslate"><span class="pre">main</span></code> last released, where the automation rule builds it</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">all</span> <span class="pre">releases</span></code></p></td>
+<td><p>the changelog</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">link_release_docs</span></code> links each changelog entry to its release’s build as the page is
+read – after the entry’s link on the index, and under its own page’s title – so no
+<code class="docutils literal notranslate"><span class="pre">.rst</span></code> source names a URL. <code class="docutils literal notranslate"><span class="pre">UNBUILT_RELEASES</span></code> lists the releases Read the Docs holds
+no build of, which get none: a release whose tag build fails joins it, and leaves once a
+rebuild succeeds. On the tags that predate the switch, Read the Docs’ flyout, which it
+injects only into the pages it serves, switches versions.</p>
+<pre  class="mermaid">
+        flowchart TD
+    B[&quot;A build carrying the switch:&lt;br/&gt;GitHub Pages, or Read the Docs'&lt;br/&gt;stable, latest or a tag&quot;]
+    B --&gt;|&quot;each other version&quot;| V[&quot;The same page in that version,&lt;br/&gt;on Read the Docs&quot;]
+    B --&gt;|&quot;all releases&quot;| C[&quot;The changelog&quot;]
+    C --&gt;|&quot;each entry's link&quot;| T[&quot;The release's build,&lt;br/&gt;/en/vX.Y.Z/ on Read the Docs&quot;]
+    T --&gt;|&quot;a tag older than the switch&quot;| F[&quot;Read the Docs' flyout&quot;]
+    </pre><p><code class="file docutils literal notranslate"><span class="pre">tests/project/test_pages_versions_3077.py</span></code>,
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_readthedocs_config_3077.py</span></code> and
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_changelog_release_docs_3134.py</span></code> pin them.</p>
 </section>
 </section>
 

@@ -214,6 +214,29 @@ The CLI needs the ``cli`` extra:
    # or explicitly
    pip install pypcapkit emoji
 
+Documentation Versions
+======================
+
+The switch under the sidebar's title opens the current page in another version.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 30 48
+
+   * - Version
+     - Built from
+     - Served at
+   * - ``stable``
+     - ``main``, the released line
+     - `GitHub Pages <https://jarryshaw.github.io/PyPCAPKit/>`__ and
+       `Read the Docs <https://pypcapkit.jarryshaw.me/en/stable/>`__
+   * - ``latest``
+     - ``develop``, the next minor
+     - `Read the Docs <https://pypcapkit.jarryshaw.me/en/latest/>`__
+   * - each release
+     - its tag
+     - Read the Docs, at ``/en/vX.Y.Z/``, linked from its :doc:`changelog` entry
+
 Indices and Tables
 ==================
 

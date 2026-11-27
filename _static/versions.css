@@ -1,8 +1,38 @@
-/* The link to Read the Docs under the sidebar brand (#3077), in furo's own variables. */
+/* The switch between the documentation's versions under the sidebar brand (#3134),
+   in furo's own variables, so its light and dark themes carry it. */
 .sidebar-versions {
   padding: 0 var(--sidebar-item-spacing-horizontal) var(--sidebar-item-spacing-vertical);
   font-size: var(--sidebar-item-font-size);
 }
-.sidebar-versions a {
-  color: var(--color-sidebar-link-text);
+.sidebar-versions p {
+  margin: 0 0 0.5em;
+}
+.sidebar-versions ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sidebar-versions li > a,
+.sidebar-versions li > span {
+  display: inline-block;
+  padding: 0.1em 0.6em;
+  border: 1px solid var(--color-background-border);
+  border-radius: 1em;
+  text-decoration: none;
+}
+.sidebar-versions li > a:hover {
+  background: var(--color-background-hover);
+}
+.sidebar-versions li > span[aria-current] {
+  border-color: var(--color-brand-primary);
+  background: var(--color-brand-primary);
+  color: var(--color-background-primary);
+}
+.sidebar-versions .sidebar-versions-note {
+  margin: 0.5em 0 0;
+  color: var(--color-foreground-muted);
+  font-size: var(--font-size--small--2);
 }

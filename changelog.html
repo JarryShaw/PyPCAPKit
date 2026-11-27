@@ -20,7 +20,7 @@
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="_static/mermaid.css?v=10b7d883" />
-    <link rel="stylesheet" type="text/css" href="_static/versions.css?v=cb5dadd8" />
+    <link rel="stylesheet" type="text/css" href="_static/versions.css?v=3fef6c9a" />
     
     
 
@@ -201,9 +201,16 @@
   
   <span class="sidebar-brand-text">PyPCAPKit</span>
   
-</a><div class="sidebar-versions">
-  <a href="https://pypcapkit.jarryshaw.me/">All versions on Read the Docs</a>
-</div><form class="sidebar-search-container" method="get" action="search.html" role="search">
+</a><nav class="sidebar-versions" aria-label="Documentation versions">
+  <p>Version <strong>1.8.1 (stable)</strong></p>
+  <ul>
+    <li><span aria-current="page">stable</span></li>
+    <li><a href="https://pypcapkit.jarryshaw.me/en/latest/changelog.html">latest (develop)</a></li>
+    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.8.1/changelog.html">v1.8.1</a></li>
+    <li><a href="./changelog.html">all releases</a></li>
+  </ul>
+  <p class="sidebar-versions-note">latest and each release are on Read the Docs</p>
+</nav><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
@@ -625,147 +632,147 @@ carries only the version being released.</p>
 <li><p><strong>1.8.1</strong> (2026-11-27) – A bug-fix release: OSPF split into a versioned family,
 with OSPFv3 read with its own 16-octet header and OSPFv1 with the registries of
 <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1131.html"><strong>RFC 1131</strong></a>, and Sync Develop pushing <code class="docutils literal notranslate"><span class="pre">main</span></code> into <code class="docutils literal notranslate"><span class="pre">develop</span></code> directly.
-<a class="reference internal" href="changelog/1.8.1.html"><span class="doc">Full changelog</span></a>.</p></li>
+<a class="reference internal" href="changelog/1.8.1.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.8.1/">documentation</a>.</p></li>
 <li><p><strong>1.8.0</strong> (2026-11-26) – Protocol parsing split from construction, with
 <code class="docutils literal notranslate"><span class="pre">from_file</span></code> and <code class="docutils literal notranslate"><span class="pre">from_fields</span></code> as the explicit pair and closed parse and
 build signatures, <code class="docutils literal notranslate"><span class="pre">analyze</span></code> dispatching as a frame does, and versioned
-documentation on Read the Docs. <a class="reference internal" href="changelog/1.8.0.html"><span class="doc">Full changelog</span></a>.</p></li>
+documentation on Read the Docs. <a class="reference internal" href="changelog/1.8.0.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.8.0/">documentation</a>.</p></li>
 <li><p><strong>1.7.0</strong> (2026-11-25) – Dissectors for PPP, PPPoE and DNS, MLD, newer SCTP
 chunks and current TLS extensions decoded, a PCAP-NG writer, every registered
 reassembler and flow tracer fed, and grouped, keyword-only extraction and
-reassembly signatures. <a class="reference internal" href="changelog/1.7.0.html"><span class="doc">Full changelog</span></a>.</p></li>
+reassembly signatures. <a class="reference internal" href="changelog/1.7.0.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.7.0/">documentation</a>.</p></li>
 <li><p><strong>1.6.2</strong> (2026-11-21) – A registry and bug-fix release: new TLS extension
 types, the <code class="docutils literal notranslate"><span class="pre">ETW2</span></code> link type, new TCP and UDP port assignments, and a
 <code class="docutils literal notranslate"><span class="pre">BufferError</span></code> on closing a buffered reader under PyPy 3.12 fixed.
-<a class="reference internal" href="changelog/1.6.2.html"><span class="doc">Full changelog</span></a>.</p></li>
+<a class="reference internal" href="changelog/1.6.2.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.6.2/">documentation</a>.</p></li>
 <li><p><strong>1.6.1</strong> (2026-11-05) – A documentation release: vertical diagrams, new ones
 for the dispatch, extraction and reassembly paths, and a concision and accuracy
-sweep. <a class="reference internal" href="changelog/1.6.1.html"><span class="doc">Full changelog</span></a>.</p></li>
+sweep. <a class="reference internal" href="changelog/1.6.1.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.6.1/">documentation</a>.</p></li>
 <li><p><strong>1.6.0</strong> (2026-11-05) – Protocol pairs on a shared abstract base, dissectors
 for IGMP and DCCP, one package per protocol, and verified checksums.
-<a class="reference internal" href="changelog/1.6.0.html"><span class="doc">Full changelog</span></a>.</p></li>
+<a class="reference internal" href="changelog/1.6.0.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.6.0/">documentation</a>.</p></li>
 <li><p><strong>1.5.1</strong> (2026-10-30) – Fixed a double-escaping regression: <code class="docutils literal notranslate"><span class="pre">dictdumper</span></code>
 0.8.5 fixed defects <a class="reference internal" href="pcapkit/dumpkit/common.html#module-pcapkit.dumpkit.common" title="pcapkit.dumpkit.common"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit.common</span></code></a> had its own workarounds
-for, so the two stacked. <a class="reference internal" href="changelog/1.5.1.html"><span class="doc">Full changelog</span></a>.</p></li>
+for, so the two stacked. <a class="reference internal" href="changelog/1.5.1.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.5.1/">documentation</a>.</p></li>
 <li><p><strong>1.5.0</strong> (2026-10-29) – The largest release since 1.0, and the first
 recorded here as it happened rather than reconstructed: more extraction
 engines, ESP with payload decryption, SCTP and NGAP over SCTP,
-and a logger that no longer hijacks the consumer’s. <a class="reference internal" href="changelog/1.5.0.html"><span class="doc">Full changelog</span></a>.</p></li>
+and a logger that no longer hijacks the consumer’s. <a class="reference internal" href="changelog/1.5.0.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.5.0/">documentation</a>.</p></li>
 <li><p><strong>1.4.1</strong> (2026-08-22) – Release engineering only – no library behaviour
 changed: a new unit-test CI workflow gates the packaging, vendor-cron
 and documentation workflows, the vendor cron refuses to publish when the
 registry update itself failed, and unit-test compatibility on Python 3.10
-was fixed. <a class="reference internal" href="changelog/1.4.1.html"><span class="doc">Full changelog</span></a>.</p></li>
+was fixed. <a class="reference internal" href="changelog/1.4.1.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.4.1/">documentation</a>.</p></li>
 <li><p><strong>1.4.0</strong> (2026-08-21) – The first release in nearly two years to carry
 code changes, and the first with a test suite, covering the core kit, the
 extraction engines, reassembly, flow tracing, the protocol schemas, the CLI
 and the utility modules. <a class="reference internal" href="changelog/1.4.0.html"><span class="doc">Full changelog</span></a>.</p></li>
 <li><p><strong>1.3.5</strong> (2024-11-16) – Fixed a regression, introduced by 1.3.4, that
 mis-decoded every TCP and UDP frame under IPv4/IPv6 as raw payload – skip
-1.3.4 entirely. <a class="reference internal" href="changelog/1.3.5.html"><span class="doc">Full changelog</span></a>.</p></li>
+1.3.4 entirely. <a class="reference internal" href="changelog/1.3.5.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.3.5/">documentation</a>.</p></li>
 <li><p><strong>1.3.4</strong> (2024-11-14) – Fixed IPv6 Routing header length handling and
 extension-header chain extraction (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/218">#218</a>), but introduced the
 transport-layer regression fixed in 1.3.5 – upgrade past this version
-rather than to it. <a class="reference internal" href="changelog/1.3.4.html"><span class="doc">Full changelog</span></a>.</p></li>
+rather than to it. <a class="reference internal" href="changelog/1.3.4.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.3.4/">documentation</a>.</p></li>
 <li><p><strong>1.3.3</strong> (2024-11-03) – Fixed PCAP reading from the CLI and library
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/240">#240</a>) and a source install broken by <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/221">#221</a>); 1.3.2 was
-never released. <a class="reference internal" href="changelog/1.3.3.html"><span class="doc">Full changelog</span></a>.</p></li>
+never released. <a class="reference internal" href="changelog/1.3.3.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.3.3/">documentation</a>.</p></li>
 <li><p><strong>1.3.1</strong> (2023-12-21) – Renamed <code class="docutils literal notranslate"><span class="pre">register_port()</span></code> to
 <code class="docutils literal notranslate"><span class="pre">register_apptype()</span></code> with no alias left behind, and revised the
 documentation across <code class="docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code>, <code class="docutils literal notranslate"><span class="pre">pcapkit.corekit</span></code> and
 <code class="docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code>; <code class="docutils literal notranslate"><span class="pre">1.3.1.post8</span></code> fixed PCAP output during flow tracing
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/180">#180</a>). <a class="reference internal" href="changelog/1.3.1.html"><span class="doc">Full changelog</span></a>.</p></li>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/180">#180</a>). <a class="reference internal" href="changelog/1.3.1.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.3.1/">documentation</a>.</p></li>
 <li><p><strong>1.3.0</strong> (2023-10-04) – A redesign of the extension points onto
 metaclasses, adding <code class="docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code> so a registry entry can name a
-module and class imported lazily on first use. <a class="reference internal" href="changelog/1.3.0.html"><span class="doc">Full changelog</span></a>.</p></li>
+module and class imported lazily on first use. <a class="reference internal" href="changelog/1.3.0.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.3.0/">documentation</a>.</p></li>
 <li><p><strong>1.2.2</strong> (2023-09-14) – Fixed extraction failing outright (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/166">#166</a>).
-<a class="reference internal" href="changelog/1.2.2.html"><span class="doc">Full changelog</span></a>.</p></li>
+<a class="reference internal" href="changelog/1.2.2.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.2.2/">documentation</a>.</p></li>
 <li><p><strong>1.2.1</strong> (2023-08-27) – Fixed bugs in <code class="docutils literal notranslate"><span class="pre">SeekableReader</span></code> introduced one
-day earlier in 1.2.0. <a class="reference internal" href="changelog/1.2.1.html"><span class="doc">Full changelog</span></a>.</p></li>
+day earlier in 1.2.0. <a class="reference internal" href="changelog/1.2.1.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.2.1/">documentation</a>.</p></li>
 <li><p><strong>1.2.0</strong> (2023-08-26) – Added streaming input through
 <code class="docutils literal notranslate"><span class="pre">SeekableReader</span></code>, so a capture can be read from <code class="docutils literal notranslate"><span class="pre">stdin</span></code> or a pipe
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/156">#156</a>). <a class="reference internal" href="changelog/1.2.0.html"><span class="doc">Full changelog</span></a>.</p></li>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/156">#156</a>). <a class="reference internal" href="changelog/1.2.0.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.2.0/">documentation</a>.</p></li>
 <li><p><strong>1.1.1</strong> (2023-08-15) – Fixed reassembly, broken since 1.0.0 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/155">#155</a>),
 <code class="docutils literal notranslate"><span class="pre">AppType</span></code> enumeration lookups, <code class="docutils literal notranslate"><span class="pre">typing.TypeAlias</span></code> compatibility on older
 interpreters, the flow-tracing output file name, and <code class="docutils literal notranslate"><span class="pre">Schema</span></code> dumping through
-a custom dumper. <a class="reference internal" href="changelog/1.1.1.html"><span class="doc">Full changelog</span></a>.</p></li>
+a custom dumper. <a class="reference internal" href="changelog/1.1.1.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.1.1/">documentation</a>.</p></li>
 <li><p><strong>1.1.0</strong> (2023-07-09) – Rebuilt the schema and field classes on
 metaclasses, with <code class="docutils literal notranslate"><span class="pre">EnumSchema</span></code> for enum-dispatched schemas, and revised
 the IPv4, HOPOPT, IPv6-Opts, IPv6-Route, HIP, MH, TCP, HTTP/2 and PCAP-NG
-schemas onto them. <a class="reference internal" href="changelog/1.1.0.html"><span class="doc">Full changelog</span></a>.</p></li>
+schemas onto them. <a class="reference internal" href="changelog/1.1.0.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.1.0/">documentation</a>.</p></li>
 <li><p><strong>1.0.3</strong> (2023-06-29) – Added the IANA service-name and port registry as
 the <code class="docutils literal notranslate"><span class="pre">AppType</span></code> enumeration [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html"><strong>RFC 6335</strong></a>], wiring TCP and UDP parsing to
-resolve ports to service names. <a class="reference internal" href="changelog/1.0.3.html"><span class="doc">Full changelog</span></a>.</p></li>
+resolve ports to service names. <a class="reference internal" href="changelog/1.0.3.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.0.3/">documentation</a>.</p></li>
 <li><p><strong>1.0.2</strong> (2023-06-05) – Added Mobility Header parsing and construction
 [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>], and fixed <code class="docutils literal notranslate"><span class="pre">pcapkit.extract</span></code> failing on interpreters where
 <code class="docutils literal notranslate"><span class="pre">decimal.localcontext</span></code> takes no keyword arguments (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/139">#139</a>). <a class="reference internal" href="changelog/1.0.2.html"><span class="doc">Full
-changelog</span></a>.</p></li>
+changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.0.2/">documentation</a>.</p></li>
 <li><p><strong>1.0.1</strong> (2023-05-14) – Changed <code class="docutils literal notranslate"><span class="pre">Info</span></code> and <code class="docutils literal notranslate"><span class="pre">Schema</span></code> subclasses to
 finalise at class creation rather than on each instantiation, a straight
-runtime saving on parsing. <a class="reference internal" href="changelog/1.0.1.html"><span class="doc">Full changelog</span></a>.</p></li>
+runtime saving on parsing. <a class="reference internal" href="changelog/1.0.1.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.0.1/">documentation</a>.</p></li>
 <li><p><strong>1.0.0</strong> (2023-05-09) – The 1.0 rewrite: parsing and construction became
 one declarative schema and field definition per protocol, the extraction
 backend became pluggable (with PCAP-NG support and the DPKT, Scapy and
 PyShark engines), and roughly 55,000 lines added and 15,000 removed across
 617 files.
-<a class="reference internal" href="changelog/1.0.0.html"><span class="doc">Full changelog</span></a>.</p></li>
+<a class="reference internal" href="changelog/1.0.0.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v1.0.0/">documentation</a>.</p></li>
 <li><p><strong>0.16.3</strong> (2022-10-31) – Fixed import crashes on some interpreters (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/114">#114</a>,
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/116">#116</a>), the reassembly property caches, and README rendering for PyPI; the
-build chain was revised. <a class="reference internal" href="changelog/0.16.3.html"><span class="doc">Full changelog</span></a>.</p></li>
+build chain was revised. <a class="reference internal" href="changelog/0.16.3.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.16.3/">documentation</a>.</p></li>
 <li><p><strong>0.16.2</strong> (2022-08-03) – Fixed <code class="docutils literal notranslate"><span class="pre">Info</span></code> <code class="docutils literal notranslate"><span class="pre">__init__</span></code> generation for
 classes without annotations (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/113">#113</a>), and the IP reassembly algorithm (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/82">#82</a>).
-<a class="reference internal" href="changelog/0.16.2.html"><span class="doc">Full changelog</span></a>.</p></li>
+<a class="reference internal" href="changelog/0.16.2.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.16.2/">documentation</a>.</p></li>
 <li><p><strong>0.16.1</strong> (2022-06-07) – Changed warnings to raise through
 <code class="docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings</span></code> instead of <code class="docutils literal notranslate"><span class="pre">warnings.warn</span></code> directly, and
 warn on a missing optional CLI or vendor dependency too. <a class="reference internal" href="changelog/0.16.1.html"><span class="doc">Full
-changelog</span></a>.</p></li>
+changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.16.1/">documentation</a>.</p></li>
 <li><p><strong>0.16.0</strong> (2022-05-31) – A project-wide revision and the last release of
 the pre-1.0 design: type annotations and linter compliance throughout,
 protocol classes separated from their data models, and
 <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.registry</span></code> for subscribing protocols by name. <a class="reference internal" href="changelog/0.16.0.html"><span class="doc">Full
-changelog</span></a>.</p></li>
+changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.16.0/">documentation</a>.</p></li>
 <li><p><strong>0.15.5</strong> (2020-10-11) – Added a fallback encoder so <code class="docutils literal notranslate"><span class="pre">DictDumper</span></code> no
-longer raises on data it cannot encode (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/65">#65</a>). <a class="reference internal" href="changelog/0.15.5.html"><span class="doc">Full changelog</span></a>.</p></li>
+longer raises on data it cannot encode (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/65">#65</a>). <a class="reference internal" href="changelog/0.15.5.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.15.5/">documentation</a>.</p></li>
 <li><p><strong>0.15.4</strong> (2020-08-28) – Fixed the missing <code class="docutils literal notranslate"><span class="pre">stacklevel</span></code> attribute on
-<code class="docutils literal notranslate"><span class="pre">pcapkit.utilities</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/58">#58</a>); Travis CI was set up. <a class="reference internal" href="changelog/0.15.4.html"><span class="doc">Full changelog</span></a>.</p></li>
+<code class="docutils literal notranslate"><span class="pre">pcapkit.utilities</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/58">#58</a>); Travis CI was set up. <a class="reference internal" href="changelog/0.15.4.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.15.4/">documentation</a>.</p></li>
 <li><p><strong>0.15.3</strong> (2020-08-17) – Fixed ARP parsing (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/55">#55</a>), and added logging
-through a <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> logger. <a class="reference internal" href="changelog/0.15.3.html"><span class="doc">Full changelog</span></a>.</p></li>
+through a <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> logger. <a class="reference internal" href="changelog/0.15.3.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.15.3/">documentation</a>.</p></li>
 <li><p><strong>0.15.2</strong> (2020-06-27) – Added a register interface on the protocol
 classes and on <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.analysis</span></code>, so both extend without
 patching the library, and fixed flow-tracing output consistency. <a class="reference internal" href="changelog/0.15.2.html"><span class="doc">Full
-changelog</span></a>.</p></li>
+changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.15.2/">documentation</a>.</p></li>
 <li><p><strong>0.15.1</strong> (2020-06-18) – Maintenance release: revised the constant
 enumerations and the vendor crawlers that generate them. <a class="reference internal" href="changelog/0.15.1.html"><span class="doc">Full
-changelog</span></a>.</p></li>
+changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.15.1/">documentation</a>.</p></li>
 <li><p><strong>0.15.0</strong> (2020-06-07) – Merged the parsing and construction logic so a
 protocol is no longer implemented twice, added full API documentation, and
-fixed the <code class="docutils literal notranslate"><span class="pre">DictDumper</span></code> dependency (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/37">#37</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/40">#40</a>). <a class="reference internal" href="changelog/0.15.0.html"><span class="doc">Full changelog</span></a>.</p></li>
+fixed the <code class="docutils literal notranslate"><span class="pre">DictDumper</span></code> dependency (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/37">#37</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/40">#40</a>). <a class="reference internal" href="changelog/0.15.0.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.15.0/">documentation</a>.</p></li>
 <li><p><strong>0.14.5</strong> (2019-10-24) – Added a CLI for the vendor crawlers, and
 deferred vendor imports so the crawler dependencies are not needed just to
-import <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>. <a class="reference internal" href="changelog/0.14.5.html"><span class="doc">Full changelog</span></a>.</p></li>
+import <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>. <a class="reference internal" href="changelog/0.14.5.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.14.5/">documentation</a>.</p></li>
 <li><p><strong>0.14.4</strong> (2019-09-01) – Shipped the vendor crawler scripts in the
 distribution, and split the CLI and vendor dependencies into separate
-<code class="docutils literal notranslate"><span class="pre">setup.py</span></code> extras. <a class="reference internal" href="changelog/0.14.4.html"><span class="doc">Full changelog</span></a>.</p></li>
+<code class="docutils literal notranslate"><span class="pre">setup.py</span></code> extras. <a class="reference internal" href="changelog/0.14.4.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.14.4/">documentation</a>.</p></li>
 <li><p><strong>0.14.3</strong> (2019-08-08) – Fixed reported bugs (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/29">#29</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/30">#30</a>) and a Wikipedia
 block that broke a vendor crawler; the constant enumerations and sample
-output were regenerated. <a class="reference internal" href="changelog/0.14.3.html"><span class="doc">Full changelog</span></a>.</p></li>
+output were regenerated. <a class="reference internal" href="changelog/0.14.3.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.14.3/">documentation</a>.</p></li>
 <li><p><strong>0.14.2</strong> (2019-03-28) – Fixed the exception classes and the TCP
-reassembly algorithm. <a class="reference internal" href="changelog/0.14.2.html"><span class="doc">Full changelog</span></a>.</p></li>
+reassembly algorithm. <a class="reference internal" href="changelog/0.14.2.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.14.2/">documentation</a>.</p></li>
 <li><p><strong>0.14.1</strong> (2019-03-07) – Added the <code class="docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code> environment
 variable, turning on development-mode behaviour without a code change.
-<a class="reference internal" href="changelog/0.14.1.html"><span class="doc">Full changelog</span></a>.</p></li>
+<a class="reference internal" href="changelog/0.14.1.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.14.1/">documentation</a>.</p></li>
 <li><p><strong>0.14.0</strong> (2019-03-02) – Changed the TCP reassembly pipeline to handle
-the RST flag, and added Docker build files. <a class="reference internal" href="changelog/0.14.0.html"><span class="doc">Full changelog</span></a>.</p></li>
+the RST flag, and added Docker build files. <a class="reference internal" href="changelog/0.14.0.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.14.0/">documentation</a>.</p></li>
 <li><p><strong>0.13.3</strong> (2019-02-26) – Fixed numeric literals in the constant modules
-incompatible with Python 3.5. <a class="reference internal" href="changelog/0.13.3.html"><span class="doc">Full changelog</span></a>.</p></li>
+incompatible with Python 3.5. <a class="reference internal" href="changelog/0.13.3.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.13.3/">documentation</a>.</p></li>
 <li><p><strong>0.13.2</strong> (2019-01-24) – Maintenance release: updated the <code class="docutils literal notranslate"><span class="pre">tbtrim</span></code>
-dependency. <a class="reference internal" href="changelog/0.13.2.html"><span class="doc">Full changelog</span></a>.</p></li>
+dependency. <a class="reference internal" href="changelog/0.13.2.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.13.2/">documentation</a>.</p></li>
 <li><p><strong>0.13.1</strong> (2019-01-23) – Added <code class="docutils literal notranslate"><span class="pre">tbtrim</span></code> to trim <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>’s own
 frames out of tracebacks through a custom <code class="docutils literal notranslate"><span class="pre">excepthook</span></code>, and fixed
 compatibility issues via a new <code class="docutils literal notranslate"><span class="pre">pcapkit.utilities.compat</span></code> module.
-<a class="reference internal" href="changelog/0.13.1.html"><span class="doc">Full changelog</span></a>.</p></li>
+<a class="reference internal" href="changelog/0.13.1.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.13.1/">documentation</a>.</p></li>
 <li><p><strong>0.13.0</strong> (2018-12-08) – No library changes – a licence and packaging
-metadata refresh. <a class="reference internal" href="changelog/0.13.0.html"><span class="doc">Full changelog</span></a>.</p></li>
+metadata refresh. <a class="reference internal" href="changelog/0.13.0.html"><span class="doc">Full changelog</span></a> · <a class="reference external" href="https://pypcapkit.jarryshaw.me/en/v0.13.0/">documentation</a>.</p></li>
 </ul>
 <div class="toctree-wrapper compound">
 </div>
