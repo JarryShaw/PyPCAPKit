@@ -1,4 +1,4 @@
-## 1.8.1 -- unreleased
+## 1.8.1 -- 2026-11-27
 
 A bug-fix release for OSPF, which becomes a versioned family: OSPFv3 is read with its own 16-octet header, and OSPFv1 gets a class and registries of its own. The split is a breaking change, marked **a breaking change to** and ending with how to migrate. Sync Develop pushes `main` into `develop` itself.
 
