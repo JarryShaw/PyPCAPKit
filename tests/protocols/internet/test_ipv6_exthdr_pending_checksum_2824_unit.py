@@ -24,7 +24,7 @@ import unittest
 import warnings
 from unittest import mock
 
-from tests._support import reimport_once_per_class
+from tests._support import install_hook_sentinels, reimport_once_per_class
 from tests.foundation import _roundtrip as wire
 from tests.utilities._harness import capture
 
@@ -266,21 +266,7 @@ class QuietRefusalTests(PendingChecksumTestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        saved = sys.excepthook, threading.excepthook
-
-        def restore() -> None:
-            sys.excepthook, threading.excepthook = saved
-
-        self.addCleanup(restore)
-
-        def sentinel(*args: 'object') -> None:
-            sys.__excepthook__(*args)  # type: ignore[arg-type]
-
-        def thread_sentinel(args: 'object') -> None:
-            pass
-
-        self.sentinels = sentinel, thread_sentinel
-        sys.excepthook, threading.excepthook = self.sentinels
+        self.sentinels = install_hook_sentinels(self)
 
     def test_nothing_is_logged_or_hooked(self) -> None:
         from pcapkit.utilities.logging import logger

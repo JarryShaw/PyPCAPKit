@@ -23,7 +23,7 @@ import unittest
 import warnings
 from unittest import mock
 
-from tests._support import reimport_once_per_class
+from tests._support import install_hook_sentinels, reimport_once_per_class
 from tests.utilities._harness import capture
 
 #: Test tier (#1958): exercises threading, locking or warning and exception hooks, which
@@ -60,21 +60,7 @@ class VerifyUpperTestCase(unittest.TestCase):
         self.IPv6_Frag, self.IPv6_Route, self.TCP = IPv6_Frag, IPv6_Route, TCP
         self.config, self.logger = config, logger
 
-        saved = sys.excepthook, threading.excepthook
-
-        def restore() -> None:
-            sys.excepthook, threading.excepthook = saved
-
-        self.addCleanup(restore)
-
-        def sentinel(*args: 'object') -> None:
-            sys.__excepthook__(*args)  # type: ignore[arg-type]
-
-        def thread_sentinel(args: 'object') -> None:
-            pass
-
-        self.sentinels = sentinel, thread_sentinel
-        sys.excepthook, threading.excepthook = self.sentinels
+        self.sentinels = install_hook_sentinels(self)
 
     def segment(self) -> object:
         """A TCP segment carrying a few octets."""
