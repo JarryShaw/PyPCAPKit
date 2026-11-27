@@ -23,12 +23,15 @@ Every case builds its own octets in memory and reads no capture. The protocol
 classes are imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`.
 
+The checks the ``*_make_codes_2594`` modules share run from
+:class:`~tests.protocols._make_codes.MakeCodeChecks` over this module's own table (#3148).
+
 """
 
-import inspect
 import unittest
 
 from tests._support import reimport_once_per_class
+from tests.protocols._make_codes import Case, MakeCodeChecks, enumeration_arguments
 
 #: ``(class, argument, enumeration module, member, bits, field name)``: one row
 #: per enumeration field. ``options`` stands for the type of an option given to
@@ -171,42 +174,17 @@ def _rows() -> 'list[_Row]':
     return rows
 
 
-class TestEnumerationFieldCodes(unittest.TestCase):
+class TestEnumerationFieldCodes(MakeCodeChecks, unittest.TestCase):
     """Each enumeration field takes a member or a code, and refuses the rest."""
+
+    ONE_BIT = ('HOPOPT.mode', 'IPv6_Opts.mode')
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def assertRefused(self, row: '_Row', value: 'object') -> None:
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        with self.assertRaises(ProtocolError) as caught:
-            row.build(value)
-        self.assertEqual(str(caught.exception), f'{row.message}: {value!r}')
-
-    def test_code_too_wide_for_its_field_is_refused(self) -> None:
-        for row in _rows():
-            with self.subTest(row=row.label, bits=row.bits):
-                self.assertRefused(row, 1 << row.bits)
-
-    def test_bool_is_refused_where_the_field_is_wider_than_one_bit(self) -> None:
-        for row in _rows():
-            if row.bits == 1:
-                continue
-            with self.subTest(row=row.label):
-                self.assertRefused(row, True)
-
-    def test_member_name_is_refused(self) -> None:
-        for row in _rows():
-            with self.subTest(row=row.label):
-                self.assertRefused(row, row.member.name)
-
-    def test_member_and_code_build_identical_octets(self) -> None:
-        for row in _rows():
-            with self.subTest(row=row.label):
-                octets = row.build(row.member)
-                self.assertEqual(row.build(int(row.member)), octets)
-                self.assertEqual(row.read(octets), row.member)
+    def cases(self) -> 'list[Case]':
+        return [Case(row.label, row.bits, row.member, row.build, f'{row.message}: ', read=row.read)
+                for row in _rows()]
 
     def test_every_enumeration_argument_has_a_row(self) -> None:
         # The arguments are found from the signatures: every argument of
@@ -216,16 +194,11 @@ class TestEnumerationFieldCodes(unittest.TestCase):
         swept = set()
         for name in CLASSES:
             cls = _class(name)
-            makers = [(cls.make, False)]
+            swept.update(f'{name}.{arg}' for arg in enumeration_arguments(cls.make))
             for meth in getattr(cls, '__option__', {}).values():
                 if isinstance(meth, str) and hasattr(cls, f'_make_opt_{meth}'):
-                    makers.append((getattr(cls, f'_make_opt_{meth}'), True))
-            for func, keyword_only in makers:
-                for param in inspect.signature(func).parameters.values():
-                    if keyword_only and param.kind is not param.KEYWORD_ONLY:
-                        continue
-                    if 'Enum_' in str(param.annotation):
-                        swept.add(f'{name}.{param.name}')
+                    swept.update(f'{name}.{arg}' for arg in enumeration_arguments(
+                        getattr(cls, f'_make_opt_{meth}'), keyword_only=True))
         self.assertEqual(sorted(swept), sorted(rows))
 
 

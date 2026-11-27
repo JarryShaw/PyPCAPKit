@@ -38,6 +38,9 @@ Every case builds its own packet in memory and reads no capture. :class:`HIP`
 and the enumerations are imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`.
 
+The checks the ``*_make_codes_2594`` modules share run from
+:class:`~tests.protocols._make_codes.MakeCodeChecks` over this module's own table (#3148).
+
 """
 # Deferring these is the design: each build runs after the per-class re-import.
 # pylint: disable=import-outside-toplevel
@@ -45,12 +48,13 @@ from __future__ import annotations
 
 import importlib
 import importlib.util
-import inspect
 import io
 import unittest
 from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
+from tests.protocols._make_codes import (Case, MakeCodeChecks, enumeration_arguments,
+                                         removed_keywords)
 
 if TYPE_CHECKING:
     from typing import Any, Callable
@@ -180,7 +184,7 @@ def _attr(path: 'str') -> 'Any':
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
-class HIPMakeCodeTests(unittest.TestCase):
+class HIPMakeCodeTests(MakeCodeChecks, unittest.TestCase):
     """An enumeration field takes a member or a code it can carry, nothing else."""
 
     def setUp(self) -> None:
@@ -224,13 +228,16 @@ class HIPMakeCodeTests(unittest.TestCase):
 
         return version, build
 
-    def _rows(self) -> 'list[tuple[str, Any, int, str, int, Callable[..., bytes]]]':
-        """``(label, member, bits, field name, version, build)`` for each row."""
+    def cases(self) -> 'list[Case]':
         rows = []
         for maker, argument, enum_path, member, bits, name, code, extra, listed in ROWS:
+            label = f'{maker}.{argument}'
             version, build = self._builder(argument, code, extra, listed)
-            rows.append((f'{maker}.{argument}', getattr(_attr(enum_path), member),
-                         bits, name, version, build))
+            # the member is not what the maker builds without it, so a value
+            # that never reached the packet cannot pass
+            _, bare = self._builder(argument, code, {**extra, **BARE_EXTRA.get(label, {})}, listed)
+            rows.append(Case(label, bits, getattr(_attr(enum_path), member), build,
+                             f'HIPv{version}: invalid {name}: ', bare=bare))
         return rows
 
     @staticmethod
@@ -239,63 +246,6 @@ class HIPMakeCodeTests(unittest.TestCase):
         from pcapkit.protocols.internet.hip.protocol import HIP
 
         return HIP(io.BytesIO(octets), len(octets), extension=True)
-
-    def assertRefused(self, message: 'str', build: 'Callable[..., bytes]', value: 'Any') -> None:
-        """``build(value)`` raises a ``ProtocolError`` saying exactly ``message``.
-
-        Any other outcome fails by assertion, naming what happened instead, so
-        that a value written or raised as something else reads as a failure
-        rather than as an error in the test.
-
-        """
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        try:
-            build(value)
-        except ProtocolError as error:
-            self.assertEqual(str(error), message)
-        except Exception as error:  # pylint: disable=broad-except
-            self.fail(f'{value!r} raised {type(error).__name__}: {error}; '
-                      f'expected ProtocolError: {message}')
-        else:
-            self.fail(f'{value!r} was accepted; expected ProtocolError: {message}')
-
-    def test_a_code_too_wide_for_its_field_is_refused(self) -> None:
-        """#2617: ``1 << bits`` raises ``ProtocolError`` naming the field."""
-        for label, _, bits, name, version, build in self._rows():
-            with self.subTest(row=label, bits=bits):
-                self.assertRefused(f'HIPv{version}: invalid {name}: {1 << bits!r}',
-                                   build, 1 << bits)
-
-    def test_a_bool_is_refused(self) -> None:
-        """#2617: no field here is one bit wide, so :data:`True` is refused."""
-        for label, _, bits, name, version, build in self._rows():
-            self.assertGreater(bits, 1, label)
-            with self.subTest(row=label):
-                self.assertRefused(f'HIPv{version}: invalid {name}: True', build, True)
-
-    def test_a_member_name_is_refused(self) -> None:
-        """#2594: a name is refused rather than resolved against an inferred enumeration."""
-        for label, member, _, name, version, build in self._rows():
-            with self.subTest(row=label):
-                self.assertRefused(f'HIPv{version}: invalid {name}: {member.name!r}',
-                                   build, member.name)
-
-    def test_the_member_and_its_code_build_the_same_octets(self) -> None:
-        """#2594: the member and ``int(member)`` resolve with ``get`` to one field value."""
-        rows = {f'{maker}.{argument}': (argument, code, extra, listed)
-                for maker, argument, _, _, _, _, code, extra, listed in ROWS}
-        for label, member, _, _, _, build in self._rows():
-            with self.subTest(row=label):
-                expected = build(member)
-                self.assertEqual(build(int(member)).hex(), expected.hex())
-                # the member is not what the maker builds without it, so a
-                # value that never reached the packet cannot pass
-                bare = build
-                if label in BARE_EXTRA:
-                    argument, code, extra, listed = rows[label]
-                    _, bare = self._builder(argument, code, {**extra, **BARE_EXTRA[label]}, listed)
-                self.assertNotEqual(bare().hex(), expected.hex())
 
     def test_the_widest_code_builds_parses_back_and_rebuilds(self) -> None:
         """#2594: the field width decides what is refused, so ``(1 << bits) - 1`` builds."""
@@ -349,7 +299,7 @@ class HIPMakeCodeTests(unittest.TestCase):
         for form, build in self._parameter_builders().items():
             for value in (1 << 16, -1, True, 'SEQ'):
                 with self.subTest(form=form, value=value):
-                    self.assertRefused(f'HIPv2: invalid parameter type: {value!r}', build, value)
+                    self.assertRefused(build, value, 'HIPv2: invalid parameter type: ')
 
     def test_the_widest_parameter_type_builds_parses_back_and_rebuilds(self) -> None:
         """#2594: a parameter type no member holds builds in either form, and rebuilds."""
@@ -372,14 +322,8 @@ class HIPMakeCodeTests(unittest.TestCase):
         """
         from pcapkit.protocols.internet.hip.protocol import HIP
 
-        found = set()
-        for name in vars(HIP):
-            if name != 'make' and not name.startswith('_make_param_'):
-                continue
-            for arg, param in inspect.signature(getattr(HIP, name)).parameters.items():
-                if arg in ('self', 'code', 'param') or 'Enum_' not in str(param.annotation):
-                    continue
-                found.add(f'{name}.{arg}')
+        found = {f'{name}.{arg}' for name in vars(HIP) if name == 'make' or name.startswith('_make_param_')
+                 for arg in enumeration_arguments(getattr(HIP, name)) if arg not in ('self', 'code', 'param')}
 
         self.assertEqual(found - EXEMPT, {f'{maker}.{argument}' for maker, argument, *_ in ROWS})
 
@@ -387,13 +331,7 @@ class HIPMakeCodeTests(unittest.TestCase):
         """#2594: no maker's signature declares a ``*_default``, ``*_namespace`` or ``*_reversed`` keyword."""
         from pcapkit.protocols.internet.hip.protocol import HIP
 
-        for name in vars(HIP):
-            if name != 'make' and not name.startswith('_make_'):
-                continue
-            with self.subTest(maker=name):
-                removed = [arg for arg in inspect.signature(getattr(HIP, name)).parameters
-                           if arg.endswith(('_default', '_namespace', '_reversed'))]
-                self.assertEqual(removed, [])
+        self.assertEqual(removed_keywords(HIP), [])
 
 
 if __name__ == '__main__':

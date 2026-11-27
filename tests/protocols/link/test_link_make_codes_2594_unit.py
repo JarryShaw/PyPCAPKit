@@ -19,14 +19,19 @@ the maker signatures, so an argument added to a maker needs a row. A caller hold
 Every case builds its own octets in memory and reads no capture. The classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`.
 
+The checks the ``*_make_codes_2594`` modules share run from
+:class:`~tests.protocols._make_codes.MakeCodeChecks` over this module's own table (#3148).
+
 """
 
+import functools
 import importlib
-import inspect
 import unittest
 from typing import TYPE_CHECKING, NamedTuple
 
 from tests._support import reimport_once_per_class
+from tests.protocols._make_codes import (Case, MakeCodeChecks, enumeration_arguments,
+                                         removed_keywords)
 
 if TYPE_CHECKING:
     from typing import Any
@@ -104,67 +109,34 @@ def arguments(row: 'Row', value: 'Any') -> 'dict[str, Any]':
     return {row.field: value, **row.extra}
 
 
-class TestLinkMakeCodes(unittest.TestCase):
+def read(row: 'Row', octets: 'bytes') -> 'Any':
+    """The code ``octets`` carry in ``row``'s field, read back from the parsed ``info``."""
+    value = load(row.cls)(octets, len(octets)).info
+    for part in row.info.split('.'):
+        value = getattr(value, part)
+    return value
+
+
+class TestLinkMakeCodes(MakeCodeChecks, unittest.TestCase):
     """Pin how each link maker takes its enumeration fields."""
+
+    ONE_BIT = ('L2TPv2 type',)
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def build(self, row: 'Row', value: 'Any') -> 'bytes':
-        """The octets ``row``'s maker builds with ``value`` for its field."""
-        return load(row.cls).from_fields(**arguments(row, value)).data
-
-    def test_a_code_wider_than_the_field_is_refused(self) -> None:
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        for row in ROWS:
-            with self.subTest(cls=row.cls[1], field=row.field, code=1 << row.bits):
-                with self.assertRaises(ProtocolError):
-                    self.build(row, 1 << row.bits)
-
-    def test_a_bool_is_refused_for_a_wider_field(self) -> None:
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        rows = [row for row in ROWS if row.bits > 1]
-        self.assertTrue(rows)
-        for row in rows:
-            with self.subTest(cls=row.cls[1], field=row.field):
-                with self.assertRaises(ProtocolError):
-                    self.build(row, True)
-
-    def test_a_name_is_refused(self) -> None:
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        for row in ROWS:
-            with self.subTest(cls=row.cls[1], field=row.field, name=row.member):
-                with self.assertRaises(ProtocolError):
-                    self.build(row, row.member)
-
-    def test_the_member_and_its_code_build_the_same_octets(self) -> None:
-        for row in ROWS:
-            member = getattr(load(row.enum), row.member)
-            with self.subTest(cls=row.cls[1], field=row.field, member=member):
-                made = self.build(row, member)
-                self.assertEqual(made, self.build(row, int(member)))
-
-                # the octets carry the member's code, read back from the field
-                parsed = load(row.cls)(made, len(made))
-                value = parsed.info
-                for part in row.info.split('.'):
-                    value = getattr(value, part)
-                self.assertEqual(int(value), int(member))
+    def cases(self) -> 'list[Case]':
+        return [Case(f'{row.cls[1]} {row.field}', row.bits, getattr(load(row.enum), row.member),
+                     lambda value, row=row: load(row.cls).from_fields(**arguments(row, value)).data,
+                     read=functools.partial(read, row)) for row in ROWS]
 
     def test_every_enumeration_argument_has_a_row(self) -> None:
         """Found from the signatures, with no ``_default``, ``_namespace`` or ``_reversed`` left."""
         for path in sorted({row.cls for row in ROWS}):
-            params = inspect.signature(load(path).make).parameters
             with self.subTest(cls=path[1]):
-                found = {name for name, param in params.items()
-                         if str(param.annotation).startswith('Enum_')}
                 rows = {row.field for row in ROWS if row.cls == path and row.field != 'tci.pcp'}
-                self.assertEqual(found, rows)
-                self.assertEqual([name for name in params
-                                  if name.endswith(('_default', '_namespace', '_reversed'))], [])
+                self.assertEqual(enumeration_arguments(load(path).make), rows)
+                self.assertEqual(removed_keywords(load(path)), [])
 
 
 if __name__ == '__main__':

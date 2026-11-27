@@ -27,6 +27,9 @@ message, and builds, parses back and rebuilds the widest type, ``255``.
 Every case builds its own octets in memory and reads no capture. Classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`.
 
+The checks the ``*_make_codes_2594`` modules share run from
+:class:`~tests.protocols._make_codes.MakeCodeChecks` over this module's own table (#3148).
+
 """
 # Deferring these is the design: each build runs after the per-class re-import.
 # pylint: disable=import-outside-toplevel
@@ -36,6 +39,7 @@ import io
 import unittest
 
 from tests._support import reimport_once_per_class
+from tests.protocols._make_codes import Case, MakeCodeChecks, RefusalChecks
 
 #: Option numbers of the IPv4 options under test (RFC 791, RFC 2113, RFC 4782).
 SEC, RTRALT, QS = 130, 148, 25
@@ -139,60 +143,19 @@ def member(row: 'tuple') -> 'object':
     return getattr(getattr(importlib.import_module(module), name), row[3])
 
 
-class MakeCodeTests(unittest.TestCase):
+class MakeCodeTests(MakeCodeChecks, unittest.TestCase):
     """Each row's field takes the member or its code, and refuses anything else."""
+
+    ONE_BIT = ('IPv4.make tos_del', 'IPv4.make tos_thr', 'IPv4.make tos_rel')
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def assertRefused(self, build: 'object', value: 'object') -> None:
-        """``build(value)`` raises a ProtocolError, rather than building or raising another error."""
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        try:
-            octets = build(value)  # type: ignore[operator]
-        except ProtocolError:
-            return
-        except Exception as exc:  # pylint: disable=broad-except
-            self.fail(f'{value!r} raised {type(exc).__name__}, not ProtocolError: {exc}')
-        self.fail(f'{value!r} was accepted, building {octets.hex()}')
-
-    def test_a_code_too_wide_is_refused(self) -> None:
-        for row in ROWS:
-            with self.subTest(row=row[0], value=1 << row[4]):
-                self.assertRefused(row[1], 1 << row[4])
-
-    def test_a_bool_is_refused_for_a_field_wider_than_one_bit(self) -> None:
-        for row in ROWS:
-            if row[4] == 1:
-                continue
-            with self.subTest(row=row[0]):
-                self.assertRefused(row[1], True)
-
-    def test_a_bool_is_one_for_a_one_bit_field(self) -> None:
-        one_bit = [row for row in ROWS if row[4] == 1]
-        self.assertEqual([row[0] for row in one_bit],
-                         ['IPv4.make tos_del', 'IPv4.make tos_thr', 'IPv4.make tos_rel'])
-        for row in one_bit:
-            with self.subTest(row=row[0]):
-                self.assertEqual(row[1](True), row[1](1))
-                self.assertEqual(row[5](row[1](True)), 1)
-
-    def test_a_name_is_refused(self) -> None:
-        for row in ROWS:
-            with self.subTest(row=row[0], name=row[3]):
-                self.assertRefused(row[1], row[3])
-
-    def test_a_member_and_its_code_build_the_same_octets(self) -> None:
-        for row in ROWS:
-            code = member(row)
-            with self.subTest(row=row[0], member=code):
-                octets = row[1](code)
-                self.assertEqual(octets, row[1](int(code)))  # type: ignore[call-overload]
-                self.assertEqual(row[5](octets), int(code))  # type: ignore[call-overload]
+    def cases(self) -> 'list[Case]':
+        return [Case(row[0], row[4], member(row), row[1], read=row[5]) for row in ROWS]
 
 
-class OptionTypeTests(unittest.TestCase):
+class OptionTypeTests(RefusalChecks, unittest.TestCase):
     """The type of an IPv4 option takes a member or a code it can carry, nothing else."""
 
     def setUp(self) -> None:
@@ -213,19 +176,10 @@ class OptionTypeTests(unittest.TestCase):
 
     def test_a_type_the_field_cannot_carry_is_refused(self) -> None:
         # #2594: checked as an 8-bit field before the EOOL and NOP skip reads it.
-        from pcapkit.utilities.exceptions import ProtocolError
-
         for form, build in self._builders().items():
             for value in (1 << 8, -1, True, 'EOOL'):
                 with self.subTest(form=form, value=value):
-                    try:
-                        octets = build(value)  # type: ignore[operator]
-                    except ProtocolError as error:
-                        self.assertEqual(str(error), f'IPv4: invalid option type: {value!r}')
-                    except Exception as error:  # pylint: disable=broad-except
-                        self.fail(f'{value!r} raised {type(error).__name__}: {error}')
-                    else:
-                        self.fail(f'{value!r} was accepted, building {octets.hex()}')
+                    self.assertRefused(build, value, 'IPv4: invalid option type: ')
 
     def test_the_widest_type_builds_parses_back_and_rebuilds(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
