@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""The ``llc`` family: ``LLC.__proto__``, keyed by DSAP (#2936).
+"""The ``llc`` family: ``LLC.__proto__``, keyed by DSAP (#2936, #3115).
 
 A family module of :file:`examples/generators/dispatch.py`, which loads it by
 path and binds ``generator`` to itself before this body runs (#2615). Each
@@ -30,6 +30,9 @@ def _build(code: 'Any') -> 'Any':
 
     if code == LSAP.SNAP:
         payload = bytes(SNAP.from_fields(oui=0, pid=0x0800, payload=generator._ip4(6, generator._tcp(9999))))
+    elif code == LSAP.Bridge_Spanning_Tree_Protocol:
+        from pcapkit.protocols.application.stp.protocol import STP
+        payload = bytes(STP.from_fields(version=0))
     else:  # pragma: no cover
         raise LookupError(f'llc: no payload builder for {code!r}')
     pdu = bytes(LLC.from_fields(dsap=code, ssap=code, payload=payload))
@@ -45,5 +48,6 @@ FAMILIES = (
 #: The class each case of :data:`FAMILIES` is pinned to, as
 #: :data:`examples.generators.dispatch.PINNED_TARGETS` describes.
 PINNED_TARGETS = {
+    'llc/Bridge_Spanning_Tree_Protocol': ('pcapkit.protocols.application.stp.protocol', 'STP'),
     'llc/SNAP': ('pcapkit.protocols.link.snap.protocol', 'SNAP'),
 }

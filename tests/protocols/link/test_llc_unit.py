@@ -321,12 +321,12 @@ class TestLLC(_Base):
                         self.assertNotIn(LSAP.SNAP, LLC.__paired__)
                         register_lsap(LSAP.SNAP, restore)
                     self.assertIs(LLC.__proto__[LSAP.SNAP], shipped)
-                    self.assertEqual(LLC.__paired__, {LSAP.SNAP: True})
+                    self.assertEqual(LLC.__paired__, dict(LLC._shipped_paired))
                     self.assertEqual(type(self._llc(bytes.fromhex('aa' '42' '03') + SNAP_IPV4).payload).__name__,
                                      'Raw')
                     self.assertEqual(self._llc(UI_SNAP).protochain.chain, 'LLC:SNAP:IPv4')
             register_lsap(LSAP.SNAP, shipped)
-            self.assertEqual(LLC.__paired__, {LSAP.SNAP: True})
+            self.assertEqual(LLC.__paired__, dict(LLC._shipped_paired))
         finally:
             for table, copy in zip((LLC.__proto__, LLC.__paired__), tables):
                 table.clear()

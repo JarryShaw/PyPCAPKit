@@ -96,7 +96,7 @@ __all__ = [
 
     'DNS', 'FTP', 'FTP_DATA',                               # Application Layer
     'HTTP', 'HTTPv1', 'HTTPv2', 'NGAP', 'OSPF', 'OSPFv1', 'OSPFv2', 'OSPFv3',
-    'RARP', 'DRARP', 'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS',
+    'RARP', 'DRARP', 'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS', 'STP', 'STPv0', 'RSTP', 'MSTP',
 
     'Data',                                                 # Protocol Data
     'Schema',                                               # Protocol Schema

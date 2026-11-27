@@ -51,6 +51,7 @@ if TYPE_CHECKING:
     from pcapkit.const.radiotap import *
     from pcapkit.const.sctp import *
     from pcapkit.const.sslv2 import *
+    from pcapkit.const.stp import *
     from pcapkit.const.tcp import *
     from pcapkit.const.tls import *
     from pcapkit.const.vlan import *
@@ -137,6 +138,8 @@ __all__ = [
     'SCTP_Chunk', 'SCTP_Parameter', 'SCTP_CauseCode', 'SCTP_PayloadProtocolIdentifier',
     # SSLv2
     'SSLv2_HandshakeType', 'SSLv2_Version',
+    # STP
+    'STP_ProtocolVersion', 'STP_BPDUType', 'STP_PortRole',
     # TCP
     'TCP_Checksum', 'TCP_Option', 'TCP_MPTCPOption', 'TCP_Flags',
     # TLS/DTLS
@@ -156,5 +159,5 @@ __all__ = [
 __getattr__, __dir__ = lazy_exports(__name__, globals(), packages=(
     'reg', 'pcapng', 'arp', 'dccp', 'dns', 'esp', 'ftp', 'hip', 'http', 'icmp', 'icmpv6',
     'ieee802_11', 'igmp', 'ipv4', 'ipv6', 'ipx', 'l2tp', 'linux', 'llc', 'mh', 'ngap', 'ospf',
-    'ospfv1', 'ppp', 'pppoe', 'radiotap', 'sctp', 'sslv2', 'tcp', 'tls', 'vlan',
+    'ospfv1', 'ppp', 'pppoe', 'radiotap', 'sctp', 'sslv2', 'stp', 'tcp', 'tls', 'vlan',
 ))

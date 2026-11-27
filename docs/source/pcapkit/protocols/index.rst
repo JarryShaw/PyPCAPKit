@@ -43,7 +43,7 @@ parsing a packet from its octets or building one from field values:
        end
 
        subgraph application [Application Layer]
-           Application --> DNS & HTTP & FTP & FTP_DATA & NGAP & OSPF & RARP & SSL
+           Application --> DNS & HTTP & FTP & FTP_DATA & NGAP & OSPF & RARP & SSL & STP
 
            subgraph http [HTTP Family]
                HTTP --> h1["HTTP/1.*"] & h2["HTTP/2"]
@@ -64,6 +64,10 @@ parsing a packet from its octets or building one from field values:
            subgraph ssl [SSL Family]
                SSL --> TLS & DTLS & SSLv2
                TLS --> SSLv3
+           end
+
+           subgraph stp [STP Family]
+               STP --> STPv0 & RSTP & MSTP
            end
        end
 
@@ -202,6 +206,10 @@ parsing a packet from its octets or building one from field values:
        click TLS "application/tls.html#pcapkit.protocols.application.tls.protocol.TLS"
        click SSLv3 "application/sslv3.html#pcapkit.protocols.application.sslv3.protocol.SSLv3"
        click DTLS "application/dtls.html#pcapkit.protocols.application.dtls.protocol.DTLS"
+       click STP "application/stp.html#pcapkit.protocols.application.stp.protocol.STP"
+       click STPv0 "application/stpv0.html#pcapkit.protocols.application.stpv0.protocol.STPv0"
+       click RSTP "application/rstp.html#pcapkit.protocols.application.rstp.protocol.RSTP"
+       click MSTP "application/mstp.html#pcapkit.protocols.application.mstp.protocol.MSTP"
 
        click Raw "misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw"
        click NoPayload "misc/no_payload.html#pcapkit.protocols.misc.no_payload.protocol.NoPayload"

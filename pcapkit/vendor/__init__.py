@@ -130,6 +130,7 @@ else:
     from pcapkit.vendor.radiotap import *
     from pcapkit.vendor.sctp import *
     from pcapkit.vendor.sslv2 import *
+    from pcapkit.vendor.stp import *
     from pcapkit.vendor.tcp import *
     from pcapkit.vendor.tls import *
     from pcapkit.vendor.vlan import *
@@ -222,6 +223,8 @@ __all__ = [
     'SCTP_PayloadProtocolIdentifier',
     # SSLv2
     'SSLv2_HandshakeType', 'SSLv2_Version',
+    # STP
+    'STP_ProtocolVersion', 'STP_BPDUType', 'STP_PortRole',
     # TCP
     'TCP_Checksum', 'TCP_Option', 'TCP_MPTCPOption', 'TCP_Flags',
     # TLS

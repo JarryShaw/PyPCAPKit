@@ -449,6 +449,12 @@ UNRELATED = {
     'pcapkit/protocols/application/httpv2/protocol.py': ((6, 9), 'HTTP/2 frame header and setting sizes'),
     'pcapkit/protocols/application/httpv2/schema.py': ((6, 32),
                                                        'an HTTP/2 setting size and a flag bit'),
+    'pcapkit/protocols/application/mstp/protocol.py': ((16, 32), 'the MSTI Configuration Message length '
+                                                      'and the Learning and Forwarding flag masks '
+                                                      '(IEEE 802.1Q-2022 clause 14)'),
+    'pcapkit/protocols/application/mstp/schema.py': ((16, 32), 'the MSTI Configuration Message length '
+                                                    'and the MST Configuration Name and Digest '
+                                                    'widths (IEEE 802.1Q-2022 clause 14)'),
     'pcapkit/protocols/application/ospf/protocol.py': ((16, 24),
                                               'the 24-octet OSPFv1 and OSPFv2 header length, and '
                                               'the offset 16 of the Authentication field their '
@@ -463,6 +469,10 @@ UNRELATED = {
                                                         'appendix A.3.1), not a PCAP record header'),
     'pcapkit/protocols/application/ospfv3/schema.py': ((16,), 'the OSPFv3 header length, not a PCAP '
                                                       'record header'),
+    'pcapkit/protocols/application/stp/protocol.py': ((6, 16, 32), 'the Agreement flag bit, the MSTI '
+                                                     'Configuration Message length and the Learning '
+                                                     'and Forwarding flag masks of a BPDU (IEEE '
+                                                     '802.1Q-2022 clause 14)'),
     'pcapkit/protocols/internet/ah/protocol.py': ((6, 20), 'the IP version number the ICV is padded '
                                          "for (#2886), and AH's length estimate, its 12-octet "
                                          'fixed part plus a minimal ICV, not the fixed part itself'),

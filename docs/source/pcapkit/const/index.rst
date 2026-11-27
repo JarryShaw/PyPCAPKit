@@ -114,6 +114,7 @@ Application Layer
    ospf
    ospfv1
    sslv2
+   stp
    tls
 
 Miscellaneous

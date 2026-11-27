@@ -140,6 +140,14 @@ The protocol classes :mod:`pcapkit` ships:
 |                                                                  |                | :class:`pcapkit.protocols.application.dtls.protocol.DTLS`                                  |
 +                                                                  +                +-----------------------+--------------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.application.sslv2.protocol.SSLv2`                                |
++                                                                  +----------------+-----------------------+--------------------------------------------------------------------+
+|                                                                  |                | :class:`pcapkit.protocols.application.stp.protocol.STP`                                    |
++                                                                  +                +-----------------------+--------------------------------------------------------------------+
+|                                                                  |                | :class:`pcapkit.protocols.application.stpv0.protocol.STPv0`                                |
++                                                                  +                +-----------------------+--------------------------------------------------------------------+
+|                                                                  | STP Family     | :class:`pcapkit.protocols.application.rstp.protocol.RSTP`                                  |
++                                                                  +                +-----------------------+--------------------------------------------------------------------+
+|                                                                  |                | :class:`pcapkit.protocols.application.mstp.protocol.MSTP`                                  |
 +------------------------------------------------------------------+----------------+-----------------------+--------------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.misc.pcap.header.protocol.Header`                                |
 +                                                                  + PCAP Format    +-----------------------+--------------------------------------------------------------------+
