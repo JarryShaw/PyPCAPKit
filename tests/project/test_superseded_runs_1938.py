@@ -18,7 +18,6 @@ that stops the tests once it stops being current, each ending green.
 
 from __future__ import annotations
 
-import http.server
 import io
 import json
 import os
@@ -29,7 +28,6 @@ import signal
 import subprocess  # nosec B404
 import sys
 import tempfile
-import threading
 import time
 import unittest
 import urllib.error
@@ -39,6 +37,7 @@ from tests.project.test_python_matrix_tiers_1633 import job, workflow, workflow_
 from tests.project.test_python_versions_1660 import ROOT, prose
 from tests.project.test_release_gates import STATUS, calls_status_check, evaluate_condition
 from tests.project.test_resource_monitor_1740 import DEFAULT, TESTS, sh, step
+from tests.project._watcher import NEWER, OURS, REPO, Runner, quickened, tmpdir
 from util import superseded
 
 if TYPE_CHECKING:
@@ -46,9 +45,6 @@ if TYPE_CHECKING:
 
 NAME = 'experimental.yml'
 GATE = 'current'
-#: The commit a run tests, and the one that supersedes it.
-OURS, NEWER = 'a' * 40, 'b' * 40
-REPO = 'JarryShaw/PyPCAPKit'
 #: What every job but the gate skips on.
 SKIPS_ON = "needs.current.outputs.current != 'false'"
 POSIX = os.name == 'posix'
@@ -758,61 +754,16 @@ class TestTheWorkflowCommands(unittest.TestCase):
         self.assertEqual(files.read(files.output), 'stopped=true\n')
 
 
-class Server(http.server.ThreadingHTTPServer):
-    """The API, answering ``/repos/<repo>/commits/main`` with ``head``."""
-
-    head = NEWER
-
-
-class Handler(http.server.BaseHTTPRequestHandler):
-
-    def do_GET(self) -> 'None':  # pylint: disable=invalid-name
-        if self.path != f'/repos/{REPO}/commits/main':
-            self.send_error(404)
-            return
-        body = json.dumps({'sha': self.server.head}).encode()  # type: ignore[attr-defined]
-        self.send_response(200)
-        self.send_header('Content-Type', 'application/json')
-        self.send_header('Content-Length', str(len(body)))
-        self.end_headers()
-        self.wfile.write(body)
-
-    def log_message(self, format: 'str', *args: 'Any') -> 'None':  # pylint: disable=redefined-builtin
-        pass
-
-
 @unittest.skipUnless(sys.platform.startswith('linux') and all(map(shutil.which, ('bash', 'timeout', 'prlimit'))),
                      'the tests step runs coreutils timeout and util-linux prlimit, as on the Ubuntu runners')
 class TestTheTestsStep(unittest.TestCase):
     """``Run unit tests`` itself, with ``python`` a stub that runs until stopped and the API a local server."""
 
     def setUp(self) -> None:
-        tmp = tempfile.TemporaryDirectory(prefix='pcapkit-1938-')  # pylint: disable=consider-using-with
-        self.addCleanup(tmp.cleanup)
-        self.tmp = pathlib.Path(tmp.name)
+        self.tmp = tmpdir(self, 'pcapkit-1938-')
         self.temp = self.tmp / 'temp'
-        self.temp.mkdir()
-        bindir = self.tmp / 'bin'
-        bindir.mkdir()
-        (self.temp / 'resource-monitor.log').write_text('', encoding='utf-8')
-        # No real sudo: the probe fails, so the tests run uncapped, the same argv as in the scope.
-        for name, body in (('sudo', 'echo "sudo: a password is required" >&2\nexit 1\n'),
-                           ('python', 'echo collected\nexec sleep 60\n')):
-            (bindir / name).write_text('#!/bin/sh\n' + body, encoding='utf-8')
-            (bindir / name).chmod(0o755)
-        self.server = Server(('127.0.0.1', 0), Handler)
-        thread = threading.Thread(target=self.server.serve_forever, daemon=True)
-        thread.start()
-        self.addCleanup(self.server.server_close)
-        self.addCleanup(self.server.shutdown)
-        self.env = {key: value for key, value in os.environ.items() if not key.startswith('GITHUB_')}
-        self.env.update(RUNNER_TEMP=str(self.temp), GITHUB_WORKSPACE=str(ROOT), WORKERS='3', GRAAL_PYTHON_VM_ARGS='',
-                        GITHUB_STEP_SUMMARY=str(self.tmp / 'summary.md'), GH_TOKEN='token',
-                        GITHUB_API_URL=f'http://127.0.0.1:{self.server.server_address[1]}',
-                        GITHUB_EVENT_NAME='push', GITHUB_REF='refs/heads/main', GITHUB_SHA=OURS,
-                        GITHUB_REPOSITORY=REPO, PATH=str(bindir) + os.pathsep + os.environ.get('PATH', ''),
-                        # `watcher-python` and its requests: this interpreter, which has requests.
-                        WATCHER='success', WATCHER_PYTHON=sys.executable)
+        runner = Runner(self, self.tmp, self.temp, self.tmp / 'summary.md')
+        self.env, self.server = runner.env, runner.server
 
     def test_without_the_watchers_interpreter_the_tests_run_unwatched(self) -> None:
         """A failed `watcher-python` or requests install runs the tests unwatched, with their own status."""
@@ -828,10 +779,7 @@ class TestTheTestsStep(unittest.TestCase):
                 self.assertEqual(workflow_commands(result.stdout), [])
 
     def script(self) -> 'str':
-        script = step(TESTS)['run']
-        quick = script.replace('watch --interval 60 --grace 30 ', 'watch --interval 0.5 --grace 2 --kill-wait 2 ')
-        self.assertNotEqual(quick, script)
-        return quick
+        return quickened(self)
 
     def status(self) -> 'Dict[str, str]':
         text = (self.temp / 'tests-status').read_text(encoding='utf-8')

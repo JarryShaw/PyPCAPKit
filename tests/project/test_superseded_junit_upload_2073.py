@@ -14,21 +14,18 @@ writes ``stopped=true`` to the step's outputs and the upload reads it.
 from __future__ import annotations
 
 import io
-import os
 import pathlib
 import re
 import shutil
 import sys
-import tempfile
-import threading
 import unittest
 from typing import TYPE_CHECKING
 
 from tests.project.test_python_versions_1660 import ROOT, prose
 from tests.project.test_release_gates import evaluate_expression
+from tests.project._watcher import NEWER, OURS, Runner, quickened, tmpdir
 from tests.project.test_resource_monitor_1740 import DEFAULT, TESTS, sh, step
-from tests.project.test_superseded_runs_1938 import NEWER, OURS, POSIX, REPO, SLEEPER, FakeApi, Files, Handler, \
-    Server, main_at
+from tests.project.test_superseded_runs_1938 import POSIX, SLEEPER, FakeApi, Files, main_at
 from util import superseded
 
 if TYPE_CHECKING:
@@ -104,35 +101,13 @@ class TestTheTestsStepOutput(unittest.TestCase):
     """``Run unit tests`` itself, as in test_superseded_runs_1938.py: its ``stopped`` output reaches the upload."""
 
     def setUp(self) -> None:
-        tmp = tempfile.TemporaryDirectory(prefix='pcapkit-2073-')  # pylint: disable=consider-using-with
-        self.addCleanup(tmp.cleanup)
-        root = pathlib.Path(tmp.name)
-        self.temp, bindir, self.output = root / 'temp', root / 'bin', root / 'output'
-        self.temp.mkdir()
-        bindir.mkdir()
-        (self.temp / 'resource-monitor.log').write_text('', encoding='utf-8')
-        self.python = bindir / 'python'
-        for name, body in (('sudo', 'echo "sudo: a password is required" >&2\nexit 1\n'),
-                           ('python', 'echo collected\nexec sleep 60\n')):
-            (bindir / name).write_text('#!/bin/sh\n' + body, encoding='utf-8')
-            (bindir / name).chmod(0o755)
-        self.server = Server(('127.0.0.1', 0), Handler)
-        threading.Thread(target=self.server.serve_forever, daemon=True).start()
-        self.addCleanup(self.server.server_close)
-        self.addCleanup(self.server.shutdown)
-        self.env = {key: value for key, value in os.environ.items() if not key.startswith('GITHUB_')}
-        self.env.update(RUNNER_TEMP=str(self.temp), GITHUB_WORKSPACE=str(ROOT), WORKERS='3', GRAAL_PYTHON_VM_ARGS='',
-                        GITHUB_STEP_SUMMARY=str(root / 'summary.md'), GITHUB_OUTPUT=str(self.output), GH_TOKEN='token',
-                        GITHUB_API_URL=f'http://127.0.0.1:{self.server.server_address[1]}',
-                        GITHUB_EVENT_NAME='push', GITHUB_REF='refs/heads/main', GITHUB_SHA=OURS,
-                        GITHUB_REPOSITORY=REPO, PATH=str(bindir) + os.pathsep + os.environ.get('PATH', ''),
-                        WATCHER='success', WATCHER_PYTHON=sys.executable)
+        root = tmpdir(self, 'pcapkit-2073-')
+        self.temp, self.output = root / 'temp', root / 'output'
+        runner = Runner(self, root, self.temp, root / 'summary.md', self.output)
+        self.env, self.server, self.python = runner.env, runner.server, runner.python
 
     def script(self) -> 'str':
-        script = step(TESTS)['run']
-        quick = script.replace('watch --interval 60 --grace 30 ', 'watch --interval 0.5 --grace 2 --kill-wait 2 ')
-        self.assertNotEqual(quick, script)
-        return quick
+        return quickened(self)
 
     def stopped(self) -> 'Any':
         """The ``stopped`` output, ``None`` where the step wrote none."""

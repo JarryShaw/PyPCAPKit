@@ -20,15 +20,14 @@ import re
 import shutil
 import sys
 import tempfile
-import threading
 import unittest
 from typing import TYPE_CHECKING
 
+from tests.project._watcher import OURS, Runner, quickened
 from tests.project.test_python_matrix_tiers_1633 import workflow_commands
 from tests.project.test_python_versions_1660 import ROOT, prose
 from tests.project.test_release_gates import NULL, evaluate_expression
 from tests.project.test_resource_monitor_1740 import BASH, DEFAULT, SUMMARY, TESTS, sh, step
-from tests.project.test_superseded_runs_1938 import OURS, REPO, Handler, Server
 
 if TYPE_CHECKING:
     from typing import Any, Dict, List, Optional
@@ -121,30 +120,14 @@ class TestTheStepsInTurn(Summary):
 
     def setUp(self) -> None:
         super().setUp()
-        bindir, self.output = self.root / 'bin', self.root / 'output'
-        bindir.mkdir()
-        (self.temp / 'resource-monitor.log').write_text('', encoding='utf-8')
-        self.python = bindir / 'python'
-        for name, body in (('sudo', 'echo "sudo: a password is required" >&2\nexit 1\n'),
-                           ('python', 'echo collected\nexec sleep 60\n')):
-            (bindir / name).write_text('#!/bin/sh\n' + body, encoding='utf-8')
-            (bindir / name).chmod(0o755)
-        self.server = Server(('127.0.0.1', 0), Handler)
-        threading.Thread(target=self.server.serve_forever, daemon=True).start()
-        self.addCleanup(self.server.server_close)
-        self.addCleanup(self.server.shutdown)
-        self.env.update(GITHUB_WORKSPACE=str(ROOT), WORKERS='3', GRAAL_PYTHON_VM_ARGS='', GITHUB_OUTPUT=str(self.output),
-                        GH_TOKEN='token', GITHUB_API_URL=f'http://127.0.0.1:{self.server.server_address[1]}',
-                        GITHUB_EVENT_NAME='push', GITHUB_REF='refs/heads/main', GITHUB_SHA=OURS,
-                        GITHUB_REPOSITORY=REPO, PATH=str(bindir) + os.pathsep + os.environ.get('PATH', ''),
-                        WATCHER='success', WATCHER_PYTHON=sys.executable)
+        self.output = self.root / 'output'
+        runner = Runner(self, self.root, self.temp, self.page, self.output)
+        self.env.update(runner.env)
+        self.server, self.python = runner.server, runner.python
 
     def run_tests(self) -> 'Dict[str, str]':
         """``Run unit tests``, its watcher quickened; the outputs it wrote."""
-        script = step(TESTS)['run']
-        quick = script.replace('watch --interval 60 --grace 30 ', 'watch --interval 0.5 --grace 2 --kill-wait 2 ')
-        self.assertNotEqual(quick, script)
-        sh(quick, self.env, DEFAULT)
+        sh(quickened(self), self.env, DEFAULT)
         text = self.output.read_text(encoding='utf-8') if self.output.exists() else ''
         return dict(line.split('=', 1) for line in text.splitlines() if '=' in line)
 

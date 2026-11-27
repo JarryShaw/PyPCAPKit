@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""#1967: every ``run:`` block of experimental.yml passes shellcheck.
+"""#1967: every ``run:`` block of unit-tests.yml and experimental.yml passes shellcheck.
 
 Lint's ``actionlint`` step runs shellcheck over every workflow's ``run:`` blocks,
-and a finding fails Lint. This test keeps experimental.yml clean without waiting
-for a Lint run: it checks each
+and a finding fails Lint. This test keeps both workflows free of findings (#1967,
+step 5) without waiting for a Lint run: it checks each
 ``run:`` block of a ``bash`` or ``sh`` step as actionlint does: each
 ``${{ ... }}`` expression replaced by underscores of the same length, the
 shell's ``set -e`` line above it, and the checks actionlint disables left out.
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 #: Test tier (#1958): reads the workflow files, a question about the tree.
 __tier__ = 'LATEST'
 
-WORKFLOW = 'experimental.yml'
+WORKFLOWS = ('unit-tests.yml', 'experimental.yml')
 #: The checks actionlint 1.7.12 passes to ``shellcheck -e`` (rhysd/actionlint's
 #: ``rule_shellcheck.go``): each misfires on a ``run:`` block taken alone.
 EXCLUDED = 'SC1091,SC2194,SC2050,SC2153,SC2154,SC2157,SC2043'
@@ -66,21 +66,23 @@ def findings(shell: 'str', script: 'str') -> 'list[str]':
 
 @unittest.skipIf(SHELLCHECK is None, 'shellcheck is not on PATH')
 class TestShellcheck(unittest.TestCase):
-    """experimental.yml's ``run:`` blocks carry no shellcheck finding."""
+    """Each workflow's ``run:`` blocks carry no shellcheck finding."""
 
     def test_there_are_scripts_to_check(self) -> None:
-        """The workflow has ``run:`` blocks, so the check below is not vacuous."""
-        self.assertTrue(scripts(_workflows.load(WORKFLOW)))
+        """Each workflow has ``run:`` blocks, so the check below is not vacuous."""
+        for workflow in WORKFLOWS:
+            with self.subTest(workflow=workflow):
+                self.assertTrue(scripts(_workflows.load(workflow)))
 
     def test_every_run_block_is_clean(self) -> None:
-        """Each ``run:`` block, checked as actionlint checks it, has no finding."""
-        for name, shell, script in scripts(_workflows.load(WORKFLOW)):
-            with self.subTest(step=name):
-                self.assertEqual(findings(shell, script), [])
+        for workflow in WORKFLOWS:
+            for name, shell, script in scripts(_workflows.load(workflow)):
+                with self.subTest(workflow=workflow, step=name):
+                    self.assertEqual(findings(shell, script), [])
 
     def test_a_finding_is_reported(self) -> None:
-        """The check itself sees a finding, an unquoted expansion."""
-        self.assertTrue(findings('bash', 'paths=$(echo a b)\npytest $paths\n'))
+        """The check itself sees an unquoted selection, the finding it guards against (#1967)."""
+        self.assertTrue(findings('bash', 'selection=$(echo a b)\npytest $selection\n'))
 
 
 if __name__ == '__main__':
