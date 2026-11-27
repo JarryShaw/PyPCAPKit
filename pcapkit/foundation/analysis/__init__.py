@@ -17,6 +17,8 @@ so that a caller does not interpret the raw reassembled octets itself
 from pcapkit.foundation.analysis.dtls import dtls_handshake
 # Analysis of IP datagrams
 from pcapkit.foundation.analysis.ip import ip_datagram
+# Analysis of SCTP user messages
+from pcapkit.foundation.analysis.sctp import sctp_message
 # Analysis of TCP datagrams
 from pcapkit.foundation.analysis.tcp import tcp_datagram
 
@@ -24,4 +26,5 @@ __all__ = [
     'ip_datagram',                          # IP Analysis
     'tcp_datagram',                         # TCP Analysis
     'dtls_handshake',                       # DTLS Analysis
+    'sctp_message',                         # SCTP Analysis
 ]

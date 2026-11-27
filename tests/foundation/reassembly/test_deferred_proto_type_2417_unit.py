@@ -196,8 +196,9 @@ class DeclaredProtoTypeTests(unittest.TestCase):
 
         A constraint is written as a string literal, since
         :class:`~pcapkit.const.reg.transtype.TransType`,
-        :class:`~pcapkit.const.reg.apptype.tcp.TCP` and
-        :class:`~pcapkit.const.tls.handshake_type.HandshakeType` are imported
+        :class:`~pcapkit.const.reg.apptype.tcp.TCP`,
+        :class:`~pcapkit.const.tls.handshake_type.HandshakeType` and
+        :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier` are imported
         under ``TYPE_CHECKING`` and nothing at runtime has any in scope; the
         namespace is rebuilt here rather than asking
         :func:`typing.get_type_hints`, which raises :exc:`NameError` on them.
@@ -211,12 +212,14 @@ class DeclaredProtoTypeTests(unittest.TestCase):
         """
         from pcapkit.const.reg.apptype import TCP as AppType_TCP
         from pcapkit.const.reg.transtype import TransType
+        from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
         from pcapkit.const.tls.handshake_type import HandshakeType
 
         return tuple(
             eval(getattr(constraint, '__forward_arg__', constraint),  # pylint: disable=eval-used
                  {'TransType': TransType, 'AppType_TCP': AppType_TCP,
-                  'HandshakeType': HandshakeType})
+                  'HandshakeType': HandshakeType, 'Optional': typing.Optional,
+                  'PayloadProtocolIdentifier': PayloadProtocolIdentifier})
             for constraint in cls._proto_type_variable().__constraints__
         )
 
@@ -248,6 +251,29 @@ class DeclaredProtoTypeTests(unittest.TestCase):
                      HandshakeType.certificate, 5, 7, 0, 5, b'hello', 1000.0))
         datagram, = reasm.datagram
         return held(datagram).proto
+
+    def _sctp_proto(self):
+        """The ``proto`` SCTP reassembly hands :class:`Deferred` (#2935): the
+        message's payload protocol identifier."""
+        from pcapkit.const.sctp.chunk import Chunk
+        from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
+        from pcapkit.foundation.reassembly.sctp.data import Packet
+        from pcapkit.foundation.reassembly.sctp.reassembly import SCTP
+
+        reasm = SCTP()
+        for (tsn, last) in ((1, False), (2, True)):
+            reasm(Packet(bufid=(2905, 2905, 7), src=ip_address('192.0.2.1'), dst=ip_address('198.51.100.2'),
+                         num=tsn, chunk=Chunk.Payload_Data, tsn=tsn, stream_id=0, unordered=False,
+                         beginning=not last, ending=last, ssn=0, mid=None, fsn=None,
+                         ppid=PayloadProtocolIdentifier(46), payload=b'hello', timestamp=1000.0))
+        datagram, = reasm.datagram
+        return held(datagram).proto
+
+    def test_sctp_passes_the_payload_protocol_identifier(self) -> None:
+        """The user data dispatches on the PPID its first fragment carries."""
+        from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
+
+        self.assertIs(self._sctp_proto(), PayloadProtocolIdentifier(46))
 
     def test_dtls_passes_the_handshake_header(self) -> None:
         """The body decodes by ``msg_type``; ``length`` and ``message_seq`` frame it."""
@@ -304,7 +330,8 @@ class DeclaredProtoTypeTests(unittest.TestCase):
         """
         declared = self._declared_proto_types()
         matched = {}
-        values = (('ip', self._ip_proto()), ('tcp', self._tcp_proto()), ('dtls', self._dtls_proto()))
+        values = (('ip', self._ip_proto()), ('tcp', self._tcp_proto()), ('dtls', self._dtls_proto()),
+                  ('sctp', self._sctp_proto()))
         for name, value in values:
             with self.subTest(reassembler=name):
                 admitting = [each for each in declared if admits(each, value)]

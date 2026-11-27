@@ -89,11 +89,13 @@ __all__ = [
     'IPv4_Reassembly', 'IPv6_Reassembly',                   # IP Reassembly
     'TCP_Reassembly',                                       # TCP Reassembly
     'DTLS_Reassembly',                                      # DTLS Reassembly
+    'SCTP_Reassembly',                                      # SCTP Reassembly
 
     # pcapkit.foundation.analysis
     'ip_datagram',                                          # IP Analysis
     'tcp_datagram',                                         # TCP Analysis
     'dtls_handshake',                                       # DTLS Analysis
+    'sctp_message',                                         # SCTP Analysis
 
     # pcapkit.foundation.registry
     'register_protocol',
@@ -156,9 +158,10 @@ __all__ = [
     'Data', 'data',                                         # Protocol Data
 
     # pcapkit.toolkit
-    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly', 'tcp_traceflow',
+    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly', 'sctp_reassembly',
+    'tcp_traceflow',
     'pcapng_ipv4_reassembly', 'pcapng_ipv6_reassembly', 'pcapng_tcp_reassembly', 'pcapng_dtls_reassembly',
-    'pcapng_tcp_traceflow',
+    'pcapng_sctp_reassembly', 'pcapng_tcp_traceflow',
     'pcapng_block2frame',                                   # default engine
     'dpkt_ipv6_hdr_len', 'dpkt_packet2chain', 'dpkt_packet2dict',
     'dpkt_ipv4_reassembly', 'dpkt_ipv6_reassembly', 'dpkt_tcp_reassembly', 'dpkt_tcp_traceflow',

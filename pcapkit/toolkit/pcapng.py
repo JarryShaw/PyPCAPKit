@@ -21,20 +21,21 @@ from pcapkit.protocols.internet.ipv4.protocol import IPv4
 from pcapkit.protocols.internet.ipv6.protocol import IPv6
 from pcapkit.protocols.misc.pcap.frame.data import Frame as Data_Frame
 from pcapkit.protocols.misc.pcap.frame.data import FrameInfo as Data_FrameInfo
-from pcapkit.toolkit.pcap import _dtls_fragments, _fragment, tcp_segment
+from pcapkit.toolkit.pcap import _dtls_fragments, _fragment, _sctp_fragments, tcp_segment
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
     from typing import Optional
 
     from pcapkit.foundation.reassembly.dtls.data import Packet as DTLS_Packet
+    from pcapkit.foundation.reassembly.sctp.data import Packet as SCTP_Packet
     from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
     from pcapkit.protocols.misc.pcapng.data import \
         InterfaceDescriptionBlock as Data_InterfaceDescriptionBlock
     from pcapkit.protocols.misc.pcapng.protocol import PCAPNG, Packet
 
 __all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly',
-           'tcp_traceflow', 'block2frame']
+           'sctp_reassembly', 'tcp_traceflow', 'block2frame']
 
 
 def ipv4_reassembly(frame: 'PCAPNG') -> 'IP_Packet[IPv4Address] | None':
@@ -211,6 +212,32 @@ def dtls_reassembly(frame: 'PCAPNG') -> 'Optional[tuple[DTLS_Packet, ...]]':
     """
     frame_info = cast('Packet', frame.info)
     return _dtls_fragments(frame, num=frame_info.number, timestamp=float(frame_info.timestamp_epoch))
+
+
+def sctp_reassembly(frame: 'PCAPNG') -> 'Optional[tuple[SCTP_Packet, ...]]':
+    """Make data for SCTP user-message reassembly.
+
+    A frame can be reassembled if it contains an SCTP layer
+    (:class:`~pcapkit.protocols.transport.sctp.protocol.SCTP`) bundling a DATA or
+    I-DATA chunk that is a fragment of a user message (:rfc:`9260#section-6.9`,
+    :rfc:`8260#section-2.2.3`). Only the frame's first SCTP layer is read (see
+    :func:`pcapkit.toolkit.pcap._sctp_fragments`).
+
+    Args:
+        frame: PCAP-NG frame.
+
+    Returns:
+        Data for SCTP reassembly (:term:`reasm.sctp.packet`), one per fragment,
+        if the ``frame`` can be reassembled; otherwise :data:`None`.
+
+    See Also:
+        :class:`pcapkit.foundation.reassembly.sctp.reassembly.SCTP`
+
+    .. versionadded:: 1.9.0
+
+    """
+    frame_info = cast('Packet', frame.info)
+    return _sctp_fragments(frame, num=frame_info.number, timestamp=float(frame_info.timestamp_epoch))
 
 
 def tcp_traceflow(frame: 'PCAPNG', *, nanosecond: 'bool' = False) -> 'TF_TCP_Packet | None':

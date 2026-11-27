@@ -299,8 +299,8 @@ class Scapy(EngineBase['ScapyPacket']):
     __engine_module__ = 'scapy'
 
     #: Reassembly adapters, each called as ``adapter(packet, count=n)`` on the
-    #: Scapy packet and its frame number. There is no DTLS adapter, as DTLS
-    #: reassembly reads :mod:`pcapkit`'s own DTLS layer.
+    #: Scapy packet and its frame number. There is no DTLS or SCTP adapter, as
+    #: their reassembly reads :mod:`pcapkit`'s own DTLS and SCTP layers.
     __reassembly__ = {
         'ipv4': ModuleDescriptor('pcapkit.toolkit.scapy', 'ipv4_reassembly'),
         'ipv6': ModuleDescriptor('pcapkit.toolkit.scapy', 'ipv6_reassembly'),

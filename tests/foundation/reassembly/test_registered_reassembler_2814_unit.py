@@ -375,14 +375,15 @@ class LookupTests(RegisteredReassemblerTestCase):
         self.assertEqual([name for (name, _) in manager.items()], [NAME, 'tcp'])
         self.assertEqual(list(ReassemblyManager(manager)), [NAME, 'tcp'])
 
-        self.assertEqual(list(ReassemblyData(late=(), early=()))[4:], ['late', 'early'])
-        self.assertEqual(list(ReassemblyData(early=(), late=())), ['ipv4', 'ipv6', 'tcp', 'dtls', 'early', 'late'])
+        self.assertEqual(list(ReassemblyData(late=(), early=()))[5:], ['late', 'early'])
+        self.assertEqual(list(ReassemblyData(early=(), late=())),
+                         ['ipv4', 'ipv6', 'tcp', 'dtls', 'sctp', 'early', 'late'])
 
     def test_data_keeps_the_built_in_fields(self) -> None:
         from pcapkit.foundation.reassembly.data import ReassemblyData
 
         data = ReassemblyData(tcp=(), dummy=('datagram',))
-        self.assertEqual(list(data), ['ipv4', 'ipv6', 'tcp', 'dtls', NAME])
+        self.assertEqual(list(data), ['ipv4', 'ipv6', 'tcp', 'dtls', 'sctp', NAME])
         self.assertIsNone(data.ipv4)
         self.assertEqual(data.dummy, ('datagram',))
 

@@ -131,8 +131,8 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
 
     #: Reassembly adapters, each called as ``adapter(packet, count=n)`` on the
     #: decoded packet and its frame number. There is no IPv6 adapter, as
-    #: |pcapfile|_ has no IPv6 decoder, nor a DTLS one, as DTLS reassembly reads
-    #: :mod:`pcapkit`'s own DTLS layer.
+    #: |pcapfile|_ has no IPv6 decoder, nor a DTLS or SCTP one, as their
+    #: reassembly reads :mod:`pcapkit`'s own DTLS and SCTP layers.
     __reassembly__ = {
         'ipv4': ModuleDescriptor('pcapkit.toolkit.pypcapfile', 'ipv4_reassembly'),
         'tcp': ModuleDescriptor('pcapkit.toolkit.pypcapfile', 'tcp_reassembly'),

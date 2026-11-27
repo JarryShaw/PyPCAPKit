@@ -116,9 +116,10 @@ offers says so rather than quietly doing less, unless its row says otherwise:
 |                                                                 | Scapy binds it to on the host it runs on, and no TCP or       |
 |                                                                 | Fragment header behind an AH, Mobility, HIP or Shim6 header   |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
-| :class:`~pcapkit.foundation.engines.dpkt.DPKT`,                 | no DTLS reassembly, since                                     |
-| :class:`~pcapkit.foundation.engines.scapy.Scapy` and            | :func:`~pcapkit.toolkit.pcap.dtls_reassembly` reads           |
-| :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile`      | :mod:`pcapkit`'s own DTLS layer -- disabled with an           |
+| :class:`~pcapkit.foundation.engines.dpkt.DPKT`,                 | no DTLS or SCTP reassembly, since                             |
+| :class:`~pcapkit.foundation.engines.scapy.Scapy` and            | :func:`~pcapkit.toolkit.pcap.dtls_reassembly` and             |
+| :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile`      | :func:`~pcapkit.toolkit.pcap.sctp_reassembly` read            |
+|                                                                 | :mod:`pcapkit`'s own DTLS and SCTP layers -- disabled with an |
 |                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning`         |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | :class:`~pcapkit.foundation.engines.dpkt.DPKT`,                 | no PCAP or PCAP-NG output, since each frame reaches the       |
