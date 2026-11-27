@@ -82,8 +82,8 @@ __all__ = [
     'Raw',                                                  # Raw Packet
 
     'ARP', 'C_Tag', 'Ethernet', 'FRAD', 'GRE', 'IEEE802_11', 'InARP',  # Link Layer
-    'L2TP', 'L2TPv2', 'LinuxSLL', 'LinuxSLL1', 'LinuxSLL2', 'Loopback', 'Netlink',
-    'PPP', 'PPPoE', 'Radiotap', 'S_Tag', 'VLAN',
+    'L2TP', 'L2TPv2', 'LinuxSLL', 'LinuxSLL1', 'LinuxSLL2', 'LLC', 'Loopback', 'Netlink',
+    'PPP', 'PPPoE', 'Radiotap', 'S_Tag', 'SNAP', 'VLAN',
 
     'AH', 'ESP', 'ICMP', 'ICMPv4', 'ICMPv6',                # Internet Layer
     'IGMP', 'IGMPv1', 'IGMPv2', 'IGMPv3', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',

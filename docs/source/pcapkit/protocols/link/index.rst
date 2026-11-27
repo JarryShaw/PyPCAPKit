@@ -30,18 +30,20 @@ Link Layer
    linux_sll
    linux_sll1
    linux_sll2
+   llc
    loopback
    netlink
    ppp
    pppoe
    radiotap
+   snap
    vlan
    c_tag
    s_tag
 
 .. todo::
 
-   Implement DSL, EAPOL, FDDI, ISDN, LLC/SNAP.
+   Implement DSL, EAPOL, FDDI, ISDN.
 
 Protocol Registry
 -----------------

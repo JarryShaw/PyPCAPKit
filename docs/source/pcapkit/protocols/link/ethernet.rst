@@ -25,8 +25,13 @@ Protocol [*]_, whose structure is:
    ------ ----- ----------------- -------------------------
    6         48 ``ethernet.src``  Source MAC Address
    ------ ----- ----------------- -------------------------
-   12        96 ``ethernet.type`` Protocol (Internet Layer)
+   12        96 ``ethernet.type`` Length/Type
    ====== ===== ================= =========================
+
+The Length/Type field is an EtherType from ``0x0600`` up. Up to ``0x05DC`` it is
+the length of an IEEE 802.2 :class:`~pcapkit.protocols.link.llc.protocol.LLC`
+PDU, and the octets past it are kept as ``ethernet.trailer`` (IEEE Std
+802.3-2022 §3.2.6).
 
 .. autoclass:: pcapkit.protocols.link.ethernet.protocol.Ethernet
    :no-members:
@@ -52,6 +57,7 @@ Protocol [*]_, whose structure is:
    .. rubric:: Utilities
 
    .. automethod:: _make_data
+   .. automethod:: _import_next_layer
 
 Header Schemas
 --------------
@@ -71,6 +77,7 @@ Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: pcapkit.protocols.link.ethernet.schema.callback_payload
+.. autofunction:: pcapkit.protocols.link.ethernet.schema.ethernet_payload_length
 
 Data Models
 -----------
@@ -85,6 +92,16 @@ Data Models
 .. autoclass:: pcapkit.protocols.link.ethernet.data.Ethernet
    :members:
    :show-inheritance:
+
+Constants
+---------
+
+.. module:: pcapkit.protocols.link.ethernet.const
+
+.. versionadded:: 1.9.0
+
+.. autodata:: pcapkit.protocols.link.ethernet.const.LENGTH_MAX
+   :no-value:
 
 .. rubric:: Footnotes
 

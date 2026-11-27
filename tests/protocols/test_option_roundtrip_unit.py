@@ -99,6 +99,8 @@ CASE_TIMEOUT = 30
 #: The non-empty option-like maps no family exercises, by ``module.Class.__map__``
 #: path, and why. Every other one is some family's registry (#2615).
 UNCOVERED = {
+    'pcapkit.protocols.link.llc.protocol.LLC.__paired__':
+        "LLC's paired flags, a DSAP mapped to a flag rather than to a payload; test_llc_unit.py covers it (#2936)",
     'pcapkit.protocols.protocol.ProtocolBase.__registry__':
         'the by-name protocol registry, keyed by class name rather than by an option code; '
         'tests/protocols/test_protocol_registry_2763_unit.py covers it (#2763)',

@@ -130,6 +130,8 @@ Link Layer Registries
 
 .. autofunction:: pcapkit.foundation.registry.protocols.link.register_frad
 
+.. autofunction:: pcapkit.foundation.registry.protocols.link.register_lsap
+
 .. autofunction:: pcapkit.foundation.registry.protocols.link.register_netlink
 
 .. autofunction:: pcapkit.foundation.registry.protocols.link.register_ppp

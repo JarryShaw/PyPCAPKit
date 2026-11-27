@@ -524,6 +524,9 @@ UNRELATED = {
     'pcapkit/protocols/link/linux_sll1/protocol.py': ((65535,), "the max value of LINUX_SLL's own "
                                             '2-octet link_addr_length field, not an IP total '
                                             'length'),
+    'pcapkit/protocols/link/llc/protocol.py': ((12, 16), 'the masks of the supervisory function '
+                                          'bits and the U-format P/F bit of the LLC control '
+                                          'field'),
     'pcapkit/protocols/link/loopback/protocol.py': ((24, 28), 'the BSD loopback address families of IPv6 '
                                            '(NetBSD and OpenBSD 24, FreeBSD 28)'),
     'pcapkit/protocols/link/netlink/protocol.py': ((16,), 'the nlmsghdr fixed header length (16 '

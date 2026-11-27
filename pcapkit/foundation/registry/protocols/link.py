@@ -17,6 +17,7 @@ This module provides the registries of the link layer protocols in
 from typing import TYPE_CHECKING
 
 from pcapkit.const.linux.arphrd import ARPHRD as Enum_ARPHRD
+from pcapkit.const.llc.lsap import LSAP as Enum_LSAP
 from pcapkit.const.ppp.protocol import Protocol as Enum_PPP_Protocol
 from pcapkit.const.radiotap.field_type import FieldType as Radiotap_FieldType
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
@@ -26,6 +27,7 @@ from pcapkit.foundation.registry.protocols.protocol import _check_code, _check_m
 from pcapkit.protocols.link.frad.protocol import FRAD
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+from pcapkit.protocols.link.llc.protocol import LLC
 from pcapkit.protocols.link.loopback.protocol import Loopback
 from pcapkit.protocols.link.netlink.protocol import Netlink
 from pcapkit.protocols.link.ppp.protocol import PPP
@@ -49,8 +51,8 @@ if TYPE_CHECKING:
 __all__ = [
     'register_ethertype',
     'register_loopback',
-    'register_arphrd', 'register_frad', 'register_netlink', 'register_ppp', 'register_ppp_control',
-    'register_radiotap', 'register_radiotap_field',
+    'register_arphrd', 'register_frad', 'register_lsap', 'register_netlink', 'register_ppp',
+    'register_ppp_control', 'register_radiotap', 'register_radiotap_field',
 ]
 
 #: logging.Logger: Module-level logger, a child of the package-wide
@@ -188,6 +190,47 @@ def register_frad(code: 'int', protocol: 'ModuleDescriptor[ProtocolBase] | Type[
     if isinstance(protocol, ModuleDescriptor):
         protocol = protocol.klass
     _register_name(protocol, (FRAD, code))
+
+
+# NOTE: pcapkit.protocols.link.llc.protocol.LLC.__proto__, pcapkit.protocols.link.llc.protocol.LLC.__paired__
+def register_lsap(code: 'Enum_LSAP', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]', *,
+                  paired: 'bool' = False) -> 'None':
+    r"""Register a new protocol class.
+
+    The function will register the given protocol class to the
+    :data:`pcapkit.protocols.link.llc.protocol.LLC.__proto__` registry, which
+    the information field of an I or UI PDU is dispatched by its DSAP through,
+    and its paired flag to :data:`pcapkit.protocols.link.llc.protocol.LLC.__paired__`,
+    as :meth:`LLC.register <pcapkit.protocols.link.llc.protocol.LLC.register>`
+    writes them.
+
+    Arguments:
+        code: DSAP address as in :class:`~pcapkit.const.llc.lsap.LSAP`
+        protocol: module descriptor or a
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+        paired: Whether a PDU to ``code`` is handed on only when its SSAP,
+            less the C/R bit, is ``code`` too.
+
+    Raises:
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.llc.lsap.LSAP`
+            member, e.g. a member of another enum, ``protocol`` is not a
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass, or
+            ``paired`` is not a :obj:`bool`.
+
+    .. versionadded:: 1.9.0
+
+    """
+    _check_code(code, Enum_LSAP, LLC)
+    if not isinstance(paired, bool):
+        raise RegistryError(f'paired must be a bool, not {paired!r}')
+
+    LLC.register(code, protocol, paired=paired)
+    logger.debug('registered LLC LSAP: %s', code.name)
+
+    # register protocol to protocol registry
+    if isinstance(protocol, ModuleDescriptor):
+        protocol = protocol.klass
+    _register_name(protocol, (LLC, code))
 
 
 # NOTE: pcapkit.protocols.link.netlink.protocol.Netlink.__proto__

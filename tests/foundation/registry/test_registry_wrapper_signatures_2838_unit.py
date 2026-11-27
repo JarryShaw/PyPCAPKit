@@ -45,6 +45,7 @@ TAG = re.compile(r'^# NOTE: (?P<paths>\S.*)\ndef (?P<name>register_\w+)\(', re.M
 #: ``map path -> its classmethod``, where that is not ``register_<kind>``.
 NAMED = {
     'pcapkit.protocols.protocol.ProtocolBase.__registry__': 'register_protocol',
+    'pcapkit.protocols.link.llc.protocol.LLC.__paired__': 'register',
     'pcapkit.foundation.extraction.Extractor.__output__': 'register_dumper',
     'pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__': 'register_dumper',
     'pcapkit.foundation.reassembly.reassembly.ReassemblyBase.__callback_fn__': 'register_callback',

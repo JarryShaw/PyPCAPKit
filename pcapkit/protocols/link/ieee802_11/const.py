@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
     from pcapkit.protocols.link.ieee802_11.protocol import Subtype
 
-__all__ = ['SUBTYPE', 'CONTROL_WITH_ADDR2']
+__all__ = ['SUBTYPE', 'CONTROL_WITH_ADDR2', 'DATA_WITH_BODY']
 
 #: Subtype registry of each frame type (IEEE Std 802.11-2020, Table 9-1).
 SUBTYPE = {
@@ -45,4 +45,16 @@ CONTROL_WITH_ADDR2 = frozenset({
     Enum_ControlSubtype.RTS,
     Enum_ControlSubtype.CF_End,
     Enum_ControlSubtype.CF_End_CF_ACK,
+})
+
+#: Data frame subtypes that carry a frame body, an MSDU or an A-MSDU (IEEE Std
+#: 802.11-2020, Table 9-1): those not marked *(no data)* nor reserved.
+#:
+#: .. versionadded:: 1.9.0
+DATA_WITH_BODY = frozenset({
+    Enum_DataSubtype.Data,
+    Enum_DataSubtype.QoS_Data,
+    Enum_DataSubtype.QoS_Data_CF_ACK,
+    Enum_DataSubtype.QoS_Data_CF_Poll,
+    Enum_DataSubtype.QoS_Data_CF_ACK_CF_Poll,
 })
