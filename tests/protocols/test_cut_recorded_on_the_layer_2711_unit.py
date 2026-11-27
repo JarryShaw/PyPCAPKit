@@ -24,21 +24,19 @@ The octets and captures are built here; this module is unit-tier and reads no ca
 """
 from __future__ import annotations
 
-import contextlib
 import io
 import itertools
-import logging
 import struct
 import unittest
-import warnings
 from typing import TYPE_CHECKING
 from unittest import mock
 
 from tests._support import reimport_once_per_class
 from tests.foundation import _roundtrip as wire
+from tests.protocols._rebuild import reported as _reported
 
 if TYPE_CHECKING:
-    from typing import Any, Iterator
+    from typing import Any
 
 #: Test tier (#1958): hand-picked parse -> rebuild round trips.
 __tier__ = 'ALL'
@@ -120,32 +118,6 @@ DATAGRAMS = {
 def checksums(messages: 'list[str]') -> 'list[str]':
     """The checksum warnings among ``messages``; the savefile's own end is reported too."""
     return [line for line in messages if 'checksum' in line]
-
-
-class _Logged(logging.Handler):
-    """Collect what the ``pcapkit`` logger reports."""
-
-    def __init__(self) -> None:
-        super().__init__(logging.DEBUG)
-        self.messages = []  # type: list[str]
-
-    def emit(self, record: 'logging.LogRecord') -> None:
-        self.messages.append(f'logged: {record.getMessage()}')
-
-
-@contextlib.contextmanager
-def _reported() -> 'Iterator[list[str]]':
-    """Collect what the block reports, on the :mod:`warnings` channel and the logger."""
-    handler = _Logged()
-    logger = logging.getLogger('pcapkit')
-    logger.addHandler(handler)
-    try:
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter('always')
-            yield handler.messages
-    finally:
-        logger.removeHandler(handler)
-    handler.messages.extend(f'warned: {item.message}' for item in caught)
 
 
 class CutRecordedOnTheLayerTests(unittest.TestCase):

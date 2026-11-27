@@ -20,14 +20,13 @@ and report the same. :mod:`pcapkit` is imported inside each test, after
 
 """
 
-import contextlib
-import logging
 import struct
 import unittest
 import warnings
 from typing import TYPE_CHECKING
 
 from tests.protocols.misc.test_pcapng_roundtrip2_unit import PCAPNGTestCase
+from tests.protocols._rebuild import reported as _reported
 
 if TYPE_CHECKING:
     from typing import Any, Iterator
@@ -67,32 +66,6 @@ def _dsb(secrets_type: 'int', secrets: 'bytes', secrets_length: 'int | None' = N
     body += bytes(-len(body) % 4)
     total = 12 + len(body)
     return struct.pack('<II', 10, total) + body + struct.pack('<I', total)
-
-
-class _Logged(logging.Handler):
-    """Collect what the ``pcapkit`` logger reports."""
-
-    def __init__(self) -> None:
-        super().__init__(logging.DEBUG)
-        self.messages = []  # type: list[str]
-
-    def emit(self, record: 'logging.LogRecord') -> None:
-        self.messages.append(f'logged: {record.getMessage()}')
-
-
-@contextlib.contextmanager
-def _reported() -> 'Iterator[list[str]]':
-    """Collect what a rebuild reports, on the :mod:`warnings` channel and the logger."""
-    handler = _Logged()
-    logger = logging.getLogger('pcapkit')
-    logger.addHandler(handler)
-    try:
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter('always')
-            yield handler.messages
-    finally:
-        logger.removeHandler(handler)
-    handler.messages.extend(f'warned: {item.message}' for item in caught)
 
 
 class TestPCAPNGDSBSecretsDict(PCAPNGTestCase):

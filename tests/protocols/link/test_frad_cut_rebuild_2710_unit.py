@@ -20,17 +20,16 @@ The frames are built here; this module is unit-tier and reads no capture file.
 """
 from __future__ import annotations
 
-import contextlib
-import logging
 import struct
 import unittest
 import warnings
 from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
+from tests.protocols._rebuild import reported as _reported
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Iterator
+    from typing import Any, Callable
 
 #: Test tier (#1958): hand-picked parse -> rebuild round trips.
 __tier__ = 'ALL'
@@ -58,32 +57,6 @@ OTHER_FORMS = {
 
 #: A Linux cooked-capture source address, padded to its 8 octets.
 LINK_ADDR = bytes.fromhex('001122334455') + bytes(2)
-
-
-class _Logged(logging.Handler):
-    """Collect what the ``pcapkit`` logger reports."""
-
-    def __init__(self) -> None:
-        super().__init__(logging.DEBUG)
-        self.messages = []  # type: list[str]
-
-    def emit(self, record: 'logging.LogRecord') -> None:
-        self.messages.append(f'logged: {record.getMessage()}')
-
-
-@contextlib.contextmanager
-def _reported() -> 'Iterator[list[str]]':
-    """Collect what the block reports, on the :mod:`warnings` channel and the logger."""
-    handler = _Logged()
-    logger = logging.getLogger('pcapkit')
-    logger.addHandler(handler)
-    try:
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter('always')
-            yield handler.messages
-    finally:
-        logger.removeHandler(handler)
-    handler.messages.extend(f'warned: {item.message}' for item in caught)
 
 
 class FRADCutRebuildTests(unittest.TestCase):
