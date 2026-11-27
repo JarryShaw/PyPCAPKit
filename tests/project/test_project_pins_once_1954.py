@@ -5,10 +5,12 @@ The owner's option 3, paraphrased: run the :file:`tests/project` modules whose r
 does not vary by interpreter once per push, on pull requests and on pushes to
 ``main`` alike, and leave them out of every matrix leg; the modules that import
 ``pcapkit`` stay on every leg. :func:`tests._tiers.is_project_pin` decides which,
-and :file:`tests/test_tier_guard.py` checks that rule and runs the steps that use
-it. This module pins the rest: the job runs on every diff, on ``latest``, and
-blocks; the release gate and the ``unittest-ordering`` ``project`` cells keep every pin; the
-workflows page says so.
+:file:`tests/test_tier_guard.py` checks that rule, and
+:file:`tests/project/test_tier_steps_1958.py` runs the steps that use it. This module
+pins the rest: the job runs on every diff, on ``latest``, and blocks; the release gate
+and the ``unittest-ordering`` ``project`` cells keep every pin; the workflows page
+says so. That its cells halve the pins between them is
+:file:`tests/project/test_unittest_ordering_shards.py`'s to check (#3148).
 
 """
 
@@ -20,7 +22,6 @@ import unittest
 
 from tests import _tiers
 from tests.project.test_python_matrix_tiers_1633 import job
-from tests.project.test_python_versions_1660 import matrix
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 DOC = ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst'
@@ -64,13 +65,9 @@ class TestThePinsJob(unittest.TestCase):
                       .split("pip install -e '", 1)[1].split("'", 1)[0], install)
 
     def test_it_runs_under_the_caps(self) -> None:
-        """xdist as ``test`` runs it, a 2 GiB file cap, and a step cap under the job's; a half
-        of the pins per cell (#2798)."""
+        """xdist as ``test`` runs it, a 2 GiB file cap, and a step cap under the job's."""
         run = str(step(JOB, STEP)['run'])
         self.assertIn('python util/cap_file_size.py python -m pytest -q -n logical --dist load', run)
-        self.assertIn(f'{_tiers.PROJECT_PIN_HALF_SELECTOR} "$HALF"', run)
-        self.assertEqual(step(JOB, STEP)['env'], {'HALF': '${{ matrix.half }}'})
-        self.assertEqual(matrix(*JOB), {'half': list(_tiers.PROJECT_HALVES)})
         self.assertLess(step(JOB, STEP)['timeout-minutes'], job(*JOB)['timeout-minutes'])
 
 

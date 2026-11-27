@@ -10,7 +10,8 @@ looking.
 These are worth pinning, as the ways this could rot:
 
 * the tier rule here still matches the one CI runs
-  (:class:`TierClassificationTests`, :class:`WorkflowAgreementTests`);
+  (:class:`TierClassificationTests`;
+  :mod:`tests.project.test_tier_steps_1958` runs the steps, #3148);
 * committedness comes from git rather than from a list of names that goes stale
   the moment another capture is committed (:class:`CommittedCaptureTests`);
 * a violation is caught and explained, the legitimate reads next to it are not,
@@ -29,9 +30,8 @@ and never says so -- #729 and #738 were that defect, and #745 is the ticket for
 stopping the third instance.
 
 The test tiers of #1958 are checked here too (:class:`TestTierTests`): every test
-module resolves to exactly one, ``ALL`` or ``LATEST``, a malformed ``__tier__``
-fails, and :class:`WorkflowAgreementTests` runs the steps that leave the ``LATEST``
-tier out.
+module resolves to exactly one, ``ALL`` or ``LATEST``, and a malformed ``__tier__``
+fails.
 
 This module is itself unit-tier, so it reads no capture at all: the violating
 modules it needs are written into a temporary directory and audited by path.
@@ -40,30 +40,21 @@ modules it needs are written into a temporary directory and audited by path.
 from __future__ import annotations
 
 import ast
-import os
 import pathlib
 import re
 import shutil
 import subprocess
-import sys
 import tempfile
 import textwrap
 import unittest
 import unittest.mock
 
 from tests import _dependency_gates, _tiers, conftest as _conftest
-from tests._support import bash_argv
+from tests._steps import job_section
 
 #: Test tier (#1958): tests/conftest.py runs this guard at collection on every leg,
 #: with that leg's own ast module.
 __tier__ = 'ALL'
-
-#: The unit-tier workflow job, for :class:`WorkflowAgreementTests`. Absent from a
-#: source distribution, which is why that test skips rather than fails.
-WORKFLOW = _tiers.ROOT / '.github' / 'workflows' / 'unit-tests.yml'
-#: The ``bash`` the workflow steps run under, by absolute path: on Windows a bare
-#: ``bash`` resolves to System32's WSL launcher, not the Git Bash this finds (#2103).
-BASH = shutil.which('bash')
 
 
 def write_module(directory: 'pathlib.Path', name: 'str', source: 'str') -> 'pathlib.Path':
@@ -148,39 +139,6 @@ def doctored_pyproject(case: 'unittest.TestCase', old: 'str', new: 'str') -> 'pa
     return path
 
 
-def job_section(text: 'str', name: 'str') -> 'str':
-    """The YAML text of job ``name``, from its header to the next top-level job.
-
-    A plain slice rather than a real YAML parse: :class:`WorkflowAgreementTests`
-    and :class:`FixtureTierSelectionTests` both need to know what one job's
-    steps say without tripping over another job that happens to mention the
-    same words, and a two-space-indented ``key:`` line is what marks a job
-    boundary in this file however its body is written.
-
-    """
-    match = re.search(rf'(?m)^  {re.escape(name)}:\n(.*?)(?=^  \w[\w-]*:\n|\Z)', text, re.DOTALL)
-    if match is None:
-        raise AssertionError(f'no job named {name!r} found in the workflow')
-    return match.group(1)
-
-
-def step_run_block(section: 'str', step_name: 'str') -> 'str':
-    """The ``run:`` block of the step named ``step_name`` within a job section.
-
-    Scoped to one step, not just one job, because a job can hold several
-    steps and only one of them is the one a test cares about -- see
-    :func:`job_section` for why a text slice rather than a YAML parse.
-
-    """
-    match = re.search(
-        rf'(?m)^      - name: {re.escape(step_name)}\n(.*?)(?=^      - name:|\Z)',
-        section, re.DOTALL,
-    )
-    if match is None:
-        raise AssertionError(f'no step named {step_name!r} found in this job')
-    return match.group(1)
-
-
 class TierClassificationTests(unittest.TestCase):
     """:func:`~tests._tiers.is_unit_tier` against the CI ignore rules."""
 
@@ -207,316 +165,6 @@ class TierClassificationTests(unittest.TestCase):
         relative = 'tests/protocols/test_pcapng_regression.py'
         self.assertIs(_tiers.is_unit_tier(relative),
                       _tiers.is_unit_tier(_tiers.ROOT / relative))
-
-
-class WorkflowAgreementTests(unittest.TestCase):
-    """The tier rule here matches the one the workflow runs."""
-
-    #: :data:`PYTHON_STUB`'s ``$SELECTOR_CACHE`` for this class's steps, so each
-    #: selector runs once per class rather than once per step run (#2254).
-    selectors = ''
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
-        temp = tempfile.TemporaryDirectory(prefix='pcapkit-selectors-')
-        cls.addClassCleanup(temp.cleanup)
-        cls.selectors = temp.name
-
-    def test_ignore_flags_match_the_fixture_tier_constants(self) -> None:
-        """Every ignored path and glob is accounted for by a constant.
-
-        The point of failure this catches: somebody adds another
-        fixture-dependent naming convention to the workflow and the guard goes
-        on classifying those modules as unit-tier, flagging their perfectly
-        legal capture reads. No other glob is left: the round-trip sweeps
-        (#1732) are left out by test tier (#1958), module by module, rather
-        than by a name glob, so a glob here is a tier's or it is unaccounted
-        for.
-
-        """
-        if not WORKFLOW.is_file():
-            self.skipTest(f'{WORKFLOW} is not present, e.g. in a source distribution')
-
-        text = WORKFLOW.read_text(encoding='utf-8')
-        globs = set(re.findall(r"--ignore-glob='([^']+)'", text))
-        directories = set(re.findall(r'--ignore=tests/(\S+)', text))
-
-        self.assertEqual(globs, {f'*{suffix}' for suffix in _tiers.FIXTURE_TIER_SUFFIXES})
-        self.assertEqual(directories, set(_tiers.FIXTURE_TIER_DIRS))
-        self.assertNotIn('roundtrip', text)
-
-    def test_integration_job_selects_positively_by_asking_tiers_for_it(self) -> None:
-        """The ``integration`` job's selection runs the other direction, so it
-        is checked the other way.
-
-        The ``test`` job above is checked by parsing its ``--ignore`` /
-        ``--ignore-glob`` flags out of the workflow text and comparing them to
-        :data:`~tests._tiers.FIXTURE_TIER_DIRS` /
-        :data:`~tests._tiers.FIXTURE_TIER_SUFFIXES` -- a *negative* selection,
-        so those two regexes are what could drift from this module. The
-        ``integration`` job instead *selects* the fixture-dependent tier
-        positively, and a positive selection spelled out as literal paths
-        would be invisible to those same regexes: nothing would stop it from
-        drifting from :func:`~tests._tiers.skip_idiom_modules` while this test
-        stayed green.
-
-        So the ``integration`` job does not spell the selection out. Its "Run
-        full test suite" step has to call
-        :func:`~tests._tiers.fixture_tier_paths` directly instead of
-        reimplementing the answer -- which makes drift structurally
-        impossible rather than merely checked for, and is what this asserts.
-
-        """
-        if not WORKFLOW.is_file():
-            self.skipTest(f'{WORKFLOW} is not present, e.g. in a source distribution')
-
-        text = WORKFLOW.read_text(encoding='utf-8')
-        section = job_section(text, 'integration')
-        run_block = step_run_block(section, 'Run full test suite')
-
-        self.assertIn(
-            'fixture_tier_paths', run_block,
-            "the integration job's \"Run full test suite\" step no longer calls "
-            "tests._tiers.fixture_tier_paths() -- see this test's docstring for why a "
-            "hand-written selection here can drift silently"
-        )
-        self.assertIn('pytest', run_block)
-
-    @unittest.skipIf(BASH is None, 'the steps are bash scripts')
-    def test_the_legs_leave_out_exactly_the_latest_tier_or_the_pins(self) -> None:
-        """#1958: run as bash runs them, the ``test`` legs, ``latest``'s too, ignore each ``LATEST`` module.
-
-        #2751: each cell of ``test-latest-tier`` runs its half of the ``LATEST`` tier
-        by name, and the halves leave out each project pin (#1954), which the cells
-        of ``project-tests`` run, a half each (#2798). Every step asks
-        :data:`~tests._tiers.LATEST_TIER_SELECTOR`,
-        :data:`~tests._tiers.LATEST_HALF_SELECTOR` or
-        :data:`~tests._tiers.PROJECT_PIN_HALF_SELECTOR` at run time, so none can drift
-        from :func:`~tests._tiers.module_tier`; what can is how each uses the
-        answer, which is what running them checks. experimental.yml asks in a step
-        of its own, under the runner's ``python3``; its legs run in
-        :file:`tests/project/test_sweeps_on_latest_only_1732.py`.
-
-        """
-        if not WORKFLOW.is_file():
-            self.skipTest(f'{WORKFLOW} is not present, e.g. in a source distribution')
-        text = WORKFLOW.read_text(encoding='utf-8')
-        pins = list(_tiers.project_pin_paths())
-        latest = list(_tiers.latest_tier_paths())
-        self.assertTrue(pins)
-        self.assertLess(len(pins), len(latest))
-        self.assertEqual(leg_ignores(text, cache=self.selectors), latest)
-        self.assertEqual(leg_selects(text, cache=self.selectors), [])
-        halves = []  # type: list[str]
-        for half in _tiers.LATEST_TIER_HALVES:
-            with self.subTest(half=half):
-                selected = leg_selects(text, str(half), self.selectors)
-                self.assertTrue(selected)
-                self.assertEqual(selected, list(_tiers.latest_tier_half(half)))
-                self.assertEqual(leg_ignores(text, str(half), self.selectors), [])
-                halves.extend(selected)
-        self.assertEqual(sorted(halves + pins), sorted(path for path in latest if _tiers.is_unit_tier(path)))
-        ran = []  # type: list[str]
-        for half in _tiers.PROJECT_HALVES:
-            with self.subTest(pins=half):
-                chosen = project_pins_run(text, str(half), self.selectors)
-                self.assertTrue(chosen)
-                self.assertEqual(chosen, list(_tiers.project_pin_half(half)))
-                ran.extend(chosen)
-        self.assertEqual(sorted(ran), pins)
-        for workflow, job, step, selector in (
-                (WORKFLOW, 'test', 'Run unit tests', _tiers.LATEST_HALF_SELECTOR),
-                (WORKFLOW, 'test', 'Run unit tests', _tiers.LATEST_TIER_SELECTOR),
-                (WORKFLOW, 'project-tests', 'Run the project pins', _tiers.PROJECT_PIN_HALF_SELECTOR),
-                (EXPERIMENTAL_WORKFLOW, 'experimental', 'List the LATEST tier',
-                 _tiers.LATEST_TIER_SELECTOR.replace('python -c', 'python3 -c'))):
-            with self.subTest(job=job, selector=selector):
-                script = run_script(job_section(workflow.read_text(encoding='utf-8'), job), step)
-                self.assertIn(selector, script)
-        # The experimental legs ignore what that step printed, as `test`'s legs do.
-        tests = step_run_block(job_section(EXPERIMENTAL_WORKFLOW.read_text(encoding='utf-8'), 'experimental'),
-                               'Run unit tests')
-        self.assertIn('LATEST_TIER: ${{ steps.tier.outputs.paths }}', tests)
-        self.assertIn('for module in $LATEST_TIER; do\n            set -- "$@" --ignore="$module"', tests)
-
-    @unittest.skipIf(BASH is None, 'the steps are bash scripts')
-    def test_a_leg_that_stops_ignoring_the_latest_tier_is_caught(self) -> None:
-        """The check above, against a ``test`` step that computes the list and then drops it."""
-        if not WORKFLOW.is_file():
-            self.skipTest(f'{WORKFLOW} is not present, e.g. in a source distribution')
-        text = WORKFLOW.read_text(encoding='utf-8')
-        loop = 'set -- "$@" --ignore="$module"'
-        self.assertEqual(text.count(loop), 1, 'the loop this test removes has been reworded')
-        self.assertEqual(leg_ignores(text.replace(loop, ':'), cache=self.selectors), [])
-        # #2751: and a cell that computes its half and then drops it, which would run the whole suite.
-        loop = 'set -- "$@" "$module"'
-        self.assertEqual(text.count(loop), 1, 'the loop this test removes has been reworded')
-        self.assertEqual(leg_selects(text.replace(loop, ':'), '1', self.selectors), [])
-
-    @unittest.skipIf(BASH is None, 'the steps are bash scripts')
-    def test_a_leg_that_asks_for_the_wrong_list_is_caught(self) -> None:
-        """The pins alone are not the ``LATEST`` tier, and one half is not the other (#2751, #2798)."""
-        if not WORKFLOW.is_file():
-            self.skipTest(f'{WORKFLOW} is not present, e.g. in a source distribution')
-        text = WORKFLOW.read_text(encoding='utf-8')
-        latest = _tiers.LATEST_TIER_SELECTOR.split('"', 1)[1]
-        pins = _tiers.PROJECT_PINS_SELECTOR.split('"', 1)[1]
-        self.assertEqual(text.count(latest), 1)
-        self.assertEqual(text.count(_tiers.PROJECT_PIN_HALF_SELECTOR), 1)  # `project-tests`'s
-        self.assertNotEqual(leg_ignores(text.replace(latest, pins), cache=self.selectors),
-                            list(_tiers.latest_tier_paths()))
-        asked = 'project_pin_half(int(sys.argv[1]))'
-        self.assertEqual(text.count(asked), 1)
-        first = _tiers.PROJECT_HALVES[0]
-        for half in _tiers.PROJECT_HALVES[1:]:
-            with self.subTest(pins=half):
-                self.assertNotEqual(project_pins_run(text.replace(asked, f'project_pin_half({first})'), str(half),
-                                                     self.selectors), list(_tiers.project_pin_half(half)))
-        asked = 'latest_tier_half(int(sys.argv[1]))'
-        self.assertEqual(text.count(asked), 1)
-        first = _tiers.LATEST_TIER_HALVES[0]
-        for half in _tiers.LATEST_TIER_HALVES[1:]:
-            with self.subTest(half=half):
-                self.assertNotEqual(leg_selects(text.replace(asked, f'latest_tier_half({first})'), str(half),
-                                                self.selectors), list(_tiers.latest_tier_half(half)))
-
-
-#: The experimental legs' workflow (#1732), whose unit-tier step leaves the ``LATEST`` tier out too.
-EXPERIMENTAL_WORKFLOW = _tiers.ROOT / '.github' / 'workflows' / 'experimental.yml'
-#: A ``python`` that writes each argument on a line of ``$ARGS_FILE``, and hands a
-#: ``-c`` to the real one, which is how the steps ask tests/_tiers.py for the pins. util/cap_file_size.py's
-#: command it execs, as the script does, with no real interpreter: under the coverage
-#: leg one would be measured, be logged as a second ``coverage run --rcfile``
-#: controller, and exec before saving, which fails the #1387 guard (#1969).
-#:
-#: With ``$SELECTOR_CACHE`` set, a ``-c`` runs the real interpreter once per distinct
-#: argument list and replays its output after that (#2254): each selector call rescans
-#: the suite in a fresh interpreter, and :class:`WorkflowAgreementTests` asks the same
-#: selectors repeatedly. A doctored step that asks something else is keyed apart and
-#: runs for real; a failing run is not kept.
-PYTHON_STUB = ('#!/bin/sh\n'
-               'if [ "$1" = -c ] && [ -n "$SELECTOR_CACHE" ]; then\n'
-               '  answer="$SELECTOR_CACHE/$(printf \'%s\\n\' "$@" | cksum | tr \' \' _)"\n'
-               '  if [ ! -f "$answer" ]; then\n'
-               '    "$REAL_PYTHON" "$@" > "$answer.part" || { status=$?; cat "$answer.part"; exit "$status"; }\n'
-               '    mv "$answer.part" "$answer"\n'
-               '  fi\n'
-               '  exec cat "$answer"\n'
-               'fi\n'
-               'case "$1" in -c) exec "$REAL_PYTHON" "$@";; util/cap_file_size.py) shift; exec "$@";; esac\n'
-               'printf \'%s\\n\' "$@" > "$ARGS_FILE"\n')
-
-
-def run_script(section: 'str', step_name: 'str') -> 'str':
-    """The dedented ``run: |`` script of the step named ``step_name`` in a job section."""
-    match = re.search(r'(?ms)^        run: \|\n(.*)', step_run_block(section, step_name))
-    if match is None:
-        raise AssertionError(f'the step {step_name!r} has no run: | block')
-    lines = []
-    for line in match.group(1).splitlines():
-        if line.strip() and not line.startswith(' ' * 10):
-            break
-        lines.append(line)
-    return textwrap.dedent('\n'.join(lines))
-
-
-def stubbed_argv(script: 'str', env: 'dict[str, str]') -> 'list[str]':
-    """The arguments ``script`` hands ``python``, run from the root under ``bash -e``."""
-    with tempfile.TemporaryDirectory(prefix='pcapkit-pins-') as temp:
-        stub = pathlib.Path(temp, 'python')
-        stub.write_text(PYTHON_STUB, encoding='utf-8')
-        stub.chmod(0o755)
-        record = pathlib.Path(temp, 'args')
-        full = dict(os.environ, **env, ARGS_FILE=str(record), RUNNER_TEMP=temp, REAL_PYTHON=sys.executable,
-                    PATH=temp + os.pathsep + os.environ.get('PATH', ''))
-        full.pop('PYTHONSAFEPATH', None)  # the runner sets none, and it would hide tests/ from `-c`
-        result = subprocess.run(bash_argv('-e', '-c', script, executable=BASH), env=full, cwd=str(_tiers.ROOT),
-                                capture_output=True, text=True, check=False, timeout=120)
-        if result.returncode:
-            raise AssertionError(f'the step failed: {result.stdout[-1000:]}{result.stderr[-1000:]}')
-        return record.read_text(encoding='utf-8').splitlines()
-
-
-@unittest.skipIf(shutil.which('sh') is None, 'the stub is a sh script')
-class PythonStubTests(unittest.TestCase):
-    """#1969: :data:`PYTHON_STUB` records the command util/cap_file_size.py caps without a real ``python``."""
-
-    @unittest.skipIf(os.name == 'nt', 'util/cap_file_size.py is POSIX-only (#2102)')
-    def test_the_capped_command_is_recorded_without_the_real_interpreter(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            for name, text in (('python', PYTHON_STUB), ('real', '#!/bin/sh\necho "$@" >> "$REAL_LOG"\n')):
-                path = pathlib.Path(temp, name)
-                path.write_text(text, encoding='utf-8')
-                path.chmod(0o755)
-            record, real = pathlib.Path(temp, 'args'), pathlib.Path(temp, 'real.log')
-            env = dict(os.environ, ARGS_FILE=str(record), REAL_PYTHON=str(pathlib.Path(temp, 'real')),
-                       REAL_LOG=str(real), PATH=temp + os.pathsep + os.environ.get('PATH', ''))
-            command = ['-m', 'pytest', '-q', '-n', 'auto']
-            result = subprocess.run(['python', 'util/cap_file_size.py', 'python', *command], env=env,
-                                    capture_output=True, text=True, check=False, timeout=60)
-            self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertFalse(real.exists(), 'the real interpreter ran the capped command')
-            self.assertEqual(record.read_text(encoding='utf-8').splitlines(), command)
-
-    @unittest.skipIf(os.name == 'nt', 'the stub is found on PATH by name, as Windows does not find a sh script')
-    def test_a_selector_runs_once_per_cache_and_a_failure_is_not_kept(self) -> None:
-        """#2254: with ``$SELECTOR_CACHE`` set, each distinct ``-c`` reaches the real interpreter once."""
-        real_python = '#!/bin/sh\necho "$@" >> "$REAL_LOG"\necho "answer $2"\n[ "$2" != fail ]\n'
-        with tempfile.TemporaryDirectory() as temp:
-            for name, text in (('python', PYTHON_STUB), ('real', real_python)):
-                path = pathlib.Path(temp, name)
-                path.write_text(text, encoding='utf-8')
-                path.chmod(0o755)
-            cache, real = pathlib.Path(temp, 'cache'), pathlib.Path(temp, 'real.log')
-            cache.mkdir()
-            env = dict(os.environ, ARGS_FILE=str(pathlib.Path(temp, 'args')), SELECTOR_CACHE=str(cache),
-                       REAL_PYTHON=str(pathlib.Path(temp, 'real')), REAL_LOG=str(real),
-                       PATH=temp + os.pathsep + os.environ.get('PATH', ''))
-
-            def ask(code: 'str') -> 'subprocess.CompletedProcess[str]':
-                return subprocess.run(['python', '-c', code], env=env, capture_output=True, text=True,
-                                      check=False, timeout=60)
-
-            self.assertEqual([ask(code).stdout for code in ('a', 'a', 'b')], ['answer a\n', 'answer a\n', 'answer b\n'])
-            for _ in range(2):
-                failed = ask('fail')
-                self.assertEqual((failed.returncode, failed.stdout), (1, 'answer fail\n'))
-            self.assertEqual(real.read_text(encoding='utf-8').splitlines(), ['-c a', '-c b', '-c fail', '-c fail'])
-
-
-def leg_argv(text: 'str', half: 'str' = '', cache: 'str' = '') -> 'list[str]':
-    """What the ``Run unit tests`` step hands pytest on a ``test`` leg, or with ``half`` a ``test-latest-tier`` cell.
-
-    ``cache`` is a directory for :data:`PYTHON_STUB`'s ``$SELECTOR_CACHE``; empty runs every selector.
-
-    """
-    script = run_script(job_section(text, 'test'), 'Run unit tests')
-    # #2005: a leg that runs pytest once, as a PyPy leg's own `SHARDS` would otherwise reach the stubbed step.
-    return stubbed_argv(script, {'ANNOTATION_LEVEL': 'error', 'COVERAGE': 'false', 'HALF': half, 'SHARDS': '',
-                                 'SELECTOR_CACHE': cache})
-
-
-def leg_ignores(text: 'str', half: 'str' = '', cache: 'str' = '') -> 'list[str]':
-    """The modules :func:`leg_argv` ``--ignore``\\ s, less the fixture tier's directory."""
-    return [arg.split('=', 1)[1] for arg in leg_argv(text, half, cache)
-            if arg.startswith('--ignore=') and arg != f'--ignore=tests/{next(iter(_tiers.FIXTURE_TIER_DIRS))}']
-
-
-def leg_selects(text: 'str', half: 'str' = '', cache: 'str' = '') -> 'list[str]':
-    """The modules :func:`leg_argv` names for pytest to run, a ``test-latest-tier`` cell's half (#2751)."""
-    return [arg for arg in leg_argv(text, half, cache) if not arg.startswith('-') and arg.endswith('.py')]
-
-
-def project_pins_run(text: 'str', half: 'str', cache: 'str' = '') -> 'list[str]':
-    """The modules ``project-tests``'s ``Run the project pins`` step hands pytest in cell ``half`` (#2798).
-
-    ``cache`` is as for :func:`leg_ignores`.
-
-    """
-    argv = stubbed_argv(run_script(job_section(text, 'project-tests'), 'Run the project pins'),
-                        {'HALF': half, 'SELECTOR_CACHE': cache})
-    return [arg for arg in argv if arg.endswith('.py')]
 
 
 class ProjectPinRuleTests(unittest.TestCase):
@@ -888,8 +536,8 @@ class FixtureTierSelectionTests(unittest.TestCase):
     """:func:`~tests._tiers.skip_idiom_modules` and :func:`~tests._tiers.fixture_tier_paths`.
 
     Together these are what the ``integration`` job runs instead of the whole
-    suite -- see :class:`WorkflowAgreementTests` for the half of the guarantee
-    that lives in the workflow file itself.
+    suite -- see :class:`tests.project.test_tier_steps_1958.WorkflowAgreementTests`
+    for the half of the guarantee that lives in the workflow file itself.
 
     """
 
@@ -2158,7 +1806,7 @@ class DependencyGateSelectionTests(unittest.TestCase):
     def test_job_sections_agrees_with_the_single_job_slice(self) -> None:
         """Two slicers over the same YAML, checked against each other.
 
-        :func:`job_section` above answers for one named job and
+        :func:`~tests._steps.job_section` answers for one named job and
         :func:`~tests._dependency_gates.job_sections` enumerates them all. They
         are separate because one is needed where the other cannot be imported,
         so this is what stops the pair from drifting.

@@ -1163,7 +1163,7 @@ def job_sections(text: 'str') -> 'dict[str, str]':
     """Every top-level job of the workflow, as name -> YAML body.
 
     A text slice rather than a YAML parse, for the reason
-    :func:`~tests.test_tier_guard.job_section` gives: a two-space-indented
+    :func:`~tests._steps.job_section` gives: a two-space-indented
     ``key:`` line is what marks a job boundary in this file however its body is
     written, and that function slices one job the same way. The two are checked
     against each other so the duplication cannot drift.
@@ -1383,9 +1383,9 @@ def job_reaches(job: 'Job', gate: 'Gate') -> 'bool':
     * ``'ignore'`` is the unit tier less the project pins (#1954), so
       :func:`~tests._tiers.is_unit_tier` and :func:`~tests._tiers.is_project_pin`
       answer it -- and
-      :meth:`~tests.test_tier_guard.WorkflowAgreementTests\
-.test_ignore_flags_match_the_fixture_tier_constants`
-      is what keeps that equivalence true. It is what the ``latest`` legs run
+      :meth:`~tests.project.test_tier_steps_1958.WorkflowAgreementTests\
+.test_the_steps_select_by_tier`'s ``test_ignore_flags_match_the_fixture_tier_constants``
+      subtest is what keeps that equivalence true. It is what the ``latest`` legs run
       between them, ``test``'s, which runs the ``ALL`` tier, and the halves of the
       ``LATEST`` one that ``test-latest-tier`` runs by ``test``'s steps (#2751); the
       other legs also leave out the ``LATEST`` test tier,
