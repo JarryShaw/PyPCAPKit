@@ -2,24 +2,28 @@
 """#1967: :file:`util/release_conda.py`, run as both conda jobs' steps run it.
 
 * :class:`TestTheStepMatchesTheReferenceShell` runs each step's inline shell form, the
-  reference the script must match -- ``conda``'s "Check whether this leg is already on Anaconda", both
-  conda jobs' "Build conda packages" and "Upload conda packages to Anaconda
-  (Intel)" -- and the script, on the cases below, against stand-in ``curl``, ``conda`` and ``anaconda``, and
+  reference the script must match -- ``conda``'s "Check whether this leg is already on Anaconda" and both
+  conda jobs' "Build conda packages", for the one noarch package (#3133) -- and the script, on the
+  cases below, against stand-in ``curl`` and ``conda``, and
   requires the same status, standard output and error, step outputs and calls.
   ``bash``'s ``<path>: line N:`` before its own errors is dropped, and the
   build's fresh directory is read as ``<out>``. The step bodies are kept here
   verbatim, and each case table is checked to reach every way its shell ends.
 * :class:`TestTheScripts` pins what the cases cannot compare: the step outputs a
   run writes, and the errors for a leg on another platform.
+* :class:`TestTheScriptsInProcess` runs ``leg`` and ``build`` in this process, with
+  the network and ``conda`` stubbed, so their branches count towards coverage.
 * :class:`TestTheStepsRunTheScripts` pins each step to its script and its
-  ``env:``, both jobs' legs to :data:`release_conda.PLATFORMS`, and the script
-  to Python 3.8's syntax.
+  ``env:``, both jobs' runner to :data:`release_conda.PLATFORMS`, the recipe's
+  host Python to the one that downloaded its wheels, and the script to Python
+  3.8's syntax.
 
 """
 
 from __future__ import annotations
 
 import ast
+import io
 import json
 import os
 import pathlib
@@ -31,6 +35,7 @@ import tempfile
 import textwrap
 import unittest
 from typing import TYPE_CHECKING
+from unittest import mock
 
 from tests._support import bash_argv
 from tests._workflows import job, steps
@@ -38,15 +43,16 @@ from tests.project.test_requires_python_floor_2051 import FLOOR
 from util import release_conda
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Any, Optional
 
 #: Test tier (#1958): runs the tree's own scripts and the steps' inline shell forms.
 __tier__ = 'LATEST'
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 UTIL = ROOT / 'util'
+RECIPE = (ROOT / 'conda' / 'pypcapkit' / 'meta.yaml').read_text(encoding='utf-8')
 BASH = shutil.which('bash') or ''
-JOBS = (('create-release.yml', 'conda'), ('cron-conda.yml', 'conda-dist'))
+JOBS = (('create-release.yml', 'conda-build'), ('cron-conda.yml', 'conda-build'))
 
 
 def read_outputs(text: 'str') -> 'list[tuple[str, str]]':
@@ -74,13 +80,12 @@ exit "${CURL_FAIL:-0}"
 
 #: A ``conda`` whose ``build`` writes each of ``$FAKE_BUILT``'s paths under its
 #: ``--output-folder`` -- ``<path>/`` a directory, ``<path>@<target>`` a link --
-#: and whose ``install`` and ``build`` fail with ``$INSTALL_FAIL`` and ``$BUILD_FAIL``.
+#: and which fails with ``$BUILD_FAIL``.
 FAKE_CONDA = r'''#!/bin/bash
 out=""
 for arg in "$@"; do [ "$prev" = --output-folder ] && out="$arg"; prev="$arg"; done
 printf 'conda %s\n' "$*" | sed "s|${out:-@@}|<out>|g" >> "$CALL_LOG"
 case "$1" in
-  install) exit "${INSTALL_FAIL:-0}" ;;
   build)
     echo 'conda-build: building'
     [ -z "${BUILD_FAIL:-}" ] || { echo 'conda-build: failed' >&2; exit "$BUILD_FAIL"; }
@@ -95,32 +100,20 @@ case "$1" in
 esac
 '''
 
-#: An ``anaconda`` logging its arguments a line each, failing with ``$ANACONDA_FAIL``.
-FAKE_ANACONDA = r'''#!/bin/sh
-{ echo anaconda; printf '%s\n' "$@"; } >> "$CALL_LOG"
-exit "${ANACONDA_FAIL:-0}"
-'''
-
 #: "Check whether this leg is already on Anaconda" in ``conda``, as inline shell: what
 #: :file:`util/release_conda.py`'s ``leg`` must match.
 REFERENCE_LEG = textwrap.dedent(r'''
     set -euo pipefail
 
-    case "${{ matrix.os }}" in
-      macos-latest)
-        target_platform="osx-arm64"
-        ;;
-      macos-26-intel)
-        target_platform="osx-64"
-        ;;
+    case "$PCAPKIT_CONDA_OS" in
       ubuntu-latest)
-        target_platform="linux-64"
+        target_platform="noarch"
         ;;
       *)
         target_platform=""
         ;;
     esac
-    py_tag="py$(echo "${{ matrix.python-version }}" | tr -d '.')"
+    py_tag="py"
 
     # Same coupling risk, and the same fix, as version_check's checks.
     status="$(curl -s --retry 3 --retry-connrefused \
@@ -154,33 +147,25 @@ REFERENCE_LEG = textwrap.dedent(r'''
     fi
 ''').lstrip()
 
-#: "Build conda packages" in ``conda-dist``, as inline shell: what ``build`` must match;
-#: ``conda``'s is the same but for the ``windows-latest`` arm (:data:`REFERENCE_RELEASE_BUILD`).
+#: "Build conda packages" in both jobs, as inline shell: what ``build`` must match.
 REFERENCE_BUILD = textwrap.dedent(r'''
     set -euo pipefail
 
+    # The recipe's host Python (#3133).
+    : "$PCAPKIT_PYTHON_VERSION"
     out_dir="$(mktemp -d -t compilation-XXXXXXXXXX)"
     echo "out_dir=$out_dir" >> "$GITHUB_OUTPUT"
 
-    conda build . --package-format .tar.bz2 --no-anaconda-upload --output-folder "$out_dir" --python "${{ matrix.python-version }}"
+    conda build . --package-format .tar.bz2 --no-anaconda-upload --output-folder "$out_dir"
     host_package="$(find "$out_dir" -type f \( -name '*.tar.bz2' -o -name '*.conda' \) -print | sort | sed -n '1p')"
     if [ -z "$host_package" ]; then
       echo "::error::No conda package was built"
       exit 1
     fi
 
-    case "${{ matrix.os }}" in
-      macos-latest)
-        target_platform="osx-arm64"
-        ;;
-      macos-26-intel)
-        target_platform="osx-64"
-        ;;
+    case "$PCAPKIT_CONDA_OS" in
       ubuntu-latest)
-        target_platform="linux-64"
-        ;;
-      windows-latest)
-        target_platform="win-64"
+        target_platform="noarch"
         ;;
       *)
         target_platform=""
@@ -194,7 +179,7 @@ REFERENCE_BUILD = textwrap.dedent(r'''
     # made from the arm64 build carried arm64 extensions.
     host_platform="$(basename "$(dirname "$host_package")")"
     if [ "$host_platform" != "$target_platform" ]; then
-      echo "::error title=${host_platform} package on a ${target_platform:-unmapped} leg (#1822)::${{ matrix.os }} publishes ${target_platform:-nothing}, and conda built ${host_platform} here; a package is published only for the platform it was built on."
+      echo "::error title=${host_platform} package on a ${target_platform:-unmapped} leg (#1822)::${PCAPKIT_CONDA_OS} publishes ${target_platform:-nothing}, and conda built ${host_platform} here; a package is published only for the platform it was built for."
       exit 1
     fi
 
@@ -213,39 +198,7 @@ REFERENCE_BUILD = textwrap.dedent(r'''
       echo EOF
     } >> "$GITHUB_OUTPUT"
 ''').lstrip()
-REFERENCE_RELEASE_BUILD = REFERENCE_BUILD.replace('  windows-latest)\n    target_platform="win-64"\n    ;;\n', '')
 
-#: "Upload conda packages to Anaconda (Intel)" in both jobs, as inline shell: what ``upload`` must match.
-REFERENCE_UPLOAD = textwrap.dedent(r'''
-    set -euo pipefail
-
-    conda install -n base --override-channels -c conda-forge -y anaconda-client 'typer<0.26'
-
-    # The action's handling of its `labels:` and `packages:` inputs: a
-    # comma-separated list, each trimmed, and the build step's
-    # newline-separated paths.
-    labels=()
-    IFS=',' read -ra names <<< "$PCAPKIT_CONDA_LABELS"
-    for name in ${names[@]+"${names[@]}"}; do
-      name="$(echo "$name" | xargs)"
-      if [ -n "$name" ]; then
-        labels+=(--label "$name")
-      fi
-    done
-    packages=()
-    while IFS= read -r path; do
-      if [ -n "$path" ]; then
-        packages+=("$path")
-      fi
-    done <<< "$PCAPKIT_CONDA_PACKAGES"
-    if [ "${#packages[@]}" -eq 0 ]; then
-      echo "::error::No conda packages to upload"
-      exit 1
-    fi
-
-    "${CONDA}/bin/anaconda" --token "$ANACONDA_API_TOKEN" upload \
-      --user "$PCAPKIT_CONDA_CHANNEL" --skip-existing ${labels[@]+"${labels[@]}"} "${packages[@]}"
-''').lstrip()
 
 
 def reply(*builds: 'tuple[str, str]') -> 'str':
@@ -253,71 +206,48 @@ def reply(*builds: 'tuple[str, str]') -> 'str':
     return json.dumps({'distributions': [{'attrs': {'subdir': subdir, 'build': build}} for subdir, build in builds]})
 
 
-#: The leg check's cases: ``(name, os, python, reply, extra env)``.
+#: The leg check's cases: ``(name, os, reply, extra env)``.
 LEG_CASES = (
-    ('the leg is published', 'ubuntu-latest', '3.14', reply(('linux-64', 'py314_0')), {}),
-    ('another platform is', 'macos-latest', '3.14', reply(('linux-64', 'py314_0'), ('osx-64', 'py314_0')), {}),
-    ('the arm64 leg is published', 'macos-latest', '3.13', reply(('osx-arm64', 'py313_1')), {}),
-    ('the Intel leg is published', 'macos-26-intel', '3.13', reply(('osx-64', 'py313_0')), {}),
-    ('a longer tag is another build', 'ubuntu-latest', '3.1', reply(('linux-64', 'py314_0')), {}),
-    ('an unmapped label matches nothing', 'macos-99', '3.14', reply(('', 'py314_0'), ('osx-64', 'py314_0')), {}),
-    ('no distributions', 'ubuntu-latest', '3.14', '{}', {}),
-    ('not found', 'ubuntu-latest', '3.14', reply(('linux-64', 'py314_0')), {'CURL_CODE': '404'}),
-    ('a 2xx other than 200 is not read', 'ubuntu-latest', '3.14', reply(('linux-64', 'py314_0')),
-     {'CURL_CODE': '201'}),
-    ('a 204 with no body', 'ubuntu-latest', '3.14', '', {'CURL_CODE': '204'}),
-    ('curl fails', 'ubuntu-latest', '3.14', reply(('linux-64', 'py314_0')), {'CURL_CODE': '000', 'CURL_FAIL': '7'}),
-    ('a 200 that is no JSON', 'ubuntu-latest', '3.14', 'not json', {}),
-    ('a 200 that is a list', 'ubuntu-latest', '3.14', '[]', {}),
-    ('no version', 'ubuntu-latest', '3.14', '{}', {'PCAPKIT_VERSION': None}),
+    ('the package is published', 'ubuntu-latest', reply(('noarch', 'py_0')), {}),
+    ('a bumped build is published', 'ubuntu-latest', reply(('noarch', 'py_1')), {}),
+    ('a platform package is not it', 'ubuntu-latest', reply(('linux-64', 'py_0'), ('linux-64', 'py314_0')), {}),
+    ('a per-Python build is not it', 'ubuntu-latest', reply(('noarch', 'py314_0')), {}),
+    ('an unmapped label matches nothing', 'macos-99', reply(('', 'py_0'), ('noarch', 'py_0')), {}),
+    ('no distributions', 'ubuntu-latest', '{}', {}),
+    ('not found', 'ubuntu-latest', reply(('noarch', 'py_0')), {'CURL_CODE': '404'}),
+    ('a 2xx other than 200 is not read', 'ubuntu-latest', reply(('noarch', 'py_0')), {'CURL_CODE': '201'}),
+    ('a 204 with no body', 'ubuntu-latest', '', {'CURL_CODE': '204'}),
+    ('curl fails', 'ubuntu-latest', reply(('noarch', 'py_0')), {'CURL_CODE': '000', 'CURL_FAIL': '7'}),
+    ('a 200 that is no JSON', 'ubuntu-latest', 'not json', {}),
+    ('a 200 that is a list', 'ubuntu-latest', '[]', {}),
+    ('no version', 'ubuntu-latest', '{}', {'PCAPKIT_VERSION': None}),
+    ('no label', None, '{}', {}),
 )
 
 #: The build's cases: ``(name, os, $FAKE_BUILT, extra env)``.
 BUILD_CASES = (
-    ('linux-64 on ubuntu-latest', 'ubuntu-latest', 'linux-64/pypcapkit-1.5.0-py314_0.tar.bz2', {}),
-    ('osx-arm64 on macos-latest', 'macos-latest', 'osx-arm64/pypcapkit-1.5.0-py314_0.tar.bz2', {}),
-    ('osx-64 on macos-26-intel', 'macos-26-intel', 'osx-64/pypcapkit-1.5.0-py314_0.tar.bz2', {}),
-    ('win-64 on windows-latest', 'windows-latest', 'win-64/pypcapkit-1.5.0-py314_0.tar.bz2', {}),
+    ('noarch on ubuntu-latest', 'ubuntu-latest', 'noarch/pypcapkit-1.5.0-py_0.tar.bz2', {}),
     ('every package, sorted, and nothing else', 'ubuntu-latest',
-     'linux-64/z.tar.bz2 linux-64/a.conda linux-64/repodata.json linux-64/dir.tar.bz2/ '
-     'linux-64/link.conda@a.conda linux-64/.hidden.conda', {}),
-    ('osx-arm64 on macos-26-intel', 'macos-26-intel', 'osx-arm64/pypcapkit-1.5.0-py314_0.tar.bz2', {}),
-    ('an unmapped label', 'macos-99', 'osx-arm64/pypcapkit-1.5.0-py314_0.tar.bz2', {}),
-    ('nothing built', 'ubuntu-latest', 'linux-64/repodata.json', {}),
-    ('a failed build', 'ubuntu-latest', 'linux-64/a.tar.bz2', {'BUILD_FAIL': '3'}),
+     'noarch/z.tar.bz2 noarch/a.conda noarch/repodata.json noarch/dir.tar.bz2/ '
+     'noarch/link.conda@a.conda noarch/.hidden.conda', {}),
+    ('linux-64 on ubuntu-latest', 'ubuntu-latest', 'linux-64/pypcapkit-1.5.0-py314_0.tar.bz2', {}),
+    ('an unmapped label', 'macos-99', 'noarch/pypcapkit-1.5.0-py_0.tar.bz2', {}),
+    ('nothing built', 'ubuntu-latest', 'noarch/repodata.json', {}),
+    ('a failed build', 'ubuntu-latest', 'noarch/a.tar.bz2', {'BUILD_FAIL': '3'}),
     ('no conda', 'ubuntu-latest', '', {'PATH': None}),
-)
-
-PACKAGES = '/out/osx-64/pypcapkit-1.5.0-py314_0.tar.bz2\n/out/osx-64/pypcapkit-1.5.0-py314_1.conda'
-#: The upload's cases: ``(name, $PCAPKIT_CONDA_LABELS, $PCAPKIT_CONDA_PACKAGES, extra env)``.
-UPLOAD_CASES = (
-    ('one label', 'main', PACKAGES, {}),
-    ('labels trimmed', ' main , dev ', PACKAGES, {}),
-    ('no label', '', PACKAGES, {}),
-    ('empty and blank labels', ',main,, ,dev,', PACKAGES, {}),
-    ('a label holding a run of spaces', 'a  b', PACKAGES, {}),
-    ('only the first line of labels', 'main\ndev', PACKAGES, {}),
-    ('blank package lines', 'main', '\n' + PACKAGES + '\n\n', {}),
-    ('a path holding spaces', 'main', '/out/osx-64/a b.conda', {}),
-    ('no packages', 'main', '\n\n', {}),
-    ('a failed install', 'main', PACKAGES, {'INSTALL_FAIL': '5'}),
-    ('a failed upload', 'main', PACKAGES, {'ANACONDA_FAIL': '2'}),
-    ('no CONDA', 'main', PACKAGES, {'CONDA': None}),
-    ('no labels', None, PACKAGES, {}),
+    ('no Python', 'ubuntu-latest', 'noarch/pypcapkit-1.5.0-py_0.tar.bz2', {'PCAPKIT_PYTHON_VERSION': None}),
 )
 
 
 class _Stand(unittest.TestCase):
-    """A scratch directory with stand-in ``curl``, ``conda``, ``anaconda`` and ``python3`` first on ``PATH``."""
+    """A scratch directory with stand-in ``curl``, ``conda`` and ``python3`` first on ``PATH``."""
 
     def setUp(self) -> None:
         tmp = tempfile.TemporaryDirectory(prefix='pcapkit-1967-conda-')  # pylint: disable=consider-using-with
         self.addCleanup(tmp.cleanup)
         self.tmp = pathlib.Path(tmp.name)
         self.bin = self.tmp / 'bin'
-        conda_bin = self.tmp / 'conda' / 'bin'
-        for path, text in ((self.bin / 'curl', FAKE_CURL), (self.bin / 'conda', FAKE_CONDA),
-                           (conda_bin / 'anaconda', FAKE_ANACONDA)):
+        for path, text in ((self.bin / 'curl', FAKE_CURL), (self.bin / 'conda', FAKE_CONDA)):
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(text, encoding='utf-8')
             path.chmod(0o755)
@@ -333,8 +263,7 @@ class _Stand(unittest.TestCase):
         self.base = {
             'PATH': f'{self.bin}{os.pathsep}{os.environ.get("PATH", "")}', 'HOME': str(self.tmp), 'LC_ALL': 'C',
             'TMPDIR': str(self.scratch), 'GITHUB_OUTPUT': str(self.output), 'CALL_LOG': str(self.log),
-            'CURL_REPLY': str(self.reply), 'CONDA': str(self.tmp / 'conda'), 'PCAPKIT_VERSION': '1.5.0',
-            'ANACONDA_API_TOKEN': 'TOKEN', 'ANACONDA_CLI_FORCE_NEW': '1', 'PCAPKIT_CONDA_CHANNEL': 'jarryshaw',
+            'CURL_REPLY': str(self.reply), 'PCAPKIT_VERSION': '1.5.0',
         }
 
     def reset(self) -> None:
@@ -376,56 +305,48 @@ class _Stand(unittest.TestCase):
         return self.state(subprocess.run([sys.executable, str(script), *words[2:]], cwd=self.work,  # nosec: B603
                                          env=env, capture_output=True, text=True, check=False, timeout=120))
 
-    def reference(self, shell: 'str', env: 'dict[str, str]', label: 'str' = '',
-               python: 'str' = '') -> 'tuple[object, ...]':
-        """``shell``, templated for the leg, as ``shell: bash`` runs it, its own errors' ``<path>: line N:`` dropped."""
-        self.shell.write_text(shell.replace('/tmp/anaconda_release.json', str(self.release))
-                              .replace('${{ matrix.os }}', label)
-                              .replace('${{ matrix.python-version }}', python), encoding='utf-8')
+    def reference(self, shell: 'str', env: 'dict[str, str]') -> 'tuple[object, ...]':
+        """``shell``, as ``shell: bash`` runs it, its own errors' ``<path>: line N:`` dropped."""
+        self.shell.write_text(shell.replace('/tmp/anaconda_release.json', str(self.release)), encoding='utf-8')
         result = subprocess.run(bash_argv('-eo', 'pipefail', str(self.shell), executable=BASH),  # nosec: B603
                                 cwd=self.work, env=env, capture_output=True, text=True, check=False, timeout=120)
         result.stderr = re.sub(rf'(?m)^{re.escape(str(self.shell))}: line \d+: ', '', result.stderr)
         return self.state(result)
 
     def leg_env(self, case: 'tuple[object, ...]') -> 'dict[str, str]':
-        _, label, python, body, extra = case
+        _, label, body, extra = case
         self.reply.write_text(str(body), encoding='utf-8')
-        return self.env(extra, PCAPKIT_CONDA_OS=label, PCAPKIT_PYTHON_VERSION=python)  # type: ignore[arg-type]
+        return self.env(extra, PCAPKIT_CONDA_OS=label)  # type: ignore[arg-type]
 
     def build_env(self, case: 'tuple[object, ...]') -> 'dict[str, str]':
         _, label, built, extra = case
-        return self.env(extra, PCAPKIT_CONDA_OS=label, PCAPKIT_PYTHON_VERSION='3.14',  # type: ignore[arg-type]
-                        FAKE_BUILT=built, PCAPKIT_BUILD='0')
-
-    def upload_env(self, case: 'tuple[object, ...]') -> 'dict[str, str]':
-        _, labels, packages, extra = case
-        return self.env(extra, PCAPKIT_CONDA_LABELS=labels, PCAPKIT_CONDA_PACKAGES=packages)  # type: ignore[arg-type]
+        return self.env(dict({'PCAPKIT_PYTHON_VERSION': '3.15'}, **extra),  # type: ignore[arg-type]
+                        PCAPKIT_CONDA_OS=label, FAKE_BUILT=built, PCAPKIT_BUILD='0')
 
 
 #: Each step, as ``(workflow, job, step name)``, and the ``run:`` it holds.
 STEPS = {
     ('create-release.yml', 'conda', 'Check whether this leg is already on Anaconda'):
         'python3 util/release_conda.py leg /tmp/anaconda_release.json',
-    ('create-release.yml', 'conda', 'Build conda packages'): 'python ../../util/release_conda.py build',
-    ('cron-conda.yml', 'conda-dist', 'Build conda packages'): 'python ../../util/release_conda.py build',
-    ('create-release.yml', 'conda', 'Upload conda packages to Anaconda (Intel)'):
-        'python3 util/release_conda.py upload',
-    ('cron-conda.yml', 'conda-dist', 'Upload conda packages to Anaconda (Intel)'):
-        'python3 util/release_conda.py upload',
+    ('create-release.yml', 'conda-build', 'Build conda packages'): 'python ../../util/release_conda.py build',
+    ('cron-conda.yml', 'conda-build', 'Build conda packages'): 'python ../../util/release_conda.py build',
+    # #3133: the publishers find the package conda-build built and conda-test installed.
+    ('create-release.yml', 'conda', 'Find the conda package'):
+        'python3 util/release_conda.py downloaded "$RUNNER_TEMP/conda-package"',
+    ('cron-conda.yml', 'conda-dist', 'Find the conda package'):
+        'python3 util/release_conda.py downloaded "$RUNNER_TEMP/conda-package"',
 }
 LEG_RUN = STEPS[('create-release.yml', 'conda', 'Check whether this leg is already on Anaconda')]
-BUILD_RUN = STEPS[('cron-conda.yml', 'conda-dist', 'Build conda packages')]
-UPLOAD_RUN = STEPS[('cron-conda.yml', 'conda-dist', 'Upload conda packages to Anaconda (Intel)')]
+BUILD_RUN = STEPS[('cron-conda.yml', 'conda-build', 'Build conda packages')]
 
 
 @unittest.skipIf(not BASH, 'needs bash, which runs the reference shell')
 class TestTheStepMatchesTheReferenceShell(_Stand):
     """Each script exits, prints, writes and calls exactly as the step's inline shell form, on every case."""
 
-    def agree(self, shell: 'str', run: 'str', env: 'dict[str, str]', label: 'str' = '',
-              python: 'str' = '') -> 'tuple[object, ...]':
+    def agree(self, shell: 'str', run: 'str', env: 'dict[str, str]') -> 'tuple[object, ...]':
         self.reset()
-        old = self.reference(shell, env, label, python)
+        old = self.reference(shell, env)
         self.reset()
         new = self.script(run, env)
         self.assertEqual(new, old)
@@ -434,34 +355,26 @@ class TestTheStepMatchesTheReferenceShell(_Stand):
     def test_the_leg_check(self) -> None:
         for case in LEG_CASES:
             with self.subTest(case=case[0]):
-                self.agree(REFERENCE_LEG, LEG_RUN, self.leg_env(case), str(case[1]), str(case[2]))
+                self.agree(REFERENCE_LEG, LEG_RUN, self.leg_env(case))
 
     def test_the_build(self) -> None:
-        for shell, cases in ((REFERENCE_BUILD, BUILD_CASES),
-                             (REFERENCE_RELEASE_BUILD, [case for case in BUILD_CASES if case[1] != 'windows-latest'])):
-            for case in cases:
-                with self.subTest(case=case[0], release=shell is REFERENCE_RELEASE_BUILD):
-                    self.agree(shell, BUILD_RUN, self.build_env(case), str(case[1]), '3.14')
-
-    def test_the_upload(self) -> None:
-        for case in UPLOAD_CASES:
+        for case in BUILD_CASES:
             with self.subTest(case=case[0]):
-                self.agree(REFERENCE_UPLOAD, UPLOAD_RUN, self.upload_env(case))
+                self.agree(REFERENCE_BUILD, BUILD_RUN, self.build_env(case))
 
     def test_every_way_each_shell_ends_was_reached(self) -> None:
         """So agreement is not agreement on one path."""
         ended = {}  # type: dict[str, set[object]]
         for name, shell, cases, env in (
-                ('leg', REFERENCE_LEG, LEG_CASES, self.leg_env), ('build', REFERENCE_BUILD, BUILD_CASES, self.build_env),
-                ('upload', REFERENCE_UPLOAD, UPLOAD_CASES, self.upload_env)):
+                ('leg', REFERENCE_LEG, LEG_CASES, self.leg_env),
+                ('build', REFERENCE_BUILD, BUILD_CASES, self.build_env)):
             for case in cases:
                 self.reset()
-                found = self.reference(shell, env(case), str(case[1]), '3.14' if name == 'build' else str(case[2]))
+                found = self.reference(shell, env(case))
                 ended.setdefault(name, set()).add((found[0], dict(found[3]).get('PCAPKIT_LEG_EXISTS')))
         self.assertEqual(ended, {
             'leg': {(0, 'true'), (0, 'false'), (1, None)},
             'build': {(0, None), (1, None), (3, None), (127, None)},
-            'upload': {(0, None), (1, None), (2, None), (5, None)},
         })
 
 
@@ -473,26 +386,26 @@ class TestTheScripts(_Stand):
         self.reset()
 
     def test_a_build_outputs_every_package(self) -> None:
-        status, stdout, _, outputs, _ = self.script(BUILD_RUN, self.build_env(BUILD_CASES[4]))
+        status, stdout, _, outputs, _ = self.script(BUILD_RUN, self.build_env(BUILD_CASES[1]))
         self.assertEqual(status, 0)
-        found = ['<out>/linux-64/.hidden.conda', '<out>/linux-64/a.conda', '<out>/linux-64/z.tar.bz2']
+        found = ['<out>/noarch/.hidden.conda', '<out>/noarch/a.conda', '<out>/noarch/z.tar.bz2']
         self.assertEqual(stdout, 'conda-build: building\n' + ''.join(f'{path}\n' for path in found))
         self.assertEqual(outputs, [('out_dir', '<out>'), ('host_package', found[0]),
                                    ('packages_csv', ','.join(found)), ('packages', '\n'.join(found))])
 
     def test_a_package_for_another_platform_fails_the_leg(self) -> None:
-        status, stdout, _, outputs, _ = self.script(BUILD_RUN, self.build_env(BUILD_CASES[5]))
+        status, stdout, _, outputs, _ = self.script(BUILD_RUN, self.build_env(BUILD_CASES[2]))
         self.assertEqual(status, 1)
         self.assertEqual(stdout.splitlines()[-1], (
-            '::error title=osx-arm64 package on a osx-64 leg (#1822)::macos-26-intel publishes osx-64, and conda '
-            'built osx-arm64 here; a package is published only for the platform it was built on.'))
+            '::error title=linux-64 package on a noarch leg (#1822)::ubuntu-latest publishes noarch, and conda '
+            'built linux-64 here; a package is published only for the platform it was built for.'))
         self.assertEqual([name for name, _ in outputs], ['out_dir', 'host_package'])
 
     def test_a_published_leg_is_announced(self) -> None:
         status, stdout, _, outputs, calls = self.script(LEG_RUN, self.leg_env(LEG_CASES[0]))
         self.assertEqual(status, 0)
         self.assertEqual(outputs, [('PCAPKIT_LEG_EXISTS', 'true')])
-        self.assertEqual(stdout, '::notice title=conda leg already published::pypcapkit 1.5.0 for linux-64 / py314 '
+        self.assertEqual(stdout, '::notice title=conda leg already published::pypcapkit 1.5.0 for noarch / py '
                                  "is already on anaconda.org/jarryshaw (http 200); skipping this leg's upload.\n")
         self.assertEqual(calls, f'curl -s --retry 3 --retry-connrefused -o {self.release} -w %{{http_code}} '
                                 'https://api.anaconda.org/release/jarryshaw/pypcapkit/1.5.0\n')
@@ -505,31 +418,124 @@ class TestTheScripts(_Stand):
         self.assertEqual(outputs, [('PCAPKIT_LEG_EXISTS', 'false')])
         self.assertEqual(str(calls).count('\n'), 1)  # curl alone, no count
 
-    def test_the_upload_makes_the_actions_call(self) -> None:
-        status, _, _, _, calls = self.script(UPLOAD_RUN, self.upload_env(UPLOAD_CASES[1]))
-        self.assertEqual(status, 0)
-        self.assertEqual(str(calls).splitlines(), [
-            'conda install -n base --override-channels -c conda-forge -y anaconda-client typer<0.26', 'anaconda',
-            '--token', 'TOKEN', 'upload', '--user', 'jarryshaw', '--skip-existing', '--label', 'main',
-            '--label', 'dev', *PACKAGES.split('\n')])
-
-    def test_the_upload_installs_a_typer_anaconda_client_loads(self) -> None:
-        """#2809: anaconda-client's ``config`` passes ``typer.Option(click_type=...)``.
-
-        typer 0.29 rejects it, so ``anaconda`` raises :exc:`TypeError` loading its
-        plugins, before uploading anything, and 0.26 to 0.28 misparse it.
-        anaconda-client 1.17.0 pins ``typer>=0.17,<0.26``; conda-forge's 1.14.1 and
-        1.16.0 declare no typer, leaving anaconda-cli-base's unbounded ``typer >=0.17``.
-        """
-        status, _, _, _, calls = self.script(UPLOAD_RUN, self.upload_env(UPLOAD_CASES[0]))
-        self.assertEqual(status, 0)
-        install = str(calls).splitlines()[0].split(' ')
-        self.assertEqual(install[:2], ['conda', 'install'])
-        self.assertEqual([spec for spec in install if spec.startswith('typer')], ['typer<0.26'])
-
     def test_the_outputs_reader_reads_both_forms(self) -> None:
         self.assertEqual(read_outputs('a=1\nb<<EOF_x\nl1\nl2\nEOF_x\nc=x<<y\n'),
                          [('a', '1'), ('b', 'l1\nl2'), ('c', 'x<<y')])
+
+
+class TestTheScriptsInProcess(unittest.TestCase):
+    """``main`` run here, its outputs read back (#3133)."""
+
+    def setUp(self) -> None:
+        tmp = tempfile.TemporaryDirectory(prefix='pcapkit-3133-conda-')  # pylint: disable=consider-using-with
+        self.addCleanup(tmp.cleanup)
+        self.tmp = pathlib.Path(tmp.name)
+        self.output = self.tmp / 'output'
+        self.output.write_text('', encoding='utf-8')
+
+    def env(self, **variables: 'str') -> 'mock._patch[Any]':
+        return mock.patch.dict(os.environ, {'GITHUB_OUTPUT': str(self.output), 'PCAPKIT_VERSION': '1.8.2',
+                                            'PCAPKIT_CONDA_OS': 'ubuntu-latest', **variables})
+
+    def test_a_published_package_is_found(self) -> None:
+        reply = str(self.tmp / 'reply.json')
+        stdout = io.TextIOWrapper(io.BytesIO(), encoding='utf-8')
+        with self.env(), mock.patch.object(release_conda.release_published, 'fetch', return_value=b'200'), \
+                mock.patch.object(release_conda.release_published, 'count', return_value=b'true') as count, \
+                mock.patch('sys.stdout', stdout):
+            self.assertEqual(release_conda.main(['leg', reply]), 0)
+        count.assert_called_once_with(release_conda.leg_source(reply, 'noarch', 'py'))
+        stdout.flush()
+        self.assertEqual(stdout.buffer.getvalue(), b'::notice title=conda leg already published::pypcapkit 1.8.2 for '
+                                                   b"noarch / py is already on anaconda.org/jarryshaw (http 200); "
+                                                   b"skipping this leg's upload.\n")
+        self.assertEqual(self.output.read_text(encoding='utf-8'), 'PCAPKIT_LEG_EXISTS=true\n')
+
+    def test_another_status_counts_nothing(self) -> None:
+        with self.env(), mock.patch.object(release_conda.release_published, 'fetch', return_value=b'404'), \
+                mock.patch.object(release_conda.release_published, 'count') as count:
+            self.assertEqual(release_conda.main(['leg', str(self.tmp / 'reply.json')]), 0)
+        count.assert_not_called()
+        self.assertEqual(self.output.read_text(encoding='utf-8'), 'PCAPKIT_LEG_EXISTS=false\n')
+
+    def test_an_output_that_does_not_open_fails(self) -> None:
+        err = io.StringIO()
+        with self.env(GITHUB_OUTPUT=str(self.tmp / 'missing' / 'output')), mock.patch('sys.stderr', err), \
+                mock.patch.object(release_conda.release_published, 'fetch', return_value=b'404'):
+            self.assertEqual(release_conda.main(['leg', str(self.tmp / 'reply.json')]), 1)
+        self.assertIn('No such file or directory', err.getvalue())
+
+    def test_a_failed_count_ends_the_check(self) -> None:
+        with self.env(), mock.patch.object(release_conda.release_published, 'fetch', return_value=b'200'), \
+                mock.patch.object(release_conda.release_published, 'count',
+                                  side_effect=release_conda.release_published.Failed(3)):
+            self.assertEqual(release_conda.main(['leg', str(self.tmp / 'reply.json')]), 3)
+
+    def build(self, *built: 'str', status: 'int' = 0) -> 'tuple[int, str, str]':
+        """``build``'s status, standard output and ``$GITHUB_OUTPUT``, conda writing ``built`` under its folder."""
+        out_dir = self.tmp / 'compilation-x'
+        out_dir.mkdir()
+
+        def conda(*args: 'str') -> 'int':
+            for name in built:
+                (out_dir / name).parent.mkdir(parents=True, exist_ok=True)
+                (out_dir / name).write_bytes(b'')
+            return status
+        stdout = io.StringIO()
+        with self.env(PCAPKIT_PYTHON_VERSION='3.15'), mock.patch('sys.stdout', stdout), \
+                mock.patch.object(release_conda.tempfile, 'mkdtemp', return_value=str(out_dir)), \
+                mock.patch.object(release_conda, 'call', side_effect=conda):
+            result = release_conda.main(['build'])
+        return result, stdout.getvalue(), self.output.read_text(encoding='utf-8')
+
+    def test_a_noarch_build_outputs_its_package(self) -> None:
+        status, stdout, written = self.build('noarch/pypcapkit-1.8.2-py_0.tar.bz2', 'noarch/repodata.json')
+        package = str(self.tmp / 'compilation-x' / 'noarch' / 'pypcapkit-1.8.2-py_0.tar.bz2')
+        self.assertEqual(status, 0, stdout)
+        self.assertIn(package, stdout)
+        self.assertEqual(dict(read_outputs(written)), {'out_dir': str(self.tmp / 'compilation-x'),
+                                                       'host_package': package, 'packages_csv': package,
+                                                       'packages': package})
+
+    def test_a_platform_build_fails(self) -> None:
+        status, stdout, _ = self.build('linux-64/pypcapkit-1.8.2-py315_0.tar.bz2')
+        self.assertEqual(status, 1)
+        self.assertIn('::error title=linux-64 package on a noarch leg (#1822)::', stdout)
+
+    def test_nothing_built_fails(self) -> None:
+        status, stdout, _ = self.build('noarch/repodata.json')
+        self.assertEqual(status, 1)
+        self.assertIn('::error::No conda package was built', stdout)
+
+    def test_a_failed_build_is_its_status(self) -> None:
+        self.assertEqual(self.build(status=5)[0], 5)
+
+    def test_the_downloaded_package_is_output(self) -> None:
+        """#3133: what the publisher uploads, found where the artifact was downloaded."""
+        found = self.tmp / 'conda-package'
+        (found / 'deep').mkdir(parents=True)
+        for name in ('pypcapkit-1.8.2-py_0.tar.bz2', 'deep/pypcapkit-1.8.2-py_0.conda', 'repodata.json'):
+            (found / name).write_bytes(b'')
+        stdout = io.StringIO()
+        with self.env(), mock.patch('sys.stdout', stdout):
+            self.assertEqual(release_conda.main(['downloaded', str(found)]), 0)
+        packages = [str(found / 'deep' / 'pypcapkit-1.8.2-py_0.conda'), str(found / 'pypcapkit-1.8.2-py_0.tar.bz2')]
+        self.assertEqual(stdout.getvalue(), ''.join(f'{path}\n' for path in packages))
+        self.assertEqual(dict(read_outputs(self.output.read_text(encoding='utf-8'))),
+                         {'packages_csv': ','.join(packages), 'packages': '\n'.join(packages)})
+
+    def test_no_downloaded_package_fails(self) -> None:
+        stdout = io.StringIO()
+        with self.env(), mock.patch('sys.stdout', stdout):
+            self.assertEqual(release_conda.main(['downloaded', str(self.tmp)]), 1)
+        self.assertIn(f'::error::No conda package was downloaded to {self.tmp}', stdout.getvalue())
+        self.assertEqual(self.output.read_text(encoding='utf-8'), '')
+
+    def test_a_missing_command_is_127(self) -> None:
+        err = io.StringIO()
+        with mock.patch('sys.stderr', err):
+            self.assertEqual(release_conda.call(str(self.tmp / 'no-such-conda')), 127)
+        self.assertIn('no-such-conda: command not found', err.getvalue())
 
 
 class TestTheStepsRunTheScripts(unittest.TestCase):
@@ -547,12 +553,24 @@ class TestTheStepsRunTheScripts(unittest.TestCase):
 
     def test_the_leg_and_build_steps_name_the_leg(self) -> None:
         for workflow, job_id, name in STEPS:
-            if 'release_conda.py upload' in STEPS[(workflow, job_id, name)]:
+            if 'release_conda.py downloaded' in STEPS[(workflow, job_id, name)]:
                 continue
             given = self.step(workflow, job_id, name)['env']
             with self.subTest(workflow=workflow, step=name):
-                self.assertEqual(given['PCAPKIT_CONDA_OS'], '${{ matrix.os }}')  # type: ignore[index]
-                self.assertEqual(given['PCAPKIT_PYTHON_VERSION'], '${{ matrix.python-version }}')  # type: ignore[index]
+                self.assertEqual(given['PCAPKIT_CONDA_OS'], job(workflow, job_id)['runs-on'])  # type: ignore[index]
+
+    def test_the_recipe_is_hosted_on_the_python_that_downloaded_the_wheels(self) -> None:
+        """#3133: pip refuses a wheel tagged for another Python, as dictdumper's ``cp3XX-none-any`` are."""
+        for workflow, job_id in JOBS:
+            setup = [entry for entry in steps(workflow, job_id)
+                     if str(entry.get('uses', '')).startswith('actions/setup-python@')]
+            build = self.step(workflow, job_id, 'Build conda packages')
+            with self.subTest(workflow=workflow):
+                self.assertEqual(len(setup), 1)
+                self.assertEqual(build['env']['PCAPKIT_PYTHON_VERSION'],  # type: ignore[index]
+                                 setup[0]['with']['python-version'])  # type: ignore[index]
+        self.assertIn("{% set python = environ['PCAPKIT_PYTHON_VERSION'] %}", RECIPE)
+        self.assertIn('    - python {{ python }}.*\n', RECIPE)
 
     def test_the_build_runs_from_the_recipe_under_a_login_shell(self) -> None:
         """Where conda's base ``python`` is first on ``PATH``, and on Windows ``conda`` is defined at all."""
@@ -572,7 +590,7 @@ class TestTheStepsRunTheScripts(unittest.TestCase):
     def test_every_leg_is_mapped_and_every_mapping_is_a_leg(self) -> None:
         legs = set()  # type: set[str]
         for workflow, job_id in JOBS:
-            labels = job(workflow, job_id)['strategy']['matrix']['os']
+            labels = [job(workflow, job_id)['runs-on']]
             legs.update(labels)
             with self.subTest(workflow=workflow):
                 self.assertLessEqual(set(labels), set(release_conda.PLATFORMS))

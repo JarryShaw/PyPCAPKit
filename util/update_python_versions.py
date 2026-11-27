@@ -246,8 +246,8 @@ class Target(NamedTuple):
 
 
 #: An image's family and version, at the start of the table's Image cell:
-#: ``Windows Server 2025`` reads as ``windows`` 2025, for the conda job's
-#: ``windows-latest`` leg (#2060).
+#: ``Windows Server 2025`` reads as ``windows`` 2025, for a ``windows-latest``
+#: runner (#2060).
 IMAGE = re.compile(r'(Ubuntu|macOS|Windows)(?:\s+Server)?\s+(\d+(?:\.\d+)?)\b')
 #: setup-python's manifest ``platform`` for each family.
 PLATFORM = {'ubuntu': 'linux', 'macos': 'darwin', 'windows': 'win32'}
@@ -583,7 +583,7 @@ def workflow_labels(workflows: 'dict[str, Any]') -> 'dict[str, list[str]]':
         Where a version without ``runner`` runs: the label a ``matrix.os || '...'``
         falls back to, or the literal ``runs-on`` of a job installing a tier's list.
     ``supported``
-        ``default``, plus each label of a literal ``os`` axis (the conda jobs).
+        ``default``, plus each label of a literal ``os`` axis.
     ``latest``
         The ``runs-on`` of every job whose setup-python reads ``latest``, or the
         label its ``matrix.os || '...'`` falls back to, but a job with

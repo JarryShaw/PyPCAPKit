@@ -14,9 +14,9 @@ on:
     workflows: ["Unit Tests"]
     types: [completed]
   # A build-only run of the dispatched ref, so the schedule's build and smoke
-  # tests, the Windows leg's included, can be debugged without waiting for
-  # Saturday: `conda-update` refreshes and bumps but pushes nothing, and
-  # `conda-dist` builds that tree. No step that pushes, tags, uploads or posts
+  # tests can be debugged without waiting for Saturday: `conda-update`
+  # refreshes and bumps but pushes nothing, and
+  # `conda-build` builds that tree. No step that pushes, tags, uploads or posts
   # runs, and no job enters an environment -- unless `publish` is set (#2060),
   # which `mode` refuses off `main`, and which then publishes as a scheduled
   # bump does, with the build bumped even when nothing changed.
@@ -26,7 +26,7 @@ on:
         description: >-
           Publish main's released version: bump the build even when nothing
           changed, push and tag the bump, then build the v<version> tag's tree,
-          upload every platform and post the report. Refused on any other ref,
+          upload the noarch package and post the report. Refused on any other ref,
           and where main's version has no v tag or names other dependencies.
           Unset, the run only builds.
         type: boolean
@@ -131,7 +131,7 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      # #1660: `latest` for this job and `conda-dist`'s versions, from
+      # #1660: `latest` for this job and `conda-build`, `conda-test`'s versions, from
       # .github/python-versions.toml, read with the runner's own python3.
       - name: Read the Python versions
         id: python-versions
@@ -141,32 +141,15 @@ jobs:
         with:
           python-version: ${{ steps.python-versions.outputs.latest }}
 
-      # `.[all]` is what util/conda_vendor.py vendors (#1814), pinning each
-      # package at the version installed here but for its `PLATFORM_PINS`
-      # (#1827), so this install resolves the newest releases. `requests` is
-      # for the next step, the script's only run that reads the network.
+      # The core dependencies are what util/conda_vendor.py vendors, but for
+      # those conda-forge has (#1814, #3133), pinning each at the version
+      # installed here, so this install resolves the newest releases.
       - name: Install and Setup
         run: |
           set -x
 
-          python -m pip install -U pip setuptools wheel packaging requests
-          python -m pip install -e '.[all]'
-
-      # #1851: moves each `PLATFORM_PINS` pin in conda/platform-pins.toml up to
-      # PyPI's newest release with a wheel for the pinned platform, no further
-      # than the one installed above, and renews its review-by date; a pin that
-      # reaches the installed release goes. Not one of
-      # util/verdict_covers_checkout.py's bot-managed paths, which says why
-      # (#1643). An unreadable package keeps its pin, as does a pin no release
-      # can move to (#2025) and a pin whose own release has lost a wheel while
-      # an older one still qualifies (#2028), and each warns, as does a pin past
-      # its review-by date; none fails the step. The log keeps those lines for
-      # the run report (#2030); `pipefail`, so `tee` cannot hide the script's
-      # own exit status.
-      - name: Refresh the platform pins
-        run: |
-          set -o pipefail
-          python util/conda_vendor.py --refresh-pins | tee "$RUNNER_TEMP/platform-pins.log"
+          python -m pip install -U pip setuptools wheel packaging
+          python -m pip install -e .
 
       - name: Setup Conda Distribution
         run: |
@@ -192,7 +175,7 @@ jobs:
           fi
 
       # #2060: a manual run with `publish` bumps even when nothing changed, so
-      # its build is one Anaconda has no file for and every `conda-dist` leg
+      # its build is one Anaconda has no file for and `conda-dist`
       # uploads; util/conda_vendor.py regenerates the same recipe when no
       # dependency moved. Any other run bumps only on a change. `forced` says
       # which, for Push Changes and the run report: no later run repeats a
@@ -301,7 +284,7 @@ jobs:
           Updated conda distribution at $(date). The following files have been changed:
             ${CHANGED_FILES:-none, as a manual run with publish bumps regardless}${provenance}"
 
-      # #1632: writes `pushed` and `commit` for `conda-tag` and `conda-dist`.
+      # #1632: writes `pushed` and `commit` for `conda-tag`, `conda-build` and `conda-dist`.
       # The verdict covers `$GITHUB_SHA` only, so the commits a rebase onto the
       # fetched tip would bring in are put to #1643's rule, run from this
       # checkout. Not covered: nothing is pushed, and the tip's own Unit Tests
@@ -407,7 +390,7 @@ jobs:
       # project has shipped for real (e.g. 1.5.0b14), and gating on it would
       # silently block one. `is_devrelease` is `true` only for a PEP 440
       # dev-release suffix (X.Y.Z.devN), the work-in-progress signal `conda-tag`
-      # and `conda-dist` read below so that a scheduled or `workflow_run`
+      # and the conda jobs read below so that a scheduled or `workflow_run`
       # trigger never tags or uploads a dev version with no human in the path.
       # Independent of the equivalent `PCAPKIT_DEV_RELEASE` gate proposed for
       # create-release.yml's `version_check` job in #2452 (not yet merged):
@@ -426,10 +409,10 @@ jobs:
             echo "PCAPKIT_BUILD=$(cat conda/build)"
           } >> "$GITHUB_OUTPUT"
 
-      # A build-only run pushes nothing, so `conda-dist` gets this job's changes
+      # A build-only run pushes nothing, so `conda-build` gets this job's changes
       # as a patch on the dispatched commit. The first line keeps the file from
       # being empty when nothing changed.
-      - name: Save the changes for conda-dist
+      - name: Save the changes for conda-build
         if: needs.mode.outputs.publishes != 'true'
         run: |
           {
@@ -437,7 +420,7 @@ jobs:
             git diff --binary "$GITHUB_SHA"
           } > "$RUNNER_TEMP/conda-changes.patch"
 
-      - name: Upload the changes for conda-dist
+      - name: Upload the changes for conda-build
         if: needs.mode.outputs.publishes != 'true'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -445,11 +428,10 @@ jobs:
           path: ${{ runner.temp }}/conda-changes.patch
           retention-days: 1
 
-      # #2030: the run's outcome for the `discussion` job to post: what the pin
-      # refresh moved or warned about, the files the run changed, and the build
-      # it pushed. `status=warning` where a pin warned, or where a forced bump
-      # was not pushed (#2060), which is what needs a hand. `continue-on-error`
-      # on both, so a report never fails the bump.
+      # #2030: the run's outcome for the `discussion` job to post: the files
+      # the run changed, and the build it pushed. `status=warning` where a
+      # forced bump was not pushed (#2060), which is what needs a hand.
+      # `continue-on-error` on both, so a report never fails the bump.
       - name: Write the run report
         id: run-report
         if: ${{ !cancelled() }}
@@ -465,10 +447,7 @@ jobs:
           # #2841: 'false' where the release tag names other dependencies.
           SAME_DEPENDENCIES: ${{ steps.release-deps.outputs.same }}
         run: |
-          pins="$RUNNER_TEMP/platform-pins.log"
-          if grep -q '^::warning title=Platform pins::' "$pins" 2> /dev/null; then
-            echo "status=warning" >> "$GITHUB_OUTPUT"
-          elif [ "$FORCED" = true ] && [ -z "$COMMIT" ]; then
+          if [ "$FORCED" = true ] && [ -z "$COMMIT" ]; then
             echo "status=warning" >> "$GITHUB_OUTPUT"
           elif [ "$SAME_DEPENDENCIES" = false ]; then
             echo "status=warning" >> "$GITHUB_OUTPUT"
@@ -478,17 +457,6 @@ jobs:
           {
             echo '### Conda Update'
             echo
-            if [ ! -f "$pins" ]; then
-              echo '- Platform pins: not refreshed, as the job stopped first'
-            elif grep -q '^::[a-z]* title=Platform pins::' "$pins"; then
-              echo '- Platform pins:'
-              # The workflow command's data escapes, undone; `%25` last.
-              grep '^::[a-z]* title=Platform pins::' "$pins" |
-                sed -e 's/^::\([a-z]*\) title=Platform pins::/  - \1: /' \
-                    -e 's/%0D//g' -e 's/%0A/ /g' -e 's/%25/%/g'
-            else
-              echo '- Platform pins: none moved, and none warned'
-            fi
             if [ "$FILES_CHANGED" = true ]; then
               echo "- Changed: $CHANGED_FILES"
             elif [ "$BUMP" = true ]; then
@@ -528,19 +496,22 @@ jobs:
       # The commit Push Changes put on `main`, and the one `conda-tag` tags.
       CONDA_COMMIT: ${{ steps.push-changes.outputs.commit }}
       # #2841: the commit `v<version>` names, written on a publishing bump whose
-      # version has that tag and its dependencies, and the tree `conda-dist`
+      # version has that tag and its dependencies, and the tree `conda-build`
       # then builds. The tag is written wherever it was found, so the report can
       # say which of the two left the commit unwritten.
       PCAPKIT_RELEASE_COMMIT: ${{ steps.release-deps.outputs.commit }}
       PCAPKIT_RELEASE_TAG: ${{ steps.release-tag.outputs.tag }}
       PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
-      # #2458: read by `conda-tag` and `conda-dist` below, to block tagging and
+      # #2458: read by `conda-tag` and the conda jobs below, to block tagging and
       # uploading a dev-release version.
       PCAPKIT_DEV_RELEASE: ${{ steps.get_version.outputs.PCAPKIT_DEV_RELEASE }}
       PCAPKIT_CONDA_LABEL: ${{ steps.get_version.outputs.PCAPKIT_CONDA_LABEL }}
       PCAPKIT_BUILD: ${{ steps.get_version.outputs.PCAPKIT_BUILD }}
+      PYTHON_LATEST: ${{ steps.python-versions.outputs.latest }}
+      # #3133: `conda-test`'s Python axis, and the entries marking its KTLO legs.
       PYTHON_CONDA: ${{ steps.python-versions.outputs.conda }}
-      # #2030: `warning` where a platform pin warned without failing the job.
+      PYTHON_CONDA_KTLO: ${{ steps.python-versions.outputs.conda-ktlo }}
+      # #2030: `warning` where the run needs a hand without failing the job.
       status: ${{ steps.run-report.outputs.status }}
 
   conda-tag:
@@ -603,7 +574,7 @@ jobs:
 
       # `env:`, not `${{ }}` in the script, which CodeQL flags as code
       # injection. Tags `$CONDA_COMMIT` by name: a tag already on it is left
-      # and the job stays green, so a re-run goes on to `conda-dist`; a tag on
+      # and the job stays green, so a re-run goes on to `conda-build`; a tag on
       # another commit means the build number names another tree, so the job
       # fails, the tag stays, and nothing is uploaded under it.
       - name: Create Tag
@@ -636,16 +607,17 @@ jobs:
           git remote set-url origin git@github.com:JarryShaw/PyPCAPKit.git
           git push origin "conda-${PCAPKIT_VERSION}+${PCAPKIT_BUILD}"
 
-  conda-dist:
-    name: Conda deployment (update) on ${{ matrix.os }} with Python ${{ matrix.python-version }}
-    runs-on: ${{ matrix.os }}
-    # #1968: `ANACONDA_TOKEN` is an `anaconda` environment secret, as for
-    # create-release.yml's `conda`; keep it free of reviewers. A build-only
-    # run, whose uploads all skip, names no environment.
-    environment: ${{ needs.mode.outputs.publishes == 'true' && 'anaconda' || '' }}
+  # #3133: the one `noarch: python` package, as create-release.yml builds,
+  # tests and publishes it: `conda-build` builds it once, `conda-test` installs
+  # that file on each platform and Python, and `conda-dist` publishes it once
+  # every supported leg passed. A build-only run builds and tests alone.
+  conda-build:
+    name: Conda build (update)
+    runs-on: ubuntu-latest
+    # No `environment:`: it builds, and publishes nothing.
     needs: [ conda-tag, conda-update, mode ]
     # #1632, as for `conda-tag`. `conda-tag` must succeed, with no `skipped`
-    # escape as create-release.yml's `conda` job grants its `tag`: the checkout
+    # escape as create-release.yml's conda jobs grant its `tag`: the checkout
     # pins the tag, which names the pushed commit only then, and `conda-tag`
     # skips only when no bump was pushed. A build-only run, which never tags,
     # builds the dispatched commit with `conda-update`'s changes applied.
@@ -668,23 +640,7 @@ jobs:
         needs.conda-update.outputs.PCAPKIT_DEV_RELEASE != 'true'
       ))
     permissions:
-      contents: write
-    strategy:
-      fail-fast: false
-      matrix:
-        # #1822: each leg builds and publishes its own runner's platform only,
-        # as create-release.yml's `conda` job says.
-        os:
-          - macos-latest
-          - macos-26-intel
-          - ubuntu-latest
-          # #2060: win-64, uploaded with the anaconda-client CLI as the Intel
-          # leg is.
-          - windows-latest
-        # #1633: the supported tier, from .github/python-versions.toml through
-        # `conda-update` (#1660); create-release.yml's ``conda`` job says why
-        # there is no KTLO 3.10 leg.
-        python-version: ${{ fromJSON(needs.conda-update.outputs.PYTHON_CONDA) }}
+      contents: read
     steps:
       # No persisted token: nothing here runs `git` with credentials (#2060).
       - id: checkout
@@ -742,10 +698,10 @@ jobs:
       - id: setup-python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ needs.conda-update.outputs.PYTHON_LATEST }}
 
       # #1854: pcapkit is not installed here; see create-release.yml's step of
-      # the same name. `shell: bash` here and below, as Windows runs `pwsh`.
+      # the same name.
       - name: Install and Setup
         id: install
         shell: bash
@@ -754,10 +710,7 @@ jobs:
 
           python -m pip install -U pip setuptools wheel
 
-      # #1827: pip evaluates conda/requirements.txt's platform markers here,
-      # on this leg's own runner, so Intel macOS fetches its own cryptography
-      # pin; the recipe's build.sh, or bld.bat on Windows, installs whatever
-      # this downloaded.
+      # The recipe's build.sh installs whatever this downloaded.
       - name: Setup Conda Distribution
         id: download
         shell: bash
@@ -767,8 +720,7 @@ jobs:
           mkdir -p conda/wheels
           python -m pip download -r conda/requirements.txt -d conda/wheels
 
-      # See create-release.yml's step of the same name for the 3.15 and Intel
-      # exceptions (#2123).
+      # Base keeps its own Python, as in create-release.yml's step of the same name.
       - name: Conda environment creation and activation
         id: miniconda
         uses: conda-incubator/setup-miniconda@be893c923ea9cf1cf7cd510fbdde27c7e18cbdcb # v4.1.0
@@ -776,10 +728,6 @@ jobs:
           PCAPKIT_VERSION: ${{ needs.conda-update.outputs.PCAPKIT_VERSION }}
           PCAPKIT_BUILD: ${{ needs.conda-update.outputs.PCAPKIT_BUILD }}
         with:
-          # #2044: Miniforge on the Intel leg; see create-release.yml's step of
-          # the same name.
-          miniforge-version: ${{ matrix.os == 'macos-26-intel' && 'latest' || '' }}
-          python-version: ${{ matrix.os != 'macos-26-intel' && matrix.python-version != '3.15' && matrix.python-version || '' }}
           activate-environment: base
           auto-update-conda: false
           auto-activate: true
@@ -787,8 +735,7 @@ jobs:
           conda-remove-defaults: false
           show-channel-urls: true
 
-      # A login shell, as for the build below: on Windows only that one has the
-      # `conda` setup-miniconda's `conda init` defines.
+      # A login shell, as for the build below, which activates base.
       - name: Install conda build tools
         id: conda-build-tools
         shell: bash -el {0}
@@ -798,79 +745,192 @@ jobs:
 
       # #1967: util/release_conda.py, as create-release.yml's step of the same
       # name, on conda's base `python`, which the login shell activates. #1822:
-      # it fails a package built for another platform than the leg's.
+      # it fails a package built for another platform than noarch.
       - name: Build conda packages
         id: conda_build
         shell: bash -el {0}
         env:
           PCAPKIT_VERSION: ${{ needs.conda-update.outputs.PCAPKIT_VERSION }}
           PCAPKIT_BUILD: ${{ needs.conda-update.outputs.PCAPKIT_BUILD }}
-          PCAPKIT_CONDA_OS: ${{ matrix.os }}
-          PCAPKIT_PYTHON_VERSION: ${{ matrix.python-version }}
+          PCAPKIT_CONDA_OS: ubuntu-latest
+          PCAPKIT_PYTHON_VERSION: ${{ needs.conda-update.outputs.PYTHON_LATEST }}
         working-directory: conda/pypcapkit
         run: python ../../util/release_conda.py build
 
-      # #1814: the package's only run requirement is Python, so it has only what
-      # it vendors in `pcapkit/_extern`, and package discovery alone ships those
-      # without their data files. This checks every vendored distribution has
-      # every file its RECORD lists and imports from there, with no
-      # site-packages on the path. #1822: it also fails unless the package and
-      # every native binary in it are for this runner's platform.
-      # setup-python's interpreter, not conda's: it is the matrix version the
-      # package was built for, which conda's base is not on 3.15. On Windows it
-      # is `python.exe` at the top of `pythonLocation`, not under `bin/` (#2060).
+      # #1814: package discovery alone ships the vendored distributions in
+      # `pcapkit/_extern` without their data files. This checks every one has
+      # every file its RECORD lists and imports from there, with nothing else
+      # on the path, and #1822, #3133, that the package is noarch: python with
+      # no native binary. The recipe's own test imports pcapkit beside its
+      # conda-forge run requirements. On setup-python's interpreter, as the
+      # script needs tomllib.
       - name: Smoke-test the vendored packages
         id: smoke
         shell: bash
         env:
           PCAPKIT_CONDA_PACKAGE: ${{ steps.conda_build.outputs.host_package }}
-        run: |
-          python="${pythonLocation}/bin/python"
-          if [ "$RUNNER_OS" = Windows ]; then
-            python="$(cygpath -u "$pythonLocation")/python.exe"
-          fi
-          "$python" util/conda_vendor.py --smoke "$PCAPKIT_CONDA_PACKAGE"
+        run: '"${pythonLocation}/bin/python" util/conda_vendor.py --smoke "$PCAPKIT_CONDA_PACKAGE"'
 
-      # #2044: not on macos-26-intel, whose leg "Upload conda packages to
-      # Anaconda (Intel)" uploads instead, nor, #2060, on windows-latest, whose
-      # "Upload conda packages to Anaconda (Windows)" does. No upload, nor the
-      # GitHub Release steps after them, runs on a build-only run.
+      # The file `conda-test` installs and `conda-dist` publishes, so both have
+      # the one this job built.
+      - name: Upload the conda package
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: conda-package
+          path: ${{ steps.conda_build.outputs.packages }}
+          if-no-files-found: error
+
+  # #3133: the package `conda-build` built, installed from a local channel
+  # beside conda-forge on each platform and each Python of both tiers. Every
+  # step is #1672's: a KTLO leg's failure is a warning on a green leg, so only a
+  # supported leg's failure fails the job and holds `conda-dist` back.
+  conda-test:
+    name: Conda install on ${{ matrix.os }} with Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    needs: [ conda-build, conda-update ]
+    if: ${{ !cancelled() && needs.conda-build.result == 'success' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # create-release.yml's `conda-test` says why these.
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+          - macos-26-intel
+          - macos-latest
+          - windows-latest
+        # #1633, #1660: CPython's KTLO and supported tiers, the KTLO legs marked.
+        python-version: ${{ fromJSON(needs.conda-update.outputs.PYTHON_CONDA) }}
+        include: ${{ fromJSON(needs.conda-update.outputs.PYTHON_CONDA_KTLO) }}
+    steps:
+      - name: Checkout code
+        id: checkout
+        continue-on-error: ${{ matrix.ktlo == true }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          sparse-checkout: util
+          persist-credentials: false
+
+      - name: Download the conda package
+        id: download
+        continue-on-error: ${{ matrix.ktlo == true }}
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: conda-package
+          path: ${{ runner.temp }}/conda-channel/noarch
+
+      - name: Conda environment creation and activation
+        id: miniconda
+        if: ${{ steps.download.outcome == 'success' }}
+        continue-on-error: ${{ matrix.ktlo == true }}
+        uses: conda-incubator/setup-miniconda@be893c923ea9cf1cf7cd510fbdde27c7e18cbdcb # v4.1.0
+        with:
+          # #2044: Miniforge on the Intel leg; see create-release.yml's step of
+          # the same name.
+          miniforge-version: ${{ matrix.os == 'macos-26-intel' && 'latest' || '' }}
+          activate-environment: base
+          auto-update-conda: false
+          auto-activate: true
+          channels: conda-forge
+          conda-remove-defaults: true
+          show-channel-urls: true
+
+      # A login shell, which activates base, and on Windows defines `conda`.
+      - name: Index the local channel
+        id: index
+        if: ${{ steps.miniconda.outcome == 'success' }}
+        continue-on-error: ${{ matrix.ktlo == true }}
+        shell: bash -el {0}
+        run: |
+          conda install -n base --override-channels -c conda-forge -y conda-index
+          python -m conda_index "$RUNNER_TEMP/conda-channel"
+
+      - name: Install the conda package
+        id: install
+        if: ${{ steps.index.outcome == 'success' }}
+        continue-on-error: ${{ matrix.ktlo == true }}
+        shell: bash -el {0}
+        env:
+          PCAPKIT_PYTHON_VERSION: ${{ matrix.python-version }}
+        run: |
+          conda create -y -p "$RUNNER_TEMP/conda-test" --override-channels \
+            -c "$RUNNER_TEMP/conda-channel" -c conda-forge "python=$PCAPKIT_PYTHON_VERSION" pypcapkit
+
+      # The recipe's test commands, conda/pypcapkit/meta.yaml's `test:`.
+      - name: Test the conda package
+        id: test
+        if: ${{ steps.install.outcome == 'success' }}
+        continue-on-error: ${{ matrix.ktlo == true }}
+        shell: bash -el {0}
+        run: |
+          conda activate "$RUNNER_TEMP/conda-test"
+          python -c "import pcapkit"
+          pcapkit-cli --help
+          python -c "import os, pcapkit, dictdumper, tbtrim; assert all(os.path.realpath(m.__file__).startswith(os.path.realpath(pcapkit._extern) + os.sep) for m in (dictdumper, tbtrim))"
+
+      # #1672, on the runner's own interpreter: `python` on Windows, which
+      # has no `python3`, and `python3` where there is no `python`.
+      - name: KTLO summary
+        if: ${{ !cancelled() && matrix.ktlo == true }}
+        continue-on-error: ${{ matrix.ktlo == true }}
+        shell: bash
+        env:
+          LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
+          STEPS: ${{ toJSON(steps) }}
+        run: '"$(command -v python || command -v python3)" util/leg_summary.py ktlo'
+
+  # #3133: publishes the package `conda-build` built, once every supported leg
+  # of `conda-test` installed it; never on a build-only run.
+  conda-dist:
+    name: Conda deployment (update)
+    runs-on: ubuntu-latest
+    # #1968: `ANACONDA_TOKEN` is an `anaconda` environment secret, as for
+    # create-release.yml's `conda`; keep it free of reviewers.
+    environment: ${{ needs.mode.outputs.publishes == 'true' && 'anaconda' || '' }}
+    needs: [ conda-build, conda-test, conda-tag, conda-update, mode ]
+    # `conda-build`'s gates, on the publishing branch alone, and every supported
+    # leg of `conda-test` green (#1632, #2458, #2841).
+    if: >-
+      !cancelled() && needs.mode.outputs.publishes == 'true' &&
+      needs.conda-update.result == 'success' &&
+      needs.conda-build.result == 'success' && needs.conda-test.result == 'success' &&
+      needs.conda-tag.result == 'success' &&
+      needs.conda-update.outputs.CONDA_CHANGED == 'true' &&
+      needs.conda-update.outputs.PCAPKIT_RELEASE_COMMIT != '' &&
+      needs.conda-update.outputs.PCAPKIT_DEV_RELEASE != 'true'
+    permissions:
+      contents: write
+    steps:
+      # util/ alone, for the script below; no persisted token (#2060).
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: util
+          persist-credentials: false
+
+      - name: Download the conda package
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: conda-package
+          path: ${{ runner.temp }}/conda-package
+
+      - name: Find the conda package
+        id: conda_package
+        shell: bash
+        run: python3 util/release_conda.py downloaded "$RUNNER_TEMP/conda-package"
+
       - name: Upload conda packages to Anaconda
-        if: ${{ needs.mode.outputs.publishes == 'true' && matrix.os != 'macos-26-intel' && matrix.os != 'windows-latest' }}
+        if: ${{ needs.mode.outputs.publishes == 'true' }}
         uses: anaconda/actions/upload-package@a6f488910b4a1e4f3fe01736241ca1b92b4b355a # v0.3.1
         with:
           token: ${{ secrets.ANACONDA_TOKEN }}
           channel: jarryshaw
-          packages: ${{ steps.conda_build.outputs.packages }}
+          packages: ${{ steps.conda_package.outputs.packages }}
           labels: ${{ needs.conda-update.outputs.PCAPKIT_CONDA_LABEL }}
           force: true
-
-      # #2044: see create-release.yml's step of the same name. One difference
-      # from the action here: `--skip-existing` keeps a file anaconda.org
-      # already has, where the action's `force: true` replaces it.
-      - name: Upload conda packages to Anaconda (Intel)
-        if: ${{ needs.mode.outputs.publishes == 'true' && matrix.os == 'macos-26-intel' }}
-        shell: bash
-        env:
-          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
-          ANACONDA_CLI_FORCE_NEW: "1"
-          PCAPKIT_CONDA_CHANNEL: jarryshaw
-          PCAPKIT_CONDA_PACKAGES: ${{ steps.conda_build.outputs.packages }}
-          PCAPKIT_CONDA_LABELS: ${{ needs.conda-update.outputs.PCAPKIT_CONDA_LABEL }}
-        run: python3 util/release_conda.py upload
-
-      # #2060: see create-release.yml's step of the same name, which says why
-      # it runs under a login shell on conda's base `python`.
-      - name: Upload conda packages to Anaconda (Windows)
-        if: ${{ needs.mode.outputs.publishes == 'true' && matrix.os == 'windows-latest' }}
-        shell: bash -el {0}
-        env:
-          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
-          ANACONDA_CLI_FORCE_NEW: "1"
-          PCAPKIT_CONDA_CHANNEL: jarryshaw
-          PCAPKIT_CONDA_PACKAGES: ${{ steps.conda_build.outputs.packages }}
-          PCAPKIT_CONDA_LABELS: ${{ needs.conda-update.outputs.PCAPKIT_CONDA_LABEL }}
-        run: python util/release_conda.py upload
 
       # #1634: the upload below never makes the release. ncipollo/release-action
       # v1.21.0 creates a missing one, and its tag, at ``commit``
@@ -886,7 +946,7 @@ jobs:
       # on anaconda.org regardless.
       - name: Check the GitHub release exists
         id: release
-        if: ${{ needs.mode.outputs.publishes == 'true' && matrix.os == 'ubuntu-latest' }}
+        if: ${{ needs.mode.outputs.publishes == 'true' }}
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -929,11 +989,11 @@ jobs:
       # ``removeUndefinedProperties``, called from its ``merge``, bundled in
       # dist/index.js).
       - name: Upload package to GitHub Release
-        if: ${{ needs.mode.outputs.publishes == 'true' && matrix.os == 'ubuntu-latest' && steps.release.outputs.published == 'true' }}
+        if: ${{ needs.mode.outputs.publishes == 'true' && steps.release.outputs.published == 'true' }}
         uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
         with:
           allowUpdates: true
-          artifacts: ${{ steps.conda_build.outputs.packages_csv }}
+          artifacts: ${{ steps.conda_package.outputs.packages_csv }}
           commit: ${{ github.ref_name }}
           omitBodyDuringUpdate: true
           omitDraftDuringUpdate: true
@@ -942,15 +1002,16 @@ jobs:
           tag: "v${{ needs.conda-update.outputs.PCAPKIT_VERSION }}"
           token: "${{ secrets.GITHUB_TOKEN }}"
 
-  # #2030: posts `conda-update`'s report with the tag and upload results, and a
-  # short one of its own where `head` failed or was cancelled, as cron-vendor.yml's
-  # `discussion` job does, whose comment gives the rules. It waits for
-  # `conda-dist`, so the report says whether the build reached Anaconda. Never
-  # on a build-only run, which the thread would read as a real one; a manual
-  # run with `publish` posts as the schedule does (#2060).
+  # #2030: posts `conda-update`'s report with the tag, build, test and upload
+  # results, and a short one of its own where `head` failed or was cancelled, as
+  # cron-vendor.yml's `discussion` job does, whose comment gives the rules. It
+  # waits for `conda-dist`, so the report says whether the build reached
+  # Anaconda, and for `conda-build` and `conda-test` (#3133). Never on a
+  # build-only run, which the thread would read as a real one; a manual run
+  # with `publish` posts as the schedule does (#2060).
   discussion:
     name: Post the conda report
-    needs: [ head, conda-update, conda-tag, conda-dist, mode ]
+    needs: [ head, conda-update, conda-tag, conda-build, conda-test, conda-dist, mode ]
     if: >-
       ${{ always() && needs.mode.outputs.publishes == 'true' && (needs.conda-update.result != 'skipped' ||
       needs.head.result == 'failure' || needs.head.result == 'cancelled') }}
@@ -987,6 +1048,8 @@ jobs:
           UPDATE_RESULT: ${{ needs.conda-update.result }}
           UPDATE_STATUS: ${{ needs.conda-update.outputs.status }}
           TAG_RESULT: ${{ needs.conda-tag.result }}
+          BUILD_RESULT: ${{ needs.conda-build.result }}
+          TEST_RESULT: ${{ needs.conda-test.result }}
           DIST_RESULT: ${{ needs.conda-dist.result }}
           # #2458: needed to tell "skipped, nothing was pushed" apart from
           # "skipped, a build was pushed but it is a dev release" below.
@@ -1009,9 +1072,11 @@ jobs:
           else
             if [ "$UPDATE_RESULT" != success ]; then
               status="$UPDATE_RESULT"
-            elif [ "$TAG_RESULT" = failure ] || [ "$DIST_RESULT" = failure ]; then
+            elif [ "$TAG_RESULT" = failure ] || [ "$BUILD_RESULT" = failure ] || [ "$TEST_RESULT" = failure ] ||
+                 [ "$DIST_RESULT" = failure ]; then
               status=failure
-            elif [ "$TAG_RESULT" = cancelled ] || [ "$DIST_RESULT" = cancelled ]; then
+            elif [ "$TAG_RESULT" = cancelled ] || [ "$BUILD_RESULT" = cancelled ] || [ "$TEST_RESULT" = cancelled ] ||
+                 [ "$DIST_RESULT" = cancelled ]; then
               status=cancelled
             else
               status="${UPDATE_STATUS:-success}"
@@ -1021,6 +1086,8 @@ jobs:
             if [ "$TAG_RESULT" != skipped ] && [ -f report/conda-report.md ]; then
               {
                 echo "- Tag: $TAG_RESULT"
+                echo "- Build: $BUILD_RESULT"
+                echo "- Test: $TEST_RESULT"
                 echo "- Upload: $DIST_RESULT"
               } >> report/conda-report.md
             elif [ "$CONDA_CHANGED" = true ] && [ "$DEV_RELEASE" = true ] && [ -f report/conda-report.md ]; then

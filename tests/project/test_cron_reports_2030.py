@@ -10,8 +10,6 @@ category with :file:`util/discussion_report.py`, which
   :data:`PERMISSIONS` lists them, first-party actions only, the mode each event
   maps to, the report steps and their guards, cron-conda's job running on a failed gate but not on
   a deliberate skip, and no ``workflow_run`` consumer of either.
-* :class:`TestThePinRefresh` runs cron-conda's ``Refresh the platform pins``
-  with a stand-in ``python``: the log it keeps, and the exit status it keeps.
 * :class:`TestTheCondaReport` and :class:`TestThePythonVersionsReport` run
   each ``Write the run report`` step as the runner runs it.
 * :class:`TestThePostSteps` runs each ``Post the report to Discussions`` with a
@@ -28,7 +26,6 @@ import shutil
 import subprocess  # nosec: B404
 import sys
 import tempfile
-import textwrap
 import unittest
 from typing import TYPE_CHECKING
 
@@ -54,6 +51,7 @@ POSTERS = (
 PERMISSIONS = {
     CONDA: {None: {'contents': 'read'}, 'mode': {}, 'head': {'contents': 'read'},
             'conda-update': {'contents': 'write'}, 'conda-tag': {'contents': 'write'},
+            'conda-build': {'contents': 'read'}, 'conda-test': {'contents': 'read'},
             'conda-dist': {'contents': 'write'}},
     VERSIONS: {None: {}, 'detect': {'contents': 'read', 'pull-requests': 'read'}, 'pr': {'actions': 'read'}},
 }
@@ -66,6 +64,9 @@ ARGS = {
         'UPDATE_RESULT': '${{ needs.conda-update.result }}',
         'UPDATE_STATUS': '${{ needs.conda-update.outputs.status }}',
         'TAG_RESULT': '${{ needs.conda-tag.result }}',
+        # #3133: a failed build or test leg fails the report, though the upload only skipped.
+        'BUILD_RESULT': '${{ needs.conda-build.result }}',
+        'TEST_RESULT': '${{ needs.conda-test.result }}',
         'DIST_RESULT': '${{ needs.conda-dist.result }}',
         # #2458: tells "skipped, nothing pushed" apart from "skipped, a
         # dev-release build was pushed on purpose".
@@ -83,7 +84,8 @@ ARGS = {
     }),
 }
 #: Each ``discussion`` job's ``needs:`` and ``if:``.
-NEEDS = {CONDA: ['head', 'conda-update', 'conda-tag', 'conda-dist', 'mode'], VERSIONS: ['detect']}
+NEEDS = {CONDA: ['head', 'conda-update', 'conda-tag', 'conda-build', 'conda-test', 'conda-dist', 'mode'],
+         VERSIONS: ['detect']}
 IFS = {
     CONDA: "${{ always() && needs.mode.outputs.publishes == 'true' && (needs.conda-update.result != 'skipped' || "
            "needs.head.result == 'failure' || "
@@ -225,7 +227,8 @@ class TestTheWorkflowsPost(unittest.TestCase):
         )
         for event, head, update, expected, publishes in rows:
             needs = {'head': {'result': head}, 'conda-update': {'result': update, 'outputs': {}},
-                     'conda-tag': {'result': 'skipped'}, 'conda-dist': {'result': 'skipped'},
+                     'conda-tag': {'result': 'skipped'}, 'conda-build': {'result': 'skipped'},
+                     'conda-test': {'result': 'skipped'}, 'conda-dist': {'result': 'skipped'},
                      'mode': {'result': 'failure' if publishes is None else 'success',
                               'outputs': {} if publishes is None else {'publishes': publishes}}}
             context = {STATUS: {'cancelled': False}, 'github': {'event_name': event, 'event': {}},
@@ -254,37 +257,6 @@ class TestTheWorkflowsPost(unittest.TestCase):
             listed = (on.get('workflow_run') or {}).get('workflows', []) if isinstance(on, dict) else []
             with self.subTest(workflow=path.name):
                 self.assertFalse(names & set(listed), listed)
-
-
-@unittest.skipIf(not BASH, 'needs bash on PATH')
-class TestThePinRefresh(unittest.TestCase):
-    """``Refresh the platform pins``, run with a stand-in ``python``, as ``bash -e`` runs it."""
-
-    def run_step(self, code: 'int') -> 'tuple[subprocess.CompletedProcess[str], str]':
-        with tempfile.TemporaryDirectory(prefix='pcapkit-2030-pins-') as tmp:
-            root = pathlib.Path(tmp)
-            (root / 'fake.py').write_text(textwrap.dedent(f'''\
-                import sys
-                assert sys.argv[1:] == ['util/conda_vendor.py', '--refresh-pins'], sys.argv
-                print('::notice title=Platform pins::pyshark 0.6 -> 0.7 on osx-arm64')
-                sys.exit({code})
-            '''), encoding='utf-8')
-            launcher(root, 'python', 'fake.py')
-            script = root / 'step.sh'
-            script.write_text(step(CONDA, 'conda-update', 'Refresh the platform pins')['run'], encoding='utf-8')
-            env = {'PATH': f'{root}{os.pathsep}{os.environ.get("PATH", "")}', 'RUNNER_TEMP': str(root)}
-            result = subprocess.run(bash_argv('-e', str(script), executable=str(BASH)),  # nosec: B603
-                                    cwd=root, env=env, capture_output=True, text=True, check=False, timeout=60)
-            return result, (root / 'platform-pins.log').read_text(encoding='utf-8')
-
-    def test_the_log_keeps_the_annotations(self) -> None:
-        result, log = self.run_step(0)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        line = '::notice title=Platform pins::pyshark 0.6 -> 0.7 on osx-arm64\n'
-        self.assertEqual((result.stdout, log), (line, line))
-
-    def test_the_scripts_failure_still_fails_the_step(self) -> None:
-        self.assertEqual(self.run_step(3)[0].returncode, 3)
 
 
 @unittest.skipIf(not BASH, 'needs bash on PATH')
@@ -327,7 +299,7 @@ class _ReportStep(unittest.TestCase):
 
 
 class TestTheCondaReport(_ReportStep):
-    """``conda-update``'s report: the pins, the changed files, and the build pushed."""
+    """``conda-update``'s report: the changed files, and the build pushed (no pins since #3133)."""
 
     workflow, job, file = CONDA, 'conda-update', 'conda-report.md'
 
@@ -336,16 +308,12 @@ class TestTheCondaReport(_ReportStep):
         (self.work / 'conda').mkdir()
         (self.work / 'conda' / 'build').write_text('4\n', encoding='utf-8')
 
-    def pins(self, *lines: 'str') -> 'None':
-        (self.temp / 'platform-pins.log').write_text(''.join(f'{line}\n' for line in lines), encoding='utf-8')
-
     def report(self, **env: 'str') -> 'tuple[str, str]':
         """As a run that publishes, the schedule's or a ``workflow_run``'s, unless ``env`` says otherwise."""
         return super().report(**{'PUBLISHES': 'true', **env})
 
     def test_a_build_only_run(self) -> None:
         """A manual run without ``publish``, for which ``mode`` wrote 'false'."""
-        self.pins()
         for files_changed in ('true', 'false'):
             with self.subTest(files_changed=files_changed):
                 text, _ = self.report(PUBLISHES='false', FILES_CHANGED=files_changed, BUMP=files_changed,
@@ -354,37 +322,26 @@ class TestTheCondaReport(_ReportStep):
 
     def test_a_forced_bump(self) -> None:
         """#2060: a manual run with ``publish``, bumped and pushed although nothing changed."""
-        self.pins('pcapkit/_extern: 12 distributions')
         sha = 'f4f94bcad' + '0' * 31
         self.assertEqual(self.report(FILES_CHANGED='false', BUMP='true', PUSH='success', COMMIT=sha), (
-            '### Conda Update\n\n- Platform pins: none moved, and none warned\n'
+            '### Conda Update\n\n'
             '- Changed: nothing, and the build was bumped anyway, as a manual run with publish asks\n'
             f'- Pushed: build 4 as {sha}\n', 'success'))
 
     def test_a_quiet_run(self) -> None:
-        self.pins('pcapkit/_extern: 12 distributions')
         self.assertEqual(self.report(FILES_CHANGED='false', PUSH='skipped'), (
-            '### Conda Update\n\n- Platform pins: none moved, and none warned\n'
+            '### Conda Update\n\n'
             '- Changed: nothing, so no build was bumped\n', 'success'))
 
-    def test_a_pushed_bump_with_a_moved_pin(self) -> None:
-        self.pins('::notice title=Platform pins::pyshark 0.6 -> 0.7 on osx-arm64, 100%25 sure%0Areview by 2027-01')
+    def test_a_pushed_bump(self) -> None:
         sha = 'f4f94bcad' + '0' * 31
-        self.assertEqual(self.report(FILES_CHANGED='true', CHANGED_FILES='conda/build conda/platform-pins.toml',
+        self.assertEqual(self.report(FILES_CHANGED='true', CHANGED_FILES='conda/build conda/requirements.txt',
                                      PUSH='success', COMMIT=sha), (
-            '### Conda Update\n\n- Platform pins:\n'
-            '  - notice: pyshark 0.6 -> 0.7 on osx-arm64, 100% sure review by 2027-01\n'
-            '- Changed: conda/build conda/platform-pins.toml\n'
+            '### Conda Update\n\n'
+            '- Changed: conda/build conda/requirements.txt\n'
             f'- Pushed: build 4 as {sha}\n', 'success'))
 
-    def test_a_pin_warning_warns(self) -> None:
-        self.pins('::warning title=Platform pins::PyPI could not be read for pyshark (503), so its pins stay')
-        text, status = self.report(FILES_CHANGED='false', PUSH='skipped')
-        self.assertIn('  - warning: PyPI could not be read for pyshark (503), so its pins stay\n', text)
-        self.assertEqual(status, 'warning')
-
     def test_a_bump_not_pushed(self) -> None:
-        self.pins()
         for push, line in (('success', "- Pushed: nothing; Push Changes' notice says why\n"),
                            ('failure', '- Pushed: nothing, as Push Changes failed\n'),
                            ('', '- Pushed: nothing, as the job stopped first\n')):
@@ -393,9 +350,9 @@ class TestTheCondaReport(_ReportStep):
                 self.assertTrue(text.endswith(line), text)
                 self.assertEqual(status, 'success')
 
-    def test_a_job_that_stopped_before_the_refresh(self) -> None:
+    def test_a_job_that_stopped_first(self) -> None:
         self.assertEqual(self.report(), (
-            '### Conda Update\n\n- Platform pins: not refreshed, as the job stopped first\n'
+            '### Conda Update\n\n'
             '- Pushed: nothing, as the job stopped first\n', 'success'))
 
 
@@ -520,22 +477,32 @@ class TestThePostSteps(unittest.TestCase):
                     f'- Gate: {head}, so conda-update did not run and nothing was built or pushed\n')))
 
     def test_the_conda_status_and_the_tag_and_upload(self) -> None:
-        # `(conda-update, its status, conda-tag, conda-dist, --status, lines added)`.
-        tagged = '- Tag: success\n- Upload: '
-        for update, status, tag, dist, expected, added in (
-                ('success', 'success', 'skipped', 'skipped', 'success', ''),
-                ('success', 'warning', 'skipped', 'skipped', 'warning', ''),
-                ('success', '', 'skipped', 'skipped', 'success', ''),
-                ('success', 'success', 'success', 'success', 'success', tagged + 'success\n'),
-                ('success', 'warning', 'success', 'failure', 'failure', tagged + 'failure\n'),
-                ('success', 'success', 'failure', 'skipped', 'failure', '- Tag: failure\n- Upload: skipped\n'),
-                ('success', 'warning', 'success', 'cancelled', 'cancelled', tagged + 'cancelled\n'),
-                ('failure', 'warning', 'skipped', 'skipped', 'failure', ''),
-                ('cancelled', '', 'skipped', 'skipped', 'cancelled', ''),
+        # `(conda-update, its status, conda-tag, conda-build, conda-test, conda-dist, --status, lines added)`.
+        tagged = '- Tag: success\n- Build: success\n- Test: success\n- Upload: '
+        for update, status, tag, build, test, dist, expected, added in (
+                ('success', 'success', 'skipped', 'skipped', 'skipped', 'skipped', 'success', ''),
+                ('success', 'warning', 'skipped', 'skipped', 'skipped', 'skipped', 'warning', ''),
+                ('success', '', 'skipped', 'skipped', 'skipped', 'skipped', 'success', ''),
+                ('success', 'success', 'success', 'success', 'success', 'success', 'success', tagged + 'success\n'),
+                ('success', 'warning', 'success', 'success', 'success', 'failure', 'failure', tagged + 'failure\n'),
+                ('success', 'success', 'failure', 'skipped', 'skipped', 'skipped', 'failure',
+                 '- Tag: failure\n- Build: skipped\n- Test: skipped\n- Upload: skipped\n'),
+                ('success', 'warning', 'success', 'success', 'success', 'cancelled', 'cancelled',
+                 tagged + 'cancelled\n'),
+                # #3133: a supported test leg, or the build, failed, so nothing was uploaded.
+                ('success', 'success', 'success', 'success', 'failure', 'skipped', 'failure',
+                 '- Tag: success\n- Build: success\n- Test: failure\n- Upload: skipped\n'),
+                ('success', 'success', 'success', 'failure', 'skipped', 'skipped', 'failure',
+                 '- Tag: success\n- Build: failure\n- Test: skipped\n- Upload: skipped\n'),
+                ('success', 'success', 'success', 'success', 'cancelled', 'skipped', 'cancelled',
+                 '- Tag: success\n- Build: success\n- Test: cancelled\n- Upload: skipped\n'),
+                ('failure', 'warning', 'skipped', 'skipped', 'skipped', 'skipped', 'failure', ''),
+                ('cancelled', '', 'skipped', 'skipped', 'skipped', 'skipped', 'cancelled', ''),
         ):
-            with self.subTest(update=update, status=status, tag=tag, dist=dist):
+            with self.subTest(update=update, status=status, tag=tag, build=build, test=test, dist=dist):
                 self.assertEqual(self.run_step(CONDA, 'the run\n', MODE='scheduled', HEAD_RESULT='success',
                                                UPDATE_RESULT=update, UPDATE_STATUS=status, TAG_RESULT=tag,
+                                               BUILD_RESULT=build, TEST_RESULT=test,
                                                DIST_RESULT=dist), (expected, 'the run\n' + added))
 
     def test_a_pushed_dev_release_skips_tag_and_upload_with_an_explanation(self) -> None:

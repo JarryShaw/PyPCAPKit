@@ -5,19 +5,23 @@
   modules package discovery finds, with no bytecode; a tree without the
   directory builds with no warning about it. Measured by building a wheel of a
   stub package carrying :file:`pyproject.toml`'s own ``[tool.setuptools]`` tables.
-* :file:`util/conda_vendor.py` derives :file:`conda/requirements.txt` from
-  ``dependencies`` and the ``all`` extra, walks what they require, drops a
-  requirement no conda build can need, and its ``--check`` passes on the list it
-  writes and fails on a stale one. These run on stand-in metadata, so they need
-  neither the network nor any vendored package installed.
-* The committed list holds every requirement :file:`pyproject.toml` makes live on
-  a conda build, with its marker, and none that is dead there.
+* :file:`util/conda_vendor.py` derives :file:`conda/requirements.txt` from the
+  ``dependencies`` conda-forge lacks (#3133), walks what they require, drops a
+  requirement no interpreter can need, refuses one only some need, and its
+  ``--check`` passes on the list it writes and fails on a stale one. These run on
+  stand-in metadata, so they need neither the network nor any vendored package
+  installed.
+* The committed list holds every requirement :file:`pyproject.toml` makes live,
+  with no marker, and none that is dead. The recipe takes the rest of
+  ``dependencies`` from conda-forge, and no optional dependency at all.
 * ``parse`` and ``--check`` report lines pinning one package differently under
   one marker, which pip cannot install together, and accept an identical
   duplicate (#1852).
 * ``--smoke`` passes on a conda package whose vendored distributions are complete
-  and fails on one missing a data file. Its platform checks (#1822) are
+  and fails on one missing a data file. Its noarch checks (#1822) are
   :file:`test_conda_native_platforms_1822.py`'s.
+* :class:`InProcessTests` runs in this process the modes the others run as a
+  subprocess, so their branches count towards coverage.
 
 """
 
@@ -25,7 +29,6 @@ from __future__ import annotations
 
 import bz2
 import contextlib
-import datetime
 import importlib.util
 import io
 import json
@@ -37,8 +40,8 @@ import tempfile
 import textwrap
 import unittest
 import zipfile
-from unittest import mock
 from typing import TYPE_CHECKING
+from unittest import mock
 
 try:
     import tomllib
@@ -53,6 +56,7 @@ __tier__ = 'LATEST'
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / 'util' / 'conda_vendor.py'
+RECIPE = ROOT / 'conda' / 'pypcapkit' / 'meta.yaml'
 NO_TOMLLIB = 'tomllib, which reads pyproject.toml and .github/python-versions.toml, needs Python 3.11+'
 
 _MODULE = []  # type: list[Any]
@@ -147,7 +151,7 @@ def requirement_lines(*lines: 'str') -> 'str':
 
 #: Stand-in ``Requires-Dist`` metadata for :func:`conda_vendor.derive`.
 METADATA = {
-    'core': ['helper>=1', 'oldshim; python_version < "3.8"', 'docsy; extra == "docs"'],
+    'core': ['helper>=1', 'oldshim; python_version < "3.8"', 'docsy; extra == "docs"', 'typing-extensions'],
     'helper': None,
     'crypt': ['ffi; platform_python_implementation != "PyPy"', 'socksy; extra == "socks"'],
     'ffi': ['parser; implementation_name != "PyPy"'],
@@ -183,13 +187,29 @@ class DeriveTests(unittest.TestCase):
                           'ffi': 'transitive', 'parser': 'transitive', 'socksy': 'transitive',
                           'backport': 'dead', 'newer': 'needed'})
 
-    def test_lines_carry_a_marker_only_where_some_builds_need_none(self) -> None:
+    def test_conda_forge_packages_are_not_vendored(self) -> None:
+        """Asked for directly or by a vendored package, as ``core`` asks for typing-extensions (#3133)."""
+        found = self.found('core', 'chardet', 'Typing_Extensions; python_version < "3.11"')
+        self.assertEqual(sorted(found), ['core', 'helper'])
+
+    def test_lines_carry_no_marker(self) -> None:
         module = vendor()
         envs = module.environments(self.PYTHONS)
-        found = self.found('core', 'backport; python_version < "3.11"', 'newer; python_version >= "3.12"')
-        self.assertEqual(module.lines(found, envs, VERSIONS.__getitem__),
-                         ['core==1.0', 'helper==1.0',
-                          'newer==1.0; python_version == "3.12" or python_version == "3.13"'])
+        found = self.found('core', 'backport; python_version < "3.11"')
+        self.assertEqual(module.lines(found, envs, VERSIONS.__getitem__), ['core==1.0', 'helper==1.0'])
+
+    def test_a_package_only_some_interpreters_need_is_refused(self) -> None:
+        """One noarch package serves them all, so it cannot vendor one for 3.12 and up alone (#3133)."""
+        module = vendor()
+        envs = module.environments(self.PYTHONS)
+        found = self.found('core', 'newer; python_version >= "3.12"')
+        with self.assertRaises(module.Partial) as raised:
+            module.lines(found, envs, VERSIONS.__getitem__)
+        self.assertEqual(str(raised.exception), (
+            'partial: newer is needed on Python 3.12, 3.13 on darwin, linux, win32 only (and not on every '
+            'interpreter one noarch package serves), so take it from conda-forge instead'))
+        self.assertEqual(module.compare(requirement_lines('core==1.0', 'helper==1.0', 'newer==1.0'), found, envs),
+                         [str(raised.exception)])
 
     def test_a_live_package_not_installed_here_is_named_with_its_builds(self) -> None:
         module = vendor()
@@ -213,23 +233,21 @@ class DeriveTests(unittest.TestCase):
         with self.assertRaises(module.NotInstalled) as local:
             module.derive([Requirement('shim')], module.environments([here]), lacking)
         self.assertIn('(pyproject.toml asks for shim)', str(local.exception))
-        self.assertTrue(str(local.exception).endswith('install .[all] first'), str(local.exception))
+        self.assertTrue(str(local.exception).endswith('install . first'), str(local.exception))
 
     def test_compare_passes_on_written_lines_and_names_each_stale_one(self) -> None:
         module = vendor()
         envs = module.environments(self.PYTHONS)
         found = self.found('core', 'crypt', 'backport; python_version < "3.11"')
-        # The stand-in packages have no platform pins (#1827's are its own tests').
-        with mock.patch.object(module, 'PLATFORM_PINS', {}):
-            written = requirement_lines(*module.lines(found, envs, VERSIONS.__getitem__))
-            self.assertEqual(module.compare(written, found, envs), [])
-            repinned = written.replace('core==1.0', 'core==9.9')
-            self.assertEqual(module.compare(repinned, found, envs), [])
-            stale = requirement_lines('backport==1.0; python_version < "3.11"', 'core==1.0',
-                                      'crypt==1.0', 'ffi==1.0', 'helper==1.0', 'lxml==6.1.3')
-            problems = module.compare(stale, found, envs)
+        written = requirement_lines(*module.lines(found, envs, VERSIONS.__getitem__))
+        self.assertEqual(module.compare(written, found, envs), [])
+        repinned = written.replace('core==1.0', 'core==9.9')
+        self.assertEqual(module.compare(repinned, found, envs), [])
+        stale = requirement_lines('backport==1.0; python_version < "3.11"', 'core==1.0',
+                                  'crypt==1.0; sys_platform == "linux"', 'ffi==1.0', 'helper==1.0', 'lxml==6.1.3')
+        problems = module.compare(stale, found, envs)
         self.assertEqual([problem.split(':')[0] + ':' + problem.split()[1] for problem in problems],
-                         ['dead:backport', 'stale:lxml', 'missing:parser'])
+                         ['dead:backport', 'marker:crypt', 'stale:lxml', 'missing:parser'])
 
 
 class CommittedListTests(unittest.TestCase):
@@ -237,7 +255,6 @@ class CommittedListTests(unittest.TestCase):
 
     def test_every_live_direct_requirement_is_listed_and_no_dead_one(self) -> None:
         module = vendor()
-        from packaging.markers import Marker
         envs = module.environments(module.conda_pythons())
         have = module.parse((ROOT / 'conda' / 'requirements.txt').read_text(encoding='utf-8'))
         for found in module.derive(module.direct(), envs, lambda name: []).items():
@@ -247,21 +264,17 @@ class CommittedListTests(unittest.TestCase):
                     self.assertNotIn(name, have)
                     continue
                 self.assertIn(name, have)
-                # #1827: a line per platform pin, each with its own marker.
-                self.assertEqual(set(have[name]), {None if marker is None else str(Marker(marker))
-                                                   for marker, _ in module.pins(name, entry, envs)})
+                self.assertEqual(set(have[name]), {None})
 
     def test_check_passes_on_its_own_output_and_fails_on_a_stale_file(self) -> None:
         module = vendor()
         metadata = dict.fromkeys((req.name for req in module.direct()), [])
         with tempfile.TemporaryDirectory() as temp:
             target = pathlib.Path(temp) / 'requirements.txt'
-            saved = module.FILE, module.ROOT, module._requires, module._version, module._today
+            saved = module.FILE, module.ROOT, module._requires, module._version
             module.FILE, module.ROOT = target, pathlib.Path(temp)
             module._requires = lambda name: metadata.get(name, [])
             module._version = lambda name: '1.0'
-            # No platform pin is overdue then; their review-by dates are #1851's tests'.
-            module._today = lambda: datetime.date.min
             try:
                 self.assertEqual(module.main([]), 0)
                 with contextlib.redirect_stdout(io.StringIO()) as quiet:
@@ -272,15 +285,15 @@ class CommittedListTests(unittest.TestCase):
                     self.assertEqual(module.main(['--check']), 1)
                 self.assertIn('stale: scapy', report.getvalue())
             finally:
-                module.FILE, module.ROOT, module._requires, module._version, module._today = saved
+                module.FILE, module.ROOT, module._requires, module._version = saved
 
 
 class DuplicatePinTests(unittest.TestCase):
     """Lines pinning one package differently under one marker, which pip rejects (#1852)."""
 
-    #: A pin of aenum the committed file does not hold, as ``pip download -r`` got
-    #: beside it in the issue and failed with ``ResolutionImpossible``.
-    OTHER = '3.1.16'
+    #: A pin of dictdumper the committed file does not hold, as ``pip download -r``
+    #: got one of aenum beside it in the issue and failed with ``ResolutionImpossible``.
+    OTHER = '0.8.4'
 
     def setUp(self) -> None:
         self.module = vendor()
@@ -289,8 +302,8 @@ class DuplicatePinTests(unittest.TestCase):
         # Stand-in metadata: what the committed file says that this does not
         # derive is the same with the duplicate as without it.
         self.found = self.module.derive(self.module.direct(), self.envs, lambda name: [])
-        self.pinned = self.module.parse(self.text)['aenum'][None]
-        self.assertNotEqual(self.pinned, self.OTHER, 'pick another conflicting aenum pin')
+        self.pinned = self.module.parse(self.text)['dictdumper'][None]
+        self.assertNotEqual(self.pinned, self.OTHER, 'pick another conflicting dictdumper pin')
 
     def added(self, line: 'str') -> 'list[str]':
         """What ``--check`` reports of the committed file with ``line`` appended, and not without it."""
@@ -303,11 +316,11 @@ class DuplicatePinTests(unittest.TestCase):
                           if problem.startswith('conflict:')], [])
 
     def test_a_conflicting_pin_is_reported(self) -> None:
-        conflict = f"conflict: aenum pins '=={self.pinned}' and '=={self.OTHER}' under the marker None"
+        conflict = f"conflict: dictdumper pins '=={self.pinned}' and '=={self.OTHER}' under the marker None"
         with self.assertRaises(self.module.Conflicting) as raised:
-            self.module.parse(self.text + f'aenum=={self.OTHER}\n')
+            self.module.parse(self.text + f'dictdumper=={self.OTHER}\n')
         self.assertEqual(str(raised.exception), conflict)
-        self.assertEqual(self.added(f'aenum=={self.OTHER}'), [conflict])
+        self.assertEqual(self.added(f'dictdumper=={self.OTHER}'), [conflict])
 
     def test_markers_are_compared_once_normalised(self) -> None:
         text = requirement_lines('Six==1.0; python_version == "3.12"', "six==2.0; python_version=='3.12'",
@@ -318,7 +331,7 @@ class DuplicatePinTests(unittest.TestCase):
                          "conflict: six pins '==1.0' and '==2.0' under the marker 'python_version == \"3.12\"'")
 
     def test_an_identical_duplicate_is_accepted(self) -> None:
-        line = f'aenum=={self.pinned}'
+        line = f'dictdumper=={self.pinned}'
         self.assertEqual(self.module.parse(self.text + line + '\n'), self.module.parse(self.text))
         self.assertEqual(self.added(line), [])
 
@@ -326,26 +339,24 @@ class DuplicatePinTests(unittest.TestCase):
         module = self.module
         with tempfile.TemporaryDirectory() as temp:
             target = pathlib.Path(temp) / 'requirements.txt'
-            saved = module.FILE, module.ROOT, module._requires, module._version, module._today
+            saved = module.FILE, module.ROOT, module._requires, module._version
             module.FILE, module.ROOT = target, pathlib.Path(temp)
             module._requires = lambda name: []
             module._version = lambda name: '1.0'
-            # No platform pin is overdue then; their review-by dates are #1851's tests'.
-            module._today = lambda: datetime.date.min
             try:
                 self.assertEqual(module.main([]), 0)
                 written = target.read_text(encoding='utf-8')
-                target.write_text(written + 'aenum==1.0\n', encoding='utf-8')
+                target.write_text(written + 'dictdumper==1.0\n', encoding='utf-8')
                 with contextlib.redirect_stdout(io.StringIO()) as quiet:
                     self.assertEqual(module.main(['--check']), 0)
                 self.assertEqual(quiet.getvalue(), '')
-                target.write_text(written + 'aenum==0.9\n', encoding='utf-8')
+                target.write_text(written + 'dictdumper==0.9\n', encoding='utf-8')
                 with contextlib.redirect_stdout(io.StringIO()) as report:
                     self.assertEqual(module.main(['--check']), 1)
-                self.assertEqual(report.getvalue(), "requirements.txt: conflict: aenum pins '==1.0' and "
+                self.assertEqual(report.getvalue(), "requirements.txt: conflict: dictdumper pins '==1.0' and "
                                                     "'==0.9' under the marker None\n")
             finally:
-                module.FILE, module.ROOT, module._requires, module._version, module._today = saved
+                module.FILE, module.ROOT, module._requires, module._version = saved
 
 
 #: A ``pcapkit/__init__.py`` reduced to its ``_extern`` shim.
@@ -361,14 +372,11 @@ class SmokeTests(unittest.TestCase):
     """``--smoke`` reads a built conda package's vendored distributions."""
 
     def package(self, temp: 'str', files: 'dict[str, str]') -> 'pathlib.Path':
-        site = f'lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages/'
         path = pathlib.Path(temp) / 'pypcapkit-0-py_0.tar.bz2'
-        # #1822: filed under this runner's platform, which --smoke requires.
-        runner = vendor().runner_platform()
-        if runner is None:  # pragma: no cover
-            raise unittest.SkipTest('this machine is none of the platforms the conda legs build on')
-        members = {site + name: text for name, text in dict({'pcapkit/__init__.py': SHIM}, **files).items()}
-        members['info/index.json'] = json.dumps({'name': 'pypcapkit', 'subdir': runner})
+        # #3133: the noarch layout, and index, which --smoke requires.
+        members = {f'site-packages/{name}': text
+                   for name, text in dict({'pcapkit/__init__.py': SHIM}, **files).items()}
+        members['info/index.json'] = json.dumps({'name': 'pypcapkit', 'subdir': 'noarch', 'noarch': 'python'})
         buffer = io.BytesIO()
         with tarfile.open(fileobj=buffer, mode='w') as archive:
             for name, text in members.items():
@@ -413,6 +421,166 @@ class SmokeTests(unittest.TestCase):
         self.assertEqual(status, 1, log)
         self.assertIn('MISSING bundle/data.pem', log)
         self.assertIn('bundle: imported from pcapkit/_extern', log)
+
+
+class InProcessTests(unittest.TestCase):
+    """The modes the other tests run as a subprocess, run here, so their branches count (#3133)."""
+
+    def setUp(self) -> None:
+        self.module = vendor()
+        tmp = tempfile.TemporaryDirectory(prefix='pcapkit-3133-vendor-')  # pylint: disable=consider-using-with
+        self.addCleanup(tmp.cleanup)
+        self.temp = tmp.name
+
+    def shown(self, returncode: 'int', stdout: 'bytes' = b'', stderr: 'bytes' = b'') -> 'Any':
+        return mock.patch.object(self.module.subprocess, 'run', return_value=subprocess.CompletedProcess(
+            ['git'], returncode, stdout, stderr))
+
+    def test_same_dependencies_in_each_outcome(self) -> None:
+        ours = (ROOT / 'pyproject.toml').read_bytes()
+        cases = (
+            (self.shown(0, ours), 0, 'v1 names the dependencies main does, which the conda recipe takes from '
+                                     'conda-forge or vendors\n'),
+            (self.shown(0, b'[project]\ndependencies = [ "tbtrim" ]\n'), self.module.NOT_SAME,
+             "v1's tree would be built with main's conda recipe, and the two name different dependencies. "
+             'v1: tbtrim. main: '),
+            (self.shown(128, stderr=b"fatal: path 'pyproject.toml' 100%\nexists on disk"), 1,
+             "::error title=No pyproject.toml at v1::fatal: path 'pyproject.toml' 100%25%0Aexists on disk\n"),
+        )
+        for patch, status, printed in cases:
+            with self.subTest(status=status), patch, contextlib.redirect_stdout(io.StringIO()) as out:
+                self.assertEqual(self.module.main(['--same-dependencies', 'v1']), status)
+            self.assertTrue(out.getvalue().startswith(printed), out.getvalue())
+
+    def test_smoke_runs_from_main(self) -> None:
+        package = SmokeTests().package(self.temp, SmokeTests.FILES)
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(self.module.main(['--smoke', str(package)]), 0)
+
+    def test_smoke_refuses_what_is_not_one_noarch_package(self) -> None:
+        def package(index: 'Optional[str]', pcapkit: 'tuple[str, ...]') -> 'pathlib.Path':
+            target = pathlib.Path(self.temp) / f'case-{len(list(pathlib.Path(self.temp).iterdir()))}.tar.bz2'
+            members = {f'{site}pcapkit/__init__.py': SHIM for site in pcapkit}
+            if index is not None:
+                members['info/index.json'] = index
+            buffer = io.BytesIO()
+            with tarfile.open(fileobj=buffer, mode='w') as archive:
+                for name, body in members.items():
+                    data = body.encode('utf-8')
+                    info = tarfile.TarInfo(name)
+                    info.size = len(data)
+                    archive.addfile(info, io.BytesIO(data))
+            target.write_bytes(bz2.compress(buffer.getvalue()))
+            return target
+        noarch = json.dumps({'subdir': 'noarch', 'noarch': 'python'})
+        for name, index, sites, said in (
+                ('no pcapkit', noarch, (), 'expected one site-packages/pcapkit, found 0'),
+                ('two pcapkits', noarch, ('site-packages/', 'a/site-packages/'), 'found 2'),
+                ('no index', None, ('site-packages/',), 'info/index.json names no subdir'),
+                ('an index that is not JSON', 'nope', ('site-packages/',), 'info/index.json names no subdir'),
+                ('a platform package', json.dumps({'subdir': 'linux-64'}), ('site-packages/',),
+                 'is filed under linux-64 as noarch None')):
+            err = io.StringIO()
+            with self.subTest(name), contextlib.redirect_stderr(err):
+                self.assertEqual(self.module.smoke(package(index, sites)), 1)
+            self.assertIn(said, err.getvalue())
+
+    def test_main_names_a_package_not_installed(self) -> None:
+        import importlib.metadata
+
+        def lacking(name: 'str') -> 'list[str]':
+            raise importlib.metadata.PackageNotFoundError(name)
+        err = io.StringIO()
+        with mock.patch.object(self.module, '_requires', lacking), contextlib.redirect_stderr(err):
+            self.assertEqual(self.module.main(['--check']), 2)
+        self.assertIn('install . first', err.getvalue())
+
+    def test_main_refuses_a_package_only_some_interpreters_need(self) -> None:
+        from packaging.requirements import Requirement
+        target = pathlib.Path(self.temp) / 'requirements.txt'
+        target.write_text('kept\n', encoding='utf-8')
+        err = io.StringIO()
+        with mock.patch.object(self.module, 'direct', lambda: [Requirement('newer; python_version >= "3.12"')]), \
+                mock.patch.object(self.module, '_requires', lambda name: []), \
+                mock.patch.object(self.module, 'FILE', target), contextlib.redirect_stderr(err):
+            self.assertEqual(self.module.main([]), 1)
+        self.assertTrue(err.getvalue().startswith('partial: newer is needed on Python 3.12'), err.getvalue())
+        self.assertEqual(target.read_text(encoding='utf-8'), 'kept\n')
+
+    def test_parse_passes_over_comments_and_blank_lines(self) -> None:
+        self.assertEqual(self.module.parse('# vendored\n\ntbtrim==0.3.1  # for refined exceptions\n'),
+                         {'tbtrim': {None: '0.3.1'}})
+
+    def test_the_metadata_readers_read_what_is_installed(self) -> None:
+        import importlib.metadata
+        self.assertEqual(self.module._version('packaging'), importlib.metadata.version('packaging'))
+        self.assertEqual(self.module._requires('packaging'), importlib.metadata.requires('packaging'))
+
+    def test_a_package_asked_for_twice_is_walked_once(self) -> None:
+        """Directly twice, and dead twice: one entry each, as the queue meets them."""
+        module = self.module
+        from packaging.requirements import Requirement
+        found = module.derive([Requirement(line) for line in ('core', 'helper', 'helper', 'old; python_version < "3"',
+                                                              'old; python_version < "3.1"')],
+                              module.environments(['3.11', '3.12']), requires)
+        self.assertEqual({name: entry['class'] for name, entry in found.items()},
+                         {'core': 'needed', 'helper': 'needed', 'old': 'dead'})
+        self.assertEqual(found['old']['marker'], 'python_version < "3"')
+
+
+def recipe_list(section: 'str') -> 'list[str]':
+    """The items of the recipe's ``requirements:`` ``section``, as written."""
+    lines = RECIPE.read_text(encoding='utf-8').splitlines()
+    start = lines.index(f'  {section}:') + 1
+    found = []
+    for line in lines[start:]:
+        if line.startswith('    - '):
+            found.append(line[len('    - '):])
+        elif line.startswith('    #') or not line.strip():
+            continue
+        else:
+            break
+    return found
+
+
+class RecipeTests(unittest.TestCase):
+    """The recipe carries the core alone: conda-forge's packages, and the vendored rest (#3133)."""
+
+    def setUp(self) -> None:
+        if tomllib is None:  # pragma: no cover
+            raise unittest.SkipTest(NO_TOMLLIB)
+        from packaging.utils import canonicalize_name
+        self.canonical = canonicalize_name
+        self.project = tomllib.loads((ROOT / 'pyproject.toml').read_text(encoding='utf-8'))['project']
+        self.vendored = set(vendor().parse((ROOT / 'conda' / 'requirements.txt').read_text(encoding='utf-8')))
+
+    def test_the_run_requirements_are_python_and_conda_forge(self) -> None:
+        self.assertEqual(recipe_list('run'), [f'python {self.project["requires-python"]}',
+                                              *sorted(vendor().CONDA_FORGE.values())])
+
+    def test_each_core_dependency_comes_from_conda_forge_or_is_vendored(self) -> None:
+        from packaging.requirements import Requirement
+        core = {self.canonical(Requirement(line).name) for line in self.project['dependencies']}
+        self.assertLessEqual(set(vendor().CONDA_FORGE), core)
+        self.assertEqual(core - set(vendor().CONDA_FORGE), self.vendored)
+        self.assertFalse(self.vendored & set(vendor().CONDA_FORGE))
+
+    def test_no_optional_dependency_is_carried(self) -> None:
+        """A user pip-installs one into the environment, which pcapkit uses ahead of _extern."""
+        from packaging.requirements import Requirement
+        core = {self.canonical(Requirement(line).name) for line in self.project['dependencies']}
+        optional = {self.canonical(Requirement(line).name)
+                    for lines in self.project['optional-dependencies'].values() for line in lines} - core
+        self.assertIn('pycrate', optional)
+        carried = self.vendored | {self.canonical(item.split()[0]) for item in recipe_list('run')}
+        self.assertEqual(carried & optional, set())
+
+    def test_the_recipe_test_imports_each_vendored_package_from_extern(self) -> None:
+        command = next(line for line in RECIPE.read_text(encoding='utf-8').splitlines()
+                       if line.strip().startswith('- python -c'))
+        modules = command.split('import os, pcapkit, ', 1)[1].split(';', 1)[0].split(', ')
+        self.assertEqual(sorted(modules), sorted(self.vendored))
+        self.assertIn(f'for m in ({", ".join(modules)}))', command)
 
 
 if __name__ == '__main__':

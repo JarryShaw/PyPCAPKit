@@ -32,9 +32,9 @@ Deliberately untested, because a unit-tier test cannot:
   /repos/{owner}/{repo}/environments``, and the unit tier runs on a fresh clone with
   no network and no token, so the workflow's own comment and #641 record it.
 * **Whether GitHub requests one approval per environment or per matrix leg.** That
-  is runner behaviour, observable only in a real run, and moot while ``pypi`` and
-  ``conda``, both matrix jobs, have no required reviewers (#887). It matters only if
-  a matrix job is gated by its own environment.
+  is runner behaviour, observable only in a real run, and moot while ``pypi``, the
+  release's one matrix job, has no required reviewer (#887). It matters only if a
+  matrix job is gated by its own environment.
 
 :mod:`yaml` comes only with the ``test`` extra, so the scanner is hand-rolled and
 :class:`TestYAMLAgreesWithTheScanner` checks it against :func:`yaml.safe_load`,
@@ -218,10 +218,6 @@ WORKFLOW = ROOT / '.github' / 'workflows' / 'create-release.yml'
 PUBLISHING_MARKERS = {
     'pypa/gh-action-pypi-publish': 'uploads a distribution to PyPI or TestPyPI',
     'anaconda/actions/upload-package': 'uploads a package to anaconda.org',
-    # #2044: the ``macos-26-intel`` leg's ``anaconda … upload``, which
-    # util/release_conda.py makes (#1967); a bare ``anaconda`` is not
-    # matched.
-    'util/release_conda.py upload': 'uploads a package to anaconda.org with the anaconda-client CLI',
     'softprops/action-gh-release': 'creates a public GitHub Release, and the tag it names',
     # ``pypi`` and ``conda`` attach their files with ``gh release upload``
     # (#1634), which util/release_upload.py runs (#1967).
@@ -1019,6 +1015,14 @@ PUBLISHING_PREDECESSORS = {
     'conda': ('github', 'tag'),
 }
 
+#: ``{job: predecessors}`` a gated job holds to ``== 'success'`` alone, as it does
+#: :data:`STRICT_PREDECESSORS`: #3133's ``conda-build``, which built the file
+#: ``conda`` publishes, and ``conda-test``, whose supported legs installed it. A
+#: skip admitted here would publish nothing built, or a file no leg tested.
+ARTIFACT_PREDECESSORS = {
+    'conda': ('conda-build', 'conda-test'),
+}
+
 #: The direct dependencies every downstream gate holds to ``== 'success'``
 #: alone, with no ``|| 'skipped'``: ``version_check`` because it produces the
 #: evidence they read, and -- #1052 -- ``unit-tests`` because it is the
@@ -1054,7 +1058,9 @@ def release_context(version_check: 'str' = 'success',
                     released_elsewhere: 'str' = 'false',
                     vendor_update: 'str' = 'success',
                     vendor_updated: 'object' = 'true',
-                    dev_release: 'str' = 'false') -> 'dict[str, object]':
+                    dev_release: 'str' = 'false',
+                    conda_build: 'str' = 'success',
+                    conda_test: 'str' = 'success') -> 'dict[str, object]':
     """The ``needs``/``github``/status context one scenario row stands for.
 
     Every default is a value that, on its own, lets a gate run, so a row
@@ -1103,6 +1109,9 @@ def release_context(version_check: 'str' = 'success',
     ``null`` when named in ``unknown``, the same treatment as
     ``released_elsewhere``.
 
+    #3133: ``conda_build`` and ``conda_test`` are :data:`ARTIFACT_PREDECESSORS`'
+    results, ``'success'`` unless a row says otherwise.
+
     """
     outputs = {}  # type: dict[str, object]
     if outputs_present:
@@ -1123,6 +1132,8 @@ def release_context(version_check: 'str' = 'success',
             'github': {'result': github},
             'tag': {'result': tag},
             'pypi': {'result': 'success'},
+            'conda-build': {'result': conda_build},
+            'conda-test': {'result': conda_test},
             'conda': {'result': 'success'},
         },
         'github': {
@@ -1234,6 +1245,12 @@ def gate_rows(job: 'str') -> 'list[tuple[str, dict[str, object], bool]]':
                          release_context(**{predecessor: result}),
                          result in ('success', 'skipped')))
 
+    for predecessor in ARTIFACT_PREDECESSORS.get(job, ()):
+        for result in JOB_RESULTS:
+            rows.append((f'{predecessor}={result}',
+                         release_context(**{predecessor.replace('-', '_'): result}),
+                         result == 'success'))
+
     rows.append(('the run was cancelled', release_context(cancelled=True), False))
     rows.append((f'the run was cancelled on a v* tag push with {evidence}=true',
                  release_context(cancelled=True, ref_name='v1.5.0', complete=(evidence,)),
@@ -1328,6 +1345,12 @@ def text_gate_violations(condition: 'str', job: 'str') -> 'list[str]':
             violations.append(f"checks {predecessor} with != 'failure', which admits cancelled")
 
     compact = re.sub(r'\s+', '', condition)
+    for strict in ARTIFACT_PREDECESSORS.get(job, ()):
+        if f"&&needs.{strict}.result=='success'&&" not in compact:
+            violations.append(f'does not require {strict} to have succeeded as a '
+                              'top-level && conjunct')
+        if compact.count(f'.{strict}.result') != 1:
+            violations.append(f'refers to {strict}.result more than once')
     for strict in STRICT_PREDECESSORS:
         if f"&&needs.{strict}.result=='success'&&" not in compact:
             violations.append(f'does not require {strict} to have succeeded as a '
@@ -1605,7 +1628,7 @@ def job_runs(jobs: 'dict[str, str]', name: 'str', context: 'dict[str, object]') 
 #: graph is renamed or extended, rather than leaving a new job unchecked.
 #: ``head`` is the call to :data:`HEAD_WORKFLOW`, and has no ``if:`` of its own;
 #: ``mode`` says whether the run publishes (#2060).
-CONDA_JOBS = ('head', 'mode', 'conda-update', 'conda-tag', 'conda-dist')
+CONDA_JOBS = ('head', 'mode', 'conda-update', 'conda-tag', 'conda-build', 'conda-test', 'conda-dist')
 #: The job posting the run's report (#2030). It gates nothing, so no row is
 #: keyed on it; :file:`tests/project/test_cron_reports_2030.py` pins it.
 CONDA_REPORTER = 'discussion'
@@ -1646,6 +1669,8 @@ def conda_context(unit_tests: 'str' = 'skipped',
                   conda_update: 'str' = 'success',
                   conda_tag: 'str' = 'success',
                   conda_dist: 'str' = 'success',
+                  conda_build: 'Optional[str]' = None,
+                  conda_test: 'Optional[str]' = None,
                   files_changed: 'object' = 'true',
                   pushed: 'object' = 'true',
                   commit: 'object' = None,
@@ -1707,7 +1732,14 @@ def conda_context(unit_tests: 'str' = 'skipped',
     and :data:`NULL` otherwise. ``NULL`` on a publishing bump is a version with
     no such tag, or a tag naming other dependencies.
 
+    ``conda_build`` and ``conda_test`` are #3133's jobs' results, left out
+    ``conda_dist``'s, as ``conda-build`` decides what ``conda-dist`` did before.
+
     """
+    if conda_build is None:
+        conda_build = conda_dist
+    if conda_test is None:
+        conda_test = conda_build
     if mode is None:
         mode = 'skipped' if event_name == 'workflow_run' and workflow_run_event != 'push' else 'success'
     if publishes is None:
@@ -1758,6 +1790,8 @@ def conda_context(unit_tests: 'str' = 'skipped',
             'mode': {'result': mode, 'outputs': {} if publishes is NULL else {'publishes': publishes}},
             'conda-update': {'result': conda_update, 'steps': steps},
             'conda-tag': {'result': conda_tag},
+            'conda-build': {'result': conda_build},
+            'conda-test': {'result': conda_test},
             'conda-dist': {'result': conda_dist},
         },
         'github': {
@@ -1920,6 +1954,36 @@ CONDA_ROWS = [
 ]
 
 
+def _built_and_tested(rows: 'list[tuple[str, dict[str, object], dict[str, bool]]]',
+                      ) -> 'list[tuple[str, dict[str, object], dict[str, bool]]]':
+    """``rows`` with #3133's jobs expected: ``conda-build`` decides what ``conda-dist`` did,
+    ``conda-test`` follows it, and ``conda-dist`` publishes on a publishing run alone."""
+    found = []
+    for name, context, expected in rows:
+        expected = dict(expected)
+        if 'conda-dist' in expected:
+            expected['conda-build'] = expected['conda-test'] = expected['conda-dist']
+            needs = context['needs']
+            assert isinstance(needs, dict)
+            if needs['mode'].get('outputs', {}).get('publishes') != 'true':
+                expected['conda-dist'] = False
+                context = dict(context, needs=dict(needs, **{'conda-dist': {'result': 'skipped'}}))
+        found.append((name, context, expected))
+    return found
+
+
+#: #3133: the rows above with the build and the test matrix decided, and the two
+#: ways those stop an upload of their own.
+CONDA_ROWS = _built_and_tested(CONDA_ROWS) + [
+    ('conda-build failed, so nothing is tested or uploaded',
+     conda_context(conda_build='failure', conda_test='skipped', conda_dist='skipped'),
+     {'conda-test': False, 'conda-dist': False}),
+    ('a supported conda-test leg failed, so nothing is uploaded',
+     conda_context(conda_test='failure', conda_dist='skipped'),
+     {'conda-dist': False}),
+]
+
+
 class WorkflowMixin:
     """Reads and scans the workflow once per test."""
 
@@ -1936,7 +2000,8 @@ class TestPublishingJobsAreGated(WorkflowMixin, unittest.TestCase):
         """A scanner that finds nothing would pass every test below it."""
         self.assertEqual(
             sorted(self.jobs),
-            ['conda', 'github', 'pypi', 'release_status', 'tag', 'unit-tests', 'vendor_update',
+            ['conda', 'conda-build', 'conda-test', 'github', 'pypi', 'release_status', 'tag', 'unit-tests',
+             'vendor_update',
              'version_check'],
             'the job list moved; if that is intended, the expectations in this '
             'module need revisiting rather than this line being updated alone',
@@ -2417,7 +2482,7 @@ class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
     def test_conda_checks_its_own_leg_before_uploading(self) -> None:
         """The correctness half for ``conda``: ``anaconda/actions/upload-package``
         has no ``skip-existing``, so the job-level evidence above is only a cost
-        saver -- each matrix leg has to check for itself.
+        saver -- the job has to check for itself, just before it uploads.
 
         """
         block = self.jobs['conda']
@@ -2438,9 +2503,8 @@ class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
     def test_a_predicted_skip_is_announced(self) -> None:
         """#888's other half: a skip must never be silent.
 
-        ``conda``'s per-leg skip gets its own ``::notice`` at the point of the
-        skip, since ``release_status`` only sees the job's aggregate result and
-        cannot say *which* leg was already published.
+        ``conda``'s skip gets its own ``::notice`` at the point of the skip,
+        since ``release_status`` only sees the job's aggregate result.
 
         """
         # #1967: util/release_conda.py's, which the step runs.
@@ -2593,10 +2657,11 @@ class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
         self.assertIn("PYPI_URL = 'https://pypi.org/pypi/pypcapkit/'", script)
         self.assertIn("data.get('urls'", script)
 
-    def test_conda_evidence_checks_every_platform(self) -> None:
+    def test_conda_evidence_checks_the_noarch_package(self) -> None:
+        """#3133: one package for every platform; a tag before it reads its own ``SUBDIRS``."""
         self.assertIn(f'run: python3 {EVIDENCE_SCRIPT} anaconda ', self.jobs['version_check'])
         script = (ROOT / EVIDENCE_SCRIPT).read_text(encoding='utf-8')
-        self.assertIn("SUBDIRS = 'linux-64 osx-64 osx-arm64 win-64'", script)
+        self.assertIn("SUBDIRS = 'noarch'", script)
 
 
 class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
@@ -2786,7 +2851,8 @@ class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
         runs, which is #888 rather than a fix for it.
 
         """
-        for job, expected in (('tag', 28), ('pypi', 28), ('conda', 32)):
+        # ``conda``'s eight more are ARTIFACT_PREDECESSORS' (#3133).
+        for job, expected in (('tag', 28), ('pypi', 28), ('conda', 40)):
             with self.subTest(job=job):
                 rows = gate_rows(job)
                 self.assertEqual(
@@ -2814,7 +2880,8 @@ class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
             with self.subTest(job=job):
                 self.assertEqual(
                     set(declared_needs(self.jobs[job])),
-                    set(PUBLISHING_PREDECESSORS[job]) | set(STRICT_PREDECESSORS),
+                    set(PUBLISHING_PREDECESSORS[job]) | set(ARTIFACT_PREDECESSORS.get(job, ()))
+                    | set(STRICT_PREDECESSORS),
                     f'`{job}`\'s `needs:` and the scenario table disagree about its '
                     f'predecessors, so at least one of them is not being varied',
                 )
@@ -3386,7 +3453,8 @@ class TestReleaseStatusReportsHonestly(WorkflowMixin, unittest.TestCase):
         """
         self.assertEqual(
             declared_needs(self.jobs['release_status']),
-            ['vendor_update', 'unit-tests', 'version_check', 'github', 'tag', 'pypi', 'conda'],
+            ['vendor_update', 'unit-tests', 'version_check', 'github', 'tag', 'pypi', 'conda-build',
+             'conda-test', 'conda'],
         )
 
     def test_it_runs_regardless_of_what_upstream_did(self) -> None:
@@ -3403,6 +3471,22 @@ class TestReleaseStatusReportsHonestly(WorkflowMixin, unittest.TestCase):
             f'the moment anything it depends on skips, which is precisely the '
             f'situation it exists to report on',
         )
+
+    def test_the_conda_target_reads_its_build_and_install_matrix(self) -> None:
+        """#3133: a failed or cancelled ``conda-build`` or ``conda-test`` is ``conda``'s result.
+
+        Either leaves ``conda`` skipped, which against its evidence reads as the
+        #888 shape; the run instead reports the failure that held the upload back.
+
+        """
+        step = step_block(self.jobs['release_status'], RELEASE_STATUS_STEP)
+        value = step_mapping(step, 'env')['PCAPKIT_CONDA_JOB']
+        for build, test, conda in itertools.product(JOB_RESULTS, repeat=3):
+            broken = [result for result in (build, test) if result in ('failure', 'cancelled')]
+            with self.subTest(build=build, test=test, conda=conda):
+                context = {'needs': {'conda-build': {'result': build}, 'conda-test': {'result': test},
+                                     'conda': {'result': conda}}}
+                self.assertEqual(evaluate_expression(value, context), broken[0] if broken else conda)
 
     def test_it_has_no_outward_effect(self) -> None:
         self.assertIsNone(declared_environment(self.jobs['release_status']))
@@ -3764,8 +3848,9 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
             f"Only that commit's run may finish it (#1634), so this run released nothing: re-run the Create "
             f'Release run created for {TAGGED_COMMIT}, or release the next version. Its Anaconda files are the '
             "exception: while main's version is still 1.5.0b12, dispatch Conda Update with publish on main, "
-            "which builds v1.5.0b12's tree and uploads every platform under a bumped build (#2060, #2841); the "
-            "re-run finishes them only if that run's own conda legs can still succeed.",
+            "which uploads v1.5.0b12's tree as the noarch package under a bumped build (#2841, #3133). That "
+            "completes a release made as noarch, not one made per platform before #3133; the re-run finishes "
+            "them only if that run's own conda job can still succeed.",
         ])
 
     def test_missing_anaconda_files_name_the_conda_update_dispatch(self) -> None:
@@ -3780,9 +3865,10 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
             f"run's commit {RUN_COMMIT}, and still lacks some of its Anaconda files. Only that commit's run may "
             f'finish it (#1634), so this run released nothing: re-run the Create Release run created for '
             f'{TAGGED_COMMIT}, or release the next version. Its Anaconda files are the exception: while '
-            "main's version is still 1.5.0b14, dispatch Conda Update with publish on main, which builds "
-            "v1.5.0b14's tree and uploads every platform under a bumped build (#2060, #2841); the re-run "
-            "finishes them only if that run's own conda legs can still succeed.",
+            "main's version is still 1.5.0b14, dispatch Conda Update with publish on main, which uploads "
+            "v1.5.0b14's tree as the noarch package under a bumped build (#2841, #3133). That completes a "
+            "release made as noarch, not one made per platform before #3133; the re-run finishes them only if "
+            "that run's own conda job can still succeed.",
         ])
 
     def test_complete_anaconda_files_keep_the_re_run_remedy_alone(self) -> None:
@@ -3831,7 +3917,7 @@ class TestPythonSnippetsSurviveOlderInterpreters(WorkflowMixin, unittest.TestCas
 
     Source indented by a surrounding YAML block scalar only ``compile()``s on
     Python 3.14 -- 3.9 through 3.13 all raise ``IndentationError: unexpected
-    indent``, measured directly -- and ``conda``'s per-leg check runs before
+    indent``, measured directly -- and ``conda``'s own check runs before
     ``actions/setup-python`` installs a chosen version, so ``python3`` there is
     the runner image's default (3.12 on ``ubuntu-latest`` when #905 measured
     it), never 3.14. This class runs each snippet under an older interpreter to
@@ -3839,7 +3925,7 @@ class TestPythonSnippetsSurviveOlderInterpreters(WorkflowMixin, unittest.TestCas
 
     The PyPI and Anaconda evidence checks in ``version_check`` (#1967) feed
     ``python3 -`` from :file:`util/release_published.py`, and ``conda``'s
-    per-leg check from :file:`util/release_conda.py`, so this runs those
+    own check from :file:`util/release_conda.py`, so this runs those
     snippets, as those scripts build them, and any ``printf``-fed one the
     workflow holds.
 
@@ -4061,9 +4147,10 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
 
     The chain is ``head`` (the gate, :file:`cron-head.yml`) -> ``conda-update`` (bumps
     ``conda/build`` and pushes the commit) -> ``conda-tag`` (pushes
-    ``conda-<version>+<build>``) -> ``conda-dist`` (builds that tag and uploads it to
-    anaconda.org). The gate skips on the ``workflow_run`` event (#731), and in #1632
-    the two publishing jobs called no status-check function, so Actions' implicit
+    ``conda-<version>+<build>``) -> ``conda-build`` (builds that tag) -> ``conda-test``
+    -> ``conda-dist`` (uploads it to anaconda.org, #3133). The gate skips on the
+    ``workflow_run`` event (#731), and in #1632 the two publishing jobs called no
+    status-check function, so Actions' implicit
     ``success()`` skipped them behind the skipped gate even though ``conda-update``
     had escaped it and succeeded -- see this module's docstring for the measured run.
 
@@ -4082,7 +4169,7 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
     def _jobs_without_the_status_check(self) -> 'dict[str, str]':
         """The scan with both publishing jobs' status-check function removed."""
         jobs = dict(self.jobs)  # type: ignore[arg-type]
-        for name in ('conda-tag', 'conda-dist'):
+        for name in ('conda-tag', 'conda-build', 'conda-test', 'conda-dist'):
             condition = declared_if(jobs[name])
             self.assertIn(self.STATUS_CHECK_PREFIX, condition)
             mutant = condition.replace(self.STATUS_CHECK_PREFIX, '', 1)
@@ -4223,7 +4310,7 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
         update, which is worse than the cascade's skip -- so each job
         checks its predecessors' results explicitly, and every non-``success``
         result has to stop it. ``skipped`` included: a skipped ``conda-tag``
-        means no ``conda-<version>+<build>`` tag exists, and ``conda-dist``
+        means no ``conda-<version>+<build>`` tag exists, and ``conda-build``
         checks that tag out by name.
 
         """
@@ -4284,21 +4371,24 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
         Here ``conda-tag`` skips only when no bump was committed, in which case
         there is nothing for ``conda-dist`` to upload either.
 
-        ``conda-dist``'s tag and bump clauses sit behind the build-only run's
-        escape, the last conjunct, which uploads nothing (see
+        ``conda-build``'s tag and bump clauses sit behind the build-only run's
+        escape, the last conjunct, which builds and uploads nothing (see
         :mod:`tests.project.test_build_only_dispatch`); they are checked as the
-        conjuncts they are on every run that publishes. Each also needs
-        ``mode``, for its ``publishes`` output rather than its result (#2060).
+        conjuncts they are on every run that publishes. ``conda-dist`` runs on
+        a publishing run alone, so it needs the build and every supported test
+        leg too (#3133). Each also needs ``mode``, for its ``publishes`` output
+        rather than its result (#2060).
 
         """
         predecessors = {'conda-tag': ('conda-update',),
-                        'conda-dist': ('conda-update', 'conda-tag')}
+                        'conda-build': ('conda-update', 'conda-tag'),
+                        'conda-dist': ('conda-update', 'conda-tag', 'conda-build', 'conda-test')}
         escape = "&&(needs.mode.outputs.publishes!='true'||("
         for job, required in sorted(predecessors.items()):
             with self.subTest(job=job):
                 condition = declared_if(self.jobs[job])
                 compact = re.sub(r'\s+', '', condition)
-                if job == 'conda-dist':
+                if job == 'conda-build':
                     self.assertEqual(compact.count(escape), 1, compact)
                     self.assertTrue(compact.endswith('))'), compact)
                     compact = compact.replace(escape, '&&')[:-2]
@@ -4336,17 +4426,27 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
                     f'on a crawl that changed nothing',
                 )
 
-    def test_conda_dist_checks_out_the_tag_conda_tag_pushes(self) -> None:
+    def test_conda_test_runs_on_the_build_alone(self) -> None:
+        """#3133: every leg installs the file ``conda-build`` built, so it needs that job and nothing else."""
+        self.assertEqual(declared_if(self.jobs['conda-test']),
+                         "${{ !cancelled() && needs.conda-build.result == 'success' }}")
+        self.assertEqual(set(declared_needs(self.jobs['conda-test'])), {'conda-build', 'conda-update'})
+        context = conda_context(event_name='workflow_dispatch', unit_tests='success', verdict='skipped',
+                                verified=NULL, files_changed='false', pushed=NULL, conda_tag='skipped')
+        self.assertTrue(job_runs(self.jobs, 'conda-test', context))  # type: ignore[arg-type]
+
+    def test_conda_build_checks_out_the_tag_conda_tag_pushes(self) -> None:
         """Why ``conda-tag`` is held to ``success`` with no ``|| 'skipped'``.
 
-        The checkout pins ``ref: conda-<version>+<build>``, so a ``conda-dist``
+        The checkout pins ``ref: conda-<version>+<build>``, so a ``conda-build``
         admitted behind a skipped or cancelled ``conda-tag`` fails in
         ``actions/checkout`` instead of skipping cleanly -- the same defect a
-        cross-review found in ``create-release.yml``'s ``conda`` job.
+        cross-review found in ``create-release.yml``'s ``conda`` job. #3133:
+        ``conda-build`` builds what ``conda-dist`` publishes.
 
         """
         self.assertIn('ref: conda-${{ needs.conda-update.outputs.PCAPKIT_VERSION }}',
-                      self.jobs['conda-dist'])
+                      self.jobs['conda-build'])
 
     def test_conda_tag_checks_out_and_tags_the_commit_push_changes_pushed(self) -> None:
         """#1643's review: the tag goes on what Push Changes pushed, not on the tip.
@@ -4386,7 +4486,7 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
         self.assertIn('ncipollo/release-action', block)
         self.assertEqual(
             sorted(publishing_reasons(block)),
-            ['uploads a package to anaconda.org', 'uploads a package to anaconda.org with the anaconda-client CLI'],
+            ['uploads a package to anaconda.org'],
             'the publishing markers no longer recognise what `conda-dist` does; '
             'see PUBLISHING_MARKERS, which is an allowlist and says nothing about '
             'a route it does not name',
@@ -4949,7 +5049,7 @@ class TestCondaTagTagsWhatWasPushed(CondaStepHarness, unittest.TestCase):
     evaluated from Push Changes' outputs: that commit detached, or, with no
     ``ref:``, "the reference or SHA for that event" -- ``main`` at
     ``$GITHUB_SHA``, tracking ``origin/main``. Create Tag and Push Tag then run
-    with the ``env:`` they declare, and ``conda-dist`` checks out the tag they
+    with the ``env:`` they declare, and ``conda-build`` checks out the tag they
     leave on ``origin``.
 
     """

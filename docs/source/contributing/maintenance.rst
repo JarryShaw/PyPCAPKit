@@ -803,3 +803,6 @@ Failure Modes and Their Guards
      - another model (`Briefs`_)
    * - A worker posted and spawned on its own
      - the worker rules (`Briefs`_)
+   * - Anaconda's storage quota refused most of a release's conda uploads
+     - one noarch package per release; old files deleted by the owner alone
+       (:doc:`releasing`)

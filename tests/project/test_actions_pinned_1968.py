@@ -278,7 +278,7 @@ class TestDependabotCoversEveryManifest(unittest.TestCase):
                 self.assertTrue(sorted(here.glob('*requirements*.txt')) or (here / 'pyproject.toml').is_file())
 
     def test_conda_is_not_watched(self) -> None:
-        """Conda Update's ``Refresh the platform pins`` and ``Setup Conda Distribution`` write it."""
+        """Conda Update's ``Setup Conda Distribution`` writes it."""
         for ecosystem, entry in updates().items():
             with self.subTest(ecosystem=ecosystem):
                 self.assertNotIn('/conda', directories(entry))

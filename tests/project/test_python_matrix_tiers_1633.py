@@ -5,7 +5,7 @@ With 3.10 past end-of-life and 3.15.0 released, the owner's ruling on #1633 spli
 the matrices:
 
 * **Supported** -- 3.11 to 3.15, in every matrix (unit tests, compatibility,
-  conda, PyPI), blocking.
+  PyPI), blocking. The conda jobs build one noarch package on ``latest`` (#3133).
 * **KTLO** -- end-of-life versions that still build and test (3.10 wherever it
   ran, plus 3.8 and 3.9 in the test matrices), never blocking: not CI, not
   a release, not a required context.
@@ -111,12 +111,15 @@ MATRICES = (
     ('unit-tests.yml', 'pypcap-parity', tuple(v for v in PARITY if v in SUPPORTED)),
     ('python-compatibility.yml', 'compatibility', SUPPORTED),
     ('create-release.yml', 'pypi', SUPPORTED + tier('pypy', 'supported')),
-    ('create-release.yml', 'conda', SUPPORTED),
-    ('cron-conda.yml', 'conda-dist', SUPPORTED),
+    # #3133: the noarch package installed on each platform, CPython's tiers alone.
+    ('create-release.yml', 'conda-test', SUPPORTED),
+    ('cron-conda.yml', 'conda-test', SUPPORTED),
 )
-#: The jobs a single ``needs.<job>.result`` aggregates, so KTLO must stay step-level.
+#: The jobs a single ``needs.<job>.result`` aggregates, so KTLO must stay step-level:
+#: ``conda`` and ``conda-dist`` read ``conda-test``'s (#3133).
 AGGREGATED = (('unit-tests.yml', 'test'), ('unit-tests.yml', 'integration'),
-              ('unit-tests.yml', 'pypcap-parity'), ('create-release.yml', 'pypi'))
+              ('unit-tests.yml', 'pypcap-parity'), ('create-release.yml', 'pypi'),
+              ('create-release.yml', 'conda-test'), ('cron-conda.yml', 'conda-test'))
 #: Where each KTLO leg must be, as (workflow, job, KTLO versions). unit-tests.yml's
 #: are jobs of their own (#1738), which nothing gating waits on.
 KTLO_LEGS = (
@@ -125,7 +128,13 @@ KTLO_LEGS = (
     ('unit-tests.yml', 'pypcap-parity-ktlo', tuple(v for v in PARITY if v in KTLO)),
     ('python-compatibility.yml', 'compatibility', KTLO),
     ('create-release.yml', 'pypi', KTLO_ON_LATEST + tier('pypy', 'ktlo')),
+    # Every KTLO CPython: conda-forge's, not setup-python's, so no runner pin applies.
+    ('create-release.yml', 'conda-test', KTLO),
+    ('cron-conda.yml', 'conda-test', KTLO),
 )
+#: #3133: the jobs whose legs install conda-forge's Python rather than setup-python's,
+#: so the tier file's ``runner`` pins, which are setup-python's, do not apply to them.
+CONDA_FORGE_PYTHON = (('create-release.yml', 'conda-test'), ('cron-conda.yml', 'conda-test'))
 #: The jobs a KTLO leg that cannot install or compile stops in, each as
 #: (workflow, job, install-or-verify step).
 KTLO_STEPS = (
@@ -310,6 +319,8 @@ class TestTheKTLOTierNeverBlocks(unittest.TestCase):
     def test_each_runner_pinned_version_runs_on_its_pinned_runner(self) -> None:
         """No Ubuntu 26.04 build of any, which ``ubuntu-latest`` serves."""
         for name, job_id, _ in KTLO_LEGS:
+            if (name, job_id) in CONDA_FORGE_PYTHON:
+                continue
             spec = job(name, job_id)
             for leg in legs(name, job_id):
                 if leg['python-version'] in PINNED_OS:
@@ -454,17 +465,32 @@ class TestNoKTLOLegCanFailTheRelease(unittest.TestCase):
         self.assertNotRegex(failed.stdout, r'(?m)^::(warning|error)')
         self.assertNotIn('KTLO', clean.stdout)
 
-    def test_no_conda_leg_is_ktlo_and_315_leaves_base_python_alone(self) -> None:
-        """No KTLO 3.10 conda leg: the vendored set is derived for the supported tier; 3.15 needs base left alone."""
-        for name, job_id in (('create-release.yml', 'conda'), ('cron-conda.yml', 'conda-dist')):
+    def test_conda_test_installs_on_every_platform_and_tier(self) -> None:
+        """#3133: the five platforms by the tiers' CPython, KTLO's legs marked and only theirs."""
+        for name in ('create-release.yml', 'cron-conda.yml'):
+            found = legs(name, 'conda-test')
+            with self.subTest(workflow=name):
+                self.assertEqual({leg['os'] for leg in found},
+                                 {'ubuntu-latest', 'ubuntu-24.04-arm', 'macos-26-intel', 'macos-latest',
+                                  'windows-latest'})
+                self.assertEqual(sorted((leg['os'], leg['python-version']) for leg in found),
+                                 sorted({(leg['os'], version) for leg in found for version in KTLO + SUPPORTED}))
+                self.assertEqual({leg['python-version'] for leg in found if is_ktlo(leg)}, set(KTLO))
+                self.assertFalse([leg for leg in found if is_ktlo(leg) and leg['python-version'] in SUPPORTED])
+
+    def test_no_conda_leg_is_ktlo_and_base_keeps_its_python(self) -> None:
+        """#3133: the build on ``latest``, and base left on its own Python, as the recipe pins the build's."""
+        for name, job_id, needs in (('create-release.yml', 'conda-build', 'version_check'),
+                                    ('cron-conda.yml', 'conda-build', 'conda-update')):
             spec = job(name, job_id)
             with self.subTest(workflow=name, job=job_id):
-                self.assertFalse([leg for leg in legs(name, job_id) if is_ktlo(leg)])
+                self.assertNotIn('strategy', spec)
+                python = next(step for step in spec['steps']
+                              if str(step.get('uses', '')).startswith('actions/setup-python@'))
+                self.assertEqual(python['with']['python-version'], f'${{{{ needs.{needs}.outputs.PYTHON_LATEST }}}}')
                 setup = next(step for step in spec['steps']
                              if str(step.get('uses', '')).startswith('conda-incubator/setup-miniconda@'))
-                self.assertEqual(setup['with']['python-version'],
-                                 "${{ matrix.os != 'macos-26-intel' && matrix.python-version != '3.15' && "
-                                 "matrix.python-version || '' }}")
+                self.assertNotIn('python-version', setup['with'])
 
 
 #: ``pip`` for an install step, which runs util/pip_install.py on the real

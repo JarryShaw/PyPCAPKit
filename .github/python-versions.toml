@@ -32,7 +32,7 @@ latest = "3.15"
 # GraalPy, by its release line, spelt as setup-python reads them. Each runs as
 # one non-blocking leg of experimental.yml, named `(experimental)`, a workflow
 # of its own that nothing waits on (#1732), and in no other matrix:
-# no wheel, conda build or required context. The weekly job has no source for
+# no wheel or required context. The weekly job has no source for
 # either, so it keeps these lines as written, after the other versions of their
 # table. Promoting one once its leg is green is a hand edit, which
 # util/python_versions.py refuses until it has all of them.
@@ -51,24 +51,6 @@ workflow = "unit-tests.yml"
 job = "pypcap-parity"
 where = "env.APT_CACHE_SAVE"
 value = "3.11"
-
-# conda-forge's conda has no py315 build, so installing 3.15 into base fails
-# with `RemoveError: Conda cannot remove itself` (#1633, conda 26.7.2). 3.15
-# leaves base on its own Python; `conda build --python` still builds for 3.15.
-# Drop this once conda publishes a py315 build.
-[[exemptions]]
-workflow = "create-release.yml"
-job = "conda"
-where = "Conda environment creation and activation: with.python-version"
-value = "3.15"
-
-# As for create-release.yml's conda job: conda-forge's conda has no py315
-# build.
-[[exemptions]]
-workflow = "cron-conda.yml"
-job = "conda-dist"
-where = "Conda environment creation and activation: with.python-version"
-value = "3.15"
 
 # The util/ scripts held to requires-python's 3.8 compile on the leg whose
 # parser is 3.8's (#2206): ast's feature_version is best-effort on a newer

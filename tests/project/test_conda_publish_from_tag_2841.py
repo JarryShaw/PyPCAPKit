@@ -5,7 +5,7 @@ Conda Update built ``main``'s tip, so once a feature merged without a version
 bump, a scheduled bump or #2060's ``publish`` dispatch uploaded unreleased code
 under the released version. #2841's options 1, 2b and 3, taken for every
 publishing bump: the bump is still committed to ``main`` and tagged
-``conda-<version>+<build>``, but ``conda-dist`` builds the tree ``v<version>``
+``conda-<version>+<build>``, but ``conda-build`` builds the tree ``v<version>``
 names, with only :file:`conda/` and :file:`util/` from the bump; a release whose
 dependencies ``main`` has changed is not built; and the bump's message names the tag.
 
@@ -22,7 +22,7 @@ dependencies ``main`` has changed is not built; and the bump's message names the
 * :class:`TestTheBumpNamesTheTag`: ``Commit Changes`` records the tag's tree in
   the bump's message.
 * :class:`TestTheCommitReachesCondaDist`: ``conda-update`` hands that commit on;
-  without it nothing is tagged or uploaded, and with it ``conda-dist``'s
+  without it nothing is tagged or uploaded, and with it ``conda-build``'s
   ``Check out the release tag's tree`` runs after every checkout and before
   anything reads the tree.
 * :class:`TestTheReleaseTreeIsBuilt`: that step, run on a checkout of the bump's
@@ -235,17 +235,16 @@ class TestCheckTheDependencies(CondaStepHarness, unittest.TestCase):
     """``Check the release tag's dependencies``, run on ``main`` with the real util/conda_vendor.py."""
 
     TAG = 'v2.0.1'
-    #: The tag's ``pyproject.toml``: what util/conda_vendor.py's ``direct`` reads, and an extra it does not.
+    #: The tag's ``pyproject.toml``: what util/conda_vendor.py's ``direct`` reads, and extras it does not (#3133).
     RELEASED = ('[project]\nname = "pypcapkit"\ndependencies = [ "dictdumper~=0.8.0", "chardet" ]\n\n'
                 '[project.optional-dependencies]\ncli = [ "emoji" ]\n'
                 'all = [ "emoji", "cryptography>=3.4; platform_python_implementation != \'PyPy\'" ]\n')
     #: Those as util/conda_vendor.py lists them.
-    LISTED = 'chardet, cryptography>=3.4; platform_python_implementation != "PyPy", dictdumper~=0.8.0, emoji'
+    LISTED = 'chardet, dictdumper~=0.8.0'
     #: Each way ``main`` can name other dependencies: its ``pyproject.toml``, and its set as listed.
     CHANGED = {
         'one added': (RELEASED.replace('"chardet" ]', '"chardet", "aenum" ]'), 'aenum, ' + LISTED),
         'a pin moved': (RELEASED.replace('~=0.8.0', '~=0.9.0'), LISTED.replace('~=0.8.0', '~=0.9.0')),
-        'the all extra changed': (RELEASED.replace('all = [ "emoji", ', 'all = [ '), LISTED.replace(', emoji', '')),
     }
 
     def setUp(self) -> None:
@@ -254,8 +253,7 @@ class TestCheckTheDependencies(CondaStepHarness, unittest.TestCase):
         python.write_text(f'#!/bin/sh\nexec {shlex.quote(sys.executable)} "$@"\n', encoding='utf-8')
         python.chmod(0o755)
         self.work = self._clone('work')
-        # The script reads conda/platform-pins.toml as it is imported.
-        for path in ('util/conda_vendor.py', 'util/python_versions.py', 'conda/platform-pins.toml'):
+        for path in ('util/conda_vendor.py', 'util/python_versions.py'):
             (self.work / path).parent.mkdir(parents=True, exist_ok=True)
             (self.work / path).write_bytes((ROOT / path).read_bytes())
         (self.work / 'pyproject.toml').write_text(self.RELEASED, encoding='utf-8')
@@ -272,7 +270,7 @@ class TestCheckTheDependencies(CondaStepHarness, unittest.TestCase):
         return result.returncode, outputs, result.stdout + result.stderr
 
     def reason(self, main: 'str') -> 'str':
-        return (f"{self.TAG}'s tree would be built with main's vendored requirements, and the two name different "
+        return (f"{self.TAG}'s tree would be built with main's conda recipe, and the two name different "
                 f'dependencies. {self.TAG}: {self.LISTED}. main: {main}.')
 
     def test_it_runs_where_a_tag_was_found(self) -> None:
@@ -292,15 +290,17 @@ class TestCheckTheDependencies(CondaStepHarness, unittest.TestCase):
         self.assertLess(names.index(DEPS), names.index('Bump Version'))
 
     def test_the_same_dependencies_hand_the_tag_on(self) -> None:
-        """Reordered, and with an extra outside ``all`` changed: what is vendored is the same, forced or not."""
+        """Reordered, or with an extra changed, ``all`` too: the core it carries is the same (#3133), forced or not."""
         reordered = self.RELEASED.replace('"dictdumper~=0.8.0", "chardet"', '"chardet", "dictdumper~=0.8.0"')
         for label, text in (('as tagged', self.RELEASED), ('reordered', reordered),
-                            ('another extra changed', reordered.replace('cli = [ "emoji" ]', 'cli = [ ]'))):
+                            ('another extra changed', reordered.replace('cli = [ "emoji" ]', 'cli = [ ]')),
+                            ('the all extra changed', reordered.replace('all = [ "emoji", ', 'all = [ '))):
             for forced in ('true', 'false'):
                 with self.subTest(label, forced=forced):
                     self.assertEqual(self.check(text, forced), (
                         0, {'same': 'true', 'tag': self.TAG, 'commit': 'f' * 40},
-                        f'{self.TAG} names the dependencies main does, which conda/requirements.txt vendors\n'))
+                        f'{self.TAG} names the dependencies main does, which the conda recipe takes from '
+                        'conda-forge or vendors\n'))
 
     def test_a_forced_bump_on_other_dependencies_fails_naming_both_sets(self) -> None:
         for label, (text, main) in self.CHANGED.items():
@@ -365,6 +365,7 @@ class TestTheCommitReachesCondaDist(unittest.TestCase):
                 with self.subTest(event=event_name, release=release):
                     self.assertTrue(job_runs(jobs, 'conda-update', scope))
                     self.assertIs(job_runs(jobs, 'conda-tag', scope), expected)
+                    self.assertIs(job_runs(jobs, 'conda-build', scope), expected)
                     self.assertIs(job_runs(jobs, 'conda-dist', scope), expected)
 
     def test_conda_update_hands_on_the_commit(self) -> None:
@@ -372,12 +373,12 @@ class TestTheCommitReachesCondaDist(unittest.TestCase):
         outputs = _workflows.job(CONDA, 'conda-update')['outputs']
         self.assertEqual(outputs['PCAPKIT_RELEASE_COMMIT'], '${{ steps.release-deps.outputs.commit }}')
         self.assertEqual(outputs['PCAPKIT_RELEASE_TAG'], '${{ steps.release-tag.outputs.tag }}')
-        self.assertEqual(step('conda-dist', TREE)['env'],
+        self.assertEqual(step('conda-build', TREE)['env'],
                          {'PCAPKIT_RELEASE_COMMIT': '${{ needs.conda-update.outputs.PCAPKIT_RELEASE_COMMIT }}'})
 
     def test_the_tree_step_runs_exactly_when_the_commit_is_set(self) -> None:
         """Set on a publishing bump of a tagged version; a build-only run keeps the dispatched tree."""
-        condition = step('conda-dist', TREE)['if']
+        condition = step('conda-build', TREE)['if']
         for publishes, commit, expected in (('true', 'f' * 40, True), ('true', '', False), ('true', NULL, False),
                                             ('false', 'f' * 40, False), ('false', NULL, False)):
             scope = {'needs': {'mode': {'outputs': {'publishes': publishes}},
@@ -387,7 +388,7 @@ class TestTheCommitReachesCondaDist(unittest.TestCase):
                 self.assertIs(evaluate_condition(condition, scope), expected)
 
     def test_it_follows_every_checkout_and_precedes_every_read(self) -> None:
-        names = labels('conda-dist')
+        names = labels('conda-build')
         for earlier in ('checkout', 'checkout-dispatched', "Apply conda-update's changes"):
             with self.subTest(earlier=earlier):
                 self.assertLess(names.index(earlier), names.index(TREE))
@@ -395,13 +396,13 @@ class TestTheCommitReachesCondaDist(unittest.TestCase):
                       'Smoke-test the vendored packages'):
             with self.subTest(later=later):
                 self.assertLess(names.index(TREE), names.index(later))
-        # `bash` on every leg, Windows's included, and no expression in the script.
-        self.assertEqual(step('conda-dist', TREE)['shell'], 'bash')
-        self.assertNotIn('${{', step('conda-dist', TREE)['run'])
+        # `bash`, so `pipefail`, and no expression in the script.
+        self.assertEqual(step('conda-build', TREE)['shell'], 'bash')
+        self.assertNotIn('${{', step('conda-build', TREE)['run'])
 
     def test_the_checkout_before_it_is_the_bump(self) -> None:
         """So the step's ``HEAD`` is the commit ``conda-tag`` tagged, whose conda/ and util/ it keeps."""
-        ref = step('conda-dist', 'checkout')['with']['ref']
+        ref = step('conda-build', 'checkout')['with']['ref']
         self.assertEqual(ref, 'conda-${{ needs.conda-update.outputs.PCAPKIT_VERSION }}'
                               '+${{ needs.conda-update.outputs.PCAPKIT_BUILD }}')
 
@@ -422,7 +423,7 @@ class TestTheReleaseTreeIsBuilt(_ReleaseRepository, unittest.TestCase):
                             self.tree(self.runner)['pcapkit/released.py'])
 
     def test_it_builds_the_tag_with_the_bumps_conda_and_util(self) -> None:
-        result, outputs = self._bash(step('conda-dist', TREE)['run'], self.runner,
+        result, outputs = self._bash(step('conda-build', TREE)['run'], self.runner,
                                      {'PCAPKIT_RELEASE_COMMIT': self.release})
         self.assertEqual((result.returncode, outputs), (0, {}), result.stdout + result.stderr)
         self.assertEqual(self._git(self.runner, 'rev-parse', 'HEAD'), self.release)
@@ -442,7 +443,7 @@ class TestTheReleaseTreeIsBuilt(_ReleaseRepository, unittest.TestCase):
         self.assertEqual(built['util/added_on_main.py'], 'a script main added\n')
 
     def test_a_commit_it_cannot_check_out_fails_the_leg(self) -> None:
-        result, _ = self._bash(step('conda-dist', TREE)['run'], self.runner, {'PCAPKIT_RELEASE_COMMIT': '0' * 40})
+        result, _ = self._bash(step('conda-build', TREE)['run'], self.runner, {'PCAPKIT_RELEASE_COMMIT': '0' * 40})
         self.assertNotEqual(result.returncode, 0, result.stdout)
         self.assertEqual(self._git(self.runner, 'rev-parse', 'HEAD'), self.bump)
 
@@ -476,7 +477,6 @@ class TestTheReportWarns(_ReportStep):
         super().setUp()
         (self.work / 'conda').mkdir()
         (self.work / 'conda' / 'build').write_text('4\n', encoding='utf-8')
-        (self.temp / 'platform-pins.log').write_text('', encoding='utf-8')
 
     def test_other_dependencies_warn(self) -> None:
         for same, expected in (('false', 'warning'), ('true', 'success'), ('', 'success')):
