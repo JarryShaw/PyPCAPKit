@@ -36,6 +36,11 @@ All notable changes to PyPCAPKit are recorded here.
 Releases are listed newest first. :file:`CHANGELOG.md` at the repository root
 carries only the version being released.
 
+* **1.8.1** (unreleased) -- A bug-fix release: OSPF split into a versioned family,
+  with OSPFv3 read with its own 16-octet header and OSPFv1 with the registries of
+  :rfc:`1131`, and Sync Develop pushing ``main`` into ``develop`` directly.
+  :doc:`Full changelog <changelog/1.8.1>`.
+
 * **1.8.0** (2026-11-26) -- Protocol parsing split from construction, with
   ``from_file`` and ``from_fields`` as the explicit pair and closed parse and
   build signatures, ``analyze`` dispatching as a frame does, and versioned
@@ -189,6 +194,7 @@ carries only the version being released.
    :hidden:
    :maxdepth: 1
 
+   changelog/1.8.1
    changelog/1.8.0
    changelog/1.7.0
    changelog/1.6.2
