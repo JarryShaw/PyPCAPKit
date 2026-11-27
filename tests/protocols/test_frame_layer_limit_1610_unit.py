@@ -26,7 +26,6 @@ import io
 import itertools
 import logging
 import struct
-import sys
 import time
 import unittest
 import warnings
@@ -34,6 +33,7 @@ from typing import TYPE_CHECKING
 
 from tests._support import close_extractor, reimport_once_per_class, scale_timeout, time_limit
 from tests.foundation import _roundtrip as wire
+from tests.protocols._rebuild import Logged, depth
 
 if TYPE_CHECKING:
     from typing import Callable, Optional
@@ -138,43 +138,10 @@ def chains(carrier: 'str', count: 'int', times: 'int') -> 'list[str]':
     return ([carrier] + ['opts'] * count) * times + ['tcp']
 
 
-class _Logged(logging.Handler):
-    """Collect what the ``pcapkit`` logger reports of a recursion error."""
-
-    def __init__(self) -> None:
-        super().__init__(logging.DEBUG)
-        self.messages = []  # type: list[str]
-
-    def emit(self, entry: 'logging.LogRecord') -> None:
-        message = entry.getMessage()
-        if 'recursion' in message.lower():
-            self.messages.append(message)
-
-    def __enter__(self) -> '_Logged':
-        logging.getLogger('pcapkit').addHandler(self)
-        return self
-
-    def __exit__(self, *exc: object) -> None:
-        logging.getLogger('pcapkit').removeHandler(self)
-
-
-def depth(func: 'object') -> int:
-    """How many Python frames deeper than its caller ``func()`` goes."""
-    state = {'now': 0, 'most': 0}
-
-    def profile(frame: object, event: str, arg: object) -> None:  # pylint: disable=unused-argument
-        if event == 'call':
-            state['now'] += 1
-            state['most'] = max(state['most'], state['now'])
-        elif event == 'return':
-            state['now'] -= 1
-
-    sys.setprofile(profile)
-    try:
-        func()  # type: ignore[operator]
-    finally:
-        sys.setprofile(None)
-    return state['most']
+def recursion(entry: 'logging.LogRecord') -> 'Optional[str]':
+    """The message of ``entry`` if it reports a recursion error, for :class:`Logged`."""
+    message = entry.getMessage()
+    return message if 'recursion' in message.lower() else None
 
 
 class FrameLayerLimitTests(unittest.TestCase):
@@ -352,7 +319,7 @@ class FrameLayerLimitTests(unittest.TestCase):
         from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         cases = {'IPv4 in IPv4': 3000, '802.1Q tags': 10000, 'IPv6 in IPv6': 1500, 'mixed': 3000}
-        with time_limit(scale_timeout(60)), warnings.catch_warnings(), _Logged() as logged:
+        with time_limit(scale_timeout(60)), warnings.catch_warnings(), Logged(recursion) as logged:
             warnings.simplefilter('ignore')
             for shape, count in cases.items():
                 with self.subTest(shape=shape):
@@ -361,48 +328,39 @@ class FrameLayerLimitTests(unittest.TestCase):
                     self.assertTrue(bounded(short, deep), (short, deep))
         self.assertEqual(logged.messages, [])
 
-    def test_a_cut_frame_rebuilds_byte_exact(self) -> None:
-        from pcapkit.protocols.link.ethernet.protocol import Ethernet
-        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
-        from pcapkit.protocols.misc.pcap.header.protocol import Header
-
-        header = Header(GLOBAL).info
-        shapes = dict(SHAPES, chains=lambda count: chains('ipv4', 30, count // 31 + 1))
-        with warnings.catch_warnings(), _Logged() as logged:
-            warnings.simplefilter('ignore')
-            for shape, build in shapes.items():
-                for count in PAST:
-                    with self.subTest(shape=shape, count=count):
-                        data = ethernet(build(count))
-                        parsed, _ = self.frame(data)
-                        self.assertEqual(parsed.data, record(data))  # type: ignore[attr-defined]
-                        rebuilt = Frame.from_data(parsed.info.to_dict(), num=1, header=header)  # type: ignore[attr-defined]
-                        self.assertEqual(rebuilt.data, record(data))
-                        self.assertEqual(str(rebuilt.protochain), str(parsed.protochain))  # type: ignore[attr-defined]
-
-                        packet = Ethernet(data)
-                        self.assertEqual(Ethernet.from_data(packet.info.to_dict()).data, data)
-        self.assertEqual(logged.messages, [])
-
-    def test_rebuilding_a_cut_frame_warns_once_as_parsing_it_does(self) -> None:
+    def test_a_cut_frame_rebuilds_byte_exact_and_warns_once_as_parsing_it_does(self) -> None:
         # Each layer rebuilt parses its own octets again, and each such parse
         # reaches the limit, so the rebuild warned once a layer: 65 times.
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
         from pcapkit.protocols.misc.pcap.frame.protocol import Frame
         from pcapkit.protocols.misc.pcap.header.protocol import Header
         from pcapkit.utilities.warnings import ProtocolWarning
 
         header = Header(GLOBAL).info
-        for shape, build in SHAPES.items():
-            for count in PAST:
-                with self.subTest(shape=shape, count=count):
-                    parsed, messages = self.frame(ethernet(build(count)))
-                    self.assertEqual(len(messages), 1, messages)
-                    for data in (parsed.info, parsed.info.to_dict()):  # type: ignore[attr-defined]
-                        with warnings.catch_warnings(record=True) as caught:
-                            warnings.simplefilter('always')
-                            Frame.from_data(data, num=1, header=header)
-                        self.assertEqual([str(item.message) for item in caught
-                                          if issubclass(item.category, ProtocolWarning)], messages)
+        shapes = dict(SHAPES, chains=lambda count: chains('ipv4', 30, count // 31 + 1))
+        with Logged(recursion) as logged:
+            for shape, build in shapes.items():
+                for count in PAST:
+                    with self.subTest(shape=shape, count=count):
+                        data = ethernet(build(count))
+                        parsed, messages = self.frame(data)
+                        self.assertEqual(parsed.data, record(data))  # type: ignore[attr-defined]
+                        self.assertEqual(len(messages), 1, messages)
+                        for info in (parsed.info, parsed.info.to_dict()):  # type: ignore[attr-defined]
+                            with self.subTest(info=type(info).__name__):
+                                with warnings.catch_warnings(record=True) as caught:
+                                    warnings.simplefilter('always')
+                                    rebuilt = Frame.from_data(info, num=1, header=header)
+                                self.assertEqual(rebuilt.data, record(data))
+                                self.assertEqual(str(rebuilt.protochain), str(parsed.protochain))  # type: ignore[attr-defined]
+                                self.assertEqual([str(item.message) for item in caught
+                                                  if issubclass(item.category, ProtocolWarning)], messages)
+
+                        with warnings.catch_warnings():
+                            warnings.simplefilter('ignore')
+                            packet = Ethernet(data)
+                            self.assertEqual(Ethernet.from_data(packet.info.to_dict()).data, data)
+        self.assertEqual(logged.messages, [])
 
     def test_rebuilding_a_cut_frame_goes_no_deeper_than_parsing_it(self) -> None:
         # Each layer rebuilt parses its own octets again, so were it to count
@@ -413,7 +371,7 @@ class FrameLayerLimitTests(unittest.TestCase):
         from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         for carrier in ('ipv4', 'ipv6'):
-            with self.subTest(carrier=carrier), warnings.catch_warnings(), _Logged() as logged:
+            with self.subTest(carrier=carrier), warnings.catch_warnings(), Logged(recursion) as logged:
                 warnings.simplefilter('ignore')
                 data = ethernet(chains(carrier, 30, 33) if carrier == 'ipv4' else SHAPES['IPv6 in IPv6'](1000))
                 info = Ethernet(data).info.to_dict()

@@ -9,35 +9,35 @@ zero-filled one as ``INVALID`` and warn, where its capture read ``TRUNCATED`` an
 So the header is cut back through its own ``__short_read__`` before it is read, at the
 width it declares, as its capture was.
 
-Each layer below that verifies during its parse is cut at every octet that leaves it a
-short read: GRE, IGMPv1, IGMPv2, IGMPv3 and OSPF built on the octets, and ICMP and IGMPv3
-read from a PCAP savefile, since a capture keeps the cut header of the others as raw
-octets. Its rebuild from the data model and from the :obj:`dict` must give the octets
-captured and the checksum status read, and report nothing, on the :mod:`warnings` channel
-or the ``pcapkit`` logger. Whole messages are the control: they verify on rebuild, and one
-with a wrong checksum warns as its parse did.
+Each layer below that verifies during its parse is cut short: GRE, IGMPv1, IGMPv2,
+IGMPv3 and OSPF built on the octets, and ICMP and IGMPv3 read from a PCAP savefile, since
+a capture keeps the cut header of the others as raw octets. Its rebuild from the data
+model and from the :obj:`dict` must give the octets captured and the checksum status read,
+and report nothing, on the :mod:`warnings` channel or the ``pcapkit`` logger. The cuts
+here are hand-picked, and :mod:`tests.protocols.test_short_read_rebuild_every_cut_2703_unit`
+makes the same checks at every octet that leaves a short read. Whole messages are the
+control: they verify on rebuild, and one with a wrong checksum warns as its parse did.
 
 The octets and captures are built here; this module is unit-tier and reads no capture file.
 
 """
 from __future__ import annotations
 
-import contextlib
 import io
-import logging
 import struct
 import unittest
-import warnings
 from typing import TYPE_CHECKING
 from unittest import mock
 
 from tests._support import reimport_once_per_class
 from tests.foundation import _roundtrip as wire
+from tests.protocols._rebuild import reported
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Iterator
+    from typing import Any, Callable, Iterable
 
-#: Test tier (#1958): hand-picked parse -> rebuild round trips.
+#: Test tier (#1958): hand-picked parse -> rebuild round trips; the sweep of every
+#: cut is ``LATEST``, as the tier rule has it (#1732, #1958).
 __tier__ = 'ALL'
 
 
@@ -108,37 +108,42 @@ def pcap(packet: bytes, original: int) -> bytes:
             + struct.pack('<IIII', 1, 0, len(packet), original) + packet)
 
 
-class _Logged(logging.Handler):
-    """Collect what the ``pcapkit`` logger reports."""
+#: Hand-picked short reads of each message of :data:`DIRECT`, in octets captured: the
+#: first, the last, and those ending inside or on its checksum or a whole field. GRE
+#: cut inside its Protocol Type reads a partial EtherType.
+PICKED = {
+    'GRE C': (1, 3, 5, 7),
+    'GRE C, K, S': (1, 5, 10, 15),
+    'IGMPv1 report': (1, 3, 4, 7),
+    'IGMPv2 leave': (1, 3, 4, 7),
+    'IGMPv3 report': (1, 8, 13, 20, 31),
+    'IGMPv3 query': (12, 15),
+    'OSPFv2': (1, 13, 15, 16, 23),
+}
 
-    def __init__(self) -> None:
-        super().__init__(logging.DEBUG)
-        self.messages = []  # type: list[str]
-
-    def emit(self, record: 'logging.LogRecord') -> None:
-        self.messages.append(f'logged: {record.getMessage()}')
-
-
-@contextlib.contextmanager
-def _reported() -> 'Iterator[list[str]]':
-    """Collect what the block reports, on the :mod:`warnings` channel and the logger."""
-    handler = _Logged()
-    logger = logging.getLogger('pcapkit')
-    logger.addHandler(handler)
-    try:
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter('always')
-            yield handler.messages
-    finally:
-        logger.removeHandler(handler)
-    handler.messages.extend(f'warned: {item.message}' for item in caught)
+#: Hand-picked cuts of each frame of :data:`CAPTURED`, in octets off its end: the
+#: least, the most and between, a Report's last record cut to before its source.
+PICKED_CUTS = {
+    'ICMP echo': (1, 8, 16),
+    'IGMPv3 report': (1, 4, 12, 24),
+}
 
 
-class ShortReadRebuildTests(unittest.TestCase):
-    """A rebuilt short read is read and verified as its capture was."""
+class ShortReadMixin:
+    """The checks on each message cut short, at its picked cuts or at every one.
+
+    A plain class, so only the test case each tier's module builds on it is
+    collected: :class:`ShortReadRebuildTests` here, and the ``LATEST`` sweep's,
+    which sets :attr:`sweep`.
+
+    """
+
+    #: Whether to cut each message at every octet that leaves a short read rather
+    #: than at its picked cuts.
+    sweep = False
 
     def setUp(self) -> None:
-        reimport_once_per_class(self)
+        reimport_once_per_class(self)  # type: ignore[arg-type]
         import importlib
 
         import pcapkit
@@ -153,11 +158,19 @@ class ShortReadRebuildTests(unittest.TestCase):
         }
         patch = mock.patch.object(config, 'CHECKSUM_VERIFY', True)
         patch.start()
-        self.addCleanup(patch.stop)
+        self.addCleanup(patch.stop)  # type: ignore[attr-defined]
+
+    def short_reads(self, label: str) -> 'Iterable[int]':
+        """The octets of message ``label`` of :data:`DIRECT` to capture."""
+        return DIRECT[label][4] if self.sweep else PICKED[label]
+
+    def frame_cuts(self, label: str) -> 'Iterable[int]':
+        """The octets to cut off the frame of message ``label`` of :data:`CAPTURED`."""
+        return range(1, len(CAPTURED[label][1]) - HEADER + 1) if self.sweep else PICKED_CUTS[label]
 
     def parse(self, build: 'Callable[[], Any]') -> 'tuple[Any, list[str]]':
         """What ``build`` returns, and what it reported."""
-        with _reported() as messages:
+        with reported() as messages:
             layer = build()
         return layer, messages
 
@@ -175,39 +188,43 @@ class ShortReadRebuildTests(unittest.TestCase):
     def assertRebuildsAsParsed(self, layer: 'Any') -> 'None':  # pylint: disable=invalid-name
         """``layer`` rebuilt from its data model and its dict: its octets, its status, and nothing reported."""
         for path, data in (('model', layer.info), ('dict', layer.info.to_dict())):
-            with self.subTest(path=path):
+            with self.subTest(path=path):  # type: ignore[attr-defined]
                 rebuilt, messages = self.parse(lambda: type(layer).from_data(data))  # pylint: disable=cell-var-from-loop
-                self.assertEqual((rebuilt.data.hex(), rebuilt.info.checksum_status, messages),
+                self.assertEqual((rebuilt.data.hex(), rebuilt.info.checksum_status, messages),  # type: ignore[attr-defined]
                                  (layer.data.hex(), layer.info.checksum_status, []))
 
     def test_a_cut_header_built_on_its_octets_rebuilds_quietly(self) -> None:
-        for label, (_, _, msg, _, cuts) in DIRECT.items():
-            for count in cuts:
-                with self.subTest(message=label, captured=count):
+        for label, (_, _, msg, _, _) in DIRECT.items():
+            for count in self.short_reads(label):
+                with self.subTest(message=label, captured=count):  # type: ignore[attr-defined]
                     layer, _ = self.direct(label, msg[:count])
-                    self.assertIsNotNone(layer.info.get('__short_read__'))
-                    self.assertEqual(layer.data, msg[:count])
+                    self.assertIsNotNone(layer.info.get('__short_read__'))  # type: ignore[attr-defined]
+                    self.assertEqual(layer.data, msg[:count])  # type: ignore[attr-defined]
                     self.assertRebuildsAsParsed(layer)
 
     def test_a_cut_message_read_from_a_capture_rebuilds_quietly(self) -> None:
-        for label, (_, msg, _, _) in CAPTURED.items():
-            for cut in range(1, len(msg) - HEADER + 1):
-                with self.subTest(message=label, cut=cut):
+        for label in CAPTURED:
+            for cut in self.frame_cuts(label):
+                with self.subTest(message=label, cut=cut):  # type: ignore[attr-defined]
                     layer, messages = self.captured(label, cut)
-                    self.assertIsNotNone(layer.info.get('__short_read__'))
-                    self.assertIs(layer.info.checksum_status, self.Status.TRUNCATED)
-                    self.assertNotRegex(' '.join(messages), r'checksum 0x[0-9a-f]{4} is wrong;')
+                    self.assertIsNotNone(layer.info.get('__short_read__'))  # type: ignore[attr-defined]
+                    self.assertIs(layer.info.checksum_status, self.Status.TRUNCATED)  # type: ignore[attr-defined]
+                    self.assertNotRegex(' '.join(messages), r'checksum 0x[0-9a-f]{4} is wrong;')  # type: ignore[attr-defined]
                     self.assertRebuildsAsParsed(layer)
 
     def test_a_cut_header_still_reads_truncated(self) -> None:
         # Where the cut leaves part of what the checksum covers uncaptured; an
         # OSPF header cut in its Authentication field leaves all of it captured.
-        for label, (_, _, msg, _, cuts) in DIRECT.items():
-            for count in cuts:
-                with self.subTest(message=label, captured=count):
+        for label, (_, _, msg, _, _) in DIRECT.items():
+            for count in self.short_reads(label):
+                with self.subTest(message=label, captured=count):  # type: ignore[attr-defined]
                     layer, _ = self.direct(label, msg[:count])
                     expected = self.Status.VALID if label == 'OSPFv2' and count >= 16 else self.Status.TRUNCATED
-                    self.assertIs(layer.info.checksum_status, expected)
+                    self.assertIs(layer.info.checksum_status, expected)  # type: ignore[attr-defined]
+
+
+class ShortReadRebuildTests(ShortReadMixin, unittest.TestCase):
+    """A rebuilt short read is read and verified as its capture was."""
 
     def test_a_whole_message_rebuilds_verified(self) -> None:
         for label, (_, _, msg, _, _) in DIRECT.items():
