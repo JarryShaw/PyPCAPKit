@@ -3,9 +3,10 @@
 
 GitHub Pages serves ``main``'s build alone, and Read the Docs serves every version.
 :data:`VERSIONS` maps each version's path segment -- ``latest``, ``stable`` and every
-release tag -- to its URL there. GitHub Pages serves :data:`NOT_FOUND` for any path it
-lacks: under one of those segments it sends the reader to the same page on Read the
-Docs, the query and fragment kept, and anywhere else it says the page is not found.
+release tag but :data:`UNBUILT` -- to its URL there. GitHub Pages serves
+:data:`NOT_FOUND` for any path it lacks: under one of those segments it sends the
+reader to the same page on Read the Docs, the query and fragment kept, and anywhere
+else it says the page is not found.
 
 deploy-pages.yml's ``Write the version redirects`` runs it on the built site, as
 ``python util/pages_versions.py docs/build/html``, and reads the release tags from
@@ -41,6 +42,18 @@ BRANCHES = ('latest', 'stable')
 #: A release tag, whose Read the Docs slug is its name. A ``conda-*`` tag is none.
 RELEASE = re.compile(r'v(?P<release>\d+(?:\.\d+)*)(?:(?P<pre>a|b|rc)(?P<pre_n>\d+))?'
                      r'(?:\.post(?P<post>\d+))?(?:\.dev(?P<dev>\d+))?')
+#: The release tags Read the Docs holds no build of, so their Pages paths stay not
+#: found rather than redirect to its 404 (#3135). Each is active there with its only
+#: build failed, as its API (``/api/v3/projects/pypcapkit/versions/``) lists them.
+#: Pinned rather than fetched, so a publish does not hang on that API; a tag whose
+#: build is retried and succeeds leaves the set, and one whose build fails joins it.
+UNBUILT = frozenset({
+    'v1.0.0b1',
+    'v1.3.1.dev0', 'v1.3.1.dev1', 'v1.3.1.dev2',
+    'v1.3.5.post38', 'v1.3.5.post39', 'v1.3.5.post40', 'v1.3.5.post42', 'v1.3.5.post43',
+    'v1.4.0',
+    'v1.5.0a1', 'v1.5.0b1', 'v1.5.0b2', 'v1.5.0b4',
+})
 #: The two files, at the build's root.
 VERSIONS = 'versions.json'
 NOT_FOUND = '404.html'
@@ -100,8 +113,8 @@ def key(tag: 'str') -> 'tuple[tuple[int, ...], tuple[int, int], int, Union[int, 
 
 
 def versions(tags: 'Iterable[str]') -> 'dict[str, str]':
-    """Each version's path segment, the branches' then the release tags' by version, and its URL."""
-    releases = sorted({tag for tag in tags if RELEASE.fullmatch(tag)}, key=key)
+    """Each version's path segment, the branches' then the built release tags' by version, and its URL."""
+    releases = sorted({tag for tag in tags if RELEASE.fullmatch(tag) and tag not in UNBUILT}, key=key)
     return {name: f'{READ_THE_DOCS}{name}/' for name in (*BRANCHES, *releases)}
 
 

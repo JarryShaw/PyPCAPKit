@@ -2449,7 +2449,10 @@ its root, so ``clean`` keeps them, and fails rather than overwrite a page:
    * - ``versions.json``
      - each version's path segment, mapped to its Read the Docs URL: ``latest``,
        ``stable``, then every ``v*`` release tag ``origin`` lists, pre- and
-       post-releases included, in version order. A ``conda-*`` tag is none.
+       post-releases included, in version order. A ``conda-*`` tag is none, and
+       neither is a tag in ``UNBUILT``, which Read the Docs holds no build of
+       (:issue:`3135`): a tag whose build fails joins that set, and leaves it once a
+       rebuild succeeds.
    * - ``404.html``
      - the page GitHub Pages serves for a missing path. Under a segment
        ``versions.json`` lists, it sends the reader to the same page on Read the
