@@ -9,17 +9,16 @@ without it are refused, whichever member takes them. Octets without it are read
 by their Version field (RFC 791, section 3.1; RFC 8200, section 3), and data by
 its ``version``.
 
-Every case builds its own octets in memory and reads no capture. Classes are
-imported inside each test, after :func:`~tests._support.reimport_once_per_class`.
+The checks are :mod:`tests.protocols._versioned_base`'s; this module holds the
+family's tables, and the checks only IP's members need. Every case builds its own
+octets in memory and reads no capture.
 
 """
 
-import enum
-import io
 import struct
 import unittest
 
-from tests._support import reimport_once_per_class
+from tests.protocols._versioned_base import FromDataByVersion, OctetsCarryTheVersion
 
 #: A UDP datagram to the discard port, carrying ``ab``.
 UDP = struct.pack('>HHHH', 40000, 9, 10, 0) + b'ab'
@@ -37,125 +36,40 @@ def ipv6(body: 'bytes', nxt: 'int') -> 'bytes':
             + bytes(15) + b'\x01' + bytes(15) + b'\x02' + body)
 
 
-#: Octets, with the member that parses them.
-OCTETS = {
-    'IPv4 UDP': (ipv4(UDP, 17), 'IPv4'),
-    'IPv6 UDP': (ipv6(UDP, 17), 'IPv6'),
-    'IPv6 no next header': (ipv6(b'abcd', 59), 'IPv6'),
-}
-
-#: Fields, with the ``version`` that builds them.
-FIELDS = {
-    'IPv4 defaults': ({}, 4),
-    'IPv4 shared fields': ({'src': '10.0.0.1', 'dst': '10.0.0.2', 'payload': UDP}, 4),
-    'IPv4 own fields': ({'ttl': 3, 'protocol': 17, 'payload': UDP}, 4),
-    'IPv6 defaults': ({}, 6),
-    'IPv6 shared fields': ({'src': '::1', 'dst': '::2', 'payload': UDP}, 6),
-    'IPv6 own fields': ({'hop_limit': 3, 'next': 17, 'src': '::1', 'dst': '::2', 'payload': UDP}, 6),
-}
-
-#: The refusal of fields given no ``version``.
-NO_VERSION = r'^IP: no version to build with; pass version=4 or version=6$'
-
-
-class IPBaseDispatchTests(unittest.TestCase):
+class IPBaseDispatchTests(OctetsCarryTheVersion, FromDataByVersion, unittest.TestCase):
     """``IP(...)`` and ``IP.from_data`` give the member, never the base."""
 
-    def setUp(self) -> None:
-        reimport_once_per_class(self)
+    BASE = 'pcapkit.protocols.internet.ip.protocol:IP'
+    MEMBERS = {4: 'pcapkit.protocols.internet.ipv4.protocol:IPv4',
+               6: 'pcapkit.protocols.internet.ipv6.protocol:IPv6'}
+    OCTETS = {
+        'IPv4 UDP': (ipv4(UDP, 17), 4),
+        'IPv6 UDP': (ipv6(UDP, 17), 6),
+        'IPv6 no next header': (ipv6(b'abcd', 59), 6),
+    }
+    BAD_VERSIONS = (5, True, '4', 4.0, 6.0)
+    CUSTOM = (4, 'pcapkit.protocols.internet.ipv4.schema:IPv4', 'pcapkit.protocols.internet.ipv4.data:IPv4',
+              {'ttl': 3})
+    NO_MEMBER = {version: ipv4(UDP, 17, version) for version in (0, 5, 15)}
+    SHORT = (b'', 'no version in an empty packet')
+    CROSSED = {
+        'IPv4 octets, version=6': (OCTETS['IPv4 UDP'][0], 6, r'^\[IPv6\] invalid version: 4$'),
+        'IPv6 octets, version=4': (OCTETS['IPv6 UDP'][0], 4, r'^\[IPv4\] invalid version: 6$'),
+    }
 
-    @staticmethod
-    def member(name: 'str | int') -> 'type':
-        from pcapkit.protocols.internet.ipv4.protocol import IPv4
-        from pcapkit.protocols.internet.ipv6.protocol import IPv6
-
-        return {'IPv4': IPv4, 'IPv6': IPv6, 4: IPv4, 6: IPv6}[name]
-
-    def test_octets_without_version_give_the_member_their_version_names(self) -> None:
-        from pcapkit.protocols.internet.ip.protocol import IP
-
-        for label, (octets, name) in OCTETS.items():
-            for source in ('bytes', 'stream'):
-                with self.subTest(octets=label, source=source):
-                    layer = IP(octets) if source == 'bytes' else IP(io.BytesIO(octets), len(octets))
-                    direct = self.member(name)(octets)
-                    self.assertIs(type(layer), self.member(name))
-                    self.assertIsInstance(layer, IP)
-                    self.assertEqual(layer.info.version, octets[0] >> 4)
-                    self.assertEqual(layer.data, octets)
-                    self.assertEqual(str(layer.protochain), str(direct.protochain))
-
-    def test_octets_naming_no_version_raise(self) -> None:
-        from pcapkit.protocols.internet.ip.protocol import IP
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        for version in (0, 5, 15):
-            with self.subTest(version=version):
-                with self.assertRaisesRegex(ProtocolError, f'^IP: invalid version: {version}$'):
-                    IP(ipv4(UDP, 17, version))
-        with self.assertRaisesRegex(ProtocolError, '^IP: no version in an empty packet$'):
-            IP(b'')
-
-    def test_version_picks_the_member_from_fields(self) -> None:
-        """Each build is byte-exact against the member's own and parses back unchanged."""
-        from pcapkit.protocols.internet.ip.protocol import IP
-
-        for label, (fields, version) in FIELDS.items():
-            with self.subTest(fields=label):
-                layer = IP.from_fields(version=version, **fields)
-                self.assertIs(type(layer), self.member(version))
-                self.assertEqual(layer.data, self.member(version).from_fields(**fields).data)
-                parsed = IP(layer.data)
-                self.assertIs(type(parsed), type(layer))
-                self.assertEqual(parsed.data, layer.data)
-
-    def test_version_picks_the_member_from_octets(self) -> None:
-        """A ``version`` that matches the octets parses them as the member would."""
-        from pcapkit.protocols.internet.ip.protocol import IP
-
-        for label, (octets, name) in OCTETS.items():
-            for source in ('bytes', 'stream'):
-                with self.subTest(octets=label, source=source):
-                    version = octets[0] >> 4
-                    layer = (IP(octets, version=version) if source == 'bytes'
-                             else IP(io.BytesIO(octets), len(octets), version=version))
-                    self.assertIs(type(layer), self.member(name))
-                    self.assertEqual(layer.data, octets)
-
-    def test_version_over_octets_of_the_other_member_is_its_parser_s_error(self) -> None:
-        """No cross-check: the member ``version`` names parses, and refuses the Version field."""
-        from pcapkit.protocols.internet.ip.protocol import IP
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        cases = {
-            'IPv4 octets, version=6': (OCTETS['IPv4 UDP'][0], 6, r'^\[IPv6\] invalid version: 4$'),
-            'IPv6 octets, version=4': (OCTETS['IPv6 UDP'][0], 4, r'^\[IPv4\] invalid version: 6$'),
+    def cases_from_fields(self) -> 'dict[str, tuple[dict[str, object], int, object]]':
+        return {
+            'IPv4 defaults': ({}, 4, None),
+            'IPv4 shared fields': ({'src': '10.0.0.1', 'dst': '10.0.0.2', 'payload': UDP}, 4, None),
+            'IPv4 own fields': ({'ttl': 3, 'protocol': 17, 'payload': UDP}, 4, None),
+            'IPv6 defaults': ({}, 6, None),
+            'IPv6 shared fields': ({'src': '::1', 'dst': '::2', 'payload': UDP}, 6, None),
+            'IPv6 own fields': ({'hop_limit': 3, 'next': 17, 'src': '::1', 'dst': '::2', 'payload': UDP}, 6, None),
         }
-        for label, (octets, version, message) in cases.items():
-            with self.subTest(case=label):
-                with self.assertRaisesRegex(ProtocolError, message):
-                    IP(octets, version=version)
 
-    def test_a_member_checks_the_version_field_before_its_header(self) -> None:
-        """IPv6's first octet reads to IPv4 as an IHL of 0 to 4; the Version field is checked first."""
-        from pcapkit.protocols.internet.ipv4.protocol import IPv4
-        from pcapkit.protocols.internet.ipv6.protocol import IPv6
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        six = OCTETS['IPv6 UDP'][0]
-        for first in range(0x60, 0x65):
-            with self.subTest(first=hex(first)):
-                with self.assertRaisesRegex(ProtocolError, r'^\[IPv4\] invalid version: 6$'):
-                    IPv4(bytes([first]) + six[1:])
-        with self.assertRaisesRegex(ProtocolError, r'^\[IPv6\] invalid version: 4$'):
-            IPv6(OCTETS['IPv4 UDP'][0])
-
-    def test_fields_without_version_raise(self) -> None:
-        """Even a field only one member takes picks nothing."""
-        from pcapkit.protocols.internet.ip.protocol import IP
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        cases = {
+    def versionless_fields(self) -> 'dict[str, dict[str, object]]':
+        """Even a field only one member takes."""
+        return {
             'no fields': {},
             'shared fields': {'src': '10.0.0.1', 'dst': '10.0.0.2'},
             'IPv4 only': {'ttl': 3},
@@ -163,113 +77,32 @@ class IPBaseDispatchTests(unittest.TestCase):
             'flow label': {'flow_label': 1, 'src': '::1', 'dst': '::2'},
             'both': {'ttl': 3, 'hop_limit': 3},
         }
-        for label, fields in cases.items():
-            with self.subTest(fields=label):
-                with self.assertRaisesRegex(ProtocolError, NO_VERSION):
-                    IP.from_fields(**fields)
 
-    def test_version_is_the_only_check(self) -> None:
-        """A bad ``version`` raises; a field the member lacks fails the member's check."""
-        from pcapkit.protocols.internet.ip.protocol import IP
-        from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+    def foreign_fields(self) -> 'dict[int, dict[str, object]]':
+        return {4: {'hop_limit': 3}, 6: {'ttl': 3}}
 
-        for version in (5, True, '4', 4.0, 6.0):
-            with self.subTest(version=version):
-                with self.assertRaisesRegex(ProtocolError, f'^IP: invalid version: {version!r}$'):
-                    IP.from_fields(version=version)
-
-        class Version(enum.IntEnum):
-            """An :class:`~enum.IntEnum` member is an :obj:`int`, and accepted."""
-
-            IPV6 = 6
-
-        self.assertIs(type(IP.from_fields(version=Version.IPV6)), self.member(6))
-        with self.assertRaisesRegex(UnsupportedCall, "^IPv4: unexpected keyword\\(s\\): 'hop_limit'"):
-            IP.from_fields(version=4, hop_limit=3)
-        with self.assertRaisesRegex(UnsupportedCall, "^IPv6: unexpected keyword\\(s\\): 'ttl'"):
-            IP.from_fields(version=6, ttl=3)
-
-    def test_a_member_takes_version_only_as_its_own(self) -> None:
-        """Building or parsing, ``version`` must name the member (#2840)."""
+    def test_a_member_checks_the_version_field_before_its_header(self) -> None:
+        """IPv6's first octet reads to IPv4 as an IHL of 0 to 4; the Version field is checked first."""
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.protocols.internet.ipv6.protocol import IPv6
         from pcapkit.utilities.exceptions import ProtocolError
 
-        self.assertEqual(IPv4.from_fields(version=4).data, IPv4.from_fields().data)
-        self.assertEqual(IPv6.from_fields(version=6).data, IPv6.from_fields().data)
-        with self.assertRaisesRegex(ProtocolError, '^IPv4: version=6 names another member$'):
-            IPv4.from_fields(version=6)
-        with self.assertRaisesRegex(ProtocolError, '^IPv6: version=4 names another member$'):
-            IPv6.from_fields(version=4)
-        with self.assertRaisesRegex(ProtocolError, '^IPv6: version=4 names another member$'):
-            IPv6(OCTETS['IPv6 UDP'][0], version=4)
-        self.assertIs(type(IPv6(OCTETS['IPv6 UDP'][0], version=6)), IPv6)
-        # NOTE: The enclosing IP layer hands its own version to the one it carries
-        # through the private channel, so IPv6 in IPv4 is no member check.
-        six_in_four = ipv4(OCTETS['IPv6 UDP'][0], 41)
-        self.assertEqual(str(IPv4(six_in_four).protochain), 'IPv4:IPv6:UDP:Raw')
-        octets = OCTETS['IPv6 UDP'][0]
-        self.assertIs(type(IPv6._from_parent(octets, len(octets), version=4)), IPv6)  # pylint: disable=protected-access
+        six = self.OCTETS['IPv6 UDP'][0]
+        for first in range(0x60, 0x65):
+            with self.subTest(first=hex(first)):
+                with self.assertRaisesRegex(ProtocolError, r'^\[IPv4\] invalid version: 6$'):
+                    IPv4(bytes([first]) + six[1:])
+        with self.assertRaisesRegex(ProtocolError, r'^\[IPv6\] invalid version: 4$'):
+            IPv6(self.OCTETS['IPv4 UDP'][0])
 
-    def test_a_subclass_outside_the_members_has_no_version_of_its_own(self) -> None:
-        """So it takes no ``version``, as a member takes no other's."""
-        from pcapkit.protocols.internet.ip.protocol import IP
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        class Outside(IP):  # type: ignore[type-arg]
-            """A concrete subclass of the base that is no member."""
-
-            name = length = None  # type: ignore[assignment]
-            @classmethod
-            def __index__(cls) -> 'int':  # type: ignore[override]
-                raise NotImplementedError
-
-            def read(self, length: 'object' = None, **kwargs: 'object') -> 'object':
-                raise NotImplementedError
-
-            def make(self, **kwargs: 'object') -> 'object':
-                raise NotImplementedError
-
-        with self.assertRaisesRegex(ProtocolError, '^Outside: no version of its own to match version=4$'):
-            Outside.from_fields(version=4)
-
-    def test_from_data_on_the_base_gives_the_member(self) -> None:
-        from pcapkit.protocols.internet.ip.protocol import IP
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        for label, (octets, name) in OCTETS.items():
-            parsed = self.member(name)(octets)
-            for form in ('info', 'dict'):
-                with self.subTest(octets=label, form=form):
-                    data = parsed.info if form == 'info' else parsed.info.to_dict()
-                    rebuilt = IP.from_data(data)
-                    self.assertIs(type(rebuilt), self.member(name))
-                    self.assertEqual(rebuilt.data, octets)
-        with self.assertRaisesRegex(ProtocolError, '^IP: invalid version: None$'):
-            IP.from_data({})
-        with self.assertRaisesRegex(ProtocolError, '^IPv4: version=6 names another member$'):
-            IP.from_data(self.member('IPv4')(OCTETS['IPv4 UDP'][0]).info, version=6)
-
-    def test_only_the_base_dispatches(self) -> None:
-        """A subclass of the base is constructed as itself, abstract or not."""
-        from pcapkit.protocols.internet.ipv4.data import IPv4 as Data_IPv4
-        from pcapkit.protocols.internet.ip.protocol import IP
+    def test_the_outer_layer_s_version_takes_the_private_channel(self) -> None:
+        """IPv4 hands its own version to the IPv6 it carries, so IPv6 in IPv4 is no member check."""
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
-        from pcapkit.protocols.internet.ipv4.schema import IPv4 as Schema_IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
-        class Abstract(IP):  # type: ignore[type-arg] # pylint: disable=abstract-method
-            """A direct subclass of the base, still abstract."""
-
-        class Custom(IPv4, schema=Schema_IPv4, data=Data_IPv4):
-            """A concrete subclass of the base, through a member."""
-
-        octets = OCTETS['IPv4 UDP'][0]
-        self.assertIs(type(IP(octets)), IPv4)
-        self.assertIs(type(Custom(octets)), Custom)
-        self.assertIs(type(Custom.from_fields(ttl=3, version=4)), Custom)
-        self.assertIs(type(Custom.from_data(Custom(octets).info)), Custom)
-        with self.assertRaisesRegex(TypeError, 'abstract'):
-            Abstract(octets)
+        six = self.OCTETS['IPv6 UDP'][0]
+        self.assertEqual(str(IPv4(ipv4(six, 41)).protochain), 'IPv4:IPv6:UDP:Raw')
+        self.assertIs(type(IPv6._from_parent(six, len(six), version=4)), IPv6)  # pylint: disable=protected-access
 
 
 if __name__ == '__main__':
