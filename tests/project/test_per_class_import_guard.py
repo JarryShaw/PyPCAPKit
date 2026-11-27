@@ -28,6 +28,7 @@ import textwrap
 import unittest
 from typing import TYPE_CHECKING
 
+from tests import _sources
 from tests._tiers import ROOT
 
 if TYPE_CHECKING:
@@ -114,7 +115,11 @@ def scan(source: str) -> 'tuple[int, list[tuple[str, int]]]':
         package -- anywhere in ``tearDown``, or in ``setUp`` after the call.
 
     """
-    tree = ast.parse(source)
+    return _scan_tree(ast.parse(source), source)
+
+
+def _scan_tree(tree: 'ast.Module', _source: 'str') -> 'tuple[int, list[tuple[str, int]]]':
+    """:func:`scan` of a module parsed as ``tree``, for :func:`tests._sources.parsed`."""
     classes = {node.name: node for node in ast.walk(tree) if isinstance(node, ast.ClassDef)}
     using, offending = 0, []
     for cls in classes.values():
@@ -136,7 +141,7 @@ def scan_tree() -> 'tuple[int, dict[tuple[str, str], int]]':
     """:func:`scan` over every module under :data:`TESTS`, keyed by relative path."""
     using, found = 0, {}
     for path in sorted(TESTS.rglob('*.py')):
-        count, offending = scan(path.read_text(encoding='utf-8'))
+        count, offending = _sources.parsed(path, _scan_tree)
         using += count
         relative = path.relative_to(ROOT).as_posix()
         for name, line in offending:

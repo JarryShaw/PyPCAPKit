@@ -23,12 +23,12 @@ from the changelog, which only the redefinition check reads, and docstrings and
 from __future__ import annotations
 
 import ast
-import io
 import pathlib
 import re
 import tempfile
-import tokenize
 import unittest
+
+from tests import _sources as loader
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 CONF = ROOT / 'docs' / 'source' / 'conf.py'
@@ -89,16 +89,19 @@ def _rendered(path: 'pathlib.Path') -> 'str':
     its line. A ``#:`` prefix is blanked too, so a comment reads as prose.
 
     """
-    text = path.read_text(encoding='utf-8')
     if path.suffix == '.rst':
-        return text
+        return loader.text(path)
+    return loader.parsed(path, _blank_code)
+
+
+def _blank_code(tree: 'ast.Module', text: 'str') -> 'str':
+    """:func:`_rendered` of a Python file parsed as ``tree``, for :func:`tests._sources.parsed`."""
     keep = set()
-    for node in ast.walk(ast.parse(text)):
+    for node in ast.walk(tree):
         if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant) \
                 and isinstance(node.value.value, str):
             keep.update(range(node.lineno, node.end_lineno + 1))
-    comments = {tok.start[0] for tok in tokenize.generate_tokens(io.StringIO(text).readline)
-                if tok.type == tokenize.COMMENT and tok.string.startswith('#:')}
+    comments = {comment.line for comment in loader.comments_in(text) if comment.string.startswith('#:')}
     lines = []
     for num, line in enumerate(text.split('\n'), 1):
         if num in keep:
