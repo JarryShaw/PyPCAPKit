@@ -7,9 +7,9 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://jarryshaw.github.io/PyPCAPKit/changelog.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="All notable changes to PyPCAPKit are recorded here. Releases are listed newest first. CHANGELOG.md at the repository root carries only the version being released. 1.8.0(2026-11-26) – Protocol parsi..." />
-<meta name="description" content="All notable changes to PyPCAPKit are recorded here. Releases are listed newest first. CHANGELOG.md at the repository root carries only the version being released. 1.8.0(2026-11-26) – Protocol parsi..." />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="1.8.0 – 2026-11-26" href="changelog/1.8.0.html"><link rel="prev" title="Glossary" href="glossary.html">
+<meta property="og:description" content="All notable changes to PyPCAPKit are recorded here. Releases are listed newest first. CHANGELOG.md at the repository root carries only the version being released. 1.8.1(unreleased) – A bug-fix rele..." />
+<meta name="description" content="All notable changes to PyPCAPKit are recorded here. Releases are listed newest first. CHANGELOG.md at the repository root carries only the version being released. 1.8.1(unreleased) – A bug-fix rele..." />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="1.8.1 – unreleased" href="changelog/1.8.1.html"><link rel="prev" title="Glossary" href="glossary.html">
         <link rel="canonical" href="https://jarryshaw.github.io/PyPCAPKit/changelog.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -489,6 +489,7 @@
 <li class="toctree-l1"><a class="reference internal" href="demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
 <li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">Changelog</a><input aria-label="Toggle navigation of Changelog" checked="" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog/1.8.1.html">1.8.1 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
@@ -621,6 +622,10 @@ one line per release below; one that did carry something real is called out.</p>
 <p>Releases are listed newest first. <code class="file docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> at the repository root
 carries only the version being released.</p>
 <ul class="simple">
+<li><p><strong>1.8.1</strong> (unreleased) – A bug-fix release: OSPF split into a versioned family,
+with OSPFv3 read with its own 16-octet header and OSPFv1 with the registries of
+<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1131.html"><strong>RFC 1131</strong></a>, and Sync Develop pushing <code class="docutils literal notranslate"><span class="pre">main</span></code> into <code class="docutils literal notranslate"><span class="pre">develop</span></code> directly.
+<a class="reference internal" href="changelog/1.8.1.html"><span class="doc">Full changelog</span></a>.</p></li>
 <li><p><strong>1.8.0</strong> (2026-11-26) – Protocol parsing split from construction, with
 <code class="docutils literal notranslate"><span class="pre">from_file</span></code> and <code class="docutils literal notranslate"><span class="pre">from_fields</span></code> as the explicit pair and closed parse and
 build signatures, <code class="docutils literal notranslate"><span class="pre">analyze</span></code> dispatching as a frame does, and versioned
@@ -689,10 +694,10 @@ metaclasses, with <code class="docutils literal notranslate"><span class="pre">E
 the IPv4, HOPOPT, IPv6-Opts, IPv6-Route, HIP, MH, TCP, HTTP/2 and PCAP-NG
 schemas onto them. <a class="reference internal" href="changelog/1.1.0.html"><span class="doc">Full changelog</span></a>.</p></li>
 <li><p><strong>1.0.3</strong> (2023-06-29) – Added the IANA service-name and port registry as
-the <code class="docutils literal notranslate"><span class="pre">AppType</span></code> enumeration [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html"><strong>RFC 6335</strong></a>], wiring TCP and UDP parsing to
+the <code class="docutils literal notranslate"><span class="pre">AppType</span></code> enumeration [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html"><strong>RFC 6335</strong></a>], wiring TCP and UDP parsing to
 resolve ports to service names. <a class="reference internal" href="changelog/1.0.3.html"><span class="doc">Full changelog</span></a>.</p></li>
 <li><p><strong>1.0.2</strong> (2023-06-05) – Added Mobility Header parsing and construction
-[<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>], and fixed <code class="docutils literal notranslate"><span class="pre">pcapkit.extract</span></code> failing on interpreters where
+[<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>], and fixed <code class="docutils literal notranslate"><span class="pre">pcapkit.extract</span></code> failing on interpreters where
 <code class="docutils literal notranslate"><span class="pre">decimal.localcontext</span></code> takes no keyword arguments (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/139">#139</a>). <a class="reference internal" href="changelog/1.0.2.html"><span class="doc">Full
 changelog</span></a>.</p></li>
 <li><p><strong>1.0.1</strong> (2023-05-14) – Changed <code class="docutils literal notranslate"><span class="pre">Info</span></code> and <code class="docutils literal notranslate"><span class="pre">Schema</span></code> subclasses to
@@ -771,12 +776,12 @@ metadata refresh. <a class="reference internal" href="changelog/0.13.0.html"><sp
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="changelog/1.8.0.html">
+          <a class="next-page" href="changelog/1.8.1.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">1.8.0 – 2026-11-26</div>
+                <div class="title">1.8.1 – unreleased</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
