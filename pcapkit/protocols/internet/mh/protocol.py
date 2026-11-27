@@ -502,18 +502,19 @@ from pcapkit.protocols.internet.mh.schema import \
     UpdateNotificationMessage as Schema_UpdateNotificationMessage
 from pcapkit.protocols.internet.mh.schema import VendorSpecificOption as Schema_VendorSpecificOption
 from pcapkit.protocols.misc.no_payload.protocol import NoPayload
+from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema import Schema
 from pcapkit.utilities import config
 from pcapkit.utilities.datetime import fromtimestamp, totimestamp
 from pcapkit.utilities.exceptions import (BaseError, CaughtByCaller, EnumValueError, ProtocolError,
-                                          UnsupportedCall)
+                                          RegistryError, UnsupportedCall, stacklevel)
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
     from datetime import datetime as dt_type
     from datetime import timedelta
     from ipaddress import IPv4Address, IPv6Address, IPv6Network
-    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional
+    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional, Type
 
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
@@ -524,7 +525,6 @@ if TYPE_CHECKING:
     from pcapkit.protocols.internet.mh.schema import Option as Schema_Option
     from pcapkit.protocols.internet.mh.schema import Packet as Schema_Packet
     from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
-    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema import Schema
 
     Option = OrderedMultiDict[Enum_Option, Data_Option]
@@ -556,6 +556,10 @@ __all__ = ['MH']
 #: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
 _PSEUDO_HEADER: 'ModuleDescriptor[Any]' = \
     ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'pseudo_header')
+
+#: The class an option payload is parsed as where :attr:`MH.__selector__` or
+#: :attr:`MH.__multicast__` holds no dissector for its format.
+_RAW: 'ModuleDescriptor[ProtocolBase]' = ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw')
 
 
 class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
@@ -1142,6 +1146,16 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
          - :meth:`~pcapkit.protocols.internet.mh.protocol.MH._read_ext_exp`
          - :meth:`~pcapkit.protocols.internet.mh.protocol.MH._make_ext_exp`
 
+    The payloads that belong to other protocols are parsed as the protocol class
+    a registry holds for the octet naming their format, and are
+    :class:`~pcapkit.protocols.misc.raw.protocol.Raw` where none is registered:
+    the :rfc:`6088` traffic selectors through
+    :attr:`self.__selector__ <pcapkit.protocols.internet.mh.protocol.MH.__selector__>`,
+    and the MLD and IGMP records of the multicast options through
+    :attr:`self.__multicast__ <pcapkit.protocols.internet.mh.protocol.MH.__multicast__>`.
+    A payload is parsed apart from the frame, so it joins no protocol chain, and
+    a format octet its RFC rules out warns and keeps the payload raw.
+
     .. versionchanged:: 1.5.0
 
        * The FBU and FBack Lifetime is read and built as plain seconds, per
@@ -1208,6 +1222,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
        records ``checksum_status``, and :meth:`make` computes one it is not
        given under :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE`, taking
        it as ``checksum`` rather than ``chksum`` (:issue:`2813`).
+
+    .. versionchanged:: 1.9.0
+
+       The traffic selectors and the multicast options' payloads are parsed
+       through :attr:`__selector__` and :attr:`__multicast__`, rather than kept
+       as :obj:`bytes`, and a format octet their RFCs rule out warns
+       (:issue:`2937`).
 
     """
 
@@ -1343,6 +1364,50 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Enum_CGAExtension.Exp_FFFF: 'exp',
         },
     )  # type: DefaultDict[Enum_CGAExtension | int, str | tuple[ExtensionParser, ExtensionConstructor]]
+
+    #: Traffic selector format to the protocol class the traffic selector of a
+    #: flow identification sub-option [:rfc:`6089#section-4.2.1.4`] or a QoS
+    #: attribute [:rfc:`7222#section-4.2.10`] is parsed as: a
+    #: :class:`~pcapkit.corekit.module.ModuleDescriptor` naming it, or the class.
+    #: A format with no entry is :class:`~pcapkit.protocols.misc.raw.protocol.Raw`,
+    #: as are the :rfc:`6088` formats until a dissector registers. Format ``0``
+    #: is reserved, so it is never registered and its selector warns.
+    __selector__ = collections.defaultdict(
+        lambda: _RAW,
+        {
+            Enum_TrafficSelector.IPv4_Binary_Traffic_Selector: _RAW,
+            Enum_TrafficSelector.IPv6_Binary_Traffic_Selector: _RAW,
+        },
+    )  # type: DefaultDict[Enum_TrafficSelector | int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
+
+    #: Multicast option type and the octet naming its payload's format, to the
+    #: protocol class that payload is parsed as: ``protocol`` of option 54
+    #: [:rfc:`7028#section-5.1.2`, :rfc:`7028#section-8`], ``igmp_type`` of 56 and
+    #: ``mld_type`` of 57 [:rfc:`7161#section-6.1`, :rfc:`7161#section-4.1.2`,
+    #: :rfc:`7161#section-4.1.3`], and ``code`` of 60 and 61
+    #: [:rfc:`7411#section-5.3`, :rfc:`7411#section-5.4`]. Its keys are the pairs
+    #: those RFCs define, each :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
+    #: until a dissector registers, so a pair it lacks is one they rule out.
+    __multicast__ = collections.defaultdict(
+        lambda: _RAW,
+        {
+            (Enum_Option.Dynamic_IP_Multicast_Selector, 0x12): _RAW,  # IGMPv1
+            (Enum_Option.Dynamic_IP_Multicast_Selector, 0x16): _RAW,  # IGMPv2
+            (Enum_Option.Dynamic_IP_Multicast_Selector, 0x22): _RAW,  # IGMPv3
+            (Enum_Option.Dynamic_IP_Multicast_Selector, 131): _RAW,   # MLDv1
+            (Enum_Option.Dynamic_IP_Multicast_Selector, 143): _RAW,   # MLDv2
+            (Enum_Option.Active_Multicast_Subscription_IPv4, 0x12): _RAW,  # IGMPv1
+            (Enum_Option.Active_Multicast_Subscription_IPv4, 0x16): _RAW,  # IGMPv2
+            (Enum_Option.Active_Multicast_Subscription_IPv4, 0x22): _RAW,  # IGMPv3
+            (Enum_Option.Active_Multicast_Subscription_IPv6, 131): _RAW,   # MLDv1
+            (Enum_Option.Active_Multicast_Subscription_IPv6, 143): _RAW,   # MLDv2
+            (Enum_Option.Multicast_Mobility_Option, 1): _RAW,  # IGMPv3
+            (Enum_Option.Multicast_Mobility_Option, 2): _RAW,  # MLDv2
+            (Enum_Option.Multicast_Mobility_Option, 3): _RAW,  # IGMPv3, IGMPv2 compatibility mode
+            (Enum_Option.Multicast_Mobility_Option, 4): _RAW,  # MLDv2, MLDv1 compatibility mode
+            (Enum_Option.Multicast_Acknowledgement_Option, 0): _RAW,
+        },
+    )  # type: DefaultDict[tuple[Enum_Option | int, int], ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
     #: Whether :meth:`make` left the checksum for the enclosing IPv6 layer to
     #: compute, see :mod:`pcapkit.protocols.misc.checksum.ip_pseudo.protocol`.
@@ -1672,6 +1737,63 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if incumbent is not None:
             warn(f'extension {code} already registered, overwriting', RegistryWarning)
         cls.__extension__[code] = meth
+
+    @classmethod
+    def register_selector(cls, code: 'Enum_TrafficSelector',
+                          protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
+        """Register the protocol class a traffic selector format is parsed as.
+
+        Args:
+            code: Traffic selector format, see :attr:`__selector__`.
+            protocol: Module descriptor or a
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+
+        Raises:
+            RegistryError: If ``code`` is ``0``, which is reserved and must not be
+                used [:rfc:`6089#section-4.2.1.4`], or ``protocol`` is not a
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+
+        Warns:
+            RegistryWarning: If a different entry is already registered for
+                ``code``; it is overwritten. Handing back the entry already
+                stored, or one equal to it, is a silent no-op.
+
+        .. versionadded:: 1.9.0
+
+        """
+        if code == Enum_TrafficSelector.Reserved_0:
+            raise RegistryError(f'{cls.__name__}: TS format {code} is reserved and must not be used')
+        cls._register_payload(cls.__selector__, code, protocol, f'TS format {code}')
+
+    @classmethod
+    def register_multicast(cls, code: 'int', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]', *,
+                           option: 'Enum_Option') -> 'None':
+        """Register the protocol class a multicast option's payload format is parsed as.
+
+        Args:
+            code: Octet of ``option`` naming the payload's format, see
+                :attr:`__multicast__`.
+            protocol: Module descriptor or a
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+            option: Multicast option type carrying the payload.
+
+        Raises:
+            RegistryError: If :attr:`__multicast__` holds no entry for ``option``
+                and ``code``, which its RFC then does not define, or ``protocol``
+                is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`
+                subclass.
+
+        Warns:
+            RegistryWarning: If a different entry is already registered for
+                ``option`` and ``code``; it is overwritten. Handing back the entry
+                already stored, or one equal to it, is a silent no-op.
+
+        .. versionadded:: 1.9.0
+
+        """
+        if (option, code) not in cls.__multicast__:
+            raise RegistryError(f'{cls.__name__}: option {option!r} defines no payload format {code!r}')
+        cls._register_payload(cls.__multicast__, (option, code), protocol, f'option {option} format {code}')
 
     @classmethod
     def id(cls) -> 'tuple[Literal["MH"]]':  # type: ignore[override]
@@ -5316,12 +5438,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             The address records are :rfc:`3810#section-5.2` MLD or
             :rfc:`3376#section-4.2` IGMP structures. They belong to those protocols
             rather than to the mobility header, and each is self-describing through
-            its own auxiliary-data length and source count, so they are recorded
-            opaquely here rather than half-decoded.
+            its own auxiliary-data length and source count, so they are parsed
+            through :attr:`__multicast__` rather than half-decoded here.
             :attr:`~pcapkit.protocols.internet.mh.data.DynamicIPMulticastSelectorOption.protocol`
             says which of the two they are: ``143`` for MLDv2 and ``131`` for MLDv1,
             or ``0x12``, ``0x16`` and ``0x22`` for IGMPv1 to IGMPv3
-            [:rfc:`7028#section-8`].
+            [:rfc:`7028#section-8`]; any other value warns.
 
         Args:
             schema: Parsed option schema.
@@ -5341,7 +5463,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             mode=bool(schema.flags['M']),
             reserved=schema.flags['reserved'],
             records=schema.records,
-            data=schema.data,
+            data=self._read_multicast(schema.type, schema.protocol, schema.data),
         )
         return data
 
@@ -5421,10 +5543,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             The membership context is an IGMP group address (:rfc:`1112`,
             :rfc:`2236`) or an IGMPv3 group record (:rfc:`3376#section-4.2`),
             which belong to IGMP rather than to the mobility header, so they are
-            recorded opaquely.
+            parsed through :attr:`__multicast__`.
             :attr:`~pcapkit.protocols.internet.mh.data.ActiveMulticastSubscriptionIPv4Option.igmp_type`
             says which: ``0x12`` IGMPv1,
-            ``0x16`` IGMPv2, ``0x22`` IGMPv3.
+            ``0x16`` IGMPv2, ``0x22`` IGMPv3; any other value warns.
 
         Args:
             schema: Parsed option schema.
@@ -5441,7 +5563,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=schema.type,
             length=self._mh_option_length(schema.length),
             igmp_type=schema.igmp_type,
-            context=schema.context,
+            context=self._read_multicast(schema.type, schema.igmp_type, schema.context),
         )
         return data
 
@@ -5468,9 +5590,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             For MLDv2 the context is an :rfc:`3810#section-5.2` multicast address
             record; for MLDv1 it is a reserved word followed by a multicast address
             [:rfc:`7161#section-4.1.3`]. Both belong to MLD, so the context is
-            recorded opaquely and
+            parsed through :attr:`__multicast__` and
             :attr:`~pcapkit.protocols.internet.mh.data.ActiveMulticastSubscriptionIPv6Option.mld_type`
-            says which form it is in.
+            says which form it is in: ``143`` or ``131``, and any other value warns.
 
         Args:
             schema: Parsed option schema.
@@ -5487,7 +5609,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=schema.type,
             length=self._mh_option_length(schema.length),
             mld_type=schema.mld_type,
-            context=schema.context,
+            context=self._read_multicast(schema.type, schema.mld_type, schema.context),
         )
         return data
 
@@ -5636,7 +5758,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length=schema.length * 4 + 4,
             code=schema.code,
             reserved=schema.reserved,
-            data=schema.data,
+            data=self._read_multicast(schema.type, schema.code, schema.data),
         )
         return data
 
@@ -5677,7 +5799,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length=schema.length * 4 + 4,
             code=schema.code,
             status=schema.status,
-            data=schema.data,
+            data=self._read_multicast(schema.type, schema.code, schema.data),
         )
         return data
 
@@ -9620,7 +9742,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                             protocol: 'int' = 143,
                             mode: 'bool' = False,
                             records: 'int' = 0,
-                            data: 'bytes' = b'',
+                            data: 'bytes | ProtocolBase' = b'',
                             reserved: 'int' = 0,
                             **kwargs: 'Any') -> 'Schema_DynamicIPMulticastSelectorOption':
         """Make MH dynamic IP multicast selector option.
@@ -9631,7 +9753,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             protocol: MLD or IGMP protocol number identifying the record format.
             mode: Selector mode flag.
             records: Number of multicast address records in ``data``.
-            data: Multicast address records, opaque to this module.
+            data: Multicast address records, as octets or as the protocol
+                :meth:`_read_multicast` parsed them as.
             reserved: Reserved bits, i.e. the seven bits after the ``M`` flag.
             **kwargs: Arbitrary keyword arguments.
 
@@ -9650,6 +9773,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             reserved = option.reserved
             records = option.records
             data = option.data
+        data = self._payload_octets(data)
 
         return Schema_DynamicIPMulticastSelectorOption(
             type=type,
@@ -9721,7 +9845,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_opt_ams4(self, type: 'Enum_Option',
                                                   option: 'Optional[Data_ActiveMulticastSubscriptionIPv4Option]' = None, *,
                        igmp_type: 'int' = 0x22,
-                       context: 'bytes' = b'',
+                       context: 'bytes | ProtocolBase' = b'',
                        **kwargs: 'Any') -> 'Schema_ActiveMulticastSubscriptionIPv4Option':
         """Make MH active multicast subscription IPv4 option.
 
@@ -9729,7 +9853,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             igmp_type: IGMP message type identifying the context format.
-            context: Multicast membership context, opaque to this module.
+            context: Multicast membership context, as octets or as the protocol
+                :meth:`_read_multicast` parsed it as.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9743,6 +9868,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if option is not None:
             igmp_type = option.igmp_type
             context = option.context
+        context = self._payload_octets(context)
 
         return Schema_ActiveMulticastSubscriptionIPv4Option(
             type=type,
@@ -9754,7 +9880,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_opt_ams6(self, type: 'Enum_Option',
                                                   option: 'Optional[Data_ActiveMulticastSubscriptionIPv6Option]' = None, *,
                        mld_type: 'int' = 143,
-                       context: 'bytes' = b'',
+                       context: 'bytes | ProtocolBase' = b'',
                        **kwargs: 'Any') -> 'Schema_ActiveMulticastSubscriptionIPv6Option':
         """Make MH active multicast subscription IPv6 option.
 
@@ -9762,7 +9888,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             mld_type: MLD message type identifying the context format.
-            context: Multicast membership context, opaque to this module.
+            context: Multicast membership context, as octets or as the protocol
+                :meth:`_read_multicast` parsed it as.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9776,6 +9903,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if option is not None:
             mld_type = option.mld_type
             context = option.context
+        context = self._payload_octets(context)
 
         return Schema_ActiveMulticastSubscriptionIPv6Option(
             type=type,
@@ -9891,7 +10019,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_opt_mcast(self, type: 'Enum_Option', option: 'Optional[Data_MulticastMobilityOption]' = None, *,
                         code: 'int' = 2,
-                        data: 'bytes' = b'',
+                        data: 'bytes | ProtocolBase' = b'',
                         reserved: 'bytes' = b'\x00',
                         **kwargs: 'Any') -> 'Schema_MulticastMobilityOption':
         """Make MH multicast mobility option.
@@ -9900,7 +10028,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             code: Option code.
-            data: MLD or IGMP report payload, opaque to this module.
+            data: MLD or IGMP report payload, as octets or as the protocol
+                :meth:`_read_multicast` parsed it as.
             reserved: The reserved octet as captured.
             **kwargs: Arbitrary keyword arguments.
 
@@ -9920,6 +10049,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             reserved = getattr(option, 'reserved', b'\x00')
             code = option.code
             data = option.data
+        data = self._payload_octets(data)
 
         if len(data) % 4 != 0:
             raise ProtocolError(f'{self.alias}: [OptNo {type}] payload of {len(data)} octets is '
@@ -9937,7 +10067,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                                                        option: 'Optional[Data_MulticastAcknowledgementOption]' = None, *,
                             code: 'int' = 0,
                             status: 'int' = 1,
-                            data: 'bytes' = b'',
+                            data: 'bytes | ProtocolBase' = b'',
                             **kwargs: 'Any') -> 'Schema_MulticastAcknowledgementOption':
         """Make MH multicast acknowledgement option.
 
@@ -9946,7 +10076,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             code: Option code; always ``0``.
             status: Status.
-            data: MLD or IGMP unsupported report payload, opaque to this module.
+            data: MLD or IGMP unsupported report payload, as octets or as the
+                protocol :meth:`_read_multicast` parsed it as.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9962,6 +10093,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             code = option.code
             status = option.status
             data = option.data
+        data = self._payload_octets(data)
 
         if len(data) % 4 != 0:
             raise ProtocolError(f'{self.alias}: [OptNo {type}] payload of {len(data)} octets is '
@@ -10600,7 +10732,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                     length=self._mh_option_length(selector.length),
                     ts_format=selector.ts_format,
                     reserved=selector.reserved,
-                    selector=selector.selector,
+                    selector=self._read_selector(selector.ts_format, selector.selector),
                 )
             elif code == Enum_FlowIDSuboption.Flow_Binding_Action:
                 action = cast('Schema_FlowBindingActionSuboption', schema)
@@ -10836,7 +10968,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                     length=self._mh_option_length(selector.length),
                     reserved=selector.reserved,
                     ts_format=selector.ts_format,
-                    selector=selector.selector,
+                    selector=self._read_selector(selector.ts_format, selector.selector),
                 )
             elif code == Enum_QoSAttribute.QoS_Vendor_Specific_Attribute:
                 vendor = cast('Schema_QoSVendorSpecificAttribute', schema)
@@ -11224,13 +11356,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             if option is not None:
                 selector_opt = cast('Data_TrafficSelectorSuboption', option)
                 ts_format = selector_opt.ts_format  # type: Enum_TrafficSelector | int
-                selector = selector_opt.selector
+                selector = self._payload_octets(selector_opt.selector)
                 reserved = getattr(selector_opt, 'reserved', b'\x00')
             else:
                 ts_format = self._make_index(
                     kwargs.get('ts_format', Enum_TrafficSelector.IPv6_Binary_Traffic_Selector),
                     Enum_TrafficSelector, bits=8, name='TS format')
-                selector = cast('bytes', kwargs.get('selector', b''))
+                selector = self._payload_octets(cast('bytes | ProtocolBase', kwargs.get('selector', b'')))
                 reserved = cast('bytes', kwargs.get('reserved', b'\x00'))
             return Schema_TrafficSelectorSuboption(
                 type=code, length=2 + len(selector),
@@ -11555,13 +11687,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             if option is not None:
                 ts_attr = cast('Data_QoSTrafficSelectorAttribute', option)
                 ts_format = ts_attr.ts_format  # type: Enum_TrafficSelector | int
-                selector = ts_attr.selector
+                selector = self._payload_octets(ts_attr.selector)
                 octets = getattr(ts_attr, 'reserved', b'\x00')
             else:
                 ts_format = self._make_index(
                     kwargs.get('ts_format', Enum_TrafficSelector.IPv6_Binary_Traffic_Selector),
                     Enum_TrafficSelector, bits=8, name='TS format')
-                selector = cast('bytes', kwargs.get('selector', b''))
+                selector = self._payload_octets(cast('bytes | ProtocolBase', kwargs.get('selector', b'')))
                 octets = cast('bytes', kwargs.get('reserved', b'\x00'))
             return Schema_QoSTrafficSelectorAttribute(
                 type=code, length=2 + len(selector),
@@ -11779,6 +11911,135 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             extensions_list.append(data)
             total_length += data_len
         return extensions_list, total_length
+
+    def _read_selector(self, code: 'Enum_TrafficSelector', selector: 'bytes') -> 'ProtocolBase':
+        """Read a traffic selector as the class :attr:`__selector__` holds for its format.
+
+        Args:
+            code: Traffic selector format.
+            selector: Traffic selector octets.
+
+        Returns:
+            The parsed selector, as :meth:`_dispatch_payload` returns it.
+
+        Warns:
+            ProtocolWarning: If ``code`` is ``0``, which is reserved and must not be
+                used [:rfc:`6089#section-4.2.1.4`, :rfc:`7222#section-4.2.10`]; the
+                selector is then kept raw.
+
+        .. versionadded:: 1.9.0
+
+        """
+        error = None
+        if code == Enum_TrafficSelector.Reserved_0:
+            error = f'{self.alias}: TS format {code} is reserved and must not be used'
+        return self._dispatch_payload(self.__selector__, code, code, selector, error)
+
+    def _read_multicast(self, option: 'Enum_Option', code: 'int', payload: 'bytes') -> 'ProtocolBase':
+        """Read a multicast option's payload as the class :attr:`__multicast__` holds for it.
+
+        Args:
+            option: Multicast option type.
+            code: Octet of the option naming the payload's format.
+            payload: Payload octets.
+
+        Returns:
+            The parsed payload, as :meth:`_dispatch_payload` returns it.
+
+        Warns:
+            ProtocolWarning: If :attr:`__multicast__` holds no entry for ``option``
+                and ``code``, a format the option's RFC does not define
+                [:rfc:`7028#section-5.1.2`, :rfc:`7161#section-4.1.2`,
+                :rfc:`7411#section-5.3`]; the payload is then kept raw.
+
+        .. versionadded:: 1.9.0
+
+        """
+        error = None
+        if (option, code) not in self.__multicast__:
+            error = f'{self.alias}: [Opt {option}] payload format {code} is not one its RFC defines'
+        return self._dispatch_payload(self.__multicast__, (option, code), code, payload, error)
+
+    def _dispatch_payload(self, registry: 'DefaultDict[Any, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]',
+                          key: 'Any', code: 'int', payload: 'bytes', error: 'Optional[str]') -> 'ProtocolBase':
+        """Parse an option payload as the class ``registry`` holds for ``key``.
+
+        Args:
+            registry: :attr:`__selector__` or :attr:`__multicast__`.
+            key: Registry key of the payload.
+            code: Octet naming the payload's format, the parsed payload's ``alias``.
+            payload: Payload octets.
+            error: Why the payload's format is not one its RFC defines, if so.
+
+        Returns:
+            The parsed payload, as
+            :meth:`~pcapkit.protocols.protocol.ProtocolBase._analyze_next_layer`
+            keeps it: :class:`~pcapkit.protocols.misc.raw.protocol.Raw` where no
+            dissector is registered or the one registered refuses it, and
+            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` if empty.
+            It is parsed apart from the frame, so it joins no protocol chain.
+
+        Warns:
+            ProtocolWarning: With ``error``, which the raw payload keeps too.
+
+        """
+        klass = self._lookup_next_layer(registry, key)
+        if error is None:
+            return self._analyze_next_layer(klass, payload, code)
+        warn(error, ProtocolWarning, stacklevel=stacklevel())
+        return self._analyze_next_layer(klass, payload, code, error=error)
+
+    @staticmethod
+    def _payload_octets(payload: 'bytes | ProtocolBase') -> 'bytes':
+        """The octets of an option payload, given as :obj:`bytes` or as a parsed protocol.
+
+        Args:
+            payload: Payload, as a maker takes it.
+
+        Returns:
+            ``payload`` itself, or its :attr:`~pcapkit.protocols.protocol.ProtocolBase.data`.
+
+        .. versionadded:: 1.9.0
+
+        """
+        if isinstance(payload, ProtocolBase):
+            return payload.data
+        return payload
+
+    @classmethod
+    def _register_payload(cls, registry: 'DefaultDict[Any, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]',
+                          key: 'Any', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
+                          name: 'str') -> 'None':
+        """Write the class a payload is parsed as, for :meth:`register_selector`
+        and :meth:`register_multicast`.
+
+        Args:
+            registry: :attr:`__selector__` or :attr:`__multicast__`.
+            key: Registry key.
+            protocol: Module descriptor or a
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+            name: How the warning names ``key``.
+
+        Raises:
+            RegistryError: If ``protocol`` is not a
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+
+        Warns:
+            RegistryWarning: If a different entry is already registered for
+                ``key``; it is overwritten.
+
+        .. versionadded:: 1.9.0
+
+        """
+        klass = protocol.klass if isinstance(protocol, ModuleDescriptor) else protocol
+        if not (isinstance(klass, type) and issubclass(klass, ProtocolBase)):
+            raise RegistryError(f'{cls.__name__}: protocol must be a Protocol subclass, not {protocol!r}')
+        incumbent = registry.get(key)
+        if incumbent is protocol or incumbent == protocol:
+            return
+        if incumbent is not None:
+            warn(f'{name} already registered, overwriting {incumbent!r} with {protocol!r}', RegistryWarning)
+        registry[key] = protocol
 
     def _verify_pseudo_checksum(self, pseudo: 'Optional[IP_Pseudo]') -> 'None':
         """Verify the checksum over the pseudo-header of the enclosing IP layer.

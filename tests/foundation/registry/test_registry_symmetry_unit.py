@@ -468,6 +468,10 @@ class TestRegistrySymmetry(harness.RoundTripBase):
             'register_dns_option': 'no schema argument; override and restore are in test_dns_unit',
             'register_dns_rdata': 'no schema argument; override and restore are in test_dns_unit',
             'register_icmp_type': 'no schema argument; override and restore are in test_icmp_type_registrar_unit',
+            'register_mh_multicast': 'not a __proto__ map; override and restore are in '
+                                     'test_mh_payload_registry_2937_unit',
+            'register_mh_selector': 'not a __proto__ map; override and restore are in '
+                                    'test_mh_payload_registry_2937_unit',
             'register_ipx': 'IPX.__proto__ ships no entry, so an override has nothing to be restored to',
             'register_netlink': 'Netlink.__proto__ ships no entry, so there is none to restore',
             'register_dccp': 'DCCP.__proto__ ships no entry, so there is none to restore',

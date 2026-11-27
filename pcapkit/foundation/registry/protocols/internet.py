@@ -26,6 +26,7 @@ from pcapkit.const.ipx.packet import Packet as IPX_Packet
 from pcapkit.const.mh.cga_extension import CGAExtension as MH_CGAExtension
 from pcapkit.const.mh.option import Option as MH_Option
 from pcapkit.const.mh.packet import Packet as MH_Packet
+from pcapkit.const.mh.traffic_selector import TrafficSelector as MH_TrafficSelector
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.foundation.registry.protocols.protocol import _check_code, _check_meth, _register_name
@@ -85,6 +86,7 @@ __all__ = [
     'register_ipv4_option', 'register_hip_parameter', 'register_hopopt_option',
     'register_ipv6_opts_option', 'register_ipv6_route_routing',
     'register_mh_message', 'register_mh_option', 'register_mh_extension',
+    'register_mh_selector', 'register_mh_multicast',
 ]
 
 #: logging.Logger: Module-level logger, a child of the package-wide
@@ -492,3 +494,69 @@ def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_Extensi
     if schema is not None:
         Schema_MH_CGAExtension.register(code, schema)
     logger.debug('registered MH CGA extension: %s', code.name)
+
+
+# NOTE: pcapkit.protocols.internet.mh.protocol.MH.__selector__
+def register_mh_selector(code: 'MH_TrafficSelector',
+                         protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
+    """Register the protocol class an MH traffic selector format is parsed as.
+
+    The function will register the given protocol class to the
+    :data:`pcapkit.protocols.internet.mh.protocol.MH.__selector__` registry,
+    which the traffic selectors of the flow identification sub-option and the QoS
+    attribute are parsed through.
+
+    Args:
+        code: Traffic selector format as in
+            :class:`~pcapkit.const.mh.traffic_selector.TrafficSelector`.
+        protocol: module descriptor or a
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+
+    Raises:
+        RegistryError: If ``code`` is not a
+            :class:`~pcapkit.const.mh.traffic_selector.TrafficSelector` member, e.g. a
+            member of another enum, or is the reserved format ``0``
+            [:rfc:`6089#section-4.2.1.4`], or ``protocol`` is not a
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+
+    .. versionadded:: 1.9.0
+
+    """
+    _check_code(code, MH_TrafficSelector, MH)
+
+    MH.register_selector(code, protocol)
+    logger.debug('registered MH traffic selector format: %s', code.name)
+
+
+# NOTE: pcapkit.protocols.internet.mh.protocol.MH.__multicast__
+def register_mh_multicast(code: 'int', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]', *,
+                          option: 'MH_Option') -> 'None':
+    """Register the protocol class an MH multicast option's payload format is parsed as.
+
+    The function will register the given protocol class to the
+    :data:`pcapkit.protocols.internet.mh.protocol.MH.__multicast__` registry.
+
+    Args:
+        code: Octet of ``option`` naming its payload's format: ``protocol`` of the
+            dynamic IP multicast selector option, ``igmp_type`` or ``mld_type`` of
+            the active multicast subscription options, or ``code`` of the multicast
+            mobility and acknowledgement options.
+        protocol: module descriptor or a
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+        option: Multicast option type as in :class:`~pcapkit.const.mh.option.Option`.
+
+    Raises:
+        RegistryError: If ``option`` is not a :class:`~pcapkit.const.mh.option.Option`
+            member, ``code`` is not an :class:`int`, the option's RFC defines no
+            such payload format [:rfc:`7028#section-5.1.2`,
+            :rfc:`7161#section-4.1.2`, :rfc:`7411#section-5.3`], or ``protocol`` is
+            not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+
+    .. versionadded:: 1.9.0
+
+    """
+    _check_code(option, MH_Option, MH)
+    _check_code(code, None, MH)
+
+    MH.register_multicast(code, protocol, option=option)
+    logger.debug('registered MH multicast payload format: %s %s', option.name, code)
