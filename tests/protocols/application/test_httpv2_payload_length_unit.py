@@ -77,6 +77,8 @@ import warnings
 from typing import TYPE_CHECKING
 from unittest import mock
 
+from tests.protocols.application._http2 import http2_frame_bytes
+
 if TYPE_CHECKING:
     from typing import Any
 
@@ -112,37 +114,6 @@ STREAM_DEP = (0x80000002).to_bytes(4, 'big')
 #: Weight octet for the ``PRIORITY``-flagged ``HEADERS`` cases. The reader
 #: reports ``weight + 1``, so 15 on the wire is 16 in the data object.
 WEIGHT = 15
-
-
-def http2_frame_bytes(type_: 'int', flags: 'int', sid: 'int', payload: 'bytes') -> 'bytes':
-    """Build the wire octets of one HTTP/2 frame.
-
-    The length field counts the frame payload only, the 9-octet header
-    excluded [:rfc:`9113#section-4.1`].
-
-    Duplicated from
-    :func:`tests.protocols.application.test_http_unit.http2_frame_bytes` rather
-    than imported: importing it would execute that module, which purges
-    ``pcapkit`` out of :data:`sys.modules` in its own ``setUp``, and a small
-    builder is cheaper to repeat than that coupling is to reason about. The two
-    must stay in step.
-
-    Args:
-        type_: Frame type octet.
-        flags: Frame flags octet.
-        sid: Stream identifier.
-        payload: The frame payload, header excluded.
-
-    Returns:
-        The packed frame.
-
-    """
-    return (
-        len(payload).to_bytes(3, 'big')
-        + bytes([type_, flags])
-        + sid.to_bytes(4, 'big')
-        + payload
-    )
 
 
 class FramePayloadMixin:

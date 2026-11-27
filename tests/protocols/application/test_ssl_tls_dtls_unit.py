@@ -138,7 +138,9 @@ class SSLFamilyUnitTests(unittest.TestCase):
         Without this check the trailing, incomplete pair decoded as one lone
         octet rather than failing, and rebuilding padded it back out to 2
         octets -- a round-trip that silently lost byte-exactness instead of
-        refusing to parse.
+        refusing to parse. ``TLS`` parses through its dispatching :meth:`read`,
+        so this also pins that the version sniff, which decodes the same
+        ``ClientHello``, does not swallow the failure.
 
         """
         from pcapkit.protocols.application.tls.protocol import TLS
@@ -861,30 +863,6 @@ class VersionDispatchTests(unittest.TestCase):
         tls_1_2_wire = _tls_client_hello_wire()
         parsed_12 = TLS(tls_1_2_wire, len(tls_1_2_wire))
         self.assertEqual(parsed_12.name, 'Transport Layer Security')
-
-    def test_malformed_client_hello_raises_through_dispatch_same_as_before(self) -> None:
-        """Dispatch's own sniff must not swallow a genuine parse failure.
-
-        The sniff that decides SSLv3+ vs. TLS 1.3 decodes the same
-        ``ClientHello`` the real parse goes on to decode; this pins that a
-        malformed one still raises from the dispatcher's :meth:`read`, not
-        just from a concrete tier constructed directly (already covered by
-        ``RecordValidationTests`` et al. above).
-
-        """
-        from pcapkit.protocols.application.tls.protocol import TLS
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        version = b'\x03\x03'
-        random = bytes(32)
-        session_id = b'\x00'
-        cipher_suites = b'\x00\x03\x13\x01\x00'  # odd length -- malformed
-        compression = b'\x01\x00'
-        body = version + random + session_id + cipher_suites + compression
-        handshake = b'\x01' + len(body).to_bytes(3, 'big') + body
-        wire = b'\x16\x03\x03' + len(handshake).to_bytes(2, 'big') + handshake
-        with self.assertRaises(ProtocolError):
-            TLS(wire, len(wire))
 
 
 class NonRecordPayloadTests(unittest.TestCase):

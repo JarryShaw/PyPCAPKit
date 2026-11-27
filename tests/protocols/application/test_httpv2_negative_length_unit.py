@@ -33,34 +33,14 @@ import struct
 import unittest
 import warnings
 
+from tests.protocols.application._http2 import http2_frame_bytes
+
 #: Test tier (#1958): exercises integer, bytes and struct edge cases, whose limits
 #: differ by interpreter.
 __tier__ = 'ALL'
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
-
-
-def http2_frame_bytes(type_: 'int', flags: 'int', sid: 'int', payload: 'bytes') -> 'bytes':
-    """Build the wire octets of one HTTP/2 frame.
-
-    Args:
-        type_: Frame type octet.
-        flags: Frame flags octet.
-        sid: Stream identifier.
-        payload: The frame payload, header excluded.
-
-    Returns:
-        The packed frame, its 3-octet length field counting the payload only,
-        the 9-octet header excluded [:rfc:`9113#section-4.1`].
-
-    """
-    return (
-        len(payload).to_bytes(3, 'big')
-        + bytes([type_, flags])
-        + sid.to_bytes(4, 'big')
-        + payload
-    )
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

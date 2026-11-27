@@ -453,18 +453,8 @@ class TestDTLSRoundTrip(unittest.TestCase):
         self.assertIsInstance(message.body, bytes)
         self.assertEqual(message.body, _CH_BODY[:_CH_HALF])
 
-    def test_unfragmented_message_decodes_its_client_hello(self) -> None:
-        from pcapkit.protocols.application.dtls.protocol import DTLS
-
-        wire = DTLS_RECORDS['handshake: unfragmented ClientHello']
-        parsed = DTLS(wire, len(wire))
-        message = parsed.info.content[0]
-
-        self.assertFalse(message.is_fragmented)
-        self.assertEqual(message.body.cipher_suites, (0x1301,))
-
-    def test_unfragmented_client_hello_decodes_its_cookie(self) -> None:
-        """RFC 6347 Sec.4.2.1 / RFC 9147 Sec.5.3's ``cookie`` field.
+    def test_unfragmented_client_hello_decodes_its_cookie_and_cipher_suites(self) -> None:
+        """RFC 6347 Sec.4.2.1 / RFC 9147 Sec.5.3's ``cookie`` field, and the suites after it.
 
         The fixture this guards replaced one that was TLS-shaped -- no
         cookie field at all -- and so could not have caught a DTLS
@@ -479,6 +469,7 @@ class TestDTLSRoundTrip(unittest.TestCase):
 
         self.assertFalse(message.is_fragmented)
         self.assertEqual(message.body.cookie, _CH_COOKIE)
+        self.assertEqual(message.body.cipher_suites, (0x1301,))
 
     def test_unfragmented_client_hello_with_an_empty_cookie(self) -> None:
         from pcapkit.protocols.application.dtls.protocol import DTLS
