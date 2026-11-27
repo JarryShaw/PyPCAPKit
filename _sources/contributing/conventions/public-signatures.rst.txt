@@ -112,7 +112,8 @@ form, :meth:`~pcapkit.protocols.protocol.Protocol.from_file` and
           :class:`~pcapkit.protocols.internet.igmp.protocol.IGMP`,
           :class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL`,
           :class:`~pcapkit.protocols.application.http.protocol.HTTP`,
-          :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP`
+          :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP`,
+          :class:`~pcapkit.protocols.application.ospf.protocol.OSPF`
         - ``version``, which names the member and must be the class's own
           (:ref:`protocol-family-dispatch`)
       * - :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`

@@ -21,7 +21,9 @@ the ruling. The list takes either form:
   the separate abstract :class:`~pcapkit.protocols.internet.ipsec.protocol.IPsec`, whose
   :meth:`~pcapkit.protocols.internet.ipsec.protocol.IPsec.id` is ``('AH', 'ESP')``.
   :meth:`HTTP.id() <pcapkit.protocols.application.http.protocol.HTTP.id>` is
-  ``('HTTP/1', 'HTTP/2')``.
+  ``('HTTP/1', 'HTTP/2')``, and
+  :meth:`OSPF.id() <pcapkit.protocols.application.ospf.protocol.OSPF.id>` is
+  ``('OSPFv1', 'OSPFv2', 'OSPFv3')``.
 * **The base's own name, then the members.**
   :meth:`VLAN.id() <pcapkit.protocols.link.vlan.protocol.VLAN.id>` is
   ``('VLAN', 'C_Tag', 'S_Tag')`` and
@@ -91,10 +93,11 @@ Dispatching Bases
 
 **A registry binds a family's base only where its code cannot tell the members apart,
 and there the base picks the member.** IP protocol number 2 is IGMP's in every version,
-and the TCP and UDP ports bound to HTTP are the family's, so
-:class:`~pcapkit.protocols.internet.igmp.protocol.IGMP`'s ``_dispatch`` and
-:meth:`~pcapkit.protocols.application.http.protocol.HTTP._dispatch_version` read the octets to
-choose. Every registry that reaches IPv4, IPv6, AH, ESP, TLS or DTLS has a code for
+as 89 is OSPF's, and the TCP and UDP ports bound to HTTP are the family's, so
+:class:`~pcapkit.protocols.internet.igmp.protocol.IGMP`'s ``_dispatch``,
+:meth:`~pcapkit.protocols.application.http.protocol.HTTP._dispatch_version` and
+:meth:`OSPF._dispatch <pcapkit.protocols.application.ospf.protocol.OSPF._dispatch>` read the
+octets to choose. Every registry that reaches IPv4, IPv6, AH, ESP, TLS or DTLS has a code for
 that member alone, so no registry binds :class:`~pcapkit.protocols.internet.ip.protocol.IP`,
 :class:`~pcapkit.protocols.internet.ipsec.protocol.IPsec` or
 :class:`~pcapkit.protocols.application.ssl.protocol.SSL`, and none of the three defines
@@ -136,8 +139,8 @@ The member a call through a versioned base gives, as a decision:
        VER -->|"no: fields"| ERR["ProtocolError"]
        VER -->|"no: octets"| OCT{"does the format carry a version?"}
        OCT -->|"no: ICMP, LinuxSLL"| ERR
-       OCT -->|"yes: HTTP, IGMP, IP, L2TP"| HAS
-       FD -->|"IGMP, IP, L2TP:<br/>the data's version"| HAS
+       OCT -->|"yes: HTTP, IGMP, IP, L2TP, OSPF"| HAS
+       FD -->|"IGMP, IP, L2TP, OSPF:<br/>the data's version"| HAS
        FD -->|"HTTP, ICMP, LinuxSLL"| DM{"a member's data model?"}
        DM -->|"no, e.g. a dict"| ERR
        DM -->|yes| MEM
@@ -181,6 +184,10 @@ The member a call through a versioned base gives, as a decision:
      - ``1``, ``2``
      - refused, below
      - the data model; a :obj:`dict` is refused
+   * - :class:`~pcapkit.protocols.application.ospf.protocol.OSPF`
+     - ``1``, ``2``, ``3``
+     - the Version octet
+     - ``version``
 
 HTTP octets carry their version, but the HTTP data models have no top-level
 ``version`` field, only HTTP/1's ``receipt.version`` string, so
@@ -284,6 +291,11 @@ What stays loud:
 Member Shapes
 ~~~~~~~~~~~~~
 
+**Versions that differ significantly are separate members under a shared base**, as
+OSPFv1, OSPFv2 and OSPFv3 are; a version that only changes a field and adds features
+may stay one class with a dynamic alias, but explicit members are preferred, for
+parsing and for construction alike. Ruled in review of :pr:`3107` (:issue:`3105`).
+
 .. list-table::
    :header-rows: 1
    :widths: 22 38 40
@@ -303,7 +315,10 @@ Member Shapes
        :class:`HTTPv1 <pcapkit.protocols.application.httpv1.protocol.HTTPv1>` ``('HTTP/1',)``
        and :class:`HTTPv2 <pcapkit.protocols.application.httpv2.protocol.HTTPv2>`
        ``('HTTP/2',)``; :class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2`
-       ``('SSLv2',)``
+       ``('SSLv2',)``; :class:`OSPFv1 <pcapkit.protocols.application.ospfv1.protocol.OSPFv1>`
+       ``('OSPFv1',)``, :class:`OSPFv2 <pcapkit.protocols.application.ospfv2.protocol.OSPFv2>`
+       ``('OSPFv2',)`` and :class:`OSPFv3 <pcapkit.protocols.application.ospfv3.protocol.OSPFv3>`
+       ``('OSPFv3',)``
    * - Family-inclusive
      - the member's label plus the family name
      - :class:`~pcapkit.protocols.link.c_tag.protocol.C_Tag` ``('C_Tag', 'VLAN')``,

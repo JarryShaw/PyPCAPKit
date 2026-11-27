@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../../genindex.html"><link rel="search" title="Search" href="../../../../../search.html">
-        <link rel="canonical" href="https://jarryshaw.github.io/PyPCAPKit/_modules/pcapkit/protocols/application/ospf/data.html">
+        <link rel="canonical" href="https://jarryshaw.github.io/PyPCAPKit/_modules/pcapkit/protocols/application/ospfv3/protocol.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
-        <title>pcapkit.protocols.application.ospf.data - PyPCAPKit</title>
+        <title>pcapkit.protocols.application.ospfv3.protocol - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
@@ -314,6 +314,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ospfv1.html">OSPFv1 - Open Shortest Path First Version 1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ospfv2.html">OSPFv2 - Open Shortest Path First Version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ospfv3.html">OSPFv3 - Open Shortest Path First Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/rarp.html">RARP - Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/drarp.html">DRARP - Dynamic Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ssl.html">SSL - Secure Sockets Layer</a></li>
@@ -429,6 +432,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
@@ -462,6 +466,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
@@ -579,91 +584,270 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for pcapkit.protocols.application.ospf.data</h1><div class="highlight"><pre>
+          <h1>Source code for pcapkit.protocols.application.ospfv3.protocol</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">"""data models for OSPF protocol"""</span>
+<span class="sd">"""OSPFv3 - Open Shortest Path First version 3</span>
+<span class="sd">=================================================</span>
 
+<span class="sd">.. module:: pcapkit.protocols.application.ospfv3.protocol</span>
+
+<span class="sd">:mod:`pcapkit.protocols.application.ospfv3.protocol` holds</span>
+<span class="sd">:class:`~pcapkit.protocols.application.ospfv3.protocol.OSPFv3`, the extractor for</span>
+<span class="sd">OSPF for IPv6 (OSPFv3) [:rfc:`5340`], whose 16-octet header</span>
+<span class="sd">(:rfc:`5340#appendix-A.3.1`) has an Instance ID and a reserved octet in place of</span>
+<span class="sd">OSPFv2's AuType and Authentication:</span>
+
+<span class="sd">.. table::</span>
+
+<span class="sd">   ====== ===== ==================== ===============================</span>
+<span class="sd">   Octets Bits  Name                 Description</span>
+<span class="sd">   ====== ===== ==================== ===============================</span>
+<span class="sd">   0          0 ``ospf.version``     Version Number</span>
+<span class="sd">   ------ ----- -------------------- -------------------------------</span>
+<span class="sd">   1          8 ``ospf.type``        Type</span>
+<span class="sd">   ------ ----- -------------------- -------------------------------</span>
+<span class="sd">   2         16 ``ospf.len``         Packet Length (header included)</span>
+<span class="sd">   ------ ----- -------------------- -------------------------------</span>
+<span class="sd">   4         32 ``ospf.router_id``   Router ID</span>
+<span class="sd">   ------ ----- -------------------- -------------------------------</span>
+<span class="sd">   8         64 ``ospf.area_id``     Area ID</span>
+<span class="sd">   ------ ----- -------------------- -------------------------------</span>
+<span class="sd">   12        96 ``ospf.chksum``      Checksum</span>
+<span class="sd">   ------ ----- -------------------- -------------------------------</span>
+<span class="sd">   14       112 ``ospf.instance_id`` Instance ID</span>
+<span class="sd">   ------ ----- -------------------- -------------------------------</span>
+<span class="sd">   15       120 ``ospf.reserved``    Reserved</span>
+<span class="sd">   ====== ===== ==================== ===============================</span>
+
+<span class="sd">.. versionadded:: 1.8.1</span>
+
+<span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">info_final</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span><span class="p">,</span> <span class="n">Protocol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ospf.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Enum_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.shortread</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut_on_its_own</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ospf.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">OSPF</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ospfv3.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">OSPFv3</span> <span class="k">as</span> <span class="n">Data_OSPFv3</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ospfv3.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">OSPFv3</span> <span class="k">as</span> <span class="n">Schema_OSPFv3</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ospf.authentication</span><span class="w"> </span><span class="kn">import</span> <span class="n">Authentication</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ospf.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.checksum.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChecksumStatus</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'OSPF'</span><span class="p">,</span> <span class="s1">'CryptographicAuthentication'</span><span class="p">]</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'OSPFv3'</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="CryptographicAuthentication">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.data.CryptographicAuthentication">[docs]</a>
-<span class="nd">@info_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">CryptographicAuthentication</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for OSPF cryptographic authentication.</span>
+<div class="viewcode-block" id="OSPFv3">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ospfv3.html#pcapkit.protocols.application.ospfv3.protocol.OSPFv3">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">OSPFv3</span><span class="p">(</span><span class="n">OSPF</span><span class="p">[</span><span class="n">Data_OSPFv3</span><span class="p">,</span> <span class="n">Schema_OSPFv3</span><span class="p">],</span>
+             <span class="n">schema</span><span class="o">=</span><span class="n">Schema_OSPFv3</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_OSPFv3</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""This class implements OSPF for IPv6 (OSPF version 3).</span>
 
-<span class="sd">    .. versionadded:: 1.5.0</span>
+<span class="sd">    Its checksum covers an IPv6 pseudo-header (:rfc:`5340#appendix-A.3.1`), so it is</span>
+<span class="sd">    neither verified nor computed.</span>
 
-<span class="sd">       Renamed from ``CrytographicAuthentication``, which</span>
-<span class="sd">       :mod:`pcapkit.protocols.data` exported as</span>
-<span class="sd">       ``OSPF_CrytographicAuthentication`` (:issue:`1090`).</span>
-
-<span class="sd">    .. versionremoved:: 1.5.0</span>
-
-<span class="sd">       ``CrytographicAuthentication`` and ``OSPF_CrytographicAuthentication``,</span>
-<span class="sd">       with no alias (:issue:`1090`).</span>
+<span class="sd">    .. versionadded:: 1.8.1</span>
 
 <span class="sd">    """</span>
 
-    <span class="c1">#: The two reserved octets, as captured.</span>
-    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
-    <span class="c1">#: Key ID.</span>
-    <span class="n">key_id</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Authentication data length.</span>
-    <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Cryptographic sequence number.</span>
-    <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Properties.</span>
+    <span class="c1">##########################################################################</span>
 
-    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">key_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin</span></div>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[16]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Header length of current protocol."""</span>
+        <span class="k">return</span> <span class="mi">16</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Methods.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="OSPFv3.id">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ospfv3.html#pcapkit.protocols.application.ospfv3.protocol.OSPFv3.id">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Literal["OSPFv3"]]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">"""Index ID of the protocol.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Index ID of the protocol, narrowed to this member.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s1">'OSPFv3'</span><span class="p">,)</span></div>
 
 
+<div class="viewcode-block" id="OSPFv3.read">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ospfv3.html#pcapkit.protocols.application.ospfv3.protocol.OSPFv3.read">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_OSPFv3'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read OSPF for IPv6.</span>
 
-<div class="viewcode-block" id="OSPF">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.data.OSPF">[docs]</a>
-<span class="nd">@info_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">OSPF</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for OSPF packet."""</span>
+<span class="sd">        Structure of OSPFv3 header [:rfc:`5340`]:</span>
 
-    <span class="c1">#: Version number.</span>
-    <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Type.</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span>
-    <span class="c1">#: Packet length (header included).</span>
-    <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Router ID.</span>
-    <span class="n">router_id</span><span class="p">:</span> <span class="s1">'IPv4Address'</span>
-    <span class="c1">#: Area ID.</span>
-    <span class="n">area_id</span><span class="p">:</span> <span class="s1">'IPv4Address'</span>
-    <span class="c1">#: Checksum.</span>
-    <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span>
-    <span class="c1">#: Authentication type.</span>
-    <span class="n">autype</span><span class="p">:</span> <span class="s1">'Authentication'</span>
+<span class="sd">        .. code-block:: text</span>
 
-    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="c1">#: Authentication.</span>
-        <span class="n">auth</span><span class="p">:</span> <span class="s1">'bytes | CryptographicAuthentication'</span>
-        <span class="c1">#: Octets captured past the Packet Length, present only when there are</span>
-        <span class="c1">#: any.</span>
-        <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span>
-        <span class="c1">#: Outcome of verifying :attr:`chksum`, present only for OSPFv2 when</span>
-        <span class="c1">#: :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY` is on.</span>
-        <span class="n">checksum_status</span><span class="p">:</span> <span class="s1">'ChecksumStatus'</span>
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |   Version #   |     Type      |         Packet length         |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                         Router ID                             |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                          Area ID                              |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |          Checksum             |  Instance ID  |      0        |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">router_id</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">,</span>
-                     <span class="n">area_id</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">autype</span><span class="p">:</span> <span class="s1">'Authentication'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=super-init-not-called,unused-argument,line-too-long,multiple-statements,redefined-builtin</span></div>
+<span class="sd">        Args:</span>
+<span class="sd">            length: Length of packet data.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed packet data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the Version is not 3.</span>
+
+<span class="sd">        """</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">cut_on_its_own</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="s1">'version'</span><span class="p">)</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'OSPFv3: invalid version: </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+        <span class="c1"># Set before _decode_next_layer below, which reads self.alias.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_version</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">version</span>
+
+        <span class="n">ospf</span> <span class="o">=</span> <span class="n">Data_OSPFv3</span><span class="p">(</span>
+            <span class="n">version</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="nb">len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">router_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">router_id</span><span class="p">,</span>
+            <span class="n">area_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">area_id</span><span class="p">,</span>
+            <span class="n">chksum</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span>
+            <span class="n">instance_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">instance_id</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="k">else</span> <span class="p">(</span><span class="n">length</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+        <span class="c1"># NOTE: Octets past the Packet Length belong to this layer, as its length</span>
+        <span class="c1"># leaves them out, and are rebuilt as captured (#1455).</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">:</span>
+            <span class="n">ospf</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
+                <span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">),</span>
+            <span class="p">])</span>
+
+        <span class="c1"># NOTE: The body is handed on at octet 16, on the -1 sentinel, as for OSPFv2 (#3105).</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ospf</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="OSPFv3.make">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ospfv3.html#pcapkit.protocols.application.ospfv3.protocol.OSPFv3.make">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+             <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+             <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Packet | int'</span> <span class="o">=</span> <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Hello</span><span class="p">,</span>
+             <span class="n">packet_length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">router_id</span><span class="p">:</span> <span class="s1">'IPv4Address | str | bytes'</span> <span class="o">=</span> <span class="s1">'0.0.0.0'</span><span class="p">,</span>  <span class="c1"># nosec: B104</span>
+             <span class="n">area_id</span><span class="p">:</span> <span class="s1">'IPv4Address | str | bytes'</span> <span class="o">=</span> <span class="s1">'0.0.0.0'</span><span class="p">,</span>  <span class="c1"># nosec: B104</span>
+             <span class="n">checksum</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">instance_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+             <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
+             <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+             <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_OSPFv3'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            version: OSPF version number, ``3``.</span>
+<span class="sd">            type: OSPF packet type.</span>
+<span class="sd">            packet_length: Packet length (header included). If not given, it is</span>
+<span class="sd">                computed as 16 plus the length of ``payload``.</span>
+<span class="sd">            router_id: Router ID.</span>
+<span class="sd">            area_id: Area ID.</span>
+<span class="sd">            checksum: Checksum, zero if :data:`None`: it covers an IPv6</span>
+<span class="sd">                pseudo-header, so none is computed.</span>
+<span class="sd">            instance_id: Instance ID.</span>
+<span class="sd">            reserved: The reserved octet after the Instance ID.</span>
+<span class="sd">            payload: Payload data.</span>
+<span class="sd">            trailer: Octets after the packet, outside the Packet Length; written</span>
+<span class="sd">                as is.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed packet data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``version`` is not 3; if ``packet_length`` is not an</span>
+<span class="sd">                :obj:`int` in ``0..65535``; if ``checksum`` is not two octets; if</span>
+<span class="sd">                ``instance_id`` is not an :obj:`int` in ``0..255``; if</span>
+<span class="sd">                ``reserved`` is not one octet; or if ``type`` is a name, a</span>
+<span class="sd">                :obj:`bool`, or a member or code its 8 bits cannot carry.</span>
+
+<span class="sd">        """</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_version</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+        <span class="n">type_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">Enum_Packet</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s1">'OSPF'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Schema_OSPFv3</span><span class="p">(</span>
+            <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">type_</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span> <span class="k">if</span> <span class="n">packet_length</span> <span class="ow">is</span> <span class="kc">None</span>
+                    <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">packet_length</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'packet length'</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s1">'OSPF'</span><span class="p">)),</span>
+            <span class="n">router_id</span><span class="o">=</span><span class="n">router_id</span><span class="p">,</span>
+            <span class="n">area_id</span><span class="o">=</span><span class="n">area_id</span><span class="p">,</span>
+            <span class="n">checksum</span><span class="o">=</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span> <span class="k">if</span> <span class="n">checksum</span> <span class="ow">is</span> <span class="kc">None</span>
+                      <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_octets</span><span class="p">(</span><span class="n">checksum</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'checksum'</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s1">'OSPF'</span><span class="p">)),</span>
+            <span class="n">instance_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">instance_id</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'instance ID'</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s1">'OSPF'</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_octets</span><span class="p">(</span><span class="n">reserved</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'reserved octet'</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s1">'OSPF'</span><span class="p">),</span>
+            <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
+            <span class="n">trailer</span><span class="o">=</span><span class="n">trailer</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Data models.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="OSPFv3.__length_hint__">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ospfv3.html#pcapkit.protocols.application.ospfv3.protocol.OSPFv3.__length_hint__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[16]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return an estimated length for the object."""</span>
+        <span class="k">return</span> <span class="mi">16</span></div>
+
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="OSPFv3._make_data">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ospfv3.html#pcapkit.protocols.application.ospfv3.protocol.OSPFv3._make_data">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_OSPFv3'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">"""Create key-value pairs from ``data`` for protocol construction.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: protocol data</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Key-value pairs for protocol construction.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">'version'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_rebuilt_version</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+            <span class="s1">'type'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="s1">'packet_length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'len'</span><span class="p">),</span>
+            <span class="s1">'router_id'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">router_id</span><span class="p">,</span>
+            <span class="s1">'area_id'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">area_id</span><span class="p">,</span>
+            <span class="s1">'checksum'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
+            <span class="s1">'instance_id'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">instance_id</span><span class="p">,</span>
+            <span class="c1"># NOTE: A reserved octet a capture cut is zero-filled (#1458).</span>
+            <span class="s1">'reserved'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_fill_short_read</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                             <span class="n">model</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s1">'reserved'</span><span class="p">),</span>
+            <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="s1">'trailer'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">),</span>
+        <span class="p">}</span></div>
+</div>
 
 </pre></div>
         </article>

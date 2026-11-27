@@ -321,6 +321,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/ospfv1.html">OSPFv1 - Open Shortest Path First Version 1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/ospfv2.html">OSPFv2 - Open Shortest Path First Version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/ospfv3.html">OSPFv3 - Open Shortest Path First Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/rarp.html">RARP - Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/drarp.html">DRARP - Dynamic Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/ssl.html">SSL - Secure Sockets Layer</a></li>
@@ -436,6 +439,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
@@ -469,6 +473,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
@@ -614,7 +619,9 @@ the ruling. The list takes either form:</p>
 the separate abstract <a class="reference internal" href="../../pcapkit/protocols/internet/ipsec.html#pcapkit.protocols.internet.ipsec.protocol.IPsec" title="pcapkit.protocols.internet.ipsec.protocol.IPsec"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPsec</span></code></a>, whose
 <a class="reference internal" href="../../pcapkit/protocols/internet/ipsec.html#pcapkit.protocols.internet.ipsec.protocol.IPsec.id" title="pcapkit.protocols.internet.ipsec.protocol.IPsec.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">id()</span></code></a> is <code class="docutils literal notranslate"><span class="pre">('AH',</span> <span class="pre">'ESP')</span></code>.
 <a class="reference internal" href="../../pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.protocol.HTTP.id" title="pcapkit.protocols.application.http.protocol.HTTP.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP.id()</span></code></a> is
-<code class="docutils literal notranslate"><span class="pre">('HTTP/1',</span> <span class="pre">'HTTP/2')</span></code>.</p></li>
+<code class="docutils literal notranslate"><span class="pre">('HTTP/1',</span> <span class="pre">'HTTP/2')</span></code>, and
+<a class="reference internal" href="../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.protocol.OSPF.id" title="pcapkit.protocols.application.ospf.protocol.OSPF.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">OSPF.id()</span></code></a> is
+<code class="docutils literal notranslate"><span class="pre">('OSPFv1',</span> <span class="pre">'OSPFv2',</span> <span class="pre">'OSPFv3')</span></code>.</p></li>
 <li><p><strong>The base’s own name, then the members.</strong>
 <a class="reference internal" href="../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.protocol.VLAN.id" title="pcapkit.protocols.link.vlan.protocol.VLAN.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">VLAN.id()</span></code></a> is
 <code class="docutils literal notranslate"><span class="pre">('VLAN',</span> <span class="pre">'C_Tag',</span> <span class="pre">'S_Tag')</span></code> and
@@ -673,10 +680,11 @@ testing for their member.</p>
 <span id="protocol-family-dispatch"></span><h2>Dispatching Bases<a class="headerlink" href="#dispatching-bases" title="Link to this heading">¶</a></h2>
 <p><strong>A registry binds a family’s base only where its code cannot tell the members apart,
 and there the base picks the member.</strong> IP protocol number 2 is IGMP’s in every version,
-and the TCP and UDP ports bound to HTTP are the family’s, so
-<a class="reference internal" href="../../pcapkit/protocols/internet/igmp.html#pcapkit.protocols.internet.igmp.protocol.IGMP" title="pcapkit.protocols.internet.igmp.protocol.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">_dispatch</span></code> and
-<a class="reference internal" href="../../pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.protocol.HTTP._dispatch_version" title="pcapkit.protocols.application.http.protocol.HTTP._dispatch_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_dispatch_version()</span></code></a> read the octets to
-choose. Every registry that reaches IPv4, IPv6, AH, ESP, TLS or DTLS has a code for
+as 89 is OSPF’s, and the TCP and UDP ports bound to HTTP are the family’s, so
+<a class="reference internal" href="../../pcapkit/protocols/internet/igmp.html#pcapkit.protocols.internet.igmp.protocol.IGMP" title="pcapkit.protocols.internet.igmp.protocol.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">_dispatch</span></code>,
+<a class="reference internal" href="../../pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.protocol.HTTP._dispatch_version" title="pcapkit.protocols.application.http.protocol.HTTP._dispatch_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_dispatch_version()</span></code></a> and
+<a class="reference internal" href="../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.protocol.OSPF._dispatch" title="pcapkit.protocols.application.ospf.protocol.OSPF._dispatch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">OSPF._dispatch</span></code></a> read the
+octets to choose. Every registry that reaches IPv4, IPv6, AH, ESP, TLS or DTLS has a code for
 that member alone, so no registry binds <a class="reference internal" href="../../pcapkit/protocols/internet/ip.html#pcapkit.protocols.internet.ip.protocol.IP" title="pcapkit.protocols.internet.ip.protocol.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a>,
 <a class="reference internal" href="../../pcapkit/protocols/internet/ipsec.html#pcapkit.protocols.internet.ipsec.protocol.IPsec" title="pcapkit.protocols.internet.ipsec.protocol.IPsec"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPsec</span></code></a> or
 <a class="reference internal" href="../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL" title="pcapkit.protocols.application.ssl.protocol.SSL"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code></a>, and none of the three defines
@@ -713,8 +721,8 @@ next-layer channel, so the check never meets it (<a class="extlink-issue referen
     VER --&gt;|&quot;no: fields&quot;| ERR[&quot;ProtocolError&quot;]
     VER --&gt;|&quot;no: octets&quot;| OCT{&quot;does the format carry a version?&quot;}
     OCT --&gt;|&quot;no: ICMP, LinuxSLL&quot;| ERR
-    OCT --&gt;|&quot;yes: HTTP, IGMP, IP, L2TP&quot;| HAS
-    FD --&gt;|&quot;IGMP, IP, L2TP:&lt;br/&gt;the data's version&quot;| HAS
+    OCT --&gt;|&quot;yes: HTTP, IGMP, IP, L2TP, OSPF&quot;| HAS
+    FD --&gt;|&quot;IGMP, IP, L2TP, OSPF:&lt;br/&gt;the data's version&quot;| HAS
     FD --&gt;|&quot;HTTP, ICMP, LinuxSLL&quot;| DM{&quot;a member's data model?&quot;}
     DM --&gt;|&quot;no, e.g. a dict&quot;| ERR
     DM --&gt;|yes| MEM
@@ -770,6 +778,11 @@ ruled on <a class="extlink-issue reference external" href="https://github.com/Ja
 <td><p><code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">2</span></code></p></td>
 <td><p>refused, below</p></td>
 <td><p>the data model; a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> is refused</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.protocol.OSPF" title="pcapkit.protocols.application.ospf.protocol.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">2</span></code>, <code class="docutils literal notranslate"><span class="pre">3</span></code></p></td>
+<td><p>the Version octet</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">version</span></code></p></td>
 </tr>
 </tbody>
 </table>
@@ -866,6 +879,10 @@ that parse.</p></li>
 </section>
 <section id="member-shapes">
 <span id="protocol-family-shapes"></span><h2>Member Shapes<a class="headerlink" href="#member-shapes" title="Link to this heading">¶</a></h2>
+<p><strong>Versions that differ significantly are separate members under a shared base</strong>, as
+OSPFv1, OSPFv2 and OSPFv3 are; a version that only changes a field and adds features
+may stay one class with a dynamic alias, but explicit members are preferred, for
+parsing and for construction alike. Ruled in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/3107">#3107</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3105">#3105</a>).</p>
 <div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">
 <colgroup>
@@ -892,7 +909,10 @@ but to the RFC canonical name rather than a versioned one
 <a class="reference internal" href="../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.protocol.HTTPv1" title="pcapkit.protocols.application.httpv1.protocol.HTTPv1"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPv1</span></code></a> <code class="docutils literal notranslate"><span class="pre">('HTTP/1',)</span></code>
 and <a class="reference internal" href="../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.protocol.HTTPv2" title="pcapkit.protocols.application.httpv2.protocol.HTTPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPv2</span></code></a>
 <code class="docutils literal notranslate"><span class="pre">('HTTP/2',)</span></code>; <a class="reference internal" href="../../pcapkit/protocols/application/sslv2.html#pcapkit.protocols.application.sslv2.protocol.SSLv2" title="pcapkit.protocols.application.sslv2.protocol.SSLv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code></a>
-<code class="docutils literal notranslate"><span class="pre">('SSLv2',)</span></code></p></td>
+<code class="docutils literal notranslate"><span class="pre">('SSLv2',)</span></code>; <a class="reference internal" href="../../pcapkit/protocols/application/ospfv1.html#pcapkit.protocols.application.ospfv1.protocol.OSPFv1" title="pcapkit.protocols.application.ospfv1.protocol.OSPFv1"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code></a>
+<code class="docutils literal notranslate"><span class="pre">('OSPFv1',)</span></code>, <a class="reference internal" href="../../pcapkit/protocols/application/ospfv2.html#pcapkit.protocols.application.ospfv2.protocol.OSPFv2" title="pcapkit.protocols.application.ospfv2.protocol.OSPFv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv2</span></code></a>
+<code class="docutils literal notranslate"><span class="pre">('OSPFv2',)</span></code> and <a class="reference internal" href="../../pcapkit/protocols/application/ospfv3.html#pcapkit.protocols.application.ospfv3.protocol.OSPFv3" title="pcapkit.protocols.application.ospfv3.protocol.OSPFv3"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv3</span></code></a>
+<code class="docutils literal notranslate"><span class="pre">('OSPFv3',)</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p>Family-inclusive</p></td>
 <td><p>the member’s label plus the family name</p></td>

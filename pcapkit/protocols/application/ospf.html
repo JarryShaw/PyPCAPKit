@@ -7,9 +7,9 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://jarryshaw.github.io/PyPCAPKit/pcapkit/protocols/application/ospf.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.application.ospf.protocol contains OSPF only, which implements an extractor for Open Shortest Path First (OSPF)*, whose structure is:,,,, Octets, Bits, Name, Description,,, 0, 0, ..." />
-<meta name="description" content="pcapkit.protocols.application.ospf.protocol contains OSPF only, which implements an extractor for Open Shortest Path First (OSPF)*, whose structure is:,,,, Octets, Bits, Name, Description,,, 0, 0, ..." />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="RARP - Reverse Address Resolution Protocol" href="rarp.html"><link rel="prev" title="NGAP - NG Application Protocol" href="ngap.html">
+<meta property="og:description" content="pcapkit.protocols.application.ospf.protocol contains OSPF only, the abstract base of the Open Shortest Path First (OSPF) family*. Each version is a member of its own:,,,, Version, Class, Specificat..." />
+<meta name="description" content="pcapkit.protocols.application.ospf.protocol contains OSPF only, the abstract base of the Open Shortest Path First (OSPF) family*. Each version is a member of its own:,,,, Version, Class, Specificat..." />
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="OSPFv1 - Open Shortest Path First Version 1" href="ospfv1.html"><link rel="prev" title="NGAP - NG Application Protocol" href="ngap.html">
         <link rel="canonical" href="https://jarryshaw.github.io/PyPCAPKit/pcapkit/protocols/application/ospf.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -189,7 +189,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -321,6 +321,9 @@
 <li class="toctree-l4"><a class="reference internal" href="ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">OSPF - Open Shortest Path First</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ospfv1.html">OSPFv1 - Open Shortest Path First Version 1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ospfv2.html">OSPFv2 - Open Shortest Path First Version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ospfv3.html">OSPFv3 - Open Shortest Path First Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="rarp.html">RARP - Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="drarp.html">DRARP - Dynamic Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ssl.html">SSL - Secure Sockets Layer</a></li>
@@ -436,6 +439,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
@@ -469,6 +473,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
@@ -591,7 +596,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
@@ -599,62 +604,44 @@
           <section id="module-pcapkit.protocols.application.ospf">
 <span id="ospf-open-shortest-path-first"></span><h1>OSPF - Open Shortest Path First<a class="headerlink" href="#module-pcapkit.protocols.application.ospf" title="Link to this heading">¶</a></h1>
 <p id="module-pcapkit.protocols.application.ospf.protocol"><a class="reference internal" href="#module-pcapkit.protocols.application.ospf.protocol" title="pcapkit.protocols.application.ospf.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ospf.protocol</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.application.ospf.protocol.OSPF" title="pcapkit.protocols.application.ospf.protocol.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a> only,
-which implements an extractor for Open Shortest Path
-First (OSPF) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is:</p>
+<a class="reference internal" href="#pcapkit.protocols.application.ospf.protocol.OSPF" title="pcapkit.protocols.application.ospf.protocol.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a> only, the abstract base of
+the Open Shortest Path First (OSPF) family <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>. Each version is a member of its own:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Octets</p></th>
-<th class="head"><p>Bits</p></th>
-<th class="head"><p>Name</p></th>
-<th class="head"><p>Description</p></th>
+<tr class="row-odd"><th class="head"><p>Version</p></th>
+<th class="head"><p>Class</p></th>
+<th class="head"><p>Specification</p></th>
+<th class="head"><p>Header</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>0</p></td>
-<td><p>0</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ospf.version</span></code></p></td>
-<td><p>Version Number</p></td>
+<tr class="row-even"><td><p>1</p></td>
+<td><p><a class="reference internal" href="ospfv1.html#pcapkit.protocols.application.ospfv1.protocol.OSPFv1" title="pcapkit.protocols.application.ospfv1.protocol.OSPFv1"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code></a></p></td>
+<td><p><span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1131.html"><strong>RFC 1131</strong></a></p></td>
+<td><p>24 octets, AuType and Authentication</p></td>
 </tr>
-<tr class="row-odd"><td><p>1</p></td>
-<td><p>8</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ospf.type</span></code></p></td>
-<td><p>Type</p></td>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p><a class="reference internal" href="ospfv2.html#pcapkit.protocols.application.ospfv2.protocol.OSPFv2" title="pcapkit.protocols.application.ospfv2.protocol.OSPFv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv2</span></code></a></p></td>
+<td><p><span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2328.html"><strong>RFC 2328</strong></a></p></td>
+<td><p>24 octets, AuType and Authentication</p></td>
 </tr>
-<tr class="row-even"><td><p>2</p></td>
-<td><p>16</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ospf.len</span></code></p></td>
-<td><p>Packet Length (header included)</p></td>
-</tr>
-<tr class="row-odd"><td><p>4</p></td>
-<td><p>32</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ospf.router_id</span></code></p></td>
-<td><p>Router ID</p></td>
-</tr>
-<tr class="row-even"><td><p>8</p></td>
-<td><p>64</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ospf.area_id</span></code></p></td>
-<td><p>Area ID</p></td>
-</tr>
-<tr class="row-odd"><td><p>12</p></td>
-<td><p>96</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ospf.chksum</span></code></p></td>
-<td><p>Checksum</p></td>
-</tr>
-<tr class="row-even"><td><p>14</p></td>
-<td><p>112</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ospf.autype</span></code></p></td>
-<td><p>Authentication Type</p></td>
-</tr>
-<tr class="row-odd"><td><p>16</p></td>
-<td><p>128</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ospf.auth</span></code></p></td>
-<td><p>Authentication</p></td>
+<tr class="row-even"><td><p>3</p></td>
+<td><p><a class="reference internal" href="ospfv3.html#pcapkit.protocols.application.ospfv3.protocol.OSPFv3" title="pcapkit.protocols.application.ospfv3.protocol.OSPFv3"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv3</span></code></a></p></td>
+<td><p><span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5340.html"><strong>RFC 5340</strong></a></p></td>
+<td><p>16 octets, Instance ID and a reserved octet</p></td>
 </tr>
 </tbody>
 </table>
 </div>
+<p>All three share the first 14 octets alone, Version to Checksum, so the base
+parses no header. IP protocol 89 is OSPF’s in every version, so
+<a class="reference internal" href="../internet/internet.html#pcapkit.protocols.internet.internet.Internet.__proto__" title="pcapkit.protocols.internet.internet.Internet.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Internet.__proto__</span></code></a>
+binds this base, which picks the member by the Version octet. Each RFC requires its
+own version there (<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1131.html"><strong>RFC 1131</strong></a> Section 8.2, <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2328.html#section-8.2"><strong>RFC 2328 Section 8.2</strong></a>,
+<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5340.html#section-4.2.2"><strong>RFC 5340 Section 4.2.2</strong></a>), so a direct parse of any other version raises
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, and behind IP the packet is left
+<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.5.0: </span>Moved here from <code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.link.ospf</span></code>, with its data model and
 header schema. <a class="reference internal" href="#pcapkit.protocols.application.ospf.protocol.OSPF" title="pcapkit.protocols.application.ospf.protocol.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a> derives
@@ -672,23 +659,64 @@ exported, with no alias (<a class="extlink-issue reference external" href="https
 </div>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span>A rebuild keeps the parsed Packet Length and the octets past it, where
-<a class="reference internal" href="#pcapkit.protocols.application.ospf.protocol.OSPF.make" title="pcapkit.protocols.application.ospf.protocol.OSPF.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> recomputed the
-length from the payload and dropped those octets; it takes them as
-<code class="docutils literal notranslate"><span class="pre">packet_length</span></code> and <code class="docutils literal notranslate"><span class="pre">trailer</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1249">#1249</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1455">#1455</a>).</p>
+<code class="docutils literal notranslate"><span class="pre">OSPF.make</span></code> recomputed the length from the payload and dropped those octets;
+it takes them as <code class="docutils literal notranslate"><span class="pre">packet_length</span></code> and <code class="docutils literal notranslate"><span class="pre">trailer</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1249">#1249</a>,
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1455">#1455</a>).</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.8.1: </span><a class="reference internal" href="#pcapkit.protocols.application.ospf.protocol.OSPF" title="pcapkit.protocols.application.ospf.protocol.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a> became the abstract base
+of the family, giving <a class="reference internal" href="ospfv1.html#pcapkit.protocols.application.ospfv1.protocol.OSPFv1" title="pcapkit.protocols.application.ospfv1.protocol.OSPFv1"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code></a>,
+<a class="reference internal" href="ospfv2.html#pcapkit.protocols.application.ospfv2.protocol.OSPFv2" title="pcapkit.protocols.application.ospfv2.protocol.OSPFv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv2</span></code></a> or
+<a class="reference internal" href="ospfv3.html#pcapkit.protocols.application.ospfv3.protocol.OSPFv3" title="pcapkit.protocols.application.ospfv3.protocol.OSPFv3"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv3</span></code></a>; it read every
+version with OSPFv2’s 24-octet header, OSPFv3’s 16-octet one included. A version
+none of them reads, 0 or 4 to 255, is refused, and left
+<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> behind IP (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3105">#3105</a>).</p>
+</div>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.8.1: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ospf.schema</span></code> and
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ospf.data</span></code>, with their <code class="docutils literal notranslate"><span class="pre">OSPF</span></code> and
+<code class="docutils literal notranslate"><span class="pre">CryptographicAuthentication</span></code> classes and
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ospf.schema.ospf_auth_data_selector</span></code>;
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ospf.Schema_OSPF</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ospf.Schema_CryptographicAuthentication</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ospf.Data_OSPF</span></code> and
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ospf.Data_CryptographicAuthentication</span></code>; and
+<code class="docutils literal notranslate"><span class="pre">OSPF.read</span></code>, <code class="docutils literal notranslate"><span class="pre">OSPF.make</span></code> and <code class="docutils literal notranslate"><span class="pre">OSPF.length</span></code>, with <code class="docutils literal notranslate"><span class="pre">OSPF._make_data</span></code>,
+<code class="docutils literal notranslate"><span class="pre">OSPF._read_encrypt_auth</span></code>, <code class="docutils literal notranslate"><span class="pre">OSPF._make_encrypt_auth</span></code>, <code class="docutils literal notranslate"><span class="pre">OSPF._read_id_numbers</span></code>
+and <code class="docutils literal notranslate"><span class="pre">OSPF._make_id_numbers</span></code>. None has an alias: the OSPFv2 header moved to
+<a class="reference internal" href="ospfv2.html#module-pcapkit.protocols.application.ospfv2" title="pcapkit.protocols.application.ospfv2"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ospfv2</span></code></a>, as <code class="docutils literal notranslate"><span class="pre">OSPFv2</span></code>, and each member defines
+its own <code class="docutils literal notranslate"><span class="pre">read</span></code>, <code class="docutils literal notranslate"><span class="pre">make</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3105">#3105</a>).</p>
 </div>
 <br /><dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ospf.protocol.</span></span><span class="sig-name descname"><span class="pre">OSPF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protocol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="application.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.application.ospf.data.OSPF" title="pcapkit.protocols.application.ospf.data.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.application.ospf.schema.OSPF" title="pcapkit.protocols.application.ospf.schema.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a>]</p>
-<p>This class implements Open Shortest Path First.</p>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ospf.protocol.</span></span><span class="sig-name descname"><span class="pre">OSPF</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">_PT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><span class="pre">Data</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">_ST</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><span class="pre">Schema</span></a></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protocol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="application.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol._PT" title="pcapkit.protocols.protocol._PT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PT</span></code></a>, <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol._ST" title="pcapkit.protocols.protocol._ST"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_ST</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol._PT" title="pcapkit.protocols.protocol._PT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PT</span></code></a>, <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol._ST" title="pcapkit.protocols.protocol._ST"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_ST</span></code></a>]</p>
+<p>This class implements all protocols in the OSPF family.</p>
+<ul class="simple">
+<li><p>Open Shortest Path First version 1
+(<a class="reference internal" href="ospfv1.html#pcapkit.protocols.application.ospfv1.protocol.OSPFv1" title="pcapkit.protocols.application.ospfv1.protocol.OSPFv1"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code></a>) [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1131.html"><strong>RFC 1131</strong></a>]</p></li>
+<li><p>Open Shortest Path First version 2
+(<a class="reference internal" href="ospfv2.html#pcapkit.protocols.application.ospfv2.protocol.OSPFv2" title="pcapkit.protocols.application.ospfv2.protocol.OSPFv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv2</span></code></a>) [<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2328.html"><strong>RFC 2328</strong></a>]</p></li>
+<li><p>Open Shortest Path First version 3
+(<a class="reference internal" href="ospfv3.html#pcapkit.protocols.application.ospfv3.protocol.OSPFv3" title="pcapkit.protocols.application.ospfv3.protocol.OSPFv3"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv3</span></code></a>) [<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5340.html"><strong>RFC 5340</strong></a>]</p></li>
+</ul>
 <p>A routing protocol computes the forwarding table rather than forwarding
 packets, so it is a <em>user</em> of the stack rather than part of its forwarding
-path. <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1812.html#section-7"><strong>RFC 1812 Section 7</strong></a> places it accordingly, titling that chapter
+path. <span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1812.html#section-7"><strong>RFC 1812 Section 7</strong></a> places it accordingly, titling that chapter
 “APPLICATION LAYER - ROUTING PROTOCOLS” with OSPF at §7.2.2, while the
-Internet Layer protocols <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1812.html#section-4.1"><strong>RFC 1812 Section 4.1</strong></a> names are IP, ICMP and IGMP.
+Internet Layer protocols <span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1812.html#section-4.1"><strong>RFC 1812 Section 4.1</strong></a> names are IP, ICMP and IGMP.
 Hence <a class="reference internal" href="application.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a> as the
 base, and <code class="docutils literal notranslate"><span class="pre">layer</span> <span class="pre">==</span> <span class="pre">'Application'</span></code>. See
 <a class="reference internal" href="../../../contributing/conventions/protocol-layer-placement.html"><span class="doc">Protocol Layer Placement</span></a>.</p>
+<p>It is abstract, as <a class="reference internal" href="../link/l2tp.html#pcapkit.protocols.link.l2tp.protocol.L2TP" title="pcapkit.protocols.link.l2tp.protocol.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> is:
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.length" title="pcapkit.protocols.protocol.Protocol.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a>,
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> and
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> are declared abstract by
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>, and none is defined here. It
+dispatches on both paths, never giving an instance of this class
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2574">#2574</a>). The <code class="docutils literal notranslate"><span class="pre">version</span></code> field names the member; without it, octets
+give the one their Version octet names, and fields are refused.
+<a class="reference internal" href="#pcapkit.protocols.application.ospf.protocol.OSPF.from_data" title="pcapkit.protocols.application.ospf.protocol.OSPF.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> reads the <code class="docutils literal notranslate"><span class="pre">version</span></code> of its data. See <a class="reference internal" href="#pcapkit.protocols.application.ospf.protocol.OSPF.__new__" title="pcapkit.protocols.application.ospf.protocol.OSPF.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code></a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The subpackage does not track the dispatch tier. OSPF is dispatched
@@ -697,19 +725,25 @@ from <a class="reference internal" href="../internet/internet.html#pcapkit.proto
 number 89), since IP is what carries it.</p>
 </div>
 <div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.6.0: </span>Each enumeration field of <a class="reference internal" href="#pcapkit.protocols.application.ospf.protocol.OSPF.make" title="pcapkit.protocols.application.ospf.protocol.OSPF.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> takes a member or an
-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> code, resolved with the enumeration’s <code class="docutils literal notranslate"><span class="pre">get</span></code>; a name, a
-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> for a field wider than one bit, or a code the field cannot
-carry raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, rather
-than resolving against an enumeration inferred from the caller’s frame
-or writing a different value (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2594">#2594</a>).</p>
+<p><span class="versionmodified changed">Changed in version 1.6.0: </span>Each enumeration field of its <code class="docutils literal notranslate"><span class="pre">make</span></code> takes a member or an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>
+code, resolved with the enumeration’s <code class="docutils literal notranslate"><span class="pre">get</span></code>; a name, a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> for a
+field wider than one bit, or a code the field cannot carry raises
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, rather than resolving
+against an enumeration inferred from the caller’s frame or writing a
+different value (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2594">#2594</a>).</p>
 </div>
 <div class="versionremoved">
 <p><span class="versionmodified removed">Removed in version 1.6.0: </span>The <code class="docutils literal notranslate"><span class="pre">type_default</span></code>, <code class="docutils literal notranslate"><span class="pre">type_namespace</span></code>, <code class="docutils literal notranslate"><span class="pre">type_reversed</span></code>,
-<code class="docutils literal notranslate"><span class="pre">auth_type_default</span></code>, <code class="docutils literal notranslate"><span class="pre">auth_type_namespace</span></code> and
-<code class="docutils literal notranslate"><span class="pre">auth_type_reversed</span></code> arguments of <a class="reference internal" href="#pcapkit.protocols.application.ospf.protocol.OSPF.make" title="pcapkit.protocols.application.ospf.protocol.OSPF.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>; resolve a name with
+<code class="docutils literal notranslate"><span class="pre">auth_type_default</span></code>, <code class="docutils literal notranslate"><span class="pre">auth_type_namespace</span></code> and <code class="docutils literal notranslate"><span class="pre">auth_type_reversed</span></code>
+arguments of its <code class="docutils literal notranslate"><span class="pre">make</span></code>; resolve a name with
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.resolve_index" title="pcapkit.protocols.protocol.Protocol.resolve_index"><code class="xref py py-meth docutils literal notranslate"><span class="pre">resolve_index()</span></code></a> first
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2594">#2594</a>).</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.8.1: </span>Became the abstract base of the family; its parsing moved to
+<a class="reference internal" href="ospfv2.html#pcapkit.protocols.application.ospfv2.protocol.OSPFv2" title="pcapkit.protocols.application.ospfv2.protocol.OSPFv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv2</span></code></a>. Constructing it
+and <a class="reference internal" href="#pcapkit.protocols.application.ospf.protocol.OSPF.from_data" title="pcapkit.protocols.application.ospf.protocol.OSPF.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> give a member, and fields without <code class="docutils literal notranslate"><span class="pre">version</span></code> are refused
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3105">#3105</a>).</p>
 </div>
 <p class="rubric">Properties</p>
 <dl class="py property">
@@ -725,9 +759,9 @@ or writing a different value (<a class="extlink-issue reference external" href="
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF.length">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">24</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF.length" title="Link to this definition">¶</a></dt>
-<dd><p>Header length of current protocol.</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF.info_name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">info_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'ospf'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF.info_name" title="Link to this definition">¶</a></dt>
+<dd><p>Key name of the <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.info" title="pcapkit.protocols.protocol.Protocol.info"><code class="xref py py-attr docutils literal notranslate"><span class="pre">info</span></code></a> dict.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -738,95 +772,44 @@ or writing a different value (<a class="extlink-issue reference external" href="
 
 <p class="rubric">Methods</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF.read" title="Link to this definition">¶</a></dt>
-<dd><p>Read Open Shortest Path First.</p>
-<p>Structure of OSPF header [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2328.html"><strong>RFC 2328</strong></a>]:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|   Version #   |     Type      |         Packet length         |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                          Router ID                            |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                           Area ID                             |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|           Checksum            |             AuType            |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                       Authentication                          |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                       Authentication                          |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-</pre></div>
-</div>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF.id">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF.id" title="Link to this definition">¶</a></dt>
+<dd><p>Index ID of the protocol.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Length of packet data.</p></li>
-<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
-</ul>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="s1"><span class="pre">'OSPFv1'</span></span></code></span>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="s1"><span class="pre">'OSPFv2'</span></span></code></span>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="s1"><span class="pre">'OSPFv3'</span></span></code></span>]]</span></p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ospf.data.OSPF" title="pcapkit.protocols.application.ospf.data.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Parsed packet data.</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Index ID of the protocol, each member’s name, as
+<a class="reference internal" href="../internet/ip.html#pcapkit.protocols.internet.ip.protocol.IP.id" title="pcapkit.protocols.internet.ip.protocol.IP.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IP.id</span></code></a> lists
+its own; each member narrows it to its own name.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF.make">
-<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Packet.Hello</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">router_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'0.0.0.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'0.0.0.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checksum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auth_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Authentication.No_Authentication</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auth_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b'\x00\x00\x00\x00\x00\x00\x00\x00'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trailer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF.make" title="Link to this definition">¶</a></dt>
-<dd><p>Make (construct) packet data.</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF.from_data">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF.from_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF.from_data" title="Link to this definition">¶</a></dt>
+<dd><p>Create protocol instance from data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – OSPF version number.</p></li>
-<li><p><strong>type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/ospf.html#pcapkit.const.ospf.packet.Packet" title="pcapkit.const.ospf.packet.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – OSPF packet type.</p></li>
-<li><p><strong>packet_length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Packet length (header included). If not given, it is
-computed as 24 plus the length of <code class="docutils literal notranslate"><span class="pre">payload</span></code>. Give it
-explicitly when <code class="docutils literal notranslate"><span class="pre">payload</span></code> carries octets outside the OSPF
-packet, or pass those as <code class="docutils literal notranslate"><span class="pre">trailer</span></code> instead.</p></li>
-<li><p><strong>router_id</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytearray" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a></span>) – Router ID.</p></li>
-<li><p><strong>area_id</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytearray" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a></span>) – Area ID.</p></li>
-<li><p><strong>checksum</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Checksum; if <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> and
-<a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.CHECKSUM_COMPUTE" title="pcapkit.utilities.config.CHECKSUM_COMPUTE"><code class="xref py py-data docutils literal notranslate"><span class="pre">CHECKSUM_COMPUTE</span></code></a> is on, computed
-for OSPFv2 over the packet but its authentication field
-(<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2328.html#appendix-A.3.1"><strong>RFC 2328 Appendix A.3.1</strong></a>); zero otherwise, as cryptographic
-authentication leaves it (<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2328.html#appendix-D.4.3"><strong>RFC 2328 Appendix D.4.3</strong></a>).</p></li>
-<li><p><strong>auth_type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/ospf.html#pcapkit.const.ospf.authentication.Authentication" title="pcapkit.const.ospf.authentication.Authentication"><code class="xref py py-class docutils literal notranslate"><span class="pre">Authentication</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Authentication type.</p></li>
-<li><p><strong>auth_data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference internal" href="#pcapkit.protocols.application.ospf.schema.CryptographicAuthentication" title="pcapkit.protocols.application.ospf.schema.CryptographicAuthentication"><code class="xref py py-class docutils literal notranslate"><span class="pre">CryptographicAuthentication</span></code></a> | <a class="reference internal" href="#pcapkit.protocols.application.ospf.data.CryptographicAuthentication" title="pcapkit.protocols.application.ospf.data.CryptographicAuthentication"><code class="xref py py-class docutils literal notranslate"><span class="pre">CryptographicAuthentication</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Authentication data: 8 octets, or, under cryptographic
-authentication, also a schema, a data model, or the
-<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> form of a data model.</p></li>
-<li><p><strong>payload</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> | <a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></span>) – Payload data.</p></li>
-<li><p><strong>trailer</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Octets after the packet, outside the Packet Length, such
-as the message digest appended under cryptographic
-authentication (<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2328.html#appendix-D.4.3"><strong>RFC 2328 Appendix D.4.3</strong></a>); written as is.</p></li>
-<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_PT</span></code> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Protocol data.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – As <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_data</span></code></a>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ospf.schema.OSPF" title="pcapkit.protocols.application.ospf.schema.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Self</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructed packet data.</p>
+<dd class="field-odd"><p>Protocol instance; on this class, an instance of the member the
+<code class="docutils literal notranslate"><span class="pre">version</span></code> of <code class="docutils literal notranslate"><span class="pre">data</span></code> names.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">auth_data</span></code> is of an invalid type, is
-    <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> that are not exactly 8 octets long, is a
-    <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> missing a required key, or carries <code class="docutils literal notranslate"><span class="pre">reserved</span></code>
-    octets that are not two; if <code class="docutils literal notranslate"><span class="pre">packet_length</span></code> is not an
-    <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> in <code class="docutils literal notranslate"><span class="pre">0..65535</span></code>; if <code class="docutils literal notranslate"><span class="pre">checksum</span></code> is not two octets;
-    or if <code class="docutils literal notranslate"><span class="pre">type</span></code> (8 bits) or <code class="docutils literal notranslate"><span class="pre">auth_type</span></code> (16 bits) is a name, a
-    <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, or a member or code its field cannot carry.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If, on this class, <code class="docutils literal notranslate"><span class="pre">data</span></code> carries no <code class="docutils literal notranslate"><span class="pre">version</span></code> or
+    one no member reads.</p>
 </dd>
 </dl>
-<div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.5.0: </span><code class="docutils literal notranslate"><span class="pre">packet_length</span></code> is a new parameter before <code class="docutils literal notranslate"><span class="pre">router_id</span></code>, so a
-1.4.x positional argument meant for <code class="docutils literal notranslate"><span class="pre">router_id</span></code> or a later
-parameter lands one parameter early (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1249">#1249</a>).</p>
-</div>
 </dd></dl>
 
 <p class="rubric">Data Models</p>
@@ -839,368 +822,266 @@ parameter lands one parameter early (<a class="extlink-issue reference external"
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a></span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Numeral registry index of the protocol in <a class="reference external" href="https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml">IANA</a>.</p>
+<dd class="field-even"><p>Numeral registry index of the protocol in <a class="reference external" href="https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml">IANA</a>, which every
+member inherits.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF.__length_hint__">
+<span class="sig-name descname"><span class="pre">__length_hint__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF.__length_hint__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF.__length_hint__" title="Link to this definition">¶</a></dt>
+<dd><p>Return an estimated length for the object.</p>
+<p>The longest member’s header, OSPFv1’s and OSPFv2’s 24 octets, as
+<a class="reference internal" href="../link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.__length_hint__" title="pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.__length_hint__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">L2TPv2.__length_hint__</span></code></a> takes its
+longest form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protocol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Parse a protocol instance from its octets, or construct one from its fields.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Overloads<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>), <strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) = <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="o"><span class="pre">...</span></span></code></span>, /, *, <strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) = <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="o"><span class="pre">...</span></span></code></span>, <strong>layer</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) = <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="o"><span class="pre">...</span></span></code></span>, <strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) = <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="o"><span class="pre">...</span></span></code></span>, <strong>context</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/context.html#pcapkit.corekit.context.ContextRegistry" title="pcapkit.corekit.context.ContextRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextRegistry</span></code></a> | <a class="reference internal" href="../../corekit/context.html#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference internal" href="../../corekit/context.html#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code></a>[<a class="reference internal" href="../../corekit/context.html#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) = <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="o"><span class="pre">...</span></span></code></span> → <span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p></li>
+<li><p>*, <strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) = <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="o"><span class="pre">...</span></span></code></span>, <strong>context</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/context.html#pcapkit.corekit.context.ContextRegistry" title="pcapkit.corekit.context.ContextRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextRegistry</span></code></a> | <a class="reference internal" href="../../corekit/context.html#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference internal" href="../../corekit/context.html#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code></a>[<a class="reference internal" href="../../corekit/context.html#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) = <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="o"><span class="pre">...</span></span></code></span>, <strong>**fields</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) → <span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>file</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference internal" href="../../corekit/sentinels.html#pcapkit.corekit.sentinels.NoValueType" title="pcapkit.corekit.sentinels.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code></a></span>) – Source packet stream; omitted to construct.</p></li>
+<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Length of packet data.</p></li>
+<li><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Version of OSPF: the member <a class="reference internal" href="#pcapkit.protocols.application.ospf.protocol.OSPF.__new__" title="pcapkit.protocols.application.ospf.protocol.OSPF.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code></a> picks, which must
+be this class’s own.</p></li>
+<li><p><strong>layer</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – As <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init__</span></code></a>.</p></li>
+<li><p><strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – As <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init__</span></code></a>.</p></li>
+<li><p><strong>context</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/context.html#pcapkit.corekit.context.ContextRegistry" title="pcapkit.corekit.context.ContextRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextRegistry</span></code></a> | <a class="reference internal" href="../../corekit/context.html#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference internal" href="../../corekit/context.html#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code></a>[<a class="reference internal" href="../../corekit/context.html#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – As <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init__</span></code></a>.</p></li>
+<li><p><strong>**fields</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – As <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init__</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">version</span></code> is not a version of OSPF, or is not this
+    class’s own version: that of the member it is or derives from.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.8.1.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF.__new__">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF.__new__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF.__new__" title="Link to this definition">¶</a></dt>
+<dd><p>Create the member a parse or a construction of this class describes.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">version</span></code> keyword names the member. Without it, the octets give the
+member their Version octet, the first, names, and fields are refused. That
+member’s <code class="docutils literal notranslate"><span class="pre">__init__</span></code> then runs with the same arguments. A subclass of this
+class is created as itself.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span> | <a class="reference internal" href="../../corekit/sentinels.html#pcapkit.corekit.sentinels.NoValueType" title="pcapkit.corekit.sentinels.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code></a></span>) – Source packet stream, read here without being consumed;
+omitted to construct.</p></li>
+<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Length of packet data.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ospf.protocol.OSPF" title="pcapkit.protocols.application.ospf.protocol.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An uninitialised instance of the member.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><strong>TypeError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">file</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>, on this class.</p></li>
+<li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – On this class, if <code class="docutils literal notranslate"><span class="pre">version</span></code> is not a version of OSPF;
+    if, without it, the octets are empty; or if fields come without it.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.8.1.</span></p>
+</div>
 </dd></dl>
 
 <p class="rubric">Utilities</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF._make_data">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF._make_data" title="Link to this definition">¶</a></dt>
-<dd><p>Create key-value pairs from <code class="docutils literal notranslate"><span class="pre">data</span></code> for protocol construction.</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF._member_of_version">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_member_of_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF._member_of_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF._member_of_version" title="Link to this definition">¶</a></dt>
+<dd><p>The member that reads a <code class="docutils literal notranslate"><span class="pre">version</span></code> of the Version octet.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ospf.data.OSPF" title="pcapkit.protocols.application.ospf.data.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a></span>) – protocol data</p>
+<dd class="field-odd"><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Version of OSPF.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.application.ospf.protocol.OSPF" title="pcapkit.protocols.application.ospf.protocol.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a>]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Key-value pairs for protocol construction.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF._read_encrypt_auth">
-<span class="sig-name descname"><span class="pre">_read_encrypt_auth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF._read_encrypt_auth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF._read_encrypt_auth" title="Link to this definition">¶</a></dt>
-<dd><p>Read Authentication field when Cryptographic Authentication is employed,
-i.e. <a class="reference internal" href="#pcapkit.protocols.application.ospf.data.OSPF.autype" title="pcapkit.protocols.application.ospf.data.OSPF.autype"><code class="xref py py-attr docutils literal notranslate"><span class="pre">autype</span></code></a> is <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p>
-<p>Structure of Cryptographic Authentication [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2328.html"><strong>RFC 2328</strong></a>]:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|              0                |    Key ID     | Auth Data Len |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                 Cryptographic sequence number                 |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ospf.schema.CryptographicAuthentication" title="pcapkit.protocols.application.ospf.schema.CryptographicAuthentication"><code class="xref py py-class docutils literal notranslate"><span class="pre">CryptographicAuthentication</span></code></a></span>) – parsed authentication data</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ospf.data.CryptographicAuthentication" title="pcapkit.protocols.application.ospf.data.CryptographicAuthentication"><code class="xref py py-class docutils literal notranslate"><span class="pre">CryptographicAuthentication</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Parsed packet data.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF._make_encrypt_auth">
-<span class="sig-name descname"><span class="pre">_make_encrypt_auth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">auth_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF._make_encrypt_auth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF._make_encrypt_auth" title="Link to this definition">¶</a></dt>
-<dd><p>Make Authentication field when Cryptographic Authentication is employed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>auth_data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference internal" href="#pcapkit.protocols.application.ospf.schema.CryptographicAuthentication" title="pcapkit.protocols.application.ospf.schema.CryptographicAuthentication"><code class="xref py py-class docutils literal notranslate"><span class="pre">CryptographicAuthentication</span></code></a> | <a class="reference internal" href="#pcapkit.protocols.application.ospf.data.CryptographicAuthentication" title="pcapkit.protocols.application.ospf.data.CryptographicAuthentication"><code class="xref py py-class docutils literal notranslate"><span class="pre">CryptographicAuthentication</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Authentication data, as raw octets, a schema, a data
-model, or the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> form of a data model.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ospf.schema.CryptographicAuthentication" title="pcapkit.protocols.application.ospf.schema.CryptographicAuthentication"><code class="xref py py-class docutils literal notranslate"><span class="pre">CryptographicAuthentication</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Authentication schema.</p>
+<dd class="field-odd"><p><a class="reference internal" href="ospfv1.html#pcapkit.protocols.application.ospfv1.protocol.OSPFv1" title="pcapkit.protocols.application.ospfv1.protocol.OSPFv1"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code></a> for <code class="docutils literal notranslate"><span class="pre">1</span></code>,
+<a class="reference internal" href="ospfv2.html#pcapkit.protocols.application.ospfv2.protocol.OSPFv2" title="pcapkit.protocols.application.ospfv2.protocol.OSPFv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv2</span></code></a> for <code class="docutils literal notranslate"><span class="pre">2</span></code> and
+<a class="reference internal" href="ospfv3.html#pcapkit.protocols.application.ospfv3.protocol.OSPFv3" title="pcapkit.protocols.application.ospfv3.protocol.OSPFv3"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv3</span></code></a> for <code class="docutils literal notranslate"><span class="pre">3</span></code>.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">auth_data</span></code> is of an invalid type, is
-    <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> that are not exactly 8 octets long, is a
-    <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> missing a required key, or carries <code class="docutils literal notranslate"><span class="pre">reserved</span></code>
-    octets that are not two.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – For any other <code class="docutils literal notranslate"><span class="pre">version</span></code>, or one that is no <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, as
+    a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> or a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a> is even where it equals one.</p>
 </dd>
 </dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.8.1.</span></p>
+</div>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF._make_id_numbers">
-<span class="sig-name descname"><span class="pre">_make_id_numbers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF._make_id_numbers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF._make_id_numbers" title="Link to this definition">¶</a></dt>
-<dd><p>Make router and area IDs.</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF._dispatch">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_dispatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF._dispatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF._dispatch" title="Link to this definition">¶</a></dt>
+<dd><p>Pick the class that parses the OSPF packet at the start of <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p>
+<p>As <a class="reference internal" href="../internet/igmp.html#pcapkit.protocols.internet.igmp.protocol.IGMP._dispatch" title="pcapkit.protocols.internet.igmp.protocol.IGMP._dispatch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IGMP._dispatch</span></code></a>
+does for IP protocol 2, before any class is built.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>id</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytearray" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a></span>) – ID.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Payload of the IP layer, starting at the OSPF packet.</p></li>
+<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The OSPF packet’s length, in octets.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ID bytes.</p>
+<dd class="field-odd"><p>The member its Version octet names, as <a class="reference internal" href="#pcapkit.protocols.application.ospf.protocol.OSPF._member_of_version" title="pcapkit.protocols.application.ospf.protocol.OSPF._member_of_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_member_of_version()</span></code></a> gives it;
+<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> for any other version,
+which then keeps its octets undissected.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.8.1.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF._construction_member">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_construction_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF._construction_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF._construction_member" title="Link to this definition">¶</a></dt>
+<dd><p>The member <code class="xref py py-meth docutils literal notranslate"><span class="pre">from_fields()</span></code>, <a class="reference internal" href="#pcapkit.protocols.application.ospf.protocol.OSPF.from_data" title="pcapkit.protocols.application.ospf.protocol.OSPF.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> and a call given no file construct.</p>
+<p>On this class, the member the <code class="docutils literal notranslate"><span class="pre">version</span></code> field names, which stays in
+<code class="docutils literal notranslate"><span class="pre">fields</span></code>; on another, the class itself.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fields</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Construction keywords.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Self</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The member, or the class itself.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">id</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> (see
-    <a class="reference internal" href="../../corekit/schema/ipaddress.html#pcapkit.corekit.schema.ipaddress.parse_ip_address" title="pcapkit.corekit.schema.ipaddress.parse_ip_address"><code class="xref py py-func docutils literal notranslate"><span class="pre">parse_ip_address()</span></code></a>).</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If, on this class, <code class="docutils literal notranslate"><span class="pre">version</span></code> is missing or is not a
+    version of OSPF.</p>
 </dd>
 </dl>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
-<p>Latent rather than live: nothing in this module calls this method
-(<a class="reference internal" href="#pcapkit.protocols.application.ospf.protocol.OSPF.make" title="pcapkit.protocols.application.ospf.protocol.OSPF.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> builds <code class="docutils literal notranslate"><span class="pre">router_id</span></code>/<code class="docutils literal notranslate"><span class="pre">area_id</span></code> straight from its
-own arguments), so the only caller is a unit test. It is routed
-through <a class="reference internal" href="../../corekit/schema/ipaddress.html#pcapkit.corekit.schema.ipaddress.parse_ip_address" title="pcapkit.corekit.schema.ipaddress.parse_ip_address"><code class="xref py py-func docutils literal notranslate"><span class="pre">parse_ip_address()</span></code></a>
-anyway, so that a future caller passing a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> gets
-<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FieldValueError</span></code></a> rather than a
-silent <code class="docutils literal notranslate"><span class="pre">0.0.0.1</span></code>.</p>
-<p>The description below uses <a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#type.__name__" title="(in Python v3.15)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__class__.__name__</span></code></a> rather than <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.alias" title="pcapkit.protocols.protocol.Protocol.alias"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.alias</span></code></a>, because <code class="docutils literal notranslate"><span class="pre">alias</span></code>
-here reads <code class="docutils literal notranslate"><span class="pre">self._version</span></code>, which <a class="reference internal" href="#pcapkit.protocols.application.ospf.protocol.OSPF.read" title="pcapkit.protocols.application.ospf.protocol.OSPF.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> only assigns
-from the wire – unavailable to a construction-only instance that
-never went through <a class="reference internal" href="#pcapkit.protocols.application.ospf.protocol.OSPF.read" title="pcapkit.protocols.application.ospf.protocol.OSPF.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>.</p>
-</div>
-</dd></dl>
-
-</dd></dl>
-
-<section id="module-pcapkit.protocols.application.ospf.schema">
-<span id="header-schemas"></span><h2>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.application.ospf.schema" title="Link to this heading">¶</a></h2>
-<div class="versionremoved">
-<p><span class="versionmodified removed">Removed in version 1.6.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.application.ospf</span></code>, with no alias: the module moved here
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>).</p>
-</div>
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.schema.OSPF">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ospf.schema.</span></span><span class="sig-name descname"><span class="pre">OSPF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">router_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checksum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auth_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auth_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trailer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/schema.html#OSPF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.schema.OSPF" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
-<p>Header schema for OSPF packet.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.schema.OSPF.version">
-<span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt8Field</span> <span class="pre">version&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.schema.OSPF.version" title="Link to this definition">¶</a></dt>
-<dd><p>Version.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.schema.OSPF.type">
-<span class="sig-name descname"><span class="pre">type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/ospf.html#pcapkit.const.ospf.packet.Packet" title="pcapkit.const.ospf.packet.Packet"><span class="pre">Packet</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EnumField</span> <span class="pre">type&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.schema.OSPF.type" title="Link to this definition">¶</a></dt>
-<dd><p>Type.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.schema.OSPF.length">
-<span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">length&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.schema.OSPF.length" title="Link to this definition">¶</a></dt>
-<dd><p>Length.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.schema.OSPF.router_id">
-<span class="sig-name descname"><span class="pre">router_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><span class="pre">IPv4Address</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;IPv4AddressField</span> <span class="pre">router_id&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.schema.OSPF.router_id" title="Link to this definition">¶</a></dt>
-<dd><p>Router ID.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.schema.OSPF.area_id">
-<span class="sig-name descname"><span class="pre">area_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><span class="pre">IPv4Address</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;IPv4AddressField</span> <span class="pre">area_id&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.schema.OSPF.area_id" title="Link to this definition">¶</a></dt>
-<dd><p>Area ID.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.schema.OSPF.checksum">
-<span class="sig-name descname"><span class="pre">checksum</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">checksum&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.schema.OSPF.checksum" title="Link to this definition">¶</a></dt>
-<dd><p>Checksum.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.schema.OSPF.auth_type">
-<span class="sig-name descname"><span class="pre">auth_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/ospf.html#pcapkit.const.ospf.authentication.Authentication" title="pcapkit.const.ospf.authentication.Authentication"><span class="pre">Authentication</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EnumField</span> <span class="pre">auth_type&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.schema.OSPF.auth_type" title="Link to this definition">¶</a></dt>
-<dd><p>Authentication type.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.schema.OSPF.auth_data">
-<span class="sig-name descname"><span class="pre">auth_data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.ospf.schema.CryptographicAuthentication" title="pcapkit.protocols.application.ospf.schema.CryptographicAuthentication"><span class="pre">CryptographicAuthentication</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;SwitchField</span> <span class="pre">auth_data&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.schema.OSPF.auth_data" title="Link to this definition">¶</a></dt>
-<dd><p>Authentication data.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.schema.OSPF.payload">
-<span class="sig-name descname"><span class="pre">payload</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PayloadField</span> <span class="pre">payload&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.schema.OSPF.payload" title="Link to this definition">¶</a></dt>
-<dd><p>Payload.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.schema.OSPF.trailer">
-<span class="sig-name descname"><span class="pre">trailer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PayloadField</span> <span class="pre">trailer&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.schema.OSPF.trailer" title="Link to this definition">¶</a></dt>
-<dd><p>Octets captured past the Packet Length, such as the message digest
-that cryptographic authentication appends (<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2328.html#appendix-D.4.3"><strong>RFC 2328 Appendix D.4.3</strong></a>);
-compare <a class="reference internal" href="../internet/ipv4.html#pcapkit.protocols.internet.ipv4.schema.IPv4.trailer" title="pcapkit.protocols.internet.ipv4.schema.IPv4.trailer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv4.trailer</span></code></a>.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.schema.CryptographicAuthentication">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ospf.schema.</span></span><span class="sig-name descname"><span class="pre">CryptographicAuthentication</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reserved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/schema.html#CryptographicAuthentication"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.schema.CryptographicAuthentication" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
-<p>Header schema for OSPF cryptographic authentication.</p>
 <div class="versionadded">
-<p><span class="versionmodified added">Added in version 1.5.0: </span>Renamed from <code class="docutils literal notranslate"><span class="pre">CrytographicAuthentication</span></code>, which
-<a class="reference internal" href="../index.html#module-pcapkit.protocols.schema" title="pcapkit.protocols.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema</span></code></a> exported as
-<code class="docutils literal notranslate"><span class="pre">OSPF_CrytographicAuthentication</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1090">#1090</a>).</p>
+<p><span class="versionmodified added">Added in version 1.8.1.</span></p>
 </div>
-<div class="versionremoved">
-<p><span class="versionmodified removed">Removed in version 1.5.0: </span><code class="docutils literal notranslate"><span class="pre">CrytographicAuthentication</span></code> and <code class="docutils literal notranslate"><span class="pre">OSPF_CrytographicAuthentication</span></code>,
-with no alias (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1090">#1090</a>).</p>
-</div>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.schema.CryptographicAuthentication.reserved">
-<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">reserved&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.schema.CryptographicAuthentication.reserved" title="Link to this definition">¶</a></dt>
-<dd><p>Reserved bytes.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.schema.CryptographicAuthentication.key_id">
-<span class="sig-name descname"><span class="pre">key_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt8Field</span> <span class="pre">key_id&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.schema.CryptographicAuthentication.key_id" title="Link to this definition">¶</a></dt>
-<dd><p>Key ID.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.schema.CryptographicAuthentication.len">
-<span class="sig-name descname"><span class="pre">len</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt8Field</span> <span class="pre">len&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.schema.CryptographicAuthentication.len" title="Link to this definition">¶</a></dt>
-<dd><p>Length.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.schema.CryptographicAuthentication.seq">
-<span class="sig-name descname"><span class="pre">seq</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt32Field</span> <span class="pre">seq&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.schema.CryptographicAuthentication.seq" title="Link to this definition">¶</a></dt>
-<dd><p>Sequence number.</p>
-</dd></dl>
-
-</dd></dl>
-
-<section id="auxiliary-functions">
-<h3>Auxiliary Functions<a class="headerlink" href="#auxiliary-functions" title="Link to this heading">¶</a></h3>
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.schema.ospf_auth_data_selector">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ospf.schema.</span></span><span class="sig-name descname"><span class="pre">ospf_auth_data_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/schema.html#ospf_auth_data_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.schema.ospf_auth_data_selector" title="Link to this definition">¶</a></dt>
-<dd><p>Selector function for <a class="reference internal" href="#pcapkit.protocols.application.ospf.schema.OSPF.auth_data" title="pcapkit.protocols.application.ospf.schema.OSPF.auth_data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">OSPF.auth_data</span></code></a> field.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF._make_version">
+<span class="sig-name descname"><span class="pre">_make_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF._make_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF._make_version" title="Link to this definition">¶</a></dt>
+<dd><p>Check that <code class="docutils literal notranslate"><span class="pre">version</span></code> is one this class reads, for <code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code> to write.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p>
+<dd class="field-odd"><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – The <code class="docutils literal notranslate"><span class="pre">version</span></code> given to <code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code>.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a> wrapped
-<a class="reference internal" href="#pcapkit.protocols.application.ospf.schema.CryptographicAuthentication" title="pcapkit.protocols.application.ospf.schema.CryptographicAuthentication"><code class="xref py py-class docutils literal notranslate"><span class="pre">CryptographicAuthentication</span></code></a>
-instance if <a class="reference internal" href="#pcapkit.protocols.application.ospf.schema.OSPF.auth_type" title="pcapkit.protocols.application.ospf.schema.OSPF.auth_type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">OSPF.auth_type</span></code></a> is 2, and a
-<a class="reference internal" href="../../corekit/fields/strings.html#pcapkit.corekit.fields.strings.BytesField" title="pcapkit.corekit.fields.strings.BytesField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BytesField</span></code></a> instance otherwise.</p>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">version</span></code>, as a plain <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">version</span></code> is not a version of OSPF, or names another
+    member.</p>
 </dd>
 </dl>
-</dd></dl>
-
-</section>
-</section>
-<section id="module-pcapkit.protocols.application.ospf.data">
-<span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.application.ospf.data" title="Link to this heading">¶</a></h2>
-<div class="versionremoved">
-<p><span class="versionmodified removed">Removed in version 1.6.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.data.application.ospf</span></code>, with no alias: the module moved here
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>).</p>
-</div>
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.data.OSPF">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ospf.data.</span></span><span class="sig-name descname"><span class="pre">OSPF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">len</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">router_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chksum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/data.html#OSPF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.data.OSPF" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.data.Protocol" title="pcapkit.protocols.data.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
-<p>Data model for OSPF packet.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.data.OSPF.version">
-<span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.data.OSPF.version" title="Link to this definition">¶</a></dt>
-<dd><p>Version number.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.data.OSPF.type">
-<span class="sig-name descname"><span class="pre">type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/ospf.html#pcapkit.const.ospf.packet.Packet" title="pcapkit.const.ospf.packet.Packet"><span class="pre">Packet</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.data.OSPF.type" title="Link to this definition">¶</a></dt>
-<dd><p>Type.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.data.OSPF.len">
-<span class="sig-name descname"><span class="pre">len</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.data.OSPF.len" title="Link to this definition">¶</a></dt>
-<dd><p>Packet length (header included).</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.data.OSPF.router_id">
-<span class="sig-name descname"><span class="pre">router_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><span class="pre">IPv4Address</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.data.OSPF.router_id" title="Link to this definition">¶</a></dt>
-<dd><p>Router ID.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.data.OSPF.area_id">
-<span class="sig-name descname"><span class="pre">area_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><span class="pre">IPv4Address</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.data.OSPF.area_id" title="Link to this definition">¶</a></dt>
-<dd><p>Area ID.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.data.OSPF.chksum">
-<span class="sig-name descname"><span class="pre">chksum</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.data.OSPF.chksum" title="Link to this definition">¶</a></dt>
-<dd><p>Checksum.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.data.OSPF.autype">
-<span class="sig-name descname"><span class="pre">autype</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/ospf.html#pcapkit.const.ospf.authentication.Authentication" title="pcapkit.const.ospf.authentication.Authentication"><span class="pre">Authentication</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.data.OSPF.autype" title="Link to this definition">¶</a></dt>
-<dd><p>Authentication type.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.data.OSPF.auth">
-<span class="sig-name descname"><span class="pre">auth</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.ospf.data.CryptographicAuthentication" title="pcapkit.protocols.application.ospf.data.CryptographicAuthentication"><span class="pre">CryptographicAuthentication</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.data.OSPF.auth" title="Link to this definition">¶</a></dt>
-<dd><p>Authentication.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.data.OSPF.trailer">
-<span class="sig-name descname"><span class="pre">trailer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.data.OSPF.trailer" title="Link to this definition">¶</a></dt>
-<dd><p>Octets captured past the Packet Length, present only when there are
-any.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.data.OSPF.checksum_status">
-<span class="sig-name descname"><span class="pre">checksum_status</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus" title="pcapkit.corekit.checksum.internet.ChecksumStatus"><span class="pre">ChecksumStatus</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.data.OSPF.checksum_status" title="Link to this definition">¶</a></dt>
-<dd><p>Outcome of verifying <a class="reference internal" href="#pcapkit.protocols.application.ospf.data.OSPF.chksum" title="pcapkit.protocols.application.ospf.data.OSPF.chksum"><code class="xref py py-attr docutils literal notranslate"><span class="pre">chksum</span></code></a>, present only for OSPFv2 when
-<a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.CHECKSUM_VERIFY" title="pcapkit.utilities.config.CHECKSUM_VERIFY"><code class="xref py py-data docutils literal notranslate"><span class="pre">CHECKSUM_VERIFY</span></code></a> is on.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.data.CryptographicAuthentication">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ospf.data.</span></span><span class="sig-name descname"><span class="pre">CryptographicAuthentication</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reserved</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">len</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/data.html#CryptographicAuthentication"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.data.CryptographicAuthentication" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
-<p>Data model for OSPF cryptographic authentication.</p>
 <div class="versionadded">
-<p><span class="versionmodified added">Added in version 1.5.0: </span>Renamed from <code class="docutils literal notranslate"><span class="pre">CrytographicAuthentication</span></code>, which
-<a class="reference internal" href="../index.html#module-pcapkit.protocols.data" title="pcapkit.protocols.data"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.data</span></code></a> exported as
-<code class="docutils literal notranslate"><span class="pre">OSPF_CrytographicAuthentication</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1090">#1090</a>).</p>
+<p><span class="versionmodified added">Added in version 1.8.1.</span></p>
 </div>
-<div class="versionremoved">
-<p><span class="versionmodified removed">Removed in version 1.5.0: </span><code class="docutils literal notranslate"><span class="pre">CrytographicAuthentication</span></code> and <code class="docutils literal notranslate"><span class="pre">OSPF_CrytographicAuthentication</span></code>,
-with no alias (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1090">#1090</a>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF._rebuilt_version">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_rebuilt_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">own</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF._rebuilt_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF._rebuilt_version" title="Link to this definition">¶</a></dt>
+<dd><p>The version a rebuild of <code class="docutils literal notranslate"><span class="pre">data</span></code> writes: its own, or <code class="docutils literal notranslate"><span class="pre">own</span></code> if the capture ended first.</p>
+<p>A capture that ends before the Version octet leaves it zero, which names no
+member’s own version; the rebuild is cut back before the octet,
+so the version it writes is never read (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – The data model being rebuilt.</p></li>
+<li><p><strong>own</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The version of the member rebuilding it.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The version for <code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code>.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.8.1.</span></p>
 </div>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.data.CryptographicAuthentication.reserved">
-<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.data.CryptographicAuthentication.reserved" title="Link to this definition">¶</a></dt>
-<dd><p>The two reserved octets, as captured.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.data.CryptographicAuthentication.key_id">
-<span class="sig-name descname"><span class="pre">key_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.data.CryptographicAuthentication.key_id" title="Link to this definition">¶</a></dt>
-<dd><p>Key ID.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF._verify_checksum">
+<span class="sig-name descname"><span class="pre">_verify_checksum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ospf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exempt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF._verify_checksum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF._verify_checksum" title="Link to this definition">¶</a></dt>
+<dd><p>Record on <code class="docutils literal notranslate"><span class="pre">ospf</span></code> the outcome of verifying a 24-octet header’s checksum.</p>
+<p>Only under <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.CHECKSUM_VERIFY" title="pcapkit.utilities.config.CHECKSUM_VERIFY"><code class="xref py py-data docutils literal notranslate"><span class="pre">CHECKSUM_VERIFY</span></code></a>, as
+<code class="docutils literal notranslate"><span class="pre">checksum_status</span></code>. OSPFv1 and OSPFv2 define it alike, over the packet
+but the 8-octet Authentication field at octet 16, with no pseudo-header
+(<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1131.html"><strong>RFC 1131</strong></a> Section A.2, <span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2328.html#appendix-A.3.1"><strong>RFC 2328 Appendix A.3.1</strong></a>). OSPFv3’s covers an
+IPv6 pseudo-header instead (<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5340.html#appendix-A.3.1"><strong>RFC 5340 Appendix A.3.1</strong></a>) and is not verified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ospf</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_PT</span></code></span>) – Parsed packet data, with <code class="docutils literal notranslate"><span class="pre">len</span></code> and <code class="docutils literal notranslate"><span class="pre">chksum</span></code>.</p></li>
+<li><p><strong>exempt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether the packet leaves its checksum unused, as OSPFv2’s
+cryptographic authentication does (<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2328.html#appendix-D.4.3"><strong>RFC 2328 Appendix D.4.3</strong></a>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.8.1.</span></p>
+</div>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.data.CryptographicAuthentication.len">
-<span class="sig-name descname"><span class="pre">len</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.data.CryptographicAuthentication.len" title="Link to this definition">¶</a></dt>
-<dd><p>Authentication data length.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.data.CryptographicAuthentication.seq">
-<span class="sig-name descname"><span class="pre">seq</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ospf.data.CryptographicAuthentication.seq" title="Link to this definition">¶</a></dt>
-<dd><p>Cryptographic sequence number.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ospf.protocol.OSPF._compute_checksum">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_compute_checksum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet_length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ospf/protocol.html#OSPF._compute_checksum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ospf.protocol.OSPF._compute_checksum" title="Link to this definition">¶</a></dt>
+<dd><p>Fill in a made 24-octet header’s checksum, as <a class="reference internal" href="#pcapkit.protocols.application.ospf.protocol.OSPF._verify_checksum" title="pcapkit.protocols.application.ospf.protocol.OSPF._verify_checksum"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_verify_checksum()</span></code></a> checks it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_ST</span></code></span>) – The header <code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code> built, its checksum zero.</p></li>
+<li><p><strong>packet_length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Its Packet Length.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.8.1.</span></p>
+</div>
 </dd></dl>
 
 </dd></dl>
@@ -1213,19 +1094,18 @@ with no alias (<a class="extlink-issue reference external" href="https://github.
 </aside>
 </aside>
 </section>
-</section>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="rarp.html">
+          <a class="next-page" href="ospfv1.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">RARP - Reverse Address Resolution Protocol</div>
+                <div class="title">OSPFv1 - Open Shortest Path First Version 1</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -1258,31 +1138,8 @@ with no alias (<a class="extlink-issue reference external" href="https://github.
         
       </footer>
     </div>
-    <aside class="toc-drawer">
+    <aside class="toc-drawer no-toc">
       
-      
-      <div class="toc-sticky toc-scroll">
-        <div class="toc-title-container">
-          <span class="toc-title">
-            On this page
-          </span>
-        </div>
-        <div class="toc-tree-container">
-          <div class="toc-tree">
-            <ul>
-<li><a class="reference internal" href="#">OSPF - Open Shortest Path First</a><ul>
-<li><a class="reference internal" href="#module-pcapkit.protocols.application.ospf.schema">Header Schemas</a><ul>
-<li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-pcapkit.protocols.application.ospf.data">Data Models</a></li>
-</ul>
-</li>
-</ul>
-
-          </div>
-        </div>
-      </div>
       
       
     </aside>

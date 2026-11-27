@@ -314,6 +314,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospfv1.html">OSPFv1 - Open Shortest Path First Version 1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospfv2.html">OSPFv2 - Open Shortest Path First Version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospfv3.html">OSPFv3 - Open Shortest Path First Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/rarp.html">RARP - Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/drarp.html">DRARP - Dynamic Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ssl.html">SSL - Secure Sockets Layer</a></li>
@@ -429,6 +432,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
@@ -462,6 +466,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
@@ -616,6 +621,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumRegistry</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ospf.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">OSPF</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.igmp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IGMP</span>
 
@@ -632,6 +638,11 @@
 <span class="c1">#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
 <span class="n">_IGMP</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[IGMP]'</span> <span class="o">=</span> \
     <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.igmp.protocol'</span><span class="p">,</span> <span class="s1">'IGMP'</span><span class="p">)</span>
+
+<span class="c1">#: The OSPF base :meth:`Internet._next_layer_class` hands a packet to, to pick its</span>
+<span class="c1">#: version class, resolved there as ``_IGMP`` is (:issue:`3105`).</span>
+<span class="n">_OSPF</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[OSPF]'</span> <span class="o">=</span> \
+    <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ospf.protocol'</span><span class="p">,</span> <span class="s1">'OSPF'</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Internet">
@@ -694,7 +705,10 @@
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.SCTP`</span>
 <span class="sd">         - :class:`pcapkit.protocols.transport.sctp.protocol.SCTP`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.OSPFIGP`</span>
-<span class="sd">         - :class:`pcapkit.protocols.application.ospf.protocol.OSPF`</span>
+<span class="sd">         - :class:`pcapkit.protocols.application.ospf.protocol.OSPF`, which dispatches to</span>
+<span class="sd">           :class:`pcapkit.protocols.application.ospfv1.protocol.OSPFv1`,</span>
+<span class="sd">           :class:`pcapkit.protocols.application.ospfv2.protocol.OSPFv2` or</span>
+<span class="sd">           :class:`pcapkit.protocols.application.ospfv3.protocol.OSPFv3`</span>
 
 <span class="sd">    .. versionchanged:: 1.5.0</span>
 
@@ -1054,10 +1068,13 @@
             <span class="k">return</span> <span class="n">Raw</span><span class="p">,</span> <span class="p">{</span><span class="s1">'error'</span><span class="p">:</span> <span class="n">message</span><span class="p">}</span>
 
         <span class="n">IGMPBase</span> <span class="o">=</span> <span class="n">_IGMP</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
+        <span class="n">OSPFBase</span> <span class="o">=</span> <span class="n">_OSPF</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
 
         <span class="n">protocol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">proto</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">protocol</span> <span class="ow">is</span> <span class="n">IGMPBase</span><span class="p">:</span>
             <span class="n">protocol</span> <span class="o">=</span> <span class="n">IGMPBase</span><span class="o">.</span><span class="n">_dispatch</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">protocol</span> <span class="ow">is</span> <span class="n">OSPFBase</span><span class="p">:</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="n">OSPFBase</span><span class="o">.</span><span class="n">_dispatch</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">depth</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Internet</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">protocol</span><span class="p">,</span> <span class="p">{</span><span class="s1">'_exthdr_depth'</span><span class="p">:</span> <span class="n">depth</span><span class="p">}</span>
         <span class="k">return</span> <span class="n">protocol</span><span class="p">,</span> <span class="p">{}</span></div>

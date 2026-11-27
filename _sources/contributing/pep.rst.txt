@@ -52,6 +52,10 @@ layer and alphabetically, each with its issue:
 QUIC and RSVP sit where :issue:`2805` placed them: QUIC in transport, and RSVP in
 application beside OSPF.
 
+For a protocol |pycrate|_ ships, :mod:`pcapkit` dissects the protocol structure
+itself, and ASN.1 or XML payloads go through |pycrate|_ or another parser, as
+:class:`~pcapkit.protocols.application.ngap.protocol.NGAP` does (:issue:`3106`).
+
 **Done**: :class:`~pcapkit.protocols.link.ppp.protocol.PPP` and
 :class:`~pcapkit.protocols.link.pppoe.protocol.PPPoE` (:issue:`2817`),
 :class:`~pcapkit.protocols.application.dns.protocol.DNS` (:issue:`2816`), and
@@ -456,6 +460,469 @@ Follow-ups to the bindings above:
 **Done.** ICMP (1), IGMP (2), DCCP (33), GRE (47) and ICMPv6 (58) -- the IP
 protocol numbers most likely to be met in a real capture -- are all implemented
 and bound.
+
+Planned for 2.x
+~~~~~~~~~~~~~~~
+
+Planned for the minor releases after 2.0.0, as ruled on :issue:`3106`. Their
+issues are not filed yet. Each line names a protocol and where it binds. ERSPAN,
+Ethernet CFM, the quoted invoking packet and the 802.11 protected-frame headers each
+need a ruling before they are filed. An EtherType marked IEEE is assigned by the
+IEEE but missing from IANA's list, which
+:class:`~pcapkit.const.reg.ethertype.EtherType` follows. Every one of them waits on
+the same ruling: whether to crawl the IEEE Registration Authority's list as a
+second source (:issue:`3106`, question 5).
+
+**Next**:
+
+* Link Layer:
+
+  * CAPWAP's header, DTLS preamble and data channel -- UDP ports 5246 and 5247
+  * Enhanced GRE -- GRE version 1, at IP protocol 47
+  * ERSPAN types I to III -- GRE protocol types IEEE 0x88BE and 0x22EB
+  * Ethernet Configuration Testing Protocol -- EtherType 0x9000
+  * IEEE 802.11 protected-frame headers -- the frame control's Protected bit
+  * MAC Control PAUSE and PFC -- EtherType 0x8808
+  * MACsec's SecTAG -- EtherType 0x88E5
+  * MPLS in IP and in UDP -- IP protocol 137, and UDP ports 6635 and 6636
+  * Netlink, SCTP and PPP-with-direction captures -- LinkTypes 253, 248 and 204
+  * NFLOG -- LinkType 239
+  * pflog -- LinkType 117
+
+* Internet Layer:
+
+  * The invoking packet quoted in ICMP errors -- ICMPv4 types 3, 4, 5, 11 and 12,
+    and ICMPv6 types 1 to 4
+
+* Transport Layer:
+
+  * GRE in UDP -- UDP ports 4754 and 4755
+
+* Application Layer:
+
+  * DCE/RPC's connection-oriented and connectionless PDUs -- TCP and UDP port
+    135, and SMB named pipes
+  * EIGRP -- IP protocol 88
+  * HSRP version 1 -- UDP port 1985
+  * IPFIX -- TCP and UDP port 4739, with NetFlow v9 as a class bound to no port
+  * IS-IS -- NLPID 0x83 behind LLC SAP 0xFE and FRAD, and EtherType 0x22F4
+  * LDAP at ``msft-gc`` -- TCP port 3268
+  * LDP -- TCP and UDP port 646
+  * NFSv3, MOUNT and NLM -- ONC RPC programs 100003, 100005 and 100021
+  * PIM version 2 -- IP protocol 103
+  * PTP (IEEE 1588) -- EtherType 0x88F7, and UDP ports 319 and 320
+  * RTSP -- TCP ports 554 and 8554
+  * STUN and TURN -- TCP and UDP port 3478
+  * TACACS+ -- TCP port 49
+  * TFTP with options -- UDP port 69
+  * TPKT, X.224 class 0 and RDP's negotiation -- TCP ports 102 and 3389
+
+**On demand**:
+
+* Link Layer:
+
+  * ATM AAL5 with LLC/SNAP -- LinkTypes 100, 106 and 123
+  * CAPWAP's control message elements -- UDP port 5246
+  * Cisco HDLC and SLARP -- LinkTypes 104 and 112
+  * EFM OAM -- Slow Protocols subtype 3, at EtherType 0x8809
+  * Endace ERF -- LinkType 197
+  * EPON's preamble and 802.3br's mPacket -- LinkTypes 259 and 274
+  * EtherIP -- IP protocol 97
+  * Ethernet CFM -- EtherType IEEE 0x8902
+  * MVRP and MMRP -- EtherTypes 0x88F5 and 0x88F6
+  * Netlink's route and netfilter payloads -- Netlink protocols 0 and 12
+  * NSH -- EtherType 0x894F and IP protocol 145
+  * OpenVPN -- TCP and UDP port 1194
+  * PBB's I-TAG -- EtherType 0x88E7
+  * PKTAP, enc and IPNET capture headers -- LinkTypes 258, 109 and 226
+  * Prism, AVS and PPI capture headers -- LinkTypes 119, 163 and 192
+  * Teredo -- UDP port 3544
+  * Token Ring -- LinkType 6
+  * VXLAN-GPE -- UDP port 4790
+
+* Internet Layer:
+
+  * HIP and ESP in UDP -- UDP port 10500
+
+* Transport Layer:
+
+  * UDP-Lite -- IP protocol 136
+
+* Application Layer:
+
+  * CoAP -- TCP and UDP port 5683
+  * HTTP/2's HPACK -- the HEADERS, PUSH_PROMISE and CONTINUATION frames
+  * Mobile IPv4 registration -- UDP port 434
+  * MPLS LSP Ping -- UDP port 3503
+  * OpenFlow -- TCP port 6653
+  * PCP and NAT-PMP -- UDP ports 5350 and 5351
+  * PPTP's control connection -- TCP port 1723
+  * RFB -- TCP port 5900
+  * RMCP, ASF and IPMI over LAN -- UDP ports 623 and 664
+  * RPKI to Router -- TCP port 323
+  * sFlow v5 -- UDP port 6343
+  * SLPv2 -- TCP and UDP port 427
+  * SOCKS 4 and 5 -- TCP port 1080
+  * TWAMP and STAMP -- TCP and UDP port 862
+
+**On demand, by domain**. A protocol with no registered identifier is listed as
+such. Vendor-proprietary protocols with no public specification, and vendor- or
+tool-internal link types, stay out, as work with no specification is ``wontfix``
+(:issue:`2805`).
+
+* Automotive:
+
+  * AUTOSAR's DLT -- no registered identifier
+  * AUTOSAR's PDU transport -- no registered identifier
+  * AUTOSAR's SecOC -- no registered identifier
+  * CAN and CAN FD -- LinkType 227
+  * CCP -- no registered identifier, above CAN
+  * DoIP -- TCP and UDP port 13400
+  * FlexRay -- LinkType 210
+  * GeoNetworking -- EtherType 0x8947
+  * ISO-TP -- no registered identifier, above CAN
+  * KWP2000 -- no registered identifier, above CAN
+  * LIN -- LinkType 212
+  * OBD-II -- no registered identifier, above CAN
+  * SOME/IP -- no registered identifier
+  * UDS -- no registered identifier, above ISO-TP and DoIP
+  * WAVE's WSMP -- EtherType IEEE 0x88DC
+  * XCP -- no registered identifier
+
+* Broadcast and media:
+
+  * ATSC ALP -- LinkType 289
+  * DSM-CC -- no registered identifier, inside MPEG-2 TS
+  * DVB IPDC -- no registered identifier, inside MPEG-2 TS
+  * GigE Vision's GVCP -- UDP port 3956
+  * HiQnet -- TCP and UDP port 3804
+  * IEEE 1722 AVTP -- EtherType IEEE 0x22F0
+  * IEEE 802.1CB's R-TAG -- EtherType IEEE 0xF1C1
+  * IEEE 802.1Q's MSRP -- EtherType IEEE 0x22EA
+  * MMS -- TCP port 1755
+  * MPEG-2 TS -- LinkType 243
+  * RTMP -- TCP port 1935, IANA's ``macromedia-fcs``
+  * SAP -- UDP port 9875
+  * VITA 49 -- UDP port 4991
+
+* Cable and broadband access:
+
+  * ANCP -- TCP port 6068
+  * DOCSIS -- LinkTypes 143 and 273
+  * PacketCable's COPS -- TCP port 2126
+
+* Databases:
+
+  * Firebird -- TCP port 3050
+  * memcached -- TCP and UDP port 11211
+  * MongoDB -- TCP port 27017
+  * MySQL -- TCP port 3306
+  * PostgreSQL -- TCP port 5432
+  * Redis -- TCP port 6379
+  * TDS -- TCP port 1433
+
+* Developer tools and frameworks:
+
+  * Bazaar -- TCP port 4155
+  * CVS's pserver -- TCP port 2401
+  * distcc -- TCP port 3632
+  * Erlang's EPMD -- TCP port 4369
+  * Gearman -- TCP port 4730
+  * git -- TCP port 9418
+  * HiSLIP -- TCP port 4880
+  * Java RMI -- TCP port 1099
+  * LeCroy VICP -- TCP port 1861
+  * .NET Message Framing -- no registered identifier
+  * .NET Remoting -- no registered identifier
+  * Performance Co-Pilot -- TCP port 44321
+  * RTPS (DDS) -- UDP ports 7400 and 7401
+  * rsync -- TCP port 873
+  * SANE -- TCP port 6566
+  * TCPROS -- no registered identifier
+  * Zabbix -- TCP ports 10050 and 10051
+
+* DTN, space, MANET, aviation and amateur radio:
+
+  * AODV -- UDP port 654
+  * ASTERIX -- no registered identifier
+  * AX.25 -- LinkTypes 3 and 202, and IP protocol 93
+  * BPQ -- EtherType 0x08FF, outside IANA's list
+  * Bundle Protocol -- UDP port 4556, and over TCPCL
+  * DLEP -- TCP and UDP port 854
+  * DMP -- UDP port 5031
+  * DSR -- IP protocol 48
+  * GMPLS LMP -- UDP port 701
+  * LTP -- UDP port 1113
+  * OLSR -- UDP port 698
+  * PacketBB -- UDP port 269
+  * STANAG 4607 -- no registered identifier
+  * STANAG 5066 -- TCP port 5066
+  * TCPCL -- TCP port 4556
+
+* GTP, PFCP and the 3GPP core, under the |pycrate|_ rule above:
+
+  * A21 -- UDP port 23272, IANA's ``s102``
+  * CBSP -- TCP port 48049
+  * DECT -- no registered identifier
+  * eCPRI -- EtherType IEEE 0xAEFE
+  * GPRS LLC -- LinkType 169
+  * GSM Um -- no registered identifier, inside GSMTAP
+  * GSMTAP -- UDP port 4729
+  * GTP' -- TCP and UDP port 3386
+  * GTP-U -- UDP port 2152
+  * GTPv1-C -- UDP port 2123
+  * GTPv2-C -- UDP port 2123
+  * IPDR/SP -- TCP port 4737
+  * OMA ILP -- TCP port 7276
+  * OMA ULP -- TCP port 7275
+  * PFCP -- UDP port 8805
+  * PPP's VSNCP -- PPP protocol 0x805B
+  * PPP's VSNP -- PPP protocol 0x005B
+  * ROHC -- IP protocol 142 and EtherType IEEE 0x22F1
+  * SGsAP -- SCTP port 29118
+  * WAP's WSP -- UDP port 9200, and 9201 over WTP
+  * WAP's WTLS -- UDP ports 9202 and 9203
+  * WAP's WTP -- UDP port 9201
+  * WiMAX's ASN control plane -- UDP port 2231
+
+* Industrial and fieldbus:
+
+  * ARCNET -- LinkTypes 7 and 129
+  * BACnet/IP -- UDP port 47808
+  * C12.22 -- TCP and UDP port 1153
+  * CNIP -- TCP and UDP ports 1628 and 1629
+  * DLMS/COSEM -- TCP and UDP port 4059
+  * DNP3 -- TCP and UDP port 20000
+  * EtherCAT -- EtherType IEEE 0x88A4
+  * EtherNet/IP -- TCP port 44818, and UDP ports 2222 and 44818
+  * EtherNet/IP's DLR -- EtherType 0x80E1
+  * FOUNDATION Fieldbus HSE -- TCP and UDP ports 1089 to 1091
+  * HART-IP -- TCP and UDP port 5094
+  * HSR -- EtherType IEEE 0x892F
+  * IEC 60870-5-104 -- TCP port 2404
+  * IEC 61850's GOOSE -- EtherType IEEE 0x88B8
+  * IEC 61850's Sampled Values -- EtherType IEEE 0x88BA
+  * KNXnet/IP -- TCP and UDP port 3671
+  * LLRP -- TCP port 5084
+  * Modbus -- TCP port 502
+  * OPC UA -- TCP port 4840
+  * POWERLINK -- EtherType IEEE 0x88AB
+  * PRP -- EtherType IEEE 0x88FB for its supervision frames
+  * PROFINET -- EtherType IEEE 0x8892
+  * SERCOS III -- EtherType IEEE 0x88CD
+  * TRDP -- UDP ports 17224 and 17225
+  * TTEthernet -- no registered identifier
+
+* IoT and IEEE 802.15.4:
+
+  * 6LoWPAN -- EtherType 0xA0ED, and above IEEE 802.15.4
+  * AllJoyn -- TCP and UDP port 9955
+  * Bluetooth's ATT -- no registered identifier, above L2CAP
+  * Bluetooth's BR/EDR baseband -- LinkType 255
+  * Bluetooth's HCI -- LinkTypes 187 and 201
+  * Bluetooth's L2CAP -- no registered identifier, above HCI and the LE link layer
+  * Bluetooth's LE link layer -- LinkTypes 251, 256 and 272
+  * Bluetooth's Linux monitor -- LinkType 254
+  * Bluetooth's SMP -- no registered identifier, above L2CAP
+  * DECT NR+ -- LinkType 301
+  * IEEE 802.15.4 -- LinkTypes 195, 215, 230 and 283
+  * IrDA -- LinkType 144
+  * LoRaTap -- LinkType 270
+  * LoRaWAN -- no registered identifier, above LoRaTap
+  * MQTT-SN -- no registered identifier
+  * Thread's MLE -- UDP port 19788
+  * UWB's UCI -- LinkType 299
+  * Wi-SUN -- no registered identifier, above IEEE 802.15.4
+  * ZEP -- UDP port 17754
+  * ZigBee -- no registered identifier, above IEEE 802.15.4
+
+* ITU-T and telephony signalling, beyond :issue:`3021`:
+
+  * BIT-EMU -- IP protocol 147
+  * CESoETH -- EtherType IEEE 0x88D8
+  * DPNSS -- no registered identifier
+  * ESMC -- Slow Protocols subtype 10, at EtherType 0x8809
+  * GFP -- LinkTypes 170 and 171
+  * H.501 -- TCP and UDP port 2099, IANA's ``h2250-annex-g``
+  * IAX2 -- UDP port 4569
+  * LAPB -- LinkType 207
+  * MEF's E-LMI -- EtherType IEEE 0x88EE
+  * MGCP -- UDP ports 2427 and 2727
+  * MIKEY -- UDP port 2269
+  * MRCPv2 -- no registered identifier
+  * MSRP (:rfc:`4975`) -- TCP port 2855
+  * MTP2 -- LinkTypes 139 and 140
+  * MTP3 -- LinkType 141
+  * SCCP -- LinkType 142
+  * SDH -- no registered identifier
+  * SigComp -- no registered identifier
+  * V5's envelope function -- no registered identifier
+  * X.25 -- no registered identifier, above LAPB and XOT
+  * XOT -- TCP port 1998
+
+* Legacy application protocols:
+
+  * ACAP -- TCP port 674 (:rfc:`2244`)
+  * AgentX -- TCP port 705 (:rfc:`2741`)
+  * BEEP -- no registered identifier (:rfc:`3080`, :rfc:`3081`)
+  * CMP over TCP -- TCP port 829 (:rfc:`2510`)
+  * COPS -- TCP port 3288 (:rfc:`2748`)
+  * DHCP failover -- TCP port 647 (:rfc:`8156`, and draft-ietf-dhc-failover-12 for
+    DHCPv4)
+  * Finger -- TCP port 79 (:rfc:`1288`)
+  * Gopher -- TCP port 70 (:rfc:`1436`)
+  * Handle System resolution, which DOI uses -- TCP and UDP port 2641
+    (:rfc:`3652`)
+  * IAPP -- UDP port 3517 (IEEE 802.11F)
+  * ICAP -- TCP port 1344 (:rfc:`3507`)
+  * ICP -- UDP port 3130 (:rfc:`2186`)
+  * Kerberos version 4 -- UDP port 750 (Project Athena's Kerberos V4 specification)
+  * KINK -- TCP and UDP port 910 (:rfc:`4430`)
+  * LPD -- TCP port 515 (:rfc:`1179`)
+  * RELOAD -- no registered identifier (:rfc:`6940`)
+  * rexec -- TCP port 512 (4.2BSD's rexecd)
+  * rlogin -- TCP port 513 (:rfc:`1282`)
+  * rsh -- TCP port 514 (4.2BSD's rshd)
+  * RSIP -- TCP and UDP port 4555 (:rfc:`3103`)
+  * rwho -- UDP port 513 (4.2BSD's rwhod)
+  * SASP -- TCP port 3860 (:rfc:`4678`)
+  * SMUX -- TCP port 199 (:rfc:`1227`)
+  * SPDY -- no registered identifier (draft-mbelshe-httpbis-spdy-00)
+  * TACACS -- UDP port 49 (:rfc:`1492`)
+  * Time -- TCP and UDP port 37 (:rfc:`868`)
+  * TSP -- TCP and UDP port 3653 (:rfc:`5572`)
+  * Whois -- TCP port 43 (:rfc:`3912`)
+  * X11 -- TCP ports 6000 to 6063 (the X Window System Protocol)
+  * XDMCP -- UDP port 177 (the X Display Manager Control Protocol)
+  * Z39.50 -- TCP port 210 (ANSI/NISO Z39.50)
+
+* Legacy non-IP stacks:
+
+  * AARP -- EtherType 0x80F3
+  * AFP over DSI -- TCP port 548
+  * AppleTalk's DDP -- EtherType 0x809B
+  * Apple IP over FireWire -- LinkType 138
+  * Banyan VINES -- EtherType 0x0BAD
+  * CLNP -- LLC SAP 0xFE and IP protocol 80
+  * COTP -- IP protocol 29
+  * DEC LAT -- EtherType 0x6004
+  * DEC LANBridge spanning tree -- EtherType 0x8038
+  * DECnet Phase IV -- EtherType 0x6003
+  * DLSw -- TCP ports 2065 and 2067
+  * ES-IS -- LLC SAP 0xFE
+  * IBM RPL -- LLC SAP 0xFC
+  * IBM SNA -- EtherType 0x80D5
+  * IPX in UDP -- UDP port 213
+  * LocalTalk -- LinkType 114
+  * NetBEUI -- LLC SAP 0xF0
+  * NetWare's NCP -- TCP port 524
+  * OSI over PPP -- PPP protocols 0x0023 and 0x8023
+  * XNS IDP -- EtherType 0x0600
+
+* Medical:
+
+  * DICOM -- TCP ports 104 and 11112
+  * HL7 over MLLP -- TCP port 2575
+
+* Messaging:
+
+  * AIM's OSCAR -- TCP port 5190
+  * AMQP -- TCP port 5672
+  * Delivery Optimization -- TCP port 7680
+  * DirectPlay -- TCP and UDP port 47624
+  * Gnutella -- TCP and UDP port 6346
+  * IRC -- TCP ports 194 and 6667
+  * PTP/IP -- TCP port 15740
+
+* Non-network buses and host interfaces:
+
+  * D-Bus -- LinkType 231
+  * DisplayPort AUX -- LinkType 275
+  * DVB-CI -- LinkType 235
+  * ETW -- LinkType 290
+  * I2C -- LinkType 209
+  * IPMI's HPM.2 -- LinkType 260
+  * ISO 14443 -- LinkType 264
+  * MA-USB -- no registered identifier
+  * MDB -- LinkType 300
+  * MUX27010 -- LinkType 236
+  * NC-SI -- EtherType IEEE 0x88F8
+  * SDLC -- LinkType 268
+  * USB -- LinkTypes 186, 189, 220, 249, 266, 288 and 293 to 295
+  * vsock -- LinkType 271
+
+* PPP's remaining protocols, beyond :issue:`2978`:
+
+  * BCP -- PPP protocols 0x0031 and 0x8031 (:rfc:`3518`)
+  * CBCP -- PPP protocol 0xC029 (draft-ietf-pppext-callback-cp-02)
+  * Compressed datagrams -- PPP protocol 0x00FD (:rfc:`1962`)
+  * IP header compression, CRTP included -- the odd PPP protocols 0x0061 to 0x0069
+    and 0x2063 to 0x2069 (:rfc:`3544`)
+  * PPPMux -- PPP protocols 0x0059 and 0x8059 (:rfc:`3153`)
+  * Van Jacobson compression -- PPP protocols 0x002D and 0x002F (:rfc:`1144`)
+
+* Storage and HPC fabrics:
+
+  * 9P -- TCP port 564
+  * AFS's Rx -- UDP ports 7000 to 7009
+  * ATA over Ethernet -- EtherType IEEE 0x88A2
+  * FCoE -- EtherType IEEE 0x8906
+  * FIP -- EtherType IEEE 0x8914
+  * Fibre Channel -- LinkTypes 224 and 225
+  * HyperSCSI -- EtherType IEEE 0x889A
+  * InfiniBand -- LinkType 247
+  * IP over Fibre Channel -- LinkType 122
+  * IPoIB -- LinkType 242
+  * iSNS -- TCP port 3205
+  * NBD -- TCP port 10809
+  * NDMP -- TCP port 10000
+  * NVMe/TCP -- TCP port 4420
+  * RoCE -- EtherType IEEE 0x8915 and UDP port 4791
+
+* Tunnelling, routing and rarely seen L2 to L4:
+
+  * AMT -- UDP port 2268 (:rfc:`7450`)
+  * AYIYA -- UDP port 5072 (draft-massar-v6ops-ayiya)
+  * Babel -- UDP port 6696 (:rfc:`8966`)
+  * BIER -- EtherType IEEE 0xAB37, and above MPLS, with no UDP port (:rfc:`8296`)
+  * ForCES IFE -- EtherType IEEE 0xED3E (:rfc:`8013`)
+  * IEEE 802.1BR's E-Tag -- EtherType IEEE 0x893F (IEEE 802.1BR)
+  * IEEE 802.1Qbg's ECP -- EtherType 0x8940 (IEEE 802.1Qbg)
+  * IEEE 802.21's MIH -- EtherType 0x8917 (IEEE 802.21)
+  * IEEE 802a's OUI-extended EtherType -- EtherType 0x88B7 (IEEE 802a)
+  * IEEE 1905.1 -- EtherType IEEE 0x893A (IEEE 1905.1)
+  * IPComp -- IP protocol 108 (:rfc:`3173`)
+  * LISP -- UDP ports 4341 and 4342 (:rfc:`9300`, :rfc:`9301`)
+  * MSDP -- TCP port 639 (:rfc:`3618`)
+  * PCEP -- TCP port 4189 (:rfc:`5440`)
+  * PGM -- IP protocol 113 (:rfc:`3208`)
+  * PSP -- no registered identifier, as UDP port 1000 is IANA's ``cadlock2``
+    (Google's PSP Architecture Specification)
+  * SCTP over UDP -- UDP port 9899 (:rfc:`6951`)
+  * TIPC -- EtherType IEEE 0x88CA (the TIPC protocol specification)
+  * TRILL -- EtherType 0x22F3 (:rfc:`6325`)
+  * TRILL's RBridge Channel -- EtherType 0x8946 (:rfc:`7178`)
+  * WireGuard -- no registered identifier, as UDP port 51820 is unassigned (the
+    WireGuard whitepaper)
+
+* Windows security tokens and DCE/RPC interfaces, which SMB (:issue:`3121`) keeps
+  as octets:
+
+  * DCOM -- no registered identifier, a DCE/RPC interface (MS-DCOM)
+  * DRSR -- no registered identifier, a DCE/RPC interface (MS-DRSR)
+  * EPM -- the DCE/RPC interface at TCP and UDP port 135 (MS-RPCE)
+  * GSS-API's initial context token -- no registered identifier, inside SMB, HTTP
+    and others (:rfc:`2743`)
+  * MS-PAC -- no registered identifier, inside Kerberos's authorization data
+    (MS-PAC)
+  * NEGOEX -- no registered identifier, inside SPNEGO (MS-NEGOEX)
+  * NRPC -- no registered identifier, a DCE/RPC interface (MS-NRPC)
+  * NTLM -- no registered identifier, a token inside SMB, HTTP and others (MS-NLMP)
+  * SAMR -- no registered identifier, a DCE/RPC interface (MS-SAMR)
+  * SPNEGO -- no registered identifier, a token inside SMB, HTTP and others
+    (:rfc:`4178`)
+  * SRVSVC -- no registered identifier, a DCE/RPC interface (MS-SRVS)
+  * WKSSVC -- no registered identifier, a DCE/RPC interface (MS-WKST)
 
 PCAPNG Support
 --------------
@@ -1240,6 +1707,8 @@ an item, say so on its issue.
   (:issue:`3008`), and the suite shipped in the wheel (:issue:`3022`).
 * **Iterative dissection**, under `Recursive Dissection, With a Depth Limit`_,
   whose issue is not filed yet.
+* **The 2.x protocols**, under `Planned for 2.x`_, whose issues are not filed
+  yet.
 
 **Per-entry coverage of the option and parameter registries.** The option,
 parameter, block and frame registries are *enumerated* but not *implemented*

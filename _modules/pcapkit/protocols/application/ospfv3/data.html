@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../../genindex.html"><link rel="search" title="Search" href="../../../../../search.html">
-        <link rel="canonical" href="https://jarryshaw.github.io/PyPCAPKit/_modules/pcapkit/protocols/application/ospf/schema.html">
+        <link rel="canonical" href="https://jarryshaw.github.io/PyPCAPKit/_modules/pcapkit/protocols/application/ospfv3/data.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
-        <title>pcapkit.protocols.application.ospf.schema - PyPCAPKit</title>
+        <title>pcapkit.protocols.application.ospfv3.data - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
@@ -314,6 +314,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ospfv1.html">OSPFv1 - Open Shortest Path First Version 1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ospfv2.html">OSPFv2 - Open Shortest Path First Version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ospfv3.html">OSPFv3 - Open Shortest Path First Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/rarp.html">RARP - Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/drarp.html">DRARP - Dynamic Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ssl.html">SSL - Secure Sockets Layer</a></li>
@@ -429,6 +432,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
@@ -462,6 +466,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
@@ -579,124 +584,57 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for pcapkit.protocols.application.ospf.schema</h1><div class="highlight"><pre>
+          <h1>Source code for pcapkit.protocols.application.ospfv3.data</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="c1"># mypy: disable-error-code=assignment</span>
-<span class="sd">"""header schema for OSPF protocol"""</span>
+<span class="sd">"""data models for OSPFv3 protocol"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ospf.authentication</span><span class="w"> </span><span class="kn">import</span> <span class="n">Authentication</span> <span class="k">as</span> <span class="n">Enum_Authentication</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ospf.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Enum_Packet</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4AddressField</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">PayloadField</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span><span class="p">,</span> <span class="n">UInt32Field</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BytesField</span><span class="p">,</span> <span class="n">PaddingField</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
-
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'OSPF'</span><span class="p">,</span> <span class="s1">'CryptographicAuthentication'</span><span class="p">]</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">info_final</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protocol</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldBase</span> <span class="k">as</span> <span class="n">Field</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ospf.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span>
 
-
-<div class="viewcode-block" id="ospf_auth_data_selector">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.schema.ospf_auth_data_selector">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">ospf_auth_data_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Field'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Selector function for :attr:`OSPF.auth_data` field.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        pkt: Packet data.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        A :class:`~pcapkit.corekit.fields.misc.SchemaField` wrapped</span>
-<span class="sd">        :class:`~pcapkit.protocols.application.ospf.schema.CryptographicAuthentication`</span>
-<span class="sd">        instance if :attr:`OSPF.auth_type` is 2, and a</span>
-<span class="sd">        :class:`~pcapkit.corekit.fields.strings.BytesField` instance otherwise.</span>
-
-<span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'auth_type'</span><span class="p">]</span> <span class="o">==</span> <span class="n">Enum_Authentication</span><span class="o">.</span><span class="n">Cryptographic_authentication</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">CryptographicAuthentication</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span></div>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'OSPFv3'</span><span class="p">]</span>
 
 
+<div class="viewcode-block" id="OSPFv3">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ospfv3.html#pcapkit.protocols.application.ospfv3.data.OSPFv3">[docs]</a>
+<span class="nd">@info_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OSPFv3</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Data model for OSPFv3 packet (:rfc:`5340#appendix-A.3.1`).</span>
 
-<div class="viewcode-block" id="CryptographicAuthentication">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.schema.CryptographicAuthentication">[docs]</a>
-<span class="nd">@schema_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">CryptographicAuthentication</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Header schema for OSPF cryptographic authentication.</span>
-
-<span class="sd">    .. versionadded:: 1.5.0</span>
-
-<span class="sd">       Renamed from ``CrytographicAuthentication``, which</span>
-<span class="sd">       :mod:`pcapkit.protocols.schema` exported as</span>
-<span class="sd">       ``OSPF_CrytographicAuthentication`` (:issue:`1090`).</span>
-
-<span class="sd">    .. versionremoved:: 1.5.0</span>
-
-<span class="sd">       ``CrytographicAuthentication`` and ``OSPF_CrytographicAuthentication``,</span>
-<span class="sd">       with no alias (:issue:`1090`).</span>
+<span class="sd">    .. versionadded:: 1.8.1</span>
 
 <span class="sd">    """</span>
 
-    <span class="c1">#: Reserved bytes.</span>
-    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-    <span class="c1">#: Key ID.</span>
-    <span class="n">key_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
-    <span class="c1">#: Length.</span>
-    <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
-    <span class="c1">#: Sequence number.</span>
-    <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">key_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
-
-
-
-<div class="viewcode-block" id="OSPF">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.schema.OSPF">[docs]</a>
-<span class="nd">@schema_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">OSPF</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Header schema for OSPF packet."""</span>
-
-    <span class="c1">#: Version.</span>
-    <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="c1">#: Version number.</span>
+    <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Type.</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Packet'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_Packet</span><span class="p">)</span>
-    <span class="c1">#: Length.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span>
+    <span class="c1">#: Packet length (header included).</span>
+    <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Router ID.</span>
-    <span class="n">router_id</span><span class="p">:</span> <span class="s1">'IPv4Address'</span> <span class="o">=</span> <span class="n">IPv4AddressField</span><span class="p">()</span>
+    <span class="n">router_id</span><span class="p">:</span> <span class="s1">'IPv4Address'</span>
     <span class="c1">#: Area ID.</span>
-    <span class="n">area_id</span><span class="p">:</span> <span class="s1">'IPv4Address'</span> <span class="o">=</span> <span class="n">IPv4AddressField</span><span class="p">()</span>
+    <span class="n">area_id</span><span class="p">:</span> <span class="s1">'IPv4Address'</span>
     <span class="c1">#: Checksum.</span>
-    <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-    <span class="c1">#: Authentication type.</span>
-    <span class="n">auth_type</span><span class="p">:</span> <span class="s1">'Enum_Authentication'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_Authentication</span><span class="p">)</span>
-    <span class="c1">#: Authentication data.</span>
-    <span class="n">auth_data</span><span class="p">:</span> <span class="s1">'bytes | CryptographicAuthentication'</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span>
-        <span class="n">selector</span><span class="o">=</span><span class="n">ospf_auth_data_selector</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="c1">#: Payload.</span>
-    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">24</span><span class="p">)</span>
-    <span class="c1">#: Octets captured past the Packet Length, such as the message digest</span>
-    <span class="c1">#: that cryptographic authentication appends (:rfc:`2328#appendix-D.4.3`);</span>
-    <span class="c1">#: compare :attr:`IPv4.trailer &lt;pcapkit.protocols.internet.ipv4.schema.IPv4.trailer&gt;`.</span>
-    <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
+    <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span>
+    <span class="c1">#: Instance ID.</span>
+    <span class="n">instance_id</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Packet'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">router_id</span><span class="p">:</span> <span class="s1">'IPv4Address | bytes | str | int'</span><span class="p">,</span>
-                     <span class="n">area_id</span><span class="p">:</span> <span class="s1">'IPv4Address | bytes | str | int'</span><span class="p">,</span>
-                     <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">auth_type</span><span class="p">:</span> <span class="s1">'Enum_Authentication'</span><span class="p">,</span>
-                     <span class="n">auth_data</span><span class="p">:</span> <span class="s1">'bytes | CryptographicAuthentication'</span><span class="p">,</span>
-                     <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span><span class="p">,</span>
-                     <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="c1">#: Octets captured past the Packet Length, present only when there are</span>
+        <span class="c1">#: any.</span>
+        <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">router_id</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">,</span>
+                     <span class="n">area_id</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">instance_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=super-init-not-called,unused-argument,line-too-long,multiple-statements,redefined-builtin</span></div>
 
 </pre></div>
         </article>

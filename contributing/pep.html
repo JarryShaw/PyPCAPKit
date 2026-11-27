@@ -321,6 +321,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/ospfv1.html">OSPFv1 - Open Shortest Path First Version 1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/ospfv2.html">OSPFv2 - Open Shortest Path First Version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/ospfv3.html">OSPFv3 - Open Shortest Path First Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/rarp.html">RARP - Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/drarp.html">DRARP - Dynamic Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/ssl.html">SSL - Secure Sockets Layer</a></li>
@@ -436,6 +439,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
@@ -469,6 +473,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
@@ -642,6 +647,9 @@ decoding its message bodies</p></li>
 </ul>
 <p>QUIC and RSVP sit where <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2805">#2805</a> placed them: QUIC in transport, and RSVP in
 application beside OSPF.</p>
+<p>For a protocol <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> ships, <a class="reference internal" href="../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> dissects the protocol structure
+itself, and ASN.1 or XML payloads go through <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> or another parser, as
+<a class="reference internal" href="../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.protocol.NGAP" title="pcapkit.protocols.application.ngap.protocol.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a> does (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3106">#3106</a>).</p>
 <p><strong>Done</strong>: <a class="reference internal" href="../pcapkit/protocols/link/ppp.html#pcapkit.protocols.link.ppp.protocol.PPP" title="pcapkit.protocols.link.ppp.protocol.PPP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code></a> and
 <a class="reference internal" href="../pcapkit/protocols/link/pppoe.html#pcapkit.protocols.link.pppoe.protocol.PPPoE" title="pcapkit.protocols.link.pppoe.protocol.PPPoE"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2817">#2817</a>),
 <a class="reference internal" href="../pcapkit/protocols/application/dns.html#pcapkit.protocols.application.dns.protocol.DNS" title="pcapkit.protocols.application.dns.protocol.DNS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DNS</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2816">#2816</a>), and
@@ -1015,6 +1023,498 @@ instead of guessing, since a guess path is wrong on non-HTTP input.</p></li>
 protocol numbers most likely to be met in a real capture – are all implemented
 and bound.</p>
 </section>
+<section id="planned-for-2-x">
+<h3>Planned for 2.x<a class="headerlink" href="#planned-for-2-x" title="Link to this heading">¶</a></h3>
+<p>Planned for the minor releases after 2.0.0, as ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3106">#3106</a>. Their
+issues are not filed yet. Each line names a protocol and where it binds. ERSPAN,
+Ethernet CFM, the quoted invoking packet and the 802.11 protected-frame headers each
+need a ruling before they are filed. An EtherType marked IEEE is assigned by the
+IEEE but missing from IANA’s list, which
+<a class="reference internal" href="../pcapkit/const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a> follows. Every one of them waits on
+the same ruling: whether to crawl the IEEE Registration Authority’s list as a
+second source (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3106">#3106</a>, question 5).</p>
+<p><strong>Next</strong>:</p>
+<ul class="simple">
+<li><p>Link Layer:</p>
+<ul>
+<li><p>CAPWAP’s header, DTLS preamble and data channel – UDP ports 5246 and 5247</p></li>
+<li><p>Enhanced GRE – GRE version 1, at IP protocol 47</p></li>
+<li><p>ERSPAN types I to III – GRE protocol types IEEE 0x88BE and 0x22EB</p></li>
+<li><p>Ethernet Configuration Testing Protocol – EtherType 0x9000</p></li>
+<li><p>IEEE 802.11 protected-frame headers – the frame control’s Protected bit</p></li>
+<li><p>MAC Control PAUSE and PFC – EtherType 0x8808</p></li>
+<li><p>MACsec’s SecTAG – EtherType 0x88E5</p></li>
+<li><p>MPLS in IP and in UDP – IP protocol 137, and UDP ports 6635 and 6636</p></li>
+<li><p>Netlink, SCTP and PPP-with-direction captures – LinkTypes 253, 248 and 204</p></li>
+<li><p>NFLOG – LinkType 239</p></li>
+<li><p>pflog – LinkType 117</p></li>
+</ul>
+</li>
+<li><p>Internet Layer:</p>
+<ul>
+<li><p>The invoking packet quoted in ICMP errors – ICMPv4 types 3, 4, 5, 11 and 12,
+and ICMPv6 types 1 to 4</p></li>
+</ul>
+</li>
+<li><p>Transport Layer:</p>
+<ul>
+<li><p>GRE in UDP – UDP ports 4754 and 4755</p></li>
+</ul>
+</li>
+<li><p>Application Layer:</p>
+<ul>
+<li><p>DCE/RPC’s connection-oriented and connectionless PDUs – TCP and UDP port
+135, and SMB named pipes</p></li>
+<li><p>EIGRP – IP protocol 88</p></li>
+<li><p>HSRP version 1 – UDP port 1985</p></li>
+<li><p>IPFIX – TCP and UDP port 4739, with NetFlow v9 as a class bound to no port</p></li>
+<li><p>IS-IS – NLPID 0x83 behind LLC SAP 0xFE and FRAD, and EtherType 0x22F4</p></li>
+<li><p>LDAP at <code class="docutils literal notranslate"><span class="pre">msft-gc</span></code> – TCP port 3268</p></li>
+<li><p>LDP – TCP and UDP port 646</p></li>
+<li><p>NFSv3, MOUNT and NLM – ONC RPC programs 100003, 100005 and 100021</p></li>
+<li><p>PIM version 2 – IP protocol 103</p></li>
+<li><p>PTP (IEEE 1588) – EtherType 0x88F7, and UDP ports 319 and 320</p></li>
+<li><p>RTSP – TCP ports 554 and 8554</p></li>
+<li><p>STUN and TURN – TCP and UDP port 3478</p></li>
+<li><p>TACACS+ – TCP port 49</p></li>
+<li><p>TFTP with options – UDP port 69</p></li>
+<li><p>TPKT, X.224 class 0 and RDP’s negotiation – TCP ports 102 and 3389</p></li>
+</ul>
+</li>
+</ul>
+<p><strong>On demand</strong>:</p>
+<ul class="simple">
+<li><p>Link Layer:</p>
+<ul>
+<li><p>ATM AAL5 with LLC/SNAP – LinkTypes 100, 106 and 123</p></li>
+<li><p>CAPWAP’s control message elements – UDP port 5246</p></li>
+<li><p>Cisco HDLC and SLARP – LinkTypes 104 and 112</p></li>
+<li><p>EFM OAM – Slow Protocols subtype 3, at EtherType 0x8809</p></li>
+<li><p>Endace ERF – LinkType 197</p></li>
+<li><p>EPON’s preamble and 802.3br’s mPacket – LinkTypes 259 and 274</p></li>
+<li><p>EtherIP – IP protocol 97</p></li>
+<li><p>Ethernet CFM – EtherType IEEE 0x8902</p></li>
+<li><p>MVRP and MMRP – EtherTypes 0x88F5 and 0x88F6</p></li>
+<li><p>Netlink’s route and netfilter payloads – Netlink protocols 0 and 12</p></li>
+<li><p>NSH – EtherType 0x894F and IP protocol 145</p></li>
+<li><p>OpenVPN – TCP and UDP port 1194</p></li>
+<li><p>PBB’s I-TAG – EtherType 0x88E7</p></li>
+<li><p>PKTAP, enc and IPNET capture headers – LinkTypes 258, 109 and 226</p></li>
+<li><p>Prism, AVS and PPI capture headers – LinkTypes 119, 163 and 192</p></li>
+<li><p>Teredo – UDP port 3544</p></li>
+<li><p>Token Ring – LinkType 6</p></li>
+<li><p>VXLAN-GPE – UDP port 4790</p></li>
+</ul>
+</li>
+<li><p>Internet Layer:</p>
+<ul>
+<li><p>HIP and ESP in UDP – UDP port 10500</p></li>
+</ul>
+</li>
+<li><p>Transport Layer:</p>
+<ul>
+<li><p>UDP-Lite – IP protocol 136</p></li>
+</ul>
+</li>
+<li><p>Application Layer:</p>
+<ul>
+<li><p>CoAP – TCP and UDP port 5683</p></li>
+<li><p>HTTP/2’s HPACK – the HEADERS, PUSH_PROMISE and CONTINUATION frames</p></li>
+<li><p>Mobile IPv4 registration – UDP port 434</p></li>
+<li><p>MPLS LSP Ping – UDP port 3503</p></li>
+<li><p>OpenFlow – TCP port 6653</p></li>
+<li><p>PCP and NAT-PMP – UDP ports 5350 and 5351</p></li>
+<li><p>PPTP’s control connection – TCP port 1723</p></li>
+<li><p>RFB – TCP port 5900</p></li>
+<li><p>RMCP, ASF and IPMI over LAN – UDP ports 623 and 664</p></li>
+<li><p>RPKI to Router – TCP port 323</p></li>
+<li><p>sFlow v5 – UDP port 6343</p></li>
+<li><p>SLPv2 – TCP and UDP port 427</p></li>
+<li><p>SOCKS 4 and 5 – TCP port 1080</p></li>
+<li><p>TWAMP and STAMP – TCP and UDP port 862</p></li>
+</ul>
+</li>
+</ul>
+<p><strong>On demand, by domain</strong>. A protocol with no registered identifier is listed as
+such. Vendor-proprietary protocols with no public specification, and vendor- or
+tool-internal link types, stay out, as work with no specification is <code class="docutils literal notranslate"><span class="pre">wontfix</span></code>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2805">#2805</a>).</p>
+<ul class="simple">
+<li><p>Automotive:</p>
+<ul>
+<li><p>AUTOSAR’s DLT – no registered identifier</p></li>
+<li><p>AUTOSAR’s PDU transport – no registered identifier</p></li>
+<li><p>AUTOSAR’s SecOC – no registered identifier</p></li>
+<li><p>CAN and CAN FD – LinkType 227</p></li>
+<li><p>CCP – no registered identifier, above CAN</p></li>
+<li><p>DoIP – TCP and UDP port 13400</p></li>
+<li><p>FlexRay – LinkType 210</p></li>
+<li><p>GeoNetworking – EtherType 0x8947</p></li>
+<li><p>ISO-TP – no registered identifier, above CAN</p></li>
+<li><p>KWP2000 – no registered identifier, above CAN</p></li>
+<li><p>LIN – LinkType 212</p></li>
+<li><p>OBD-II – no registered identifier, above CAN</p></li>
+<li><p>SOME/IP – no registered identifier</p></li>
+<li><p>UDS – no registered identifier, above ISO-TP and DoIP</p></li>
+<li><p>WAVE’s WSMP – EtherType IEEE 0x88DC</p></li>
+<li><p>XCP – no registered identifier</p></li>
+</ul>
+</li>
+<li><p>Broadcast and media:</p>
+<ul>
+<li><p>ATSC ALP – LinkType 289</p></li>
+<li><p>DSM-CC – no registered identifier, inside MPEG-2 TS</p></li>
+<li><p>DVB IPDC – no registered identifier, inside MPEG-2 TS</p></li>
+<li><p>GigE Vision’s GVCP – UDP port 3956</p></li>
+<li><p>HiQnet – TCP and UDP port 3804</p></li>
+<li><p>IEEE 1722 AVTP – EtherType IEEE 0x22F0</p></li>
+<li><p>IEEE 802.1CB’s R-TAG – EtherType IEEE 0xF1C1</p></li>
+<li><p>IEEE 802.1Q’s MSRP – EtherType IEEE 0x22EA</p></li>
+<li><p>MMS – TCP port 1755</p></li>
+<li><p>MPEG-2 TS – LinkType 243</p></li>
+<li><p>RTMP – TCP port 1935, IANA’s <code class="docutils literal notranslate"><span class="pre">macromedia-fcs</span></code></p></li>
+<li><p>SAP – UDP port 9875</p></li>
+<li><p>VITA 49 – UDP port 4991</p></li>
+</ul>
+</li>
+<li><p>Cable and broadband access:</p>
+<ul>
+<li><p>ANCP – TCP port 6068</p></li>
+<li><p>DOCSIS – LinkTypes 143 and 273</p></li>
+<li><p>PacketCable’s COPS – TCP port 2126</p></li>
+</ul>
+</li>
+<li><p>Databases:</p>
+<ul>
+<li><p>Firebird – TCP port 3050</p></li>
+<li><p>memcached – TCP and UDP port 11211</p></li>
+<li><p>MongoDB – TCP port 27017</p></li>
+<li><p>MySQL – TCP port 3306</p></li>
+<li><p>PostgreSQL – TCP port 5432</p></li>
+<li><p>Redis – TCP port 6379</p></li>
+<li><p>TDS – TCP port 1433</p></li>
+</ul>
+</li>
+<li><p>Developer tools and frameworks:</p>
+<ul>
+<li><p>Bazaar – TCP port 4155</p></li>
+<li><p>CVS’s pserver – TCP port 2401</p></li>
+<li><p>distcc – TCP port 3632</p></li>
+<li><p>Erlang’s EPMD – TCP port 4369</p></li>
+<li><p>Gearman – TCP port 4730</p></li>
+<li><p>git – TCP port 9418</p></li>
+<li><p>HiSLIP – TCP port 4880</p></li>
+<li><p>Java RMI – TCP port 1099</p></li>
+<li><p>LeCroy VICP – TCP port 1861</p></li>
+<li><p>.NET Message Framing – no registered identifier</p></li>
+<li><p>.NET Remoting – no registered identifier</p></li>
+<li><p>Performance Co-Pilot – TCP port 44321</p></li>
+<li><p>RTPS (DDS) – UDP ports 7400 and 7401</p></li>
+<li><p>rsync – TCP port 873</p></li>
+<li><p>SANE – TCP port 6566</p></li>
+<li><p>TCPROS – no registered identifier</p></li>
+<li><p>Zabbix – TCP ports 10050 and 10051</p></li>
+</ul>
+</li>
+<li><p>DTN, space, MANET, aviation and amateur radio:</p>
+<ul>
+<li><p>AODV – UDP port 654</p></li>
+<li><p>ASTERIX – no registered identifier</p></li>
+<li><p>AX.25 – LinkTypes 3 and 202, and IP protocol 93</p></li>
+<li><p>BPQ – EtherType 0x08FF, outside IANA’s list</p></li>
+<li><p>Bundle Protocol – UDP port 4556, and over TCPCL</p></li>
+<li><p>DLEP – TCP and UDP port 854</p></li>
+<li><p>DMP – UDP port 5031</p></li>
+<li><p>DSR – IP protocol 48</p></li>
+<li><p>GMPLS LMP – UDP port 701</p></li>
+<li><p>LTP – UDP port 1113</p></li>
+<li><p>OLSR – UDP port 698</p></li>
+<li><p>PacketBB – UDP port 269</p></li>
+<li><p>STANAG 4607 – no registered identifier</p></li>
+<li><p>STANAG 5066 – TCP port 5066</p></li>
+<li><p>TCPCL – TCP port 4556</p></li>
+</ul>
+</li>
+<li><p>GTP, PFCP and the 3GPP core, under the <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> rule above:</p>
+<ul>
+<li><p>A21 – UDP port 23272, IANA’s <code class="docutils literal notranslate"><span class="pre">s102</span></code></p></li>
+<li><p>CBSP – TCP port 48049</p></li>
+<li><p>DECT – no registered identifier</p></li>
+<li><p>eCPRI – EtherType IEEE 0xAEFE</p></li>
+<li><p>GPRS LLC – LinkType 169</p></li>
+<li><p>GSM Um – no registered identifier, inside GSMTAP</p></li>
+<li><p>GSMTAP – UDP port 4729</p></li>
+<li><p>GTP’ – TCP and UDP port 3386</p></li>
+<li><p>GTP-U – UDP port 2152</p></li>
+<li><p>GTPv1-C – UDP port 2123</p></li>
+<li><p>GTPv2-C – UDP port 2123</p></li>
+<li><p>IPDR/SP – TCP port 4737</p></li>
+<li><p>OMA ILP – TCP port 7276</p></li>
+<li><p>OMA ULP – TCP port 7275</p></li>
+<li><p>PFCP – UDP port 8805</p></li>
+<li><p>PPP’s VSNCP – PPP protocol 0x805B</p></li>
+<li><p>PPP’s VSNP – PPP protocol 0x005B</p></li>
+<li><p>ROHC – IP protocol 142 and EtherType IEEE 0x22F1</p></li>
+<li><p>SGsAP – SCTP port 29118</p></li>
+<li><p>WAP’s WSP – UDP port 9200, and 9201 over WTP</p></li>
+<li><p>WAP’s WTLS – UDP ports 9202 and 9203</p></li>
+<li><p>WAP’s WTP – UDP port 9201</p></li>
+<li><p>WiMAX’s ASN control plane – UDP port 2231</p></li>
+</ul>
+</li>
+<li><p>Industrial and fieldbus:</p>
+<ul>
+<li><p>ARCNET – LinkTypes 7 and 129</p></li>
+<li><p>BACnet/IP – UDP port 47808</p></li>
+<li><p>C12.22 – TCP and UDP port 1153</p></li>
+<li><p>CNIP – TCP and UDP ports 1628 and 1629</p></li>
+<li><p>DLMS/COSEM – TCP and UDP port 4059</p></li>
+<li><p>DNP3 – TCP and UDP port 20000</p></li>
+<li><p>EtherCAT – EtherType IEEE 0x88A4</p></li>
+<li><p>EtherNet/IP – TCP port 44818, and UDP ports 2222 and 44818</p></li>
+<li><p>EtherNet/IP’s DLR – EtherType 0x80E1</p></li>
+<li><p>FOUNDATION Fieldbus HSE – TCP and UDP ports 1089 to 1091</p></li>
+<li><p>HART-IP – TCP and UDP port 5094</p></li>
+<li><p>HSR – EtherType IEEE 0x892F</p></li>
+<li><p>IEC 60870-5-104 – TCP port 2404</p></li>
+<li><p>IEC 61850’s GOOSE – EtherType IEEE 0x88B8</p></li>
+<li><p>IEC 61850’s Sampled Values – EtherType IEEE 0x88BA</p></li>
+<li><p>KNXnet/IP – TCP and UDP port 3671</p></li>
+<li><p>LLRP – TCP port 5084</p></li>
+<li><p>Modbus – TCP port 502</p></li>
+<li><p>OPC UA – TCP port 4840</p></li>
+<li><p>POWERLINK – EtherType IEEE 0x88AB</p></li>
+<li><p>PRP – EtherType IEEE 0x88FB for its supervision frames</p></li>
+<li><p>PROFINET – EtherType IEEE 0x8892</p></li>
+<li><p>SERCOS III – EtherType IEEE 0x88CD</p></li>
+<li><p>TRDP – UDP ports 17224 and 17225</p></li>
+<li><p>TTEthernet – no registered identifier</p></li>
+</ul>
+</li>
+<li><p>IoT and IEEE 802.15.4:</p>
+<ul>
+<li><p>6LoWPAN – EtherType 0xA0ED, and above IEEE 802.15.4</p></li>
+<li><p>AllJoyn – TCP and UDP port 9955</p></li>
+<li><p>Bluetooth’s ATT – no registered identifier, above L2CAP</p></li>
+<li><p>Bluetooth’s BR/EDR baseband – LinkType 255</p></li>
+<li><p>Bluetooth’s HCI – LinkTypes 187 and 201</p></li>
+<li><p>Bluetooth’s L2CAP – no registered identifier, above HCI and the LE link layer</p></li>
+<li><p>Bluetooth’s LE link layer – LinkTypes 251, 256 and 272</p></li>
+<li><p>Bluetooth’s Linux monitor – LinkType 254</p></li>
+<li><p>Bluetooth’s SMP – no registered identifier, above L2CAP</p></li>
+<li><p>DECT NR+ – LinkType 301</p></li>
+<li><p>IEEE 802.15.4 – LinkTypes 195, 215, 230 and 283</p></li>
+<li><p>IrDA – LinkType 144</p></li>
+<li><p>LoRaTap – LinkType 270</p></li>
+<li><p>LoRaWAN – no registered identifier, above LoRaTap</p></li>
+<li><p>MQTT-SN – no registered identifier</p></li>
+<li><p>Thread’s MLE – UDP port 19788</p></li>
+<li><p>UWB’s UCI – LinkType 299</p></li>
+<li><p>Wi-SUN – no registered identifier, above IEEE 802.15.4</p></li>
+<li><p>ZEP – UDP port 17754</p></li>
+<li><p>ZigBee – no registered identifier, above IEEE 802.15.4</p></li>
+</ul>
+</li>
+<li><p>ITU-T and telephony signalling, beyond <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3021">#3021</a>:</p>
+<ul>
+<li><p>BIT-EMU – IP protocol 147</p></li>
+<li><p>CESoETH – EtherType IEEE 0x88D8</p></li>
+<li><p>DPNSS – no registered identifier</p></li>
+<li><p>ESMC – Slow Protocols subtype 10, at EtherType 0x8809</p></li>
+<li><p>GFP – LinkTypes 170 and 171</p></li>
+<li><p>H.501 – TCP and UDP port 2099, IANA’s <code class="docutils literal notranslate"><span class="pre">h2250-annex-g</span></code></p></li>
+<li><p>IAX2 – UDP port 4569</p></li>
+<li><p>LAPB – LinkType 207</p></li>
+<li><p>MEF’s E-LMI – EtherType IEEE 0x88EE</p></li>
+<li><p>MGCP – UDP ports 2427 and 2727</p></li>
+<li><p>MIKEY – UDP port 2269</p></li>
+<li><p>MRCPv2 – no registered identifier</p></li>
+<li><p>MSRP (<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4975.html"><strong>RFC 4975</strong></a>) – TCP port 2855</p></li>
+<li><p>MTP2 – LinkTypes 139 and 140</p></li>
+<li><p>MTP3 – LinkType 141</p></li>
+<li><p>SCCP – LinkType 142</p></li>
+<li><p>SDH – no registered identifier</p></li>
+<li><p>SigComp – no registered identifier</p></li>
+<li><p>V5’s envelope function – no registered identifier</p></li>
+<li><p>X.25 – no registered identifier, above LAPB and XOT</p></li>
+<li><p>XOT – TCP port 1998</p></li>
+</ul>
+</li>
+<li><p>Legacy application protocols:</p>
+<ul>
+<li><p>ACAP – TCP port 674 (<span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2244.html"><strong>RFC 2244</strong></a>)</p></li>
+<li><p>AgentX – TCP port 705 (<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2741.html"><strong>RFC 2741</strong></a>)</p></li>
+<li><p>BEEP – no registered identifier (<span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3080.html"><strong>RFC 3080</strong></a>, <span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3081.html"><strong>RFC 3081</strong></a>)</p></li>
+<li><p>CMP over TCP – TCP port 829 (<span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2510.html"><strong>RFC 2510</strong></a>)</p></li>
+<li><p>COPS – TCP port 3288 (<span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2748.html"><strong>RFC 2748</strong></a>)</p></li>
+<li><p>DHCP failover – TCP port 647 (<span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8156.html"><strong>RFC 8156</strong></a>, and draft-ietf-dhc-failover-12 for
+DHCPv4)</p></li>
+<li><p>Finger – TCP port 79 (<span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1288.html"><strong>RFC 1288</strong></a>)</p></li>
+<li><p>Gopher – TCP port 70 (<span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1436.html"><strong>RFC 1436</strong></a>)</p></li>
+<li><p>Handle System resolution, which DOI uses – TCP and UDP port 2641
+(<span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3652.html"><strong>RFC 3652</strong></a>)</p></li>
+<li><p>IAPP – UDP port 3517 (IEEE 802.11F)</p></li>
+<li><p>ICAP – TCP port 1344 (<span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3507.html"><strong>RFC 3507</strong></a>)</p></li>
+<li><p>ICP – UDP port 3130 (<span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2186.html"><strong>RFC 2186</strong></a>)</p></li>
+<li><p>Kerberos version 4 – UDP port 750 (Project Athena’s Kerberos V4 specification)</p></li>
+<li><p>KINK – TCP and UDP port 910 (<span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4430.html"><strong>RFC 4430</strong></a>)</p></li>
+<li><p>LPD – TCP port 515 (<span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1179.html"><strong>RFC 1179</strong></a>)</p></li>
+<li><p>RELOAD – no registered identifier (<span class="target" id="index-56"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6940.html"><strong>RFC 6940</strong></a>)</p></li>
+<li><p>rexec – TCP port 512 (4.2BSD’s rexecd)</p></li>
+<li><p>rlogin – TCP port 513 (<span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1282.html"><strong>RFC 1282</strong></a>)</p></li>
+<li><p>rsh – TCP port 514 (4.2BSD’s rshd)</p></li>
+<li><p>RSIP – TCP and UDP port 4555 (<span class="target" id="index-58"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3103.html"><strong>RFC 3103</strong></a>)</p></li>
+<li><p>rwho – UDP port 513 (4.2BSD’s rwhod)</p></li>
+<li><p>SASP – TCP port 3860 (<span class="target" id="index-59"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4678.html"><strong>RFC 4678</strong></a>)</p></li>
+<li><p>SMUX – TCP port 199 (<span class="target" id="index-60"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1227.html"><strong>RFC 1227</strong></a>)</p></li>
+<li><p>SPDY – no registered identifier (draft-mbelshe-httpbis-spdy-00)</p></li>
+<li><p>TACACS – UDP port 49 (<span class="target" id="index-61"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1492.html"><strong>RFC 1492</strong></a>)</p></li>
+<li><p>Time – TCP and UDP port 37 (<span class="target" id="index-62"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc868.html"><strong>RFC 868</strong></a>)</p></li>
+<li><p>TSP – TCP and UDP port 3653 (<span class="target" id="index-63"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5572.html"><strong>RFC 5572</strong></a>)</p></li>
+<li><p>Whois – TCP port 43 (<span class="target" id="index-64"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3912.html"><strong>RFC 3912</strong></a>)</p></li>
+<li><p>X11 – TCP ports 6000 to 6063 (the X Window System Protocol)</p></li>
+<li><p>XDMCP – UDP port 177 (the X Display Manager Control Protocol)</p></li>
+<li><p>Z39.50 – TCP port 210 (ANSI/NISO Z39.50)</p></li>
+</ul>
+</li>
+<li><p>Legacy non-IP stacks:</p>
+<ul>
+<li><p>AARP – EtherType 0x80F3</p></li>
+<li><p>AFP over DSI – TCP port 548</p></li>
+<li><p>AppleTalk’s DDP – EtherType 0x809B</p></li>
+<li><p>Apple IP over FireWire – LinkType 138</p></li>
+<li><p>Banyan VINES – EtherType 0x0BAD</p></li>
+<li><p>CLNP – LLC SAP 0xFE and IP protocol 80</p></li>
+<li><p>COTP – IP protocol 29</p></li>
+<li><p>DEC LAT – EtherType 0x6004</p></li>
+<li><p>DEC LANBridge spanning tree – EtherType 0x8038</p></li>
+<li><p>DECnet Phase IV – EtherType 0x6003</p></li>
+<li><p>DLSw – TCP ports 2065 and 2067</p></li>
+<li><p>ES-IS – LLC SAP 0xFE</p></li>
+<li><p>IBM RPL – LLC SAP 0xFC</p></li>
+<li><p>IBM SNA – EtherType 0x80D5</p></li>
+<li><p>IPX in UDP – UDP port 213</p></li>
+<li><p>LocalTalk – LinkType 114</p></li>
+<li><p>NetBEUI – LLC SAP 0xF0</p></li>
+<li><p>NetWare’s NCP – TCP port 524</p></li>
+<li><p>OSI over PPP – PPP protocols 0x0023 and 0x8023</p></li>
+<li><p>XNS IDP – EtherType 0x0600</p></li>
+</ul>
+</li>
+<li><p>Medical:</p>
+<ul>
+<li><p>DICOM – TCP ports 104 and 11112</p></li>
+<li><p>HL7 over MLLP – TCP port 2575</p></li>
+</ul>
+</li>
+<li><p>Messaging:</p>
+<ul>
+<li><p>AIM’s OSCAR – TCP port 5190</p></li>
+<li><p>AMQP – TCP port 5672</p></li>
+<li><p>Delivery Optimization – TCP port 7680</p></li>
+<li><p>DirectPlay – TCP and UDP port 47624</p></li>
+<li><p>Gnutella – TCP and UDP port 6346</p></li>
+<li><p>IRC – TCP ports 194 and 6667</p></li>
+<li><p>PTP/IP – TCP port 15740</p></li>
+</ul>
+</li>
+<li><p>Non-network buses and host interfaces:</p>
+<ul>
+<li><p>D-Bus – LinkType 231</p></li>
+<li><p>DisplayPort AUX – LinkType 275</p></li>
+<li><p>DVB-CI – LinkType 235</p></li>
+<li><p>ETW – LinkType 290</p></li>
+<li><p>I2C – LinkType 209</p></li>
+<li><p>IPMI’s HPM.2 – LinkType 260</p></li>
+<li><p>ISO 14443 – LinkType 264</p></li>
+<li><p>MA-USB – no registered identifier</p></li>
+<li><p>MDB – LinkType 300</p></li>
+<li><p>MUX27010 – LinkType 236</p></li>
+<li><p>NC-SI – EtherType IEEE 0x88F8</p></li>
+<li><p>SDLC – LinkType 268</p></li>
+<li><p>USB – LinkTypes 186, 189, 220, 249, 266, 288 and 293 to 295</p></li>
+<li><p>vsock – LinkType 271</p></li>
+</ul>
+</li>
+<li><p>PPP’s remaining protocols, beyond <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2978">#2978</a>:</p>
+<ul>
+<li><p>BCP – PPP protocols 0x0031 and 0x8031 (<span class="target" id="index-65"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3518.html"><strong>RFC 3518</strong></a>)</p></li>
+<li><p>CBCP – PPP protocol 0xC029 (draft-ietf-pppext-callback-cp-02)</p></li>
+<li><p>Compressed datagrams – PPP protocol 0x00FD (<span class="target" id="index-66"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1962.html"><strong>RFC 1962</strong></a>)</p></li>
+<li><p>IP header compression, CRTP included – the odd PPP protocols 0x0061 to 0x0069
+and 0x2063 to 0x2069 (<span class="target" id="index-67"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3544.html"><strong>RFC 3544</strong></a>)</p></li>
+<li><p>PPPMux – PPP protocols 0x0059 and 0x8059 (<span class="target" id="index-68"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3153.html"><strong>RFC 3153</strong></a>)</p></li>
+<li><p>Van Jacobson compression – PPP protocols 0x002D and 0x002F (<span class="target" id="index-69"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1144.html"><strong>RFC 1144</strong></a>)</p></li>
+</ul>
+</li>
+<li><p>Storage and HPC fabrics:</p>
+<ul>
+<li><p>9P – TCP port 564</p></li>
+<li><p>AFS’s Rx – UDP ports 7000 to 7009</p></li>
+<li><p>ATA over Ethernet – EtherType IEEE 0x88A2</p></li>
+<li><p>FCoE – EtherType IEEE 0x8906</p></li>
+<li><p>FIP – EtherType IEEE 0x8914</p></li>
+<li><p>Fibre Channel – LinkTypes 224 and 225</p></li>
+<li><p>HyperSCSI – EtherType IEEE 0x889A</p></li>
+<li><p>InfiniBand – LinkType 247</p></li>
+<li><p>IP over Fibre Channel – LinkType 122</p></li>
+<li><p>IPoIB – LinkType 242</p></li>
+<li><p>iSNS – TCP port 3205</p></li>
+<li><p>NBD – TCP port 10809</p></li>
+<li><p>NDMP – TCP port 10000</p></li>
+<li><p>NVMe/TCP – TCP port 4420</p></li>
+<li><p>RoCE – EtherType IEEE 0x8915 and UDP port 4791</p></li>
+</ul>
+</li>
+<li><p>Tunnelling, routing and rarely seen L2 to L4:</p>
+<ul>
+<li><p>AMT – UDP port 2268 (<span class="target" id="index-70"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7450.html"><strong>RFC 7450</strong></a>)</p></li>
+<li><p>AYIYA – UDP port 5072 (draft-massar-v6ops-ayiya)</p></li>
+<li><p>Babel – UDP port 6696 (<span class="target" id="index-71"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8966.html"><strong>RFC 8966</strong></a>)</p></li>
+<li><p>BIER – EtherType IEEE 0xAB37, and above MPLS, with no UDP port (<span class="target" id="index-72"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8296.html"><strong>RFC 8296</strong></a>)</p></li>
+<li><p>ForCES IFE – EtherType IEEE 0xED3E (<span class="target" id="index-73"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8013.html"><strong>RFC 8013</strong></a>)</p></li>
+<li><p>IEEE 802.1BR’s E-Tag – EtherType IEEE 0x893F (IEEE 802.1BR)</p></li>
+<li><p>IEEE 802.1Qbg’s ECP – EtherType 0x8940 (IEEE 802.1Qbg)</p></li>
+<li><p>IEEE 802.21’s MIH – EtherType 0x8917 (IEEE 802.21)</p></li>
+<li><p>IEEE 802a’s OUI-extended EtherType – EtherType 0x88B7 (IEEE 802a)</p></li>
+<li><p>IEEE 1905.1 – EtherType IEEE 0x893A (IEEE 1905.1)</p></li>
+<li><p>IPComp – IP protocol 108 (<span class="target" id="index-74"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3173.html"><strong>RFC 3173</strong></a>)</p></li>
+<li><p>LISP – UDP ports 4341 and 4342 (<span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9300.html"><strong>RFC 9300</strong></a>, <span class="target" id="index-76"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9301.html"><strong>RFC 9301</strong></a>)</p></li>
+<li><p>MSDP – TCP port 639 (<span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3618.html"><strong>RFC 3618</strong></a>)</p></li>
+<li><p>PCEP – TCP port 4189 (<span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5440.html"><strong>RFC 5440</strong></a>)</p></li>
+<li><p>PGM – IP protocol 113 (<span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3208.html"><strong>RFC 3208</strong></a>)</p></li>
+<li><p>PSP – no registered identifier, as UDP port 1000 is IANA’s <code class="docutils literal notranslate"><span class="pre">cadlock2</span></code>
+(Google’s PSP Architecture Specification)</p></li>
+<li><p>SCTP over UDP – UDP port 9899 (<span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6951.html"><strong>RFC 6951</strong></a>)</p></li>
+<li><p>TIPC – EtherType IEEE 0x88CA (the TIPC protocol specification)</p></li>
+<li><p>TRILL – EtherType 0x22F3 (<span class="target" id="index-81"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6325.html"><strong>RFC 6325</strong></a>)</p></li>
+<li><p>TRILL’s RBridge Channel – EtherType 0x8946 (<span class="target" id="index-82"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7178.html"><strong>RFC 7178</strong></a>)</p></li>
+<li><p>WireGuard – no registered identifier, as UDP port 51820 is unassigned (the
+WireGuard whitepaper)</p></li>
+</ul>
+</li>
+<li><p>Windows security tokens and DCE/RPC interfaces, which SMB (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3121">#3121</a>) keeps
+as octets:</p>
+<ul>
+<li><p>DCOM – no registered identifier, a DCE/RPC interface (MS-DCOM)</p></li>
+<li><p>DRSR – no registered identifier, a DCE/RPC interface (MS-DRSR)</p></li>
+<li><p>EPM – the DCE/RPC interface at TCP and UDP port 135 (MS-RPCE)</p></li>
+<li><p>GSS-API’s initial context token – no registered identifier, inside SMB, HTTP
+and others (<span class="target" id="index-83"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2743.html"><strong>RFC 2743</strong></a>)</p></li>
+<li><p>MS-PAC – no registered identifier, inside Kerberos’s authorization data
+(MS-PAC)</p></li>
+<li><p>NEGOEX – no registered identifier, inside SPNEGO (MS-NEGOEX)</p></li>
+<li><p>NRPC – no registered identifier, a DCE/RPC interface (MS-NRPC)</p></li>
+<li><p>NTLM – no registered identifier, a token inside SMB, HTTP and others (MS-NLMP)</p></li>
+<li><p>SAMR – no registered identifier, a DCE/RPC interface (MS-SAMR)</p></li>
+<li><p>SPNEGO – no registered identifier, a token inside SMB, HTTP and others
+(<span class="target" id="index-84"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4178.html"><strong>RFC 4178</strong></a>)</p></li>
+<li><p>SRVSVC – no registered identifier, a DCE/RPC interface (MS-SRVS)</p></li>
+<li><p>WKSSVC – no registered identifier, a DCE/RPC interface (MS-WKST)</p></li>
+</ul>
+</li>
+</ul>
+</section>
 </section>
 <section id="pcapng-support">
 <h2>PCAPNG Support<a class="headerlink" href="#pcapng-support" title="Link to this heading">¶</a></h2>
@@ -1111,7 +1611,7 @@ through its own child obtained from
 <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction</span></code>;</p></li>
 <li><p><strong>library-safe defaults</strong> – importing <a class="reference internal" href="../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> attaches only a
 <a class="reference external" href="https://docs.python.org/3/library/logging.handlers.html#logging.NullHandler" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">logging.NullHandler</span></code></a> and sets no level, leaving the destination and
-verbosity to the application. <span class="target" id="index-41"></span><a class="reference internal" href="../pcapkit/index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a> bootstraps a
+verbosity to the application. <span class="target" id="index-85"></span><a class="reference internal" href="../pcapkit/index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a> bootstraps a
 <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stderr</span></code></a> handler at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.DEBUG</span></code></a>;</p></li>
 <li><p>a <strong>runtime configuration API</strong> –
 <a class="reference internal" href="../pcapkit/utilities/logging.html#pcapkit.utilities.logging.configure" title="pcapkit.utilities.logging.configure"><code class="xref py py-func docutils literal notranslate"><span class="pre">configure()</span></code></a>,
@@ -1276,9 +1776,9 @@ exact value stays in the sibling field every timestamp already has, such as
 <p><strong>Still open.</strong>
 <a class="reference internal" href="../pcapkit/foundation/reassembly/index.html"><span class="doc">Packets Reassembly</span></a> covers IPv4, IPv6, TCP and DTLS
 handshake messages (see <a class="reference internal" href="#dtls">DTLS</a> above), and no more.
-IPv4 and IPv6 share the <span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> procedure, except that a fragment overlapping
-another abandons an IPv6 datagram, as <span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> requires, where IPv4
-overwrites the octets it overlaps (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2547">#2547</a>). TCP uses the <span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>
+IPv4 and IPv6 share the <span class="target" id="index-86"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> procedure, except that a fragment overlapping
+another abandons an IPv6 datagram, as <span class="target" id="index-87"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> requires, where IPv4
+overwrites the octets it overlaps (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2547">#2547</a>). TCP uses the <span class="target" id="index-88"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>
 hole-descriptor algorithm, which does handle out-of-order and overlapping
 segments. SCTP has nothing: a user message split across DATA or I-DATA chunks is
 never put back together, and <a class="reference internal" href="../pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a> has no SCTP
@@ -1329,7 +1829,7 @@ selects per-direction flows instead.</p>
 <p>What ends a bidirectional flow is worth stating, because the obvious answer is
 wrong. A teardown – a FIN from each endpoint, or a RST from either – is
 <em>recorded</em> but does not finalise the flow: the four-way close of
-<span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.6"><strong>RFC 9293 Section 3.6</strong></a> is FIN, ACK, FIN, ACK, so the final acknowledgement
+<span class="target" id="index-89"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.6"><strong>RFC 9293 Section 3.6</strong></a> is FIN, ACK, FIN, ACK, so the final acknowledgement
 arrives after the second FIN, and finalising on that FIN drops the ACK from the
 flow and lets it open a fresh buffer under the same canonical buffer ID – which
 a later connection reusing those endpoints then merges into. Duplicates of that
@@ -1343,13 +1843,13 @@ middle of a connection, sees no teardown, and then has its endpoints reused. The
 reuse is indistinguishable from a continuation without the ACK flag, which
 <a class="reference internal" href="../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.data.Packet" title="pcapkit.foundation.traceflow.tcp.data.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a> does not carry as a
 field. Reading it, in a rule that also survives a simultaneous open
-(<span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.5"><strong>RFC 9293 Section 3.5</strong></a>) and a retransmitted SYN, is <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2962">#2962</a>.</p>
+(<span class="target" id="index-90"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.5"><strong>RFC 9293 Section 3.5</strong></a>) and a retransmitted SYN, is <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2962">#2962</a>.</p>
 <p><strong>The application layer is wired into flow tracing</strong> as well. Of the ways
 of buffering a traced payload, the tracer <strong>delegates to</strong>
 <a class="reference internal" href="../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.reassembly.TCP" title="pcapkit.foundation.reassembly.tcp.reassembly.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> rather than growing a
 per-direction payload buffer of its own. A buffer that concatenated payloads in
 capture order would be silently wrong on the first retransmission or reordered
-segment, where the <span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a> hole-descriptor algorithm already in the
+segment, where the <span class="target" id="index-91"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a> hole-descriptor algorithm already in the
 reassembler is not – so
 <a class="reference internal" href="../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.data.Packet" title="pcapkit.foundation.traceflow.tcp.data.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a> carries the segment
 fields (<code class="docutils literal notranslate"><span class="pre">seq</span></code>, <code class="docutils literal notranslate"><span class="pre">ack</span></code>, <code class="docutils literal notranslate"><span class="pre">header</span></code>, <code class="docutils literal notranslate"><span class="pre">payload</span></code>) that reassembler needs, and
@@ -1387,13 +1887,13 @@ frame passes its deadline, whatever that frame’s protocol. A reassembler fed b
 hand sees only the packets handed to it, so a buffer none follows is reported
 as <a class="reference internal" href="../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.Completion.PARTIAL" title="pcapkit.foundation.reassembly.data.Completion.PARTIAL"><code class="xref py py-attr docutils literal notranslate"><span class="pre">PARTIAL</span></code></a> at the end
 of the capture.</p>
-<p>On the numbers: the 15 seconds <span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> names is that RFC’s <em>initial</em> timer
+<p>On the numbers: the 15 seconds <span class="target" id="index-92"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> names is that RFC’s <em>initial</em> timer
 setting, a lower bound which
 <code class="docutils literal notranslate"><span class="pre">TIMER</span> <span class="pre">&lt;-</span> <span class="pre">MAX(TIMER,TTL)</span></code> then raises toward the 4.25-minute TTL ceiling –
-not a deadline. <span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> supersedes the scheme outright
+not a deadline. <span class="target" id="index-93"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> supersedes the scheme outright
 (“The reassembly timeout value SHOULD be a fixed value, not set from the
 remaining TTL… between 60 seconds and 120 seconds”), so IPv4 uses 60
-seconds, agreeing with the 60 <span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> mandates for IPv6.
+seconds, agreeing with the 60 <span class="target" id="index-94"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> mandates for IPv6.
 <strong>TCP and DTLS are left with no timeout at all</strong>, since no specification gives
 their reassembly a deadline, and an idle TCP connection is ordinary rather than
 pathological; <code class="docutils literal notranslate"><span class="pre">timeout</span></code> enables one on request.</p>
@@ -1401,8 +1901,8 @@ pathological; <code class="docutils literal notranslate"><span class="pre">timeo
 identifier still holds a fixed 72 KiB of preallocated space, but for at most
 the timeout’s worth of capture time rather than for the life of the
 <a class="reference internal" href="../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>. Sizing each buffer to the
-fragments it holds is <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2957">#2957</a>. <span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> and
-<span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> also want an ICMP Time Exceeded sent on expiry when
+fragments it holds is <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2957">#2957</a>. <span class="target" id="index-95"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> and
+<span class="target" id="index-96"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> also want an ICMP Time Exceeded sent on expiry when
 the offset-zero fragment has been received; a parser sends nothing, so the
 condition is only reported in the log record.</p>
 </li>
@@ -1441,7 +1941,7 @@ HIP, as the one’s-complement half below describes. The rest record the field a
 never question it, so a corrupted capture parses as cleanly as an intact one:</p>
 <ul class="simple">
 <li><p>HOPOPT’s and IPv6-Opts’s is the CALIPSO option’s CRC-16
-(<span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5570.html#section-5.1.7"><strong>RFC 5570 Section 5.1.7</strong></a>), which <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2970">#2970</a> verifies and computes;</p></li>
+(<span class="target" id="index-97"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5570.html#section-5.1.7"><strong>RFC 5570 Section 5.1.7</strong></a>), which <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2970">#2970</a> verifies and computes;</p></li>
 <li><p>IPX’s is unused in practice, and its check is <a class="reference internal" href="#not-planned">Not Planned</a>.</p></li>
 </ul>
 <p><strong>These are different problems and they want separating</strong>, because only one
@@ -1453,7 +1953,7 @@ pseudo-header</strong>: the TCP, UDP, DCCP, ICMPv6, MH and HIP checksums cover s
 destination addresses, the protocol number and the payload length, all of which
 live in the <em>enclosing</em> layer, so verification is a structural question about
 <a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> rather than an arithmetic one.
-SCTP has no such dependency: <span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-6.8"><strong>RFC 9260 Section 6.8</strong></a> defines its CRC32c over the
+SCTP has no such dependency: <span class="target" id="index-98"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-6.8"><strong>RFC 9260 Section 6.8</strong></a> defines its CRC32c over the
 common header and chunks with the checksum field zeroed and <strong>no pseudo-header</strong>,
 so the SCTP packet alone verifies it. Its CRC32c is a hand-rolled lookup table in
 <a class="reference internal" href="../pcapkit/protocols/transport/sctp.html#module-pcapkit.protocols.transport.sctp.protocol" title="pcapkit.protocols.transport.sctp.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.sctp.protocol</span></code></a>, not a library call, so it is no
@@ -1471,7 +1971,7 @@ already established through <a class="reference internal" href="../pcapkit/corek
 part of the design rather than something to invent. Nor is
 <a class="reference internal" href="../pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.protocol.AH" title="pcapkit.protocols.internet.ah.protocol.AH"><code class="xref py py-class docutils literal notranslate"><span class="pre">AH</span></code></a>’s ICV checked: it is parsed as
 octets, and verifying it needs that keying context plus the enclosing IP header,
-whose immutable fields it covers (<span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html#section-3.3.3"><strong>RFC 4302 Section 3.3.3</strong></a>), which is
+whose immutable fields it covers (<span class="target" id="index-99"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html#section-3.3.3"><strong>RFC 4302 Section 3.3.3</strong></a>), which is
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2965">#2965</a>.</p>
 <p>The policy questions this raised have all been settled by the repo
 owner, and each lands on a precedent the library already has:</p>
@@ -1515,9 +2015,9 @@ as the offload question above asked; the owner accepted the toggles and the
 offload heuristic on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2470">#2470</a>.</p>
 <ul class="simple">
 <li><p><strong>Every checksum path is togglable, and verifying and computing default apart.</strong> Parsing
-verifies only under <span class="target" id="index-56"></span><a class="reference internal" href="../pcapkit/utilities/config.html#envvar-PCAPKIT_CHECKSUM_VERIFY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_VERIFY</span></code></a>, off by default;
+verifies only under <span class="target" id="index-100"></span><a class="reference internal" href="../pcapkit/utilities/config.html#envvar-PCAPKIT_CHECKSUM_VERIFY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_VERIFY</span></code></a>, off by default;
 construction computes a checksum the caller leaves out unless
-<span class="target" id="index-57"></span><a class="reference internal" href="../pcapkit/utilities/config.html#envvar-PCAPKIT_CHECKSUM_COMPUTE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_COMPUTE</span></code></a> turns it off.</p></li>
+<span class="target" id="index-101"></span><a class="reference internal" href="../pcapkit/utilities/config.html#envvar-PCAPKIT_CHECKSUM_COMPUTE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_COMPUTE</span></code></a> turns it off.</p></li>
 <li><p><strong>The toggle is an environment variable</strong>, with a per-call override only where
 a caller needs one. A checksum given to <code class="docutils literal notranslate"><span class="pre">make()</span></code> is written as given, which is
 what keeps a rebuild byte for byte; there is no
@@ -1531,8 +2031,8 @@ itself. MH’s checksum is defined over IPv6 alone, so over IPv4 it is
 <li><p><strong>Offload is</strong> <a class="reference internal" href="../pcapkit/corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED" title="pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED"><code class="xref py py-attr docutils literal notranslate"><span class="pre">NOT_COMPUTED</span></code></a>,
 modelled on <code class="docutils literal notranslate"><span class="pre">NO_SA</span></code>: a zero IPv4 or TCP checksum, or a TCP or UDP one holding
 the pseudo-header’s sum alone, as Linux offload leaves it, never warns. So does
-a zero UDP checksum over IPv4 (<span class="target" id="index-58"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc768.html"><strong>RFC 768</strong></a>), but not over IPv6, where it is
-mandatory (<span class="target" id="index-59"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-8.1"><strong>RFC 8200 Section 8.1</strong></a>).</p></li>
+a zero UDP checksum over IPv4 (<span class="target" id="index-102"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc768.html"><strong>RFC 768</strong></a>), but not over IPv6, where it is
+mandatory (<span class="target" id="index-103"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-8.1"><strong>RFC 8200 Section 8.1</strong></a>).</p></li>
 <li><p><strong>A fragment is</strong>
 <a class="reference internal" href="../pcapkit/corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus.NO_PSEUDO_HEADER" title="pcapkit.corekit.checksum.internet.ChecksumStatus.NO_PSEUDO_HEADER"><code class="xref py py-attr docutils literal notranslate"><span class="pre">NO_PSEUDO_HEADER</span></code></a>,
 atomic ones aside: TCP, UDP, ICMP, ICMPv6 and IGMP checksums cover all of the
@@ -1541,9 +2041,9 @@ checksum covers, so it is verified when the fragment holds that much, and
 <a class="reference internal" href="../pcapkit/corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED" title="pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TRUNCATED</span></code></a>
 otherwise.</p></li>
 <li><p><strong>IGMP covers the whole IP payload in every version, and GRE its header and
-payload only when</strong> <code class="docutils literal notranslate"><span class="pre">C</span></code> <strong>is set</strong> (<span class="target" id="index-60"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html#section-2.5"><strong>RFC 2236 Section 2.5</strong></a>,
-<span class="target" id="index-61"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.2"><strong>RFC 3376 Section 4.1.2</strong></a>, <span class="target" id="index-62"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2784.html#section-2.5"><strong>RFC 2784 Section 2.5</strong></a>). The IGMPv1 rule follows
-<span class="target" id="index-63"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html"><strong>RFC 2236</strong></a>, which updates <span class="target" id="index-64"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1112.html"><strong>RFC 1112</strong></a>’s 8-octet one. A GRE header with <code class="docutils literal notranslate"><span class="pre">C</span></code>
+payload only when</strong> <code class="docutils literal notranslate"><span class="pre">C</span></code> <strong>is set</strong> (<span class="target" id="index-104"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html#section-2.5"><strong>RFC 2236 Section 2.5</strong></a>,
+<span class="target" id="index-105"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.2"><strong>RFC 3376 Section 4.1.2</strong></a>, <span class="target" id="index-106"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2784.html#section-2.5"><strong>RFC 2784 Section 2.5</strong></a>). The IGMPv1 rule follows
+<span class="target" id="index-107"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html"><strong>RFC 2236</strong></a>, which updates <span class="target" id="index-108"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1112.html"><strong>RFC 1112</strong></a>’s 8-octet one. A GRE header with <code class="docutils literal notranslate"><span class="pre">C</span></code>
 clear is <a class="reference internal" href="../pcapkit/corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED" title="pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED"><code class="xref py py-attr docutils literal notranslate"><span class="pre">NOT_COMPUTED</span></code></a>,
 and <code class="docutils literal notranslate"><span class="pre">make()</span></code> computes one when <code class="docutils literal notranslate"><span class="pre">checksum_present</span></code> asks without giving it
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2618">#2618</a>). Neither GRE nor the Linux cooked-capture header carries a
@@ -1559,7 +2059,7 @@ header the data ends inside is
 the message rebuilt on its own reads
 <a class="reference internal" href="../pcapkit/corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED" title="pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TRUNCATED</span></code></a> as well, an
 ICMP one included (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>).</p></li>
-<li><p><strong>DCCP covers what its Checksum Coverage gives</strong> (<span class="target" id="index-65"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-9.2"><strong>RFC 4340 Section 9.2</strong></a>), over
+<li><p><strong>DCCP covers what its Checksum Coverage gives</strong> (<span class="target" id="index-109"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-9.2"><strong>RFC 4340 Section 9.2</strong></a>), over
 a pseudo-header that carries the whole packet’s length, as TCP’s does, so a
 fragment is
 <a class="reference internal" href="../pcapkit/corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus.NO_PSEUDO_HEADER" title="pcapkit.corekit.checksum.internet.ChecksumStatus.NO_PSEUDO_HEADER"><code class="xref py py-attr docutils literal notranslate"><span class="pre">NO_PSEUDO_HEADER</span></code></a>
@@ -1649,12 +2149,12 @@ field reads <code class="docutils literal notranslate"><span class="pre">0xFFFF<
 registered without a format, and Hone’s and Sysdig’s are defined only in those
 projects’ sources.</p></li>
 <li><p><a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3041">#3041</a> – the IPv4 options ZSU, FINN, IMITD, ENCODE, VISA and DPS, and
-the <span class="target" id="index-66"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4727.html"><strong>RFC 4727</strong></a> experiments: none has a public option layout.</p></li>
+the <span class="target" id="index-110"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4727.html"><strong>RFC 4727</strong></a> experiments: none has a public option layout.</p></li>
 <li><p><a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3042">#3042</a> – the TCP options Skeeter, Bubba, Trailer Checksum, SNAP and TCP
 Compression Filter: registered to people, with no document.</p></li>
 <li><p><a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3043">#3043</a> – IPv6 routing type 1, Nimrod: IANA cites no document, and
 Nimrod’s specification defines no routing-header layout.</p></li>
-<li><p><a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3044">#3044</a> – ICMPv4 types 6 and 32: <span class="target" id="index-67"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6918.html"><strong>RFC 6918</strong></a> records no public
+<li><p><a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3044">#3044</a> – ICMPv4 types 6 and 32: <span class="target" id="index-111"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6918.html"><strong>RFC 6918</strong></a> records no public
 information on type 6, and type 32’s only reference is a work in progress no
 archive holds.</p></li>
 <li><p><a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3045">#3045</a> – the SCTP PPIDs whose registration names no document, or only a
@@ -1734,7 +2234,7 @@ NGAP’s and the other PPIDs carried over DTLS (<a class="extlink-issue referenc
 fragments they hold (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2957">#2957</a>), under <a class="reference internal" href="#reassembly-beyond-ip-and-tcp">Reassembly Beyond IP and TCP</a>.</p></li>
 <li><p><strong>The Mobility Header option-payload registry</strong>, under <a class="reference internal" href="#mobility-header">Mobility Header</a>
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2937">#2937</a>), and the dissectors it would register: the MLD and IGMPv3
-records of the multicast options (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2994">#2994</a>) and the <span class="target" id="index-68"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6088.html"><strong>RFC 6088</strong></a> traffic
+records of the multicast options (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2994">#2994</a>) and the <span class="target" id="index-112"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6088.html"><strong>RFC 6088</strong></a> traffic
 selectors (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2990">#2990</a>).</p></li>
 <li><p><strong>Bindings</strong>, under <a class="reference internal" href="#registered-but-not-dissected">Registered, but Not Dissected</a>: the 802.11 frame body
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2936">#2936</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2975">#2975</a>), L2TPv3 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2976">#2976</a>) and L2F
@@ -1746,6 +2246,8 @@ selectors (<a class="extlink-issue reference external" href="https://github.com/
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3008">#3008</a>), and the suite shipped in the wheel (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3022">#3022</a>).</p></li>
 <li><p><strong>Iterative dissection</strong>, under <a class="reference internal" href="#recursive-dissection-with-a-depth-limit">Recursive Dissection, With a Depth Limit</a>,
 whose issue is not filed yet.</p></li>
+<li><p><strong>The 2.x protocols</strong>, under <a class="reference internal" href="#planned-for-2-x">Planned for 2.x</a>, whose issues are not filed
+yet.</p></li>
 </ul>
 <p><strong>Per-entry coverage of the option and parameter registries.</strong> The option,
 parameter, block and frame registries are <em>enumerated</em> but not <em>implemented</em>
@@ -1854,6 +2356,7 @@ it.</p>
 <li><a class="reference internal" href="#mobility-header">Mobility Header</a></li>
 <li><a class="reference internal" href="#dtls">DTLS</a></li>
 <li><a class="reference internal" href="#registered-but-not-dissected">Registered, but Not Dissected</a></li>
+<li><a class="reference internal" href="#planned-for-2-x">Planned for 2.x</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#pcapng-support">PCAPNG Support</a></li>
