@@ -3,10 +3,10 @@
 """OSPFv1 Authentication Types
 =================================
 
-.. module:: __main__
+.. module:: pcapkit.const.ospfv1.authentication
 
 This module contains the constant enumeration for **OSPFv1 Authentication Types**,
-which is automatically generated from :class:`__main__.Authentication`.
+which is automatically generated from :class:`pcapkit.vendor.ospfv1.authentication.Authentication`.
 
 """
 
