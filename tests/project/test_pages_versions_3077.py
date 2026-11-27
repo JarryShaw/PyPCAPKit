@@ -68,6 +68,11 @@ RELEASES = ('v0.9.0', 'v1.2.0', 'v1.10.0.dev1', 'v1.10.0a1', 'v1.10.0a2', 'v1.10
             'v1.10.0', 'v1.10.0.post1.dev1', 'v1.10.0.post1', 'v1.10.0.post2', 'v1.10.1')
 #: Tags that name no docs version.
 NOT_RELEASES = ('conda-1.10.0', 'conda-v1.10.0', 'v1.10.0+local', 'vfoo', 'v1.10.0-rc1', '1.10.0')
+#: The release tags Read the Docs never built, as its API listed them for #3135:
+#: each active, with its one build failed. Read the Docs itself is not read here.
+UNBUILT = frozenset({'v1.0.0b1', 'v1.3.1.dev0', 'v1.3.1.dev1', 'v1.3.1.dev2', 'v1.3.5.post38', 'v1.3.5.post39',
+                     'v1.3.5.post40', 'v1.3.5.post42', 'v1.3.5.post43', 'v1.4.0', 'v1.5.0a1', 'v1.5.0b1',
+                     'v1.5.0b2', 'v1.5.0b4'})
 #: The versions built from a branch, in the map's order: ``develop`` as ``latest``,
 #: and Stable Branch's mirror of ``main`` as ``stable``. ``dev`` is none: it would
 #: duplicate ``latest`` (#3077).
@@ -133,6 +138,19 @@ class TestTheVersions(unittest.TestCase):
         self.assertEqual(list(self.module.versions(NOT_RELEASES).items()),
                          [(name, f'{READ_THE_DOCS}en/{name}/') for name in BRANCHES])
 
+    def test_a_release_read_the_docs_never_built_is_left_out(self) -> None:
+        """#3135: its Pages path would otherwise redirect to Read the Docs' 404."""
+        tags = list(RELEASES + tuple(UNBUILT))
+        random.Random(3135).shuffle(tags)
+        self.assertEqual(list(self.module.versions(tags)), [*BRANCHES, *RELEASES])
+        # Their neighbours stay, as Read the Docs built them.
+        self.assertEqual(list(self.module.versions(['v1.3.5.post40', 'v1.3.5.post41', 'v1.4.0', 'v1.4.1'])),
+                         [*BRANCHES, 'v1.3.5.post41', 'v1.4.1'])
+        self.assertEqual(self.module.UNBUILT, UNBUILT)
+        for tag in sorted(UNBUILT):
+            with self.subTest(tag=tag):
+                self.assertTrue(self.module.RELEASE.fullmatch(tag))
+
 
 class TestTheScript(unittest.TestCase):
     """``python util/pages_versions.py BUILD --remote REPO``, against a scratch repository's tags."""
@@ -169,7 +187,8 @@ class TestTheScript(unittest.TestCase):
                               timeout=scale_timeout(60))
 
     def test_it_writes_both_files_from_the_tags(self) -> None:
-        for tag in ('v1.10.0', 'v1.2.0', 'v1.10.0rc1', 'conda-1.10.0', 'vfoo'):
+        # `v1.4.0` is a release Read the Docs never built (#3135).
+        for tag in ('v1.10.0', 'v1.2.0', 'v1.10.0rc1', 'conda-1.10.0', 'vfoo', 'v1.4.0'):
             self.git('tag', tag)
         self.git('tag', '-a', 'v1.10.1', '-m', 'annotated')
         result = self.run_script()
@@ -211,13 +230,13 @@ class TestTheScript(unittest.TestCase):
 
 
 class TestTheNotFoundPage(unittest.TestCase):
-    """The page against the map the script writes for one release, its branches included."""
+    """The page against the map the script writes for a release and one Read the Docs never built."""
 
     @classmethod
     def setUpClass(cls) -> None:
         module = load_script()
         cls.page = module.page()
-        cls.VERSIONS = module.versions(['v1.7.0'])
+        cls.VERSIONS = module.versions(['v1.7.0', 'v1.4.0'])
 
     def run_page(self, pathname: 'str', search: 'str' = '', fragment: 'str' = '',
                  ok: 'bool' = True, offline: 'bool' = False) -> 'dict[str, Any]':
@@ -262,6 +281,14 @@ class TestTheNotFoundPage(unittest.TestCase):
         for pathname in ('/PyPCAPKit/dev/pcapkit/foundation/extraction.html', '/PyPCAPKit/dev/', '/PyPCAPKit/dev'):
             with self.subTest(pathname=pathname):
                 self.assertEqual(self.run_page(pathname, '?q=1', '#top'),
+                                 {'fetched': ['/PyPCAPKit/versions.json'], 'replaced': None})
+
+    def test_a_release_read_the_docs_never_built_stays_not_found(self) -> None:
+        """Rather than redirect to Read the Docs' 404 (#3135)."""
+        self.assertNotIn('v1.4.0', self.VERSIONS)
+        for pathname in ('/PyPCAPKit/v1.4.0/index.html', '/PyPCAPKit/v1.4.0/', '/PyPCAPKit/v1.4.0'):
+            with self.subTest(pathname=pathname):
+                self.assertEqual(self.run_page(pathname, '', '#top'),
                                  {'fetched': ['/PyPCAPKit/versions.json'], 'replaced': None})
 
     def test_an_unreadable_map_stays_not_found(self) -> None:
