@@ -13,6 +13,9 @@ analysis.
 
    The whole project requires **Python 3.8** or later. CI supports 3.11 to 3.15, and
    still tests the end-of-life 3.8 to 3.10 without letting a failure block anything.
+   Their warnings and failures are reported in the
+   `CI reports <https://github.com/JarryShaw/PyPCAPKit/discussions/categories/ci-reports>`__
+   discussions.
 
 .. .. contents::
 ..    :depth: 2

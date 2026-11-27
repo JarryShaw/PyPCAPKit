@@ -13,7 +13,9 @@ packet through a more *Pythonic* interface. Where that depth is not needed, the 
 interface drives those tools as third-party extraction engines.
 
 Requires **Python 3.8** or later. CI supports 3.11 to 3.15, and tests the end-of-life
-3.8 to 3.10 without letting a failure block anything.
+3.8 to 3.10 without letting a failure block anything. Their warnings and failures are
+reported in the [CI reports](https://github.com/JarryShaw/PyPCAPKit/discussions/categories/ci-reports)
+discussions.
 
 ## Installation
 
