@@ -187,32 +187,6 @@ class TestIEEE802_11(unittest.TestCase):
         self.assertEqual(parsed.info.ht_control.variant, 'HT')
         self.assertEqual(parsed.payload.data, b'\x7f')
 
-    def test_control_frame_header_length_per_subtype(self) -> None:
-        """Every control subtype: RA and TA (16 octets); Control Frame
-        Extension as the Linux kernel's ``ieee80211_hdrlen()`` reads it (16,
-        whose Address 2 is NAV-SA in a DMG DTS); RA alone for CTS and Ack
-        (10); and the minimal frame format of §9.2.3 (10) for the reserved
-        subtypes and Control Wrapper, where the kernel gives 16."""
-        from pcapkit.const.ieee802_11.control_subtype import ControlSubtype
-        from pcapkit.const.ieee802_11.type import Type
-
-        expected = {0b0000: 10, 0b0001: 10, 0b0010: 16, 0b0011: 16, 0b0100: 16, 0b0101: 16,
-                    0b0110: 16, 0b0111: 10, 0b1000: 16, 0b1001: 16, 0b1010: 16, 0b1011: 16,
-                    0b1100: 10, 0b1101: 10, 0b1110: 16, 0b1111: 16}
-        rest = ADDR[1] + b'\x04\x00\x00\x00' + b'\xde\xad\xbe\xef'
-        for subtype, hdr_len in expected.items():
-            with self.subTest(subtype=subtype):
-                raw = _fc(1, subtype) + b'\x02\x00' + ADDR[0] + rest
-                parsed = self._parse(raw)
-                info = parsed.info
-                self.assertIs(info.frame_control.type, Type.Control)
-                self.assertEqual(info.frame_control.subtype, ControlSubtype.get(subtype))
-                self.assertEqual(parsed.length, hdr_len)
-                self.assertEqual(info.addr2, _mac(2) if hdr_len == 16 else None)
-                for absent in ('addr3', 'seq_ctrl', 'addr4', 'qos_control', 'ht_control'):
-                    self.assertIsNone(info[absent])
-                self.assertEqual(parsed.payload.data, raw[hdr_len:])
-
     def test_known_control_frames(self) -> None:
         """``d4 00`` is an Ack and ``b4 00`` an RTS; PS-Poll carries the AID in
         Duration/ID (§9.2.4.2)."""
@@ -284,12 +258,18 @@ class TestIEEE802_11(unittest.TestCase):
     def test_every_type_subtype_and_flag_round_trips(self) -> None:
         """Every (Type, Subtype) pair of the Table 9-1 registries, crossed with
         To DS, From DS and +HTC/Order, parses to the header length the layout
-        rule gives and rebuilds byte for byte, and ``make()`` with the same
-        values builds the same octets."""
+        rule gives, with Address 2 read where the header carries it and every
+        field it does not carry absent, and rebuilds byte for byte, and
+        ``make()`` with the same values builds the same octets."""
         from pcapkit.const.ieee802_11.control_subtype import ControlSubtype
         from pcapkit.const.ieee802_11.type import Type
         from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
 
+        # Control subtypes with RA and TA (16 octets), Control Frame Extension
+        # among them as the Linux kernel's ``ieee80211_hdrlen()`` reads it, with
+        # NAV-SA as Address 2 in a DMG DTS. The rest carry RA alone (10): CTS and
+        # Ack, and the reserved subtypes and Control Wrapper as the minimal frame
+        # format of §9.2.3, where the kernel gives 16.
         ta_subtypes = {0b0010, 0b0011, 0b0100, 0b0101, 0b0110, 0b1000, 0b1001, 0b1010, 0b1011,
                        0b1110, 0b1111}
         body = b'\xaa\xbb\xcc'
@@ -297,10 +277,11 @@ class TestIEEE802_11(unittest.TestCase):
             for subtype in range(16):
                 for flags in (0, TO_DS, FROM_DS, TO_DS | FROM_DS, ORDER, TO_DS | FROM_DS | ORDER):
                     with self.subTest(type=type_.name, subtype=subtype, flags=flags):
+                        addr3 = type_ in (Type.Management, Type.Data)
                         qos = type_ == Type.Data and bool(subtype & 0b1000)
                         addr4 = type_ == Type.Data and bool(flags & TO_DS) and bool(flags & FROM_DS)
                         htc = (type_ == Type.Management or qos) and bool(flags & ORDER)
-                        if type_ in (Type.Management, Type.Data):
+                        if addr3:
                             hdr_len = 24 + 6 * addr4 + 2 * qos + 4 * htc
                         elif type_ == Type.Control:
                             hdr_len = 16 if subtype in ta_subtypes else 10
@@ -309,8 +290,15 @@ class TestIEEE802_11(unittest.TestCase):
                         raw = _fc(type_, subtype, flags) + bytes([subtype, flags])
                         raw += bytes(range(1, hdr_len - 3)) + body
                         parsed = self._parse(raw)
+                        info = parsed.info
+                        self.assertIs(info.frame_control.type, type_)
                         self.assertEqual(parsed.length, hdr_len)
                         self.assertEqual(parsed.payload.data, body)
+                        self.assertEqual(info.addr2, ':'.join(f'{octet:02x}' for octet in raw[10:16])
+                                         if hdr_len >= 16 else None)
+                        for name, carried in (('addr3', addr3), ('seq_ctrl', addr3), ('addr4', addr4),
+                                              ('qos_control', qos), ('ht_control', htc)):
+                            self.assertEqual(info[name] is not None, carried, name)
 
                         made = IEEE802_11.from_fields(**IEEE802_11._make_data(parsed.info))
                         self.assertEqual(made.data.hex(), raw.hex())
