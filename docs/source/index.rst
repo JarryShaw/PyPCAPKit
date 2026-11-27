@@ -214,6 +214,26 @@ The CLI needs the ``cli`` extra:
    # or explicitly
    pip install pypcapkit emoji
 
+From conda, one ``noarch`` package serves every platform and Python, with the
+core functionality alone (:issue:`3133`). Its run requirements come from
+conda-forge:
+
+.. code-block:: shell
+
+   conda install -c jarryshaw -c conda-forge pypcapkit
+
+An optional feature takes its package from ``pip`` in that environment, which
+:mod:`pcapkit` uses ahead of what it vendors. Naming the package installs that
+alone; an extra, such as ``pypcapkit[crypto]``, also installs the vendored
+``dictdumper`` and ``tbtrim`` again from PyPI:
+
+.. code-block:: shell
+
+   # NGAP decoding, ESP decryption and the CLI display
+   pip install pycrate cryptography emoji
+   # an engine, such as DPKT
+   pip install dpkt
+
 Documentation Versions
 ======================
 

@@ -142,8 +142,8 @@ By the owner's ruling, a version under active development carries the :pep:`440`
 alpha, beta or release candidate, which this project ships for real (``1.5.0b14``)
 and must keep publishable. ``version_check``'s ``PCAPKIT_DEV_RELEASE`` output reads
 ``Version(__version__).is_devrelease``, never ``is_prerelease`` (which a real beta
-sets too), and ``github``, ``tag``, ``pypi`` and ``conda`` all refuse to run while it
-is ``true``, so a scheduled Vendor Update can never tag or publish a dev version on
+sets too), and ``github``, ``tag``, ``pypi``, ``conda-build`` and ``conda`` all refuse
+to run while it is ``true``, so a scheduled Vendor Update can never tag or publish a dev version on
 ``github-release``'s one approval alone (:issue:`887`, below). That approval is one
 person approving a diff, usually for reasons unrelated to the version string, so a
 stray ``.devN`` is easy to miss there, and a re-run of a job that already skipped
@@ -233,9 +233,9 @@ the default branch, and ``tag`` pulls ``main`` before tagging.
   it reads ``main`` at all; the :file:`conda/build` reset, "Reset Build
   Number", is a separate commit on top of ``main``, described under
   `Precautions`_.
-* ``pypi`` and ``conda`` check out that commit and, before building, check
-  that every tag they publish under names it, as ``tag`` does for the ``v*``
-  tag. A run created for a *later* commit of the same version therefore never
+* ``pypi``, ``conda-build`` and ``conda`` check out that commit and, before
+  building or uploading, check that every tag the files are published under
+  names it, as ``tag`` does for the ``v*`` tag. A run created for a *later* commit of the same version therefore never
   publishes a second tree under that version. ``version_check`` resolves the
   ``v*`` tag the same way first, in "Check which commit the version's tag
   names", and off a ``v*`` ref a tag naming another commit skips the gate and every publisher
@@ -244,7 +244,7 @@ the default branch, and ``tag`` pulls ``main`` before tagging.
   ``::warning`` naming both commits and what is missing, and the run stays
   green. A ``v*`` push of such a version still fails with the
   check's ``::error``. A partial release is finished by re-running the run that
-  tagged it, or, for Anaconda files that run's own ``conda`` legs cannot
+  tagged it, or, for Anaconda files that run's own ``conda-build`` cannot
   build, by Conda Update's ``publish`` dispatch (see `Recovery`_).
 * ``pypi`` and ``conda`` attach their files with ``gh release upload``, in
   their "Upload package to GitHub Release" steps, not ``action-gh-release``,
@@ -259,7 +259,7 @@ the default branch, and ``tag`` pulls ``main`` before tagging.
   says a ``502`` "may leave an empty asset with a state of starter. It can be
   safely deleted.", so an asset in any other state is deleted and uploaded
   again (``--clobber``). ``conda``'s upload is not gated on ``check_leg``, so a
-  leg whose Anaconda upload landed but whose GitHub upload failed still gets
+  run whose Anaconda upload landed but whose GitHub upload failed still gets
   its asset on a re-run.
 * ``gh release upload`` also fails, deliberately, where the action does not.
   With no release for the tag, the upload fails with ``gh``'s
@@ -447,27 +447,18 @@ a version whose tag names another commit (`One Commit per Release`_):
   :ref:`KTLO <ktlo-tier>` legs' wheels (:issue:`1633`) are not counted. This job is
   already idempotent (``skip-existing: true`` on every upload step), so the
   check exists only to save the cost of the build matrix, not for correctness.
-* ``conda`` compares Anaconda's aggregate count against the expected one (the
-  ``linux-64``, ``osx-64``, ``osx-arm64`` and ``win-64`` files for each Python
-  version of its matrix, one platform per ``os`` leg,
-  :issue:`1922`, :issue:`2060`) as the same
-  kind of job-level cost saver, and *also*
-  checks, per matrix leg, whether that leg's own platform/Python distribution
-  is already there -- this second check is the actual correctness fix, because
+* ``conda`` compares Anaconda's count against the expected one -- the one
+  ``noarch`` file (:issue:`3133`) -- as the same kind of job-level cost saver,
+  which ``conda-build`` reads too, so a complete release builds and installs
+  nothing. ``conda`` *also* checks, just before it uploads, whether that file is
+  already there -- this second check is the actual correctness fix, because
   ``anaconda/actions/upload-package`` has no ``skip-existing`` equivalent, only
   ``force:`` (never set), so re-uploading a file it already has fails outright
-  rather than being absorbed. The ``macos-26-intel`` leg is the exception: the
-  action's CLI download returns 404 there, so its "Upload conda packages to
-  Anaconda (Intel)" step runs ``anaconda upload --skip-existing`` instead
-  (:issue:`2044`), which skips
-  such a file. The ``windows-latest`` leg's "Upload conda packages to Anaconda
-  (Windows)" makes the same call (:issue:`2060`). Conda Update's Intel and
-  Windows legs run the same steps, so they keep a file anaconda.org already has,
-  where the action's ``force: true`` on its other legs replaces it.
+  rather than being absorbed.
 
 These evidence checks all run inside ``version_check``, curling PyPI's and
-Anaconda's public, unauthenticated JSON APIs; the per-leg check runs inside
-``conda`` itself, once per matrix leg, against the same Anaconda endpoint.
+Anaconda's public, unauthenticated JSON APIs; the second Anaconda check runs
+inside ``conda`` itself, against the same Anaconda endpoint.
 
 The PyPI and Anaconda counts are of the tiers the version was released with.
 Until its ``v*`` tag exists, that is this run's
@@ -483,7 +474,14 @@ workflows of the time.
 The Anaconda count's platforms follow the same rule, from the ``SUBDIRS`` line
 of :file:`util/release_published.py` at the tag's commit or, for a tag older
 than that file, the line it was added with, so a version released before
-``win-64`` was published is not read as lacking it (:issue:`2060`).
+``win-64`` was published is not read as lacking it (:issue:`2060`). So a
+version tagged before :issue:`3133` still expects a file per platform and
+supported Python, its tag's ``SUBDIRS`` and ``conda-builds``, and one tagged
+after it the single ``noarch`` file. 1.8.1 is one of the former, and stays
+partial on Anaconda as a known issue: the account's 3 GiB storage quota
+refused 12 of its 20 uploads, when each vendored the optional dependencies. The
+noarch package carries the core alone and measured about 1.5 MiB; freeing space on
+anaconda.org is the owner's, by hand.
 
 On the tag-push path ``startsWith(github.ref_name, 'v')`` bypasses the
 evidence check unconditionally; on the ``workflow_run`` path it falls through
@@ -492,9 +490,9 @@ to whichever evidence that job owns.
 The Skip-Cascade Guard
 ----------------------
 
-``tag``, ``pypi`` and ``conda`` each depend on ``github`` (and ``conda`` also
-on ``tag``), and GitHub Actions skips a job whose ``needs:`` included a job
-that itself skipped -- *before* that job's own ``if:`` is even evaluated --
+``tag``, ``pypi``, ``conda-build`` and ``conda`` each depend on ``github`` (and
+the two conda jobs also on ``tag``), and GitHub Actions skips a job whose
+``needs:`` included a job that itself skipped -- *before* that job's own ``if:`` is even evaluated --
 unless the ``if:`` calls a status-check function itself. ``github``
 legitimately skips whenever its own tag already exists, which is exactly the
 retry case this guard is for. Left alone, that skip would cascade: ``pypi``'s
@@ -504,33 +502,37 @@ itself call a status-check function -- effectively ``success()`` over
 ``needs:`` -- would still skip it, because ``github`` did not *succeed* in
 this run, it *skipped*.
 
-``tag``, ``pypi`` and ``conda`` all guard against this the same way the
-other workflows gated on a test run already do for the identical problem --
+``tag``, ``pypi``, ``conda-build`` and ``conda`` all guard against this the same
+way the other workflows gated on a test run already do for the identical problem --
 ``cron-vendor.yml``, ``deploy-pages.yml`` and ``cron-conda.yml`` each open
 with ``!cancelled()`` and require ``needs.head.result != 'failure'`` (and, in
 ``cron-conda.yml``, its ``mode`` job's success, :issue:`2060`), ``head`` being their
 call to ``cron-head.yml``, so that a skipped gate does not cascade-skip them,
-while an outright failure or a genuine run cancellation still does. ``tag``, ``pypi`` and ``conda`` are
-stricter about their *publishing* predecessors -- ``github``, and for
-``conda`` also ``tag``: ``!cancelled() && (needs.<job>.result == 'success' ||
+while an outright failure or a genuine run cancellation still does. ``tag``,
+``pypi``, ``conda-build`` and ``conda`` are stricter about their *publishing*
+predecessors -- ``github``, and for the two conda jobs also ``tag``:
+``!cancelled() && (needs.<job>.result == 'success' ||
 needs.<job>.result == 'skipped')``, not ``!= 'failure'``. The two spellings
 differ only when a predecessor's own result is ``cancelled``, which
 ``!= 'failure'`` still admits and the equality pair does not. Concretely: if
 ``tag`` is cancelled while the run itself is not, ``!= 'failure'`` would let
-``conda`` proceed into its check that ``conda-<version>+0`` names this run's
-commit, a tag ``tag`` never pushed, trading a clean skip for a failed step; the
-equality pair skips ``conda`` outright instead.
+``conda-build`` proceed into its check that ``conda-<version>+0`` names this
+run's commit, a tag ``tag`` never pushed, trading a clean skip for a failed step; the
+equality pair skips it, and so ``conda-test`` and ``conda``, outright instead.
 
-``version_check`` is the exception, and deliberately so: ``tag``, ``pypi`` and
-``conda`` each require ``needs.version_check.result == 'success'`` with no
-``|| 'skipped'``. It produces the evidence the gates read, so a skipped or
-cancelled ``version_check`` leaves them nothing to decide on. ``unit-tests`` is
+``version_check`` is the exception, and deliberately so: ``tag``, ``pypi``,
+``conda-build`` and ``conda`` each require
+``needs.version_check.result == 'success'`` with no ``|| 'skipped'``. It
+produces the evidence the gates read, so a skipped or cancelled
+``version_check`` leaves them nothing to decide on. ``unit-tests`` is
 held to the same bar for a different reason: it is the release test gate, and
 it skips when nothing is publishable
 (:issue:`1052`), so accepting
 ``skipped`` there would publish untested. ``github`` names it in ``needs:`` instead and relies on the implicit
-``success()``. The gate's own ``if:`` is the union of the publishers'
-conditions, with ``!= 'true'`` so unknown evidence runs it; should the two
+``success()``. ``conda-test`` and ``conda`` require ``conda-build``'s
+``success``, and ``conda`` ``conda-test``'s, the same way: a skipped build left
+nothing to install or upload (:issue:`3133`). The gate's own ``if:`` is the
+union of the publishers' conditions, with ``!= 'true'`` so unknown evidence runs it; should the two
 ever drift apart, the failure is a release that did not happen, which
 ``release_status`` reports loudly, never one that went out untested.
 
@@ -548,12 +550,16 @@ The Release Pipeline
        GH["github -- GitHub Release<br/>creates/attaches the v* tag<br/>THE ONLY APPROVAL"]
        GH --> TG["tag -- Conda Tag<br/>conda-&lt;version&gt;+0 tag at github.sha<br/>then conda/build reset on main"]
        GH --> PY["pypi -- build + publish<br/>OIDC trusted publishing"]
-       TG --> CD["conda -- build + upload<br/>matrix: OS x Python, per-leg evidence"]
-       GH --> CD
+       TG --> CB["conda-build -- one noarch package<br/>its own evidence, an artifact"]
+       GH --> CB
+       CB --> CT["conda-test -- installs that file<br/>on each platform and Python"]
+       CT --> CD["conda -- upload<br/>once every supported leg passed"]
        VC --> RS
        UT --> RS
        GH --> RS
        TG --> RS
+       CB --> RS
+       CT --> RS
        CD --> RS
        PY --> RS
        RS["release_status -- always runs<br/>reports why nothing released, or that it did"]
@@ -561,19 +567,31 @@ The Release Pipeline
        class GH gate
 
 A transitive reduction: ``version_check`` and ``unit-tests`` are also direct
-``needs:`` of ``tag``, ``pypi`` and ``conda`` in the file, but ``github``
-already implies them (``github`` itself depends on both), so drawing them would
-add edges without changing which job can start before which. ``release_status``'s
-edges are drawn in full, since it depends directly on *every* job precisely so
-that it can run regardless of which of them skipped.
+``needs:`` of ``tag``, ``pypi``, ``conda-build`` and ``conda`` in the file, but
+``github`` already implies them (``github`` itself depends on both), as
+``conda-test`` does ``conda``'s on ``conda-build``, ``tag`` and ``github``, so
+drawing them would add edges without changing which job can start before which.
+``release_status``'s edges are drawn in full, since it depends directly on
+*every* job precisely so that it can run regardless of which of them skipped.
+
+``conda-build`` builds the package once and hands it on as the
+``conda-package`` artifact (:issue:`3133`). ``conda-test`` installs that file
+from a local channel beside conda-forge, on linux-64, linux-aarch64, osx-64,
+osx-arm64 and win-64 under each CPython of both tiers, and runs the recipe's
+test commands; ``conda`` uploads the same file once every supported leg has
+passed. A :ref:`KTLO <ktlo-tier>` leg's failure is a warning on a green leg
+(:issue:`1672`), so it never holds the upload back. ``release_status`` reads a
+failed or cancelled build or supported leg as ``conda``'s own result, rather
+than as a skip its evidence cannot explain.
 
 Only ``github-release`` carries a required reviewer; ``conda-tag``,
 ``pypi`` and ``anaconda`` kept their environments but had their reviewers
 removed on :issue:`887`, and ``release-app``, which no Create Release job names,
 has none either (`The Release App`_, :issue:`2648`).
 What still makes one approval mean *the whole release* is the ``needs:``
-graph: ``tag`` and ``pypi`` both depend on ``github``, and ``conda`` depends on
-``tag`` and ``github`` -- so nothing downstream of ``github`` can
+graph: ``tag`` and ``pypi`` both depend on ``github``, and ``conda-build``,
+which ``conda-test`` and ``conda`` follow, depends on ``tag`` and ``github`` --
+so nothing downstream of ``github`` can
 start before it is approved, and rejecting it leaves nothing tagged and
 nothing published. Without its ``needs: github``, ``tag``, which has no
 reviewer of its own, could push a commit to ``main`` and cut a ``conda-*`` tag
@@ -671,16 +689,16 @@ release rather than re-tagging it. A re-run is a real fix, since under
 whether *their own* artefact is missing, so it finishes whichever jobs did not
 complete instead of skipping them on the ``v*`` tag's mere existence. ``pypi`` is
 safe to re-run (``skip-existing: true``), and so is
-``conda``, because each matrix leg checks Anaconda for its own
-platform/Python distribution before uploading and skips only that leg's
-upload if it is already there. Neither replaces a file the GitHub Release
-already has (:issue:`1640`).
+``conda``, because it checks Anaconda for its distribution before uploading
+and skips the upload if it is already there. Neither replaces a file the
+GitHub Release already has (:issue:`1640`).
 
 A re-run repeats the tagged commit's own workflow, so it cannot upload
-Anaconda files that commit's ``conda`` legs cannot build: 1.5.0b14's
+Anaconda files that commit's ``conda-build`` cannot build: 1.5.0b14's
 ``osx-64`` legs were broken at its tag (:issue:`2140`). Dispatching Conda Update
-with ``publish`` on ``main`` uploads every platform under a bumped build
-(:issue:`2060`). Like every Conda Update bump, it **packages only the tree of the**
+with ``publish`` on ``main`` uploads the noarch package under a bumped build
+(:issue:`2060`, :issue:`3133`), which completes a release made as noarch, not one
+counted per platform. Like every Conda Update bump, it **packages only the tree of the**
 ``v*`` **tag for** ``main``'s **version**, never ``main``'s own, taking
 :file:`conda/` and :file:`util/` from the bump it commits to ``main``: the recipe
 that can build what the tag's legs could not, and the scripts ``main``'s workflow

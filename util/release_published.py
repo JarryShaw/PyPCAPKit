@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Whether a version's files are all on PyPI, and all on Anaconda (#888, #1633, #1922).
+"""Whether a version's files are all on PyPI, and all on Anaconda (#888, #1633, #1922, #3133).
 
 :file:`.github/workflows/create-release.yml`'s ``version_check`` job runs it,
 after setup-python, in these forms:
@@ -12,7 +12,8 @@ after setup-python, in these forms:
 ``python3 util/release_published.py anaconda /tmp/anaconda_release.json``
     The step "Check Anaconda publish completeness". It expects a distribution
     for each platform the version was released for, :func:`released_subdirs`,
-    and each build in ``PCAPKIT_CONDA_BUILDS``, reads
+    and each build in ``PCAPKIT_CONDA_BUILDS``: the one noarch file from #3133
+    on, and one per platform and supported Python before it. It reads
     ``https://api.anaconda.org/release/jarryshaw/pypcapkit/<PCAPKIT_VERSION>``'s
     ``distributions`` and appends ``PCAPKIT_CONDA_COMPLETE``.
 
@@ -61,8 +62,8 @@ __all__ = ['SUBDIRS', 'SCRIPT', 'SUBDIRS_LINE', 'PYPI_URL', 'ANACONDA_URL', 'IND
            'anaconda_source', 'Unbound', 'Failed', 'var', 'words', 'fetch', 'count', 'integer', 'complete', 'check',
            'git', 'released_subdirs', 'pypi', 'anaconda', 'main']
 
-#: Each platform the ``conda`` legs publish, for each supported build (#1922, #2060).
-SUBDIRS = 'linux-64 osx-64 osx-arm64 win-64'
+#: Each platform the ``conda`` job publishes: the one ``noarch: python`` package (#3133).
+SUBDIRS = 'noarch'
 #: This script, whose :data:`SUBDIRS` line at a tag's commit names what that
 #: version was released for (#2060), and that line.
 SCRIPT = 'util/release_published.py'
@@ -73,7 +74,7 @@ ANACONDA_URL = 'https://api.anaconda.org/release/jarryshaw/pypcapkit/'
 #: What each index's log line counts, the index's name, and the output it appends.
 INDEXES = {
     'pypi': (b'files', b'PyPI', 'PCAPKIT_PYPI_COMPLETE'),
-    'anaconda': (b'platform/Python combinations', b'Anaconda', 'PCAPKIT_CONDA_COMPLETE'),
+    'anaconda': (b'platform/build combinations', b'Anaconda', 'PCAPKIT_CONDA_COMPLETE'),
 }
 
 
@@ -245,8 +246,9 @@ def released_subdirs() -> 'bytes':
     checkout lacked it; a commit older than :data:`SCRIPT` reads the line the
     script was added with, as that step reads the first tier file. So a version
     is not expected to have a platform its release did not publish: no tag
-    before #2060 lists win-64. Where ``git`` fails or the line does not parse,
-    :data:`SUBDIRS`, with a ``::warning``.
+    before #2060 lists win-64, and none before #3133 lists ``noarch``. Where
+    ``git`` fails or the line does not parse, :data:`SUBDIRS`, with a
+    ``::warning``.
 
     """
     if var('PCAPKIT_TAG_EXISTS') != b'true':
@@ -273,7 +275,7 @@ def pypi(path: 'str') -> 'int':
 
 
 def anaconda(path: 'str') -> 'int':
-    """``PCAPKIT_CONDA_COMPLETE``: each platform the version was released for, for each supported version."""
+    """``PCAPKIT_CONDA_COMPLETE``: each platform the version was released for, for each of its builds."""
     builds = var('PCAPKIT_CONDA_BUILDS')
     subdirs = released_subdirs()
     # Exported, so curl and the snippet see it.

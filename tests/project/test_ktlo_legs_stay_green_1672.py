@@ -125,7 +125,7 @@ OUTPUTS = {
 }
 #: #2030: the steps after a summary, on ``always()`` and masked on every leg, that
 #: name and upload the job's copy of its summary for util/check_suite_report.py.
-#: They end every job with a KTLO or experimental leg but :data:`UNCOPIED_SUMMARY`'s.
+#: They end every job with a KTLO or experimental leg but :data:`UNCOPIED_SUMMARIES`'.
 JOB_SUMMARY_STEPS = ('Name the job summary', 'Upload the job summary')
 #: The ``env:`` entry by which a summary step copies its lines there too (#2030).
 SUMMARY_COPY = {'JOB_SUMMARY_COPY': '${{ runner.temp }}/job-summary.md'}
@@ -148,8 +148,14 @@ IMAGE_PYTHON = '/usr/bin/python3'
 SUMMARY_RUN = f'{IMAGE_PYTHON} util/leg_summary.py ktlo'
 EXPERIMENTAL_SUMMARY_RUN = f'{IMAGE_PYTHON} util/leg_summary.py experimental'
 #: The ``KTLO summary`` whose job keeps no copy of its summary: no CI report reads
-#: Create Release's runs (#2030).
+#: Create Release's runs (#2030), nor, for #3133's ``conda-test``, Conda Update's.
 UNCOPIED_SUMMARY = ('create-release.yml', 'pypi')
+UNCOPIED_SUMMARIES = (UNCOPIED_SUMMARY, ('create-release.yml', 'conda-test'), ('cron-conda.yml', 'conda-test'))
+#: #3133: ``conda-test``'s summary, on each runner's own interpreter: Windows has
+#: ``python`` and no ``/usr/bin/python3``, the others ``python3``.
+CONDA_SUMMARY_RUN = '"$(command -v python || command -v python3)" util/leg_summary.py ktlo'
+SUMMARY_RUNS = {('create-release.yml', 'conda-test'): CONDA_SUMMARY_RUN,
+                ('cron-conda.yml', 'conda-test'): CONDA_SUMMARY_RUN}
 #: ``pypi``'s ``KTLO summary`` in its inline shell form, the reference
 #: :data:`SUMMARY_RUN`'s script must match (#1967).
 REFERENCE_RELEASE_SUMMARY = '''\
@@ -204,12 +210,12 @@ def label(step: 'dict[str, Any]') -> 'str':
 
 def summary_tail(where: 'tuple[str, str]') -> 'tuple[str, ...]':
     """The steps that follow the summary of the job ``where``, ``(workflow, job)`` (#2030)."""
-    return () if where == UNCOPIED_SUMMARY else JOB_SUMMARY_STEPS
+    return () if where in UNCOPIED_SUMMARIES else JOB_SUMMARY_STEPS
 
 
 def summary_env(where: 'tuple[str, str]', env: 'dict[str, str]') -> 'dict[str, str]':
     """The summary step's ``env:`` for the job ``where``, which copies its lines unless uncopied (#2030)."""
-    return dict(env) if where == UNCOPIED_SUMMARY else dict(env, **SUMMARY_COPY)
+    return dict(env) if where in UNCOPIED_SUMMARIES else dict(env, **SUMMARY_COPY)
 
 
 def summary_step(spec: 'dict[str, Any]') -> 'dict[str, Any]':
@@ -455,7 +461,7 @@ class TestNoKTLOFailureTurnsAJobRed(unittest.TestCase):
                 self.assertEqual(summary.get('continue-on-error'), KTLO_GUARD)
                 self.assertEqual(summary.get('shell'), 'bash')
                 self.assertEqual(summary.get('env'), summary_env((name, job_id), SUMMARY_ENV))
-                self.assertEqual(summary['run'], SUMMARY_RUN)
+                self.assertEqual(summary['run'], SUMMARY_RUNS.get((name, job_id), SUMMARY_RUN))
             blocking = BLOCKS_EVERY_LEG.get((name, job_id), ())
             for leg in filter(is_ktlo, legs(name, job_id)):
                 for index, _, record in scenarios(name, job_id, spec, leg):
@@ -743,7 +749,7 @@ class TestAnExperimentalLegIsNonBlockingTheSameWay(unittest.TestCase):
         # One script with the KTLO summary's, so a fix to either reaches both (#1967).
         self.assertEqual(self.summary['run'], EXPERIMENTAL_SUMMARY_RUN)
         self.assertEqual(summary_step(job('unit-tests.yml', 'test'))['run'], SUMMARY_RUN)
-        # #2060: the win-64 conda leg blocks as the others do, so it has no tier of its own.
+        # Only the non-blocking tiers, KTLO and experimental, have a reason the job still succeeds.
         self.assertEqual(REASONS, {'ktlo': KTLO_REASON, 'experimental': EXPERIMENTAL_REASON})
 
     def test_each_step_names_the_leg_by_its_tier(self) -> None:

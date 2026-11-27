@@ -15,7 +15,7 @@ step outputs. These things are pinned here:
   the legs, in the same order, that ``main`` spelt out at :data:`MAIN`, apart
   from the deliberate moves: the coverage leg and the ``gate`` from 3.14 to
   ``latest``, 3.15 (#1661); PyPy's legs in ``test`` and ``integration`` (#1958);
-  the conda jobs' Intel macOS and Windows legs (#1822, #2060); and unit-tests.yml's
+  the conda jobs' matrices, moved to ``conda-test`` for one noarch package (#3133); and unit-tests.yml's
   KTLO legs in jobs of their own (#1738). Job-name templates are compared too, since rulesets match
   check names literally. Where git still has :data:`MAIN`, the recorded
   matrices are read back against it.
@@ -268,10 +268,11 @@ KTLO_AT_MAIN = [{'python-version': '3.7', 'ktlo': True, 'os': 'ubuntu-22.04'},
                 {'python-version': '3.9', 'ktlo': True, 'os': 'ubuntu-24.04'},
                 {'python-version': '3.10', 'ktlo': True}]
 CONDA_AT_MAIN = {'os': ['macos-latest', 'ubuntu-latest'], 'python-version': SUPPORTED_AT_MAIN}
-#: The conda jobs' ``os`` axis, with the Intel macOS runner (#1822) and the
-#: Windows one (#2060).
+#: The conda jobs, which build one noarch package and so have no matrix (#3133),
+#: and the names that dropped their legs' platform and Python.
 CONDA_JOBS = (('create-release.yml', 'conda'), ('cron-conda.yml', 'conda-dist'))
-CONDA_OS = ['macos-latest', 'macos-26-intel', 'ubuntu-latest', 'windows-latest']
+CONDA_NAMES = {('create-release.yml', 'conda'): 'Conda deployment (release)',
+               ('cron-conda.yml', 'conda-dist'): 'Conda deployment (update)'}
 MAIN_MATRICES = {
     ('unit-tests.yml', 'test'): {
         'python-version': SUPPORTED_AT_MAIN,
@@ -522,7 +523,8 @@ class TestTheFileAndTheScript(unittest.TestCase):
         status, printed = self.main('--github-output', github_output=str(output))
         self.assertEqual(status, 0, printed)
         self.assertEqual(self.parse_github_output(output.read_text(encoding='utf-8')), live_outputs())
-        self.assertEqual(self.main('latest', 'conda'), (0, f"{live_outputs()['latest']}\n{live_outputs()['conda']}\n"))
+        self.assertEqual(self.main('latest', 'conda-builds'),
+                         (0, f"{live_outputs()['latest']}\n{live_outputs()['conda-builds']}\n"))
         for argv, env, title in ((('nope',), None, 'Cannot read the Python version tiers'),
                                  (('--github-output',), None, 'GITHUB_OUTPUT is not set'),
                                  (('--file', str(write_tiers(self.tmp, dict(TIERS_AT_MAIN, latest='3.10')))),
@@ -683,7 +685,8 @@ class TestNothingMovedButLatest(unittest.TestCase):
     def test_every_matrix_expands_to_mains_legs(self) -> None:
         """Same legs, same order; the coverage leg moves from 3.14 to ``latest`` (#1661), PyPy's join (#1958).
 
-        The conda jobs' ``os`` axis adds Intel macOS and Windows (#1822, #2060), and
+        The conda jobs that built per platform have no matrix, as they publish one
+        noarch package, which ``conda-test`` installs on each platform (#3133), and
         the KTLO legs of each job in :data:`KTLO_TWINS` are its twin's (#1738).
 
         Where the clone holds :data:`MAIN`, :data:`MAIN_MATRICES` is read back
@@ -694,16 +697,16 @@ class TestNothingMovedButLatest(unittest.TestCase):
             if has_main():
                 with self.subTest(recorded=name, job=job_id):
                     self.assertEqual(workflow_at_main(name)['jobs'][job_id]['strategy']['matrix'], spec)
+            if (name, job_id) in CONDA_JOBS:
+                with self.subTest(workflow=name, job=job_id):
+                    self.assertNotIn('strategy', workflow(name)['jobs'][job_id])
+                continue
             expected = legs(spec)
             if (name, job_id) == ('unit-tests.yml', 'test'):
                 for leg in expected:
                     leg.pop('coverage', None)
                     if leg['python-version'] == TIERS_AT_MAIN['latest']:
                         leg['coverage'] = True
-            if (name, job_id) in CONDA_JOBS:
-                # #1822: an Intel macOS leg per version, so osx-64 is built natively;
-                # #2060: and a Windows one, for win-64.
-                expected = legs(dict(spec, os=CONDA_OS))
             expected = with_pypy(name, job_id, expected)
             if (name, job_id) in KTLO_TWINS:
                 # #1738: the KTLO legs, in MAIN's order, are the twin job's.
@@ -736,11 +739,15 @@ class TestNothingMovedButLatest(unittest.TestCase):
         job of their own (#1732). Each job of :data:`KTLO_TWINS` names its legs
         (#1738) with a template of its own, the KTLO job's ending `` (KTLO)``,
         so what stays is each leg's rendered name, but for the part a PyPy leg
-        of ``test`` names (#2899), which :func:`renamed` adds.
+        of ``test`` names (#2899), which :func:`renamed` adds. The conda jobs, which no
+        ruleset requires, name no leg since they have one (#3133).
 
         """
         for (name, job_id), template in TEMPLATES_AT_MAIN.items():
             with self.subTest(workflow=name, job=job_id):
+                if (name, job_id) in CONDA_JOBS:
+                    self.assertEqual(workflow(name)['jobs'][job_id]['name'], CONDA_NAMES[(name, job_id)])
+                    continue
                 if (name, job_id) not in KTLO_TWINS:
                     self.assertEqual(workflow(name)['jobs'][job_id]['name'], template)
                     continue
@@ -902,6 +909,8 @@ class TestEveryVersionComesFromTheFile(unittest.TestCase):
                     with self.subTest(step=where):
                         if where in exemptions or 'matrix.python-version' in text:
                             continue
+                        if not text and str(step.get('uses', '')).startswith('conda-incubator/setup-miniconda@'):
+                            continue  # #3133: base keeps its own Python; the recipe pins the build's
                         output = script_output(name, job_id, READ.fullmatch(text).group(2))  # type: ignore[union-attr]
                         # #2125: benchmark.yml's `benchmark` installs the engines' interpreters too.
                         expected = {'engine-tests': ('engine-supported', 'engine-ktlo'),
@@ -990,14 +999,14 @@ class TestTheAnacondaCheckCountsTheFile(unittest.TestCase):
             written = dict(line.split('=', 1) for line in output.read_text(encoding='utf-8').split())
             return written['PCAPKIT_CONDA_COMPLETE']
 
-    def test_each_platform_needs_each_supported_build(self) -> None:
-        builds = live_outputs()['conda-builds'].split()
-        every = [(platform, build) for platform in ('linux-64', 'osx-64', 'osx-arm64', 'win-64')
-                 for build in builds]
-        ktlo = [('linux-64', 'py' + version.replace('.', ''))
-                for version in script().tier(script().load(), 'cpython', 'ktlo')]
-        self.assertEqual(self.complete(every), 'true')
-        self.assertEqual(self.complete(every[1:] + ktlo), 'false')
+    def test_the_noarch_build_completes_it(self) -> None:
+        """#3133: the one noarch file, which no set of per-platform, per-Python files stands in for."""
+        self.assertEqual(live_outputs()['conda-builds'].split(), ['py'])
+        per_platform = [(platform, 'py' + version.replace('.', ''))
+                        for platform in ('linux-64', 'osx-64', 'osx-arm64', 'win-64')
+                        for version in script().tier(script().load(), 'cpython', 'supported')]
+        self.assertEqual(self.complete([('noarch', 'py')]), 'true')
+        self.assertEqual(self.complete(per_platform), 'false')
         self.assertEqual(self.complete([]), 'false')
 
 
@@ -1211,7 +1220,7 @@ class TestTheExperimentalTier(unittest.TestCase):
                                      expected)
         self.assertGreaterEqual(len(read), 7, 'the scan is blind')
         values = live_outputs()
-        for output in ('conda', 'engine-supported', 'engine-ktlo', 'pypi-wheels', 'conda-builds', 'pypi'):
+        for output in ('engine-supported', 'engine-ktlo', 'pypi-wheels', 'conda-builds', 'pypi'):
             with self.subTest(output=output):
                 self.assertFalse(set(re.findall(r'[\w.-]+', values[output])) & set(found))
 

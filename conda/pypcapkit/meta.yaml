@@ -1,6 +1,7 @@
 {% set name = "pypcapkit" %}
 {% set version = environ['PCAPKIT_VERSION'] %}
 {% set build_number = environ['PCAPKIT_BUILD'] %}
+{% set python = environ['PCAPKIT_PYTHON_VERSION'] %}
 
 package:
   name: "{{ name|lower }}"
@@ -8,82 +9,40 @@ package:
 
 source:
   path: ../..
-  #git_url: https://github.com/JarryShaw/PyPCAPKit.git
-  #git_rev: "conda-{{ version }}+{{ build_number }}"
-  #git_depth: 1 # (Defaults to -1/not shallow)
 
+# #3133: one package per release, for every platform and Python, carrying the
+# core functionality alone. The run requirements are pyproject.toml's
+# [project].dependencies that conda-forge has; build.sh vendors the rest into
+# pcapkit/_extern. An optional feature is pip-installed into the environment.
 build:
   number: {{ build_number }}
+  noarch: python
   entry_points:
     - pcapkit-cli = pcapkit.__main__:main
     - pcapkit-vendor = pcapkit.vendor.__main__:main
-  # #2123: every binary comes from a wheel and links only system libraries, so
-  # none needs an rpath into the prefix. On osx-64, adding one fails on the
-  # vendored chardet extensions, which have no header room for it.
-  binary_relocation: false  # [osx and x86_64]
-  #script: "{{ PYTHON }} -m pip install . -vv"
 
 requirements:
-  build:
-    - git
-    - python
-    - pip
-    - setuptools>=69.0.0
-
-    # - dictdumper~=0.8.0  # for formatted output
-    # - chardet            # for bytes decode
-    # - aenum              # for const types
-    # - tbtrim>=0.2.1      # for refined exceptions
-
-    # # version compatibility
-    # - typing-extensions
-
-    # - emoji
-    # - dpkt
-    # - scapy
-    # - pyshark
-    # - requests[socks]
-    # - beautifulsoup4[html5lib]
+  # The Python that downloaded conda/wheels: pip refuses a wheel tagged for
+  # another, and a noarch build otherwise resolves any Python.
   host:
-    - python
+    - python {{ python }}.*
     - pip
     - setuptools>=69.0.0
-
-    # - dictdumper~=0.8.0  # for formatted output
-    # - chardet            # for bytes decode
-    # - aenum              # for const types
-    # - tbtrim>=0.2.1      # for refined exceptions
-
-    # # version compatibility
-    # - typing-extensions
-
-    # - emoji
-    # - dpkt
-    # - scapy
-    # - pyshark
-    # - requests[socks]
-    # - beautifulsoup4[html5lib]
+  # util/conda_vendor.py's CONDA_FORGE names these. A noarch package cannot
+  # carry typing_extensions' python_version marker, so it is unconditional.
   run:
-    - python
-
-    # - dictdumper~=0.8.0  # for formatted output
-    # - chardet            # for bytes decode
-    # - aenum              # for const types
-    # - tbtrim>=0.2.1      # for refined exceptions
-
-    # # version compatibility
-    # - typing-extensions
-
-    # - emoji
-    # - dpkt
-    # - scapy
-    # - pyshark
-    # - requests[socks]
-    # - beautifulsoup4[html5lib]
+    - python >=3.8
+    - aenum
+    - chardet
+    - typing_extensions
 
 test:
- imports:
-   - pcapkit
+  imports:
+    - pcapkit
+  commands:
+    - pcapkit-cli --help
+    # The vendored packages import from pcapkit/_extern, which pcapkit/__init__.py appends to sys.path.
+    - python -c "import os, pcapkit, dictdumper, tbtrim; assert all(os.path.realpath(m.__file__).startswith(os.path.realpath(pcapkit._extern) + os.sep) for m in (dictdumper, tbtrim))"
 
 about:
   home: https://jarryshaw.github.io/PyPCAPKit

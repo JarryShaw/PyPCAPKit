@@ -383,11 +383,14 @@ class TestTheTiers(unittest.TestCase):
     """The rules, each against the snapshot and an edit of it."""
 
     def test_the_labels_come_from_the_workflows(self) -> None:
-        """``matrix.os || 'ubuntu-latest'``; the conda jobs' ``os`` axis; where ``latest`` is installed."""
+        """``matrix.os || 'ubuntu-latest'``; a literal ``os`` axis; where ``latest`` is installed.
+
+        No job has a literal ``os`` axis since the conda jobs build one noarch package (#3133).
+
+        """
         found = context(snapshot()).labels
         self.assertEqual(found, {'default': ['ubuntu-latest'],
-                                 # #2060: Conda Update's windows-latest leg.
-                                 'supported': ['macos-26-intel', 'macos-latest', 'ubuntu-latest', 'windows-latest'],
+                                 'supported': ['ubuntu-latest'],
                                  'latest': ['macos-latest', 'ubuntu-latest']})
 
     def test_ubuntu_latest_counts_as_its_image_and_every_newer_one(self) -> None:
@@ -434,7 +437,6 @@ class TestTheTiers(unittest.TestCase):
                     'PyPCAP/PyPCAPFile parity Python 3.11', 'PyPI distribution for Python 3.11'):
             with self.subTest(leg=old):
                 self.assertIn([old, f'{old} (KTLO)'], plan['renamed'])
-        self.assertIn('Conda deployment (release) on macos-latest with Python 3.11', plan['removed'])
         self.assertTrue(any('ktlo_311' in text for text in notes(plan, 'manual')), plan['notes'])
 
     def test_end_of_life_with_no_build_left_is_dropped(self) -> None:
@@ -522,8 +524,8 @@ class TestTheTiers(unittest.TestCase):
         self.assertEqual(plan['latest'], ['3.15', '3.15'])
         self.assertEqual(changes(plan), {'3.16': (None, {'tier': 'supported'})})
         self.assertTrue(any('`latest` stays older' in text for text in notes(plan, 'warning')), plan['notes'])
-        self.assertTrue(any('supported 3.16' in text and 'darwin arm64' in text
-                            for text in notes(plan, 'warning')), plan['notes'])
+        # #3133: no supported leg runs on macOS, where the conda jobs' legs did.
+        self.assertFalse(any('supported 3.16' in text for text in notes(plan, 'warning')), plan['notes'])
 
     def test_pypy_follows_its_newest_stable_release(self) -> None:
         """A line the newest release drops is KTLO; one only in a numbered pre-release is held; a nightly is not."""

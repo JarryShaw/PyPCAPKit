@@ -8,7 +8,7 @@ of :file:`.github/workflows/create-release.yml` runs, from the checkout's root::
 
 with ``GH_TOKEN``, ``PCAPKIT_RELEASE_TAG``, the release's tag, and
 ``PCAPKIT_ASSETS``, one pattern per line, in the environment: ``dist/*`` in
-``pypi``, the build step's package paths in ``conda``. It reads the release's
+``pypi``, the downloaded package's paths in ``conda`` (#3133). It reads the release's
 assets with ``gh release view``, then, for each file each pattern names:
 
 * a name the release holds in state ``uploaded`` is left alone, with a

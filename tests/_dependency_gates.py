@@ -119,7 +119,7 @@ __all__ = [
 #: (#1732), and :file:`cron-vendor.yml` runs ``tests/const`` and ``tests/vendor``
 #: over a freshly crawled tree, where a failure discards modules rather than
 #: failing the job (#1853); neither is read here. Other workflows install
-#: ``.[all]`` somewhere -- a docs build, a conda recipe, and the lint pass --
+#: ``.[all]`` somewhere -- a docs build and the lint pass --
 #: and none of them invokes the suite;
 #: :file:`python-compatibility.yml` installs a bare ``.`` and only compiles and
 #: imports, and :file:`codeql-analysis.yml` installs nothing explicitly at all

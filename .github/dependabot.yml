@@ -4,9 +4,9 @@
 # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 #
 # Dependabot replaces PyUp's update pull requests (#1968); `.pyup.yml` turns those off.
-# Left out (#1968): conda/requirements.txt, which Conda Update's `Refresh the
-# platform pins` and `Setup Conda Distribution` steps write, and the benchmark's
-# image digests, which its Dockerfile takes from examples/benchmark/python-images.txt.
+# Left out (#1968): conda/requirements.txt, which Conda Update's `Setup Conda
+# Distribution` step writes, and the benchmark's image digests, which its
+# Dockerfile takes from examples/benchmark/python-images.txt.
 # The pip entry's `exclude-paths` keeps conda/requirements.txt out: the `/` job
 # otherwise reads requirements files one directory down, conda/ included.
 # Every entry's `target-branch` is `develop`, which carries the next minor

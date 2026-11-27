@@ -1,148 +1,104 @@
 # -*- coding: utf-8 -*-
-"""The third-party packages the conda recipe vendors into :file:`pcapkit/_extern` (#1814).
+"""The third-party packages the conda recipe vendors into :file:`pcapkit/_extern` (#1814, #3133).
 
-The conda package declares no run requirement but Python.
-``conda/pypcapkit/build.sh`` and ``bld.bat`` install every wheel that
-``pip download -r conda/requirements.txt`` fetched into :file:`pcapkit/_extern`,
-which :file:`pcapkit/__init__.py` appends to :data:`sys.path`. So
-:file:`conda/requirements.txt` is the conda distribution's whole dependency
-list, and this script derives it from :file:`pyproject.toml` instead of leaving
-it to be edited by hand. Each package falls in exactly one of these classes:
+The conda package is one ``noarch: python`` build carrying the core
+functionality alone (#3133). Its run requirements are the ``[project]
+dependencies`` that conda-forge has, :data:`CONDA_FORGE`, which
+:file:`conda/pypcapkit/meta.yaml` lists. ``conda/pypcapkit/build.sh`` installs
+every wheel ``pip download -r conda/requirements.txt`` fetched into
+:file:`pcapkit/_extern`, which :file:`pcapkit/__init__.py` appends to
+:data:`sys.path`, so anything pip-installed into the environment comes first. This
+script derives that file from :file:`pyproject.toml` instead of leaving it to be
+edited by hand. Each package falls in exactly one of these classes:
 
 ``needed``
-    ``[project] dependencies`` and the ``all`` extra. A conda user has no
-    extras to ask for, and ``all`` is the set the owner ruled on #910 to be what
-    the library needs to work at full functionality. The capture engines and the
-    crawlers' ``vendor`` extra are installed on demand there, so a conda user
-    installs them into the environment, where they take precedence over
-    anything vendored.
+    A ``[project] dependencies`` entry outside :data:`CONDA_FORGE`. No extra is
+    vendored: a conda user pip-installs an optional feature into the environment.
 ``transitive``
     What a needed package requires in turn, with the extras it was asked for,
-    as the installed distributions' metadata declares it.
+    as the installed distributions' metadata declares it, but for
+    :data:`CONDA_FORGE`'s, which the run requirements supply.
 ``dead``
-    A requirement whose marker is false on every interpreter a conda package is
-    built for: the supported CPython tier of :file:`.github/python-versions.toml`,
-    on the platforms in :data:`PLATFORMS`. It is left out.
+    A requirement whose marker is false on every interpreter the package
+    installs on: each CPython of the supported and KTLO tiers of
+    :file:`.github/python-versions.toml`, on the platforms in :data:`PLATFORMS`.
+    It is left out.
 ``stale``
     Anything else the file names.
 
-Each line pins the version installed here, as ``conda-update`` in
-:file:`.github/workflows/cron-conda.yml` installs ``.[all]`` before running this
-script. Resolving the newest releases is that install step's job, and needs the
-network; this script reads only what is installed, so it works offline. The one
-exception is :data:`PLATFORM_PINS`, read from :file:`conda/platform-pins.toml`:
-a package whose newest release has no wheel for some platform keeps an older pin
-for it, on a line of its own whose marker names that platform, beside the
-installed pin for the rest (#1827). The conda legs build natively, so each leg's
-``pip download`` evaluates those markers on its own runner.
+One set of files serves every interpreter, so a requirement live on some of them
+only cannot be vendored, and deriving the file fails on it: take that package from
+conda-forge instead.
 
-Each of those pins carries a review-by date (#1851). With ``--refresh-pins``,
-the one mode that reads the network, it asks PyPI for the newest release, up to
-the installed one, with a wheel every conda Python installs on the pinned
-platform (:func:`newest_wheel`). That request is the one thing here that needs
-:mod:`requests`, which is imported only to make it, so no other mode needs it
-installed. It moves the pin up to that release, due for
-review :data:`REVIEW_HORIZON` from today, drops a pin that reaches the installed
-release or already pins it, and rewrites the table. A package PyPI cannot be
-read for keeps its pins, with a warning, and the run still exits 0.
-``conda-update`` runs it before writing the requirements.
+Each line pins the version installed here, as ``conda-update`` in
+:file:`.github/workflows/cron-conda.yml` installs ``.`` before running this
+script. Resolving the newest releases is that install step's job, and needs the
+network; this script reads only what is installed, so it works offline.
 
 Run without arguments it rewrites :file:`conda/requirements.txt`. With
 ``--check`` it writes nothing, and exits 1 when the file names a different set of
-packages or markers than it derives, a platform pin other than
-:data:`PLATFORM_PINS`, or when that table names a package no build vendors or
-holds a pin past its review-by date -- the other pins aside, since they move with
-every release and the weekly run refreshes them. Lines pinning one package
+packages than it derives, or pins one under a marker. Lines pinning one package
 differently under one marker fail it too, since pip cannot install them together
-when the pins disagree (#1852). With ``--smoke PACKAGE`` it unpacks a
-built ``.tar.bz2`` conda package and checks that every distribution vendored in
-it shipped every file its ``RECORD`` lists, and that each of its modules imports
-from :file:`pcapkit/_extern` with nothing else on the path. It also checks that
-the package is for this runner's platform, and that every native binary in it
-is for that platform too (#1822): ``conda convert`` relabels a package without
-touching its binaries, so a relabelled one imports cleanly on the runner that
-built it and fails everywhere it was relabelled for. That mode needs only the
+when the pins disagree (#1852). With ``--smoke PACKAGE`` it unpacks a built
+``.tar.bz2`` conda package and checks that it is ``noarch: python`` with no native
+binary in it (#1822), that every distribution vendored in it shipped every file
+its ``RECORD`` lists, and that each of its modules imports from
+:file:`pcapkit/_extern` with nothing else on the path. That mode needs only the
 standard library.
 
 With ``--same-dependencies REV`` it reads ``REV``'s :file:`pyproject.toml` with
 ``git show`` and exits :data:`NOT_SAME`, naming both sets, when what
 :func:`direct` reads there differs from this tree's. ``conda-update`` builds the
-release tag's tree with this tree's requirements, so it does not build then
-(#2841).
+release tag's tree with this tree's recipe, so it does not build then (#2841).
 
 """
 
 from __future__ import annotations
 
 import argparse
-import datetime
 import importlib.metadata
 import importlib.util
 import json
 import pathlib
-import platform
-import re
 import subprocess  # nosec B404
 import sys
 import tarfile
 import tempfile
 import textwrap
 import tomllib
-import urllib.parse
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Iterable, Iterator, Literal, Optional
+    from typing import Callable, Iterable, Literal, Optional
 
     from packaging.markers import Marker
     from packaging.requirements import Requirement
-    from packaging.version import Version
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 PYPROJECT = ROOT / 'pyproject.toml'
 FILE = ROOT / 'conda' / 'requirements.txt'
 
-#: The extras the conda distribution carries, besides ``dependencies``.
-EXTRAS = ('all',)
-#: The platforms the conda workflows build on -- ``cron-conda.yml`` and
-#: ``create-release.yml`` -- by the conda subdir each leg builds, as
-#: ``sys.platform``, ``platform.system()`` and ``platform.machine()`` read on its
-#: runner: ``ubuntu-latest``, the Intel ``macos-26-intel``, the arm64
-#: ``macos-latest`` and ``windows-latest``. Each leg builds only its own runner's
-#: platform (#1822). The Windows legs build with the recipe's ``bld.bat`` (#2060).
+#: The ``[project] dependencies`` conda-forge has, by canonical name, as the
+#: package is named there: the recipe's run requirements besides Python (#3133).
+CONDA_FORGE = {
+    'aenum': 'aenum',
+    'chardet': 'chardet',
+    'typing-extensions': 'typing_extensions',
+}
+#: The platforms the package installs on, by conda subdir, as ``sys.platform``,
+#: ``platform.system()`` and ``platform.machine()`` read there, for the markers
+#: :func:`environments` evaluates.
 PLATFORMS = {
     'linux-64': ('linux', 'Linux', 'x86_64'),
     'osx-64': ('darwin', 'Darwin', 'x86_64'),
     'osx-arm64': ('darwin', 'Darwin', 'arm64'),
     'win-64': ('win32', 'Windows', 'AMD64'),
 }
-#: The file :data:`PLATFORM_PINS` is read from, and ``--refresh-pins`` rewrites (#1827, #1851).
-PINS = ROOT / 'conda' / 'platform-pins.toml'
-#: How long a pin stands before it is due for review, a quarter of a year:
-#: ``--refresh-pins`` dates a pin it moves this far ahead (#1851).
-REVIEW_HORIZON = datetime.timedelta(weeks=13)
 #: ``--same-dependencies``' exit status where the two sets differ (#2841),
 #: as util/verdict_covers_checkout.py's ``--exit-code`` reports its refusal.
 NOT_SAME = 3
-#: The wheel platform tags a build on each of :data:`PLATFORMS` installs, besides
-#: ``any``, for :func:`installs` (#1851): glibc's manylinux on linux-64, and on
-#: macOS the runner's own architecture or universal2, for any macOS version, and
-#: ``win_amd64`` on win-64. A tag left out here only leaves a pin where it is.
-WHEEL_PLATFORMS = {
-    'linux-64': re.compile(r'manylinux(?:1|2010|2014|_\d+_\d+)_x86_64'),
-    'osx-64': re.compile(r'macosx_\d+_\d+_(?:x86_64|universal2)'),
-    'osx-arm64': re.compile(r'macosx_\d+_\d+_(?:arm64|universal2)'),
-    'win-64': re.compile(r'win_amd64'),
-}
-#: Where ``--refresh-pins`` reads a package's releases: PyPI's JSON API.
-PYPI = 'https://pypi.org/pypi/{}/json'
-#: The object format and the machine of every native binary a package for each
-#: of :data:`PLATFORMS` may carry (#1822). A universal Mach-O passes when one of
-#: its slices is the machine.
-BINARIES = {'linux-64': ('ELF', 'x86_64'), 'osx-64': ('Mach-O', 'x86_64'), 'osx-arm64': ('Mach-O', 'arm64'),
-            'win-64': ('PE', 'x86_64')}
-#: What ELF's ``e_machine``, Mach-O's ``cputype`` and PE's ``Machine`` say, as
-#: :data:`BINARIES` spells it.
+#: What ELF's ``e_machine``, Mach-O's ``cputype`` and PE's ``Machine`` say, for
+#: :func:`native`'s report of a binary.
 ELF_MACHINES = {3: 'i386', 20: 'ppc', 21: 'ppc64', 40: 'arm', 62: 'x86_64', 183: 'arm64', 243: 'riscv'}
 MACHO_CPUS = {7: 'i386', 0x01000007: 'x86_64', 12: 'arm', 0x0100000c: 'arm64', 0x0200000c: 'arm64_32',
               18: 'ppc', 0x01000012: 'ppc64'}
@@ -150,88 +106,6 @@ PE_MACHINES = {0x014c: 'i386', 0x01c4: 'arm', 0x8664: 'x86_64', 0xaa64: 'arm64'}
 #: File names a native extension or library goes by, so one whose header this
 #: cannot read is reported rather than passed over.
 NATIVE_SUFFIXES = ('.so', '.dylib', '.pyd', '.dll')
-#: What :func:`render_pins` writes above the pins, so that a rewrite keeps it.
-PINS_HEADER = '''\
-# The packages conda/requirements.txt pins apart on some conda platforms, as a
-# table per package and conda subdir (#1827): the version that platform vendors
-# in place of the installed release, the date the pin is due for review by, and
-# why the platform cannot take the installed release.
-#
-# util/conda_vendor.py reads this file. Conda Update's `conda-update` job runs
-# its `--refresh-pins` first, which asks PyPI for the newest release, up to the
-# installed one, with a wheel each conda Python installs on the pinned platform.
-# It moves the pin up to that release with a fresh review-by date, and drops a
-# pin that reaches the installed release or already pins it (#1851). `--check`
-# fails on a pin past its review-by date: check by hand that the pin still
-# holds, then set a new date. The job writes this whole file, this comment
-# included, so anything a pin needs said goes in its `reason`.
-'''
-
-
-class Pin(NamedTuple):
-    """A version one of :data:`PLATFORMS` vendors in place of the installed release (#1827)."""
-
-    #: The version that platform vendors.
-    version: str
-    #: The date the pin is due for review by; ``--check`` fails after it (#1851).
-    review_by: datetime.date
-    #: Why that platform cannot take the installed release.
-    reason: str
-
-
-def _toml(text: 'str') -> 'str':
-    """``text`` as a TOML key: bare when it can be, a basic string otherwise."""
-    if re.fullmatch(r'[A-Za-z0-9_-]+', text):
-        return text
-    return _toml_string(text)
-
-
-def _toml_string(text: 'str') -> 'str':
-    """``text`` as a TOML basic string, with the characters TOML forbids there escaped."""
-    escaped = ''.join(f'\\{char}' if char in '"\\' else
-                      f'\\u{ord(char):04x}' if ord(char) < 0x20 or ord(char) == 0x7f else char
-                      for char in text)
-    return f'"{escaped}"'
-
-
-def load_pins(text: 'str') -> 'dict[str, dict[str, Pin]]':
-    """:file:`conda/platform-pins.toml`'s pins, as {package: {conda subdir: :class:`Pin`}}.
-
-    Each pin is a table of ``version`` and ``reason``, strings, and ``review-by``,
-    a TOML date. Anything else raises :class:`ValueError`.
-
-    """
-    table = {}  # type: dict[str, dict[str, Pin]]
-    for name, platforms in tomllib.loads(text).items():
-        if not isinstance(platforms, dict):
-            raise ValueError(f'{name}: a package is a table of conda subdirs, not {platforms!r}')
-        for subdir, entry in platforms.items():
-            fields = entry if isinstance(entry, dict) else {}
-            version, review_by, reason = fields.get('version'), fields.get('review-by'), fields.get('reason')
-            if (set(fields) != {'version', 'review-by', 'reason'} or not isinstance(version, str)
-                    or not isinstance(reason, str) or not isinstance(review_by, datetime.date)
-                    or isinstance(review_by, datetime.datetime)):
-                raise ValueError(f'{name}.{subdir}: a pin is a table of version and reason, strings, '
-                                 f'and review-by, a date; not {entry!r}')
-            table.setdefault(name, {})[subdir] = Pin(version, review_by, reason)
-    return table
-
-
-def render_pins(table: 'dict[str, dict[str, Pin]]') -> 'str':
-    """:file:`conda/platform-pins.toml` holding ``table``, which :func:`load_pins` reads back."""
-    parts = [PINS_HEADER]
-    for name, platforms in sorted(table.items()):
-        for subdir, pin in sorted(platforms.items()):
-            parts.append(f'\n[{_toml(name)}.{_toml(subdir)}]\n'
-                         f'version = {_toml_string(pin.version)}\n'
-                         f'review-by = {pin.review_by.isoformat()}\n'
-                         f'reason = {_toml_string(pin.reason)}\n')
-    return ''.join(parts)
-
-
-#: The packages pinned apart on some of :data:`PLATFORMS`, as {package: {conda
-#: subdir: :class:`Pin`}}, from :data:`PINS` (#1827, #1851).
-PLATFORM_PINS = load_pins(PINS.read_text(encoding='utf-8'))
 
 
 def _load_python_versions() -> 'object':
@@ -245,13 +119,16 @@ def _load_python_versions() -> 'object':
 
 
 def conda_pythons() -> 'list[str]':
-    """The CPython versions a conda package is built for, as ``conda`` in python_versions.py."""
+    """The CPython versions the package installs on: the supported and KTLO tiers, oldest first."""
     versions = _load_python_versions()
-    return list(versions.tier(versions.load(), 'cpython', 'supported'))  # type: ignore[attr-defined]
+    data = versions.load()  # type: ignore[attr-defined]
+    found = [version for name in ('ktlo', 'supported')
+             for version in versions.tier(data, 'cpython', name)]  # type: ignore[attr-defined]
+    return sorted(found, key=versions.key)  # type: ignore[attr-defined]
 
 
 def environments(pythons: 'Iterable[str]') -> 'list[dict[str, str]]':
-    """A marker environment per conda build: each Python on each of :data:`PLATFORMS`."""
+    """A marker environment per interpreter the package installs on: each Python on each of :data:`PLATFORMS`."""
     found = []
     for python in pythons:
         for sys_platform, system, machine in PLATFORMS.values():
@@ -266,7 +143,7 @@ def environments(pythons: 'Iterable[str]') -> 'list[dict[str, str]]':
 
 
 def direct(pyproject: 'pathlib.Path' = PYPROJECT) -> 'list[Requirement]':
-    """``[project] dependencies`` and the :data:`EXTRAS`, as written in ``pyproject``."""
+    """``[project] dependencies``, as written in ``pyproject``."""
     return _direct(pathlib.Path(pyproject).read_text(encoding='utf-8'))
 
 
@@ -274,10 +151,7 @@ def _direct(text: 'str') -> 'list[Requirement]':
     """:func:`direct`, of a ``pyproject.toml`` already read as ``text``."""
     from packaging.requirements import Requirement  # pylint: disable=import-outside-toplevel
     project = tomllib.loads(text)['project']
-    lines = list(project.get('dependencies', []))
-    for extra in EXTRAS:
-        lines.extend(project.get('optional-dependencies', {})[extra])
-    return [Requirement(line) for line in lines]
+    return [Requirement(line) for line in project.get('dependencies', [])]
 
 
 def _live(marker: 'Optional[Marker]', env: 'dict[str, str]', extras: 'Iterable[str]') -> 'bool':
@@ -287,7 +161,7 @@ def _live(marker: 'Optional[Marker]', env: 'dict[str, str]', extras: 'Iterable[s
 
 
 class NotInstalled(Exception):
-    """Packages some conda build needs that this interpreter has no metadata for."""
+    """Packages some interpreter needs vendored that this one has no metadata for."""
 
 
 def describe(builds: 'Iterable[int]', envs: 'list[dict[str, str]]') -> 'str':
@@ -307,9 +181,9 @@ def _not_installed(missing: 'dict[str, set[str]]', found: 'dict[str, dict[str, o
         builds = found[name]['builds']  # type: ignore[assignment]
         here = any((envs[index]['python_version'], envs[index]['sys_platform']) == host
                    for index in builds)
-        hint = ('install .[{}] first'.format(','.join(EXTRAS)) if here else
+        hint = ('install . first' if here else
                 'its marker leaves it out here, so pip did not install it; run this on one '
-                'of those builds, or install it here by hand')
+                'of those interpreters, or install it here by hand')
         reasons.append(f'{name} is needed on {describe(builds, envs)} ({"; ".join(sorted(via))}), '
                        f'and Python {host[0]} on {host[1]}, which runs this, does not have it: {hint}')
     return NotInstalled('\n'.join(reasons))
@@ -317,12 +191,13 @@ def _not_installed(missing: 'dict[str, set[str]]', found: 'dict[str, dict[str, o
 
 def derive(requirements: 'list[Requirement]', envs: 'list[dict[str, str]]',
            requires: 'Callable[[str], Optional[list[str]]]') -> 'dict[str, dict[str, object]]':
-    """Each package to vendor, by canonical name: its class and the builds needing it.
+    """Each package to vendor, by canonical name: its class and the interpreters needing it.
 
     ``requires`` returns a distribution's ``Requires-Dist`` lines, as
     :func:`importlib.metadata.requires` does, and raises
     :class:`importlib.metadata.PackageNotFoundError` for one not installed.
-    A requirement live in no environment is recorded as ``dead`` and not walked.
+    A requirement live in no environment is recorded as ``dead`` and not walked,
+    and one :data:`CONDA_FORGE` names is not walked either.
     One that is live but not installed here raises :class:`NotInstalled` once the
     walk is done, naming every such package, what required it and where.
     """
@@ -337,6 +212,8 @@ def derive(requirements: 'list[Requirement]', envs: 'list[dict[str, str]]',
     while queue:
         req, parents, kind, via = queue.pop(0)
         name = canonicalize_name(req.name)
+        if name in CONDA_FORGE:
+            continue
         where = frozenset(index for index in parents if _live(req.marker, envs[index], ()))
         if not where:
             if name not in found and kind == 'needed':
@@ -372,60 +249,25 @@ def derive(requirements: 'list[Requirement]', envs: 'list[dict[str, str]]',
     return found
 
 
-def render_marker(builds: 'frozenset[int]', envs: 'list[dict[str, str]]') -> 'Optional[str]':
-    """The marker selecting exactly ``builds``, or :data:`None` when that is all of them."""
-    if len(builds) == len(envs):
-        return None
-    pythons = sorted({envs[index]['python_version'] for index in builds},
-                     key=lambda version: tuple(map(int, version.split('.'))))
-    whole = {index for index, env in enumerate(envs) if env['python_version'] in pythons}
-    if whole != set(builds):
-        raise ValueError('needed on some platforms of one Python and not the others; '
-                         'conda/requirements.txt cannot say so with a python_version marker')
-    return ' or '.join(f'python_version == "{python}"' for python in pythons)
+class Partial(ValueError):
+    """A package needed on some interpreters only, which one noarch package cannot vendor (#3133)."""
 
 
-def platform_marker(subdirs: 'Iterable[str]', negate: 'bool' = False) -> 'str':
-    """The marker selecting the builds on ``subdirs`` of :data:`PLATFORMS`, or with ``negate`` all others."""
-    terms = []
-    for subdir in sorted(subdirs):
-        sys_platform, _, machine = PLATFORMS[subdir]
-        terms.append(f'sys_platform != "{sys_platform}" or platform_machine != "{machine}"' if negate else
-                     f'sys_platform == "{sys_platform}" and platform_machine == "{machine}"')
-    if len(terms) == 1:
-        return terms[0]
-    return (' and ' if negate else ' or ').join(f'({term})' for term in terms)
-
-
-def pins(name: 'str', entry: 'dict[str, object]',
-         envs: 'list[dict[str, str]]') -> 'list[tuple[Optional[str], Optional[str]]]':
-    """Each line ``name`` gets: its marker, and the version :data:`PLATFORM_PINS` fixes or :data:`None`."""
-    python = render_marker(entry['builds'], envs)  # type: ignore[arg-type]
-    # One for a platform no leg builds is unpinnable()'s to report.
-    fixed = {subdir: pin.version for subdir, pin in PLATFORM_PINS.get(name, {}).items() if subdir in PLATFORMS}
-    if not fixed:
-        return [(python, None)]
-    groups = {}  # type: dict[str, set[str]]
-    for subdir, version in fixed.items():
-        groups.setdefault(version, set()).add(subdir)
-    found = [(platform_marker(subdirs), version)
-             for version, subdirs in sorted(groups.items())]  # type: list[tuple[str, Optional[str]]]
-    found.append((platform_marker(fixed, negate=True), None))
-    return [(marker if python is None else f'({python}) and ({marker})', version)
-            for marker, version in found]
+def partial(found: 'dict[str, dict[str, object]]', envs: 'list[dict[str, str]]') -> 'list[str]':
+    """Each package of ``found`` vendored for some of ``envs`` and not the others, one line apiece."""
+    return [f'partial: {name} is needed on {describe(entry["builds"], envs)} only '  # type: ignore[arg-type]
+            '(and not on every interpreter one noarch package serves), so take it from conda-forge instead'
+            for name, entry in sorted(found.items())
+            if entry['class'] != 'dead' and len(entry['builds']) != len(envs)]  # type: ignore[arg-type]
 
 
 def lines(found: 'dict[str, dict[str, object]]', envs: 'list[dict[str, str]]',
           version: 'Callable[[str], str]') -> 'list[str]':
-    """:file:`conda/requirements.txt`'s lines, sorted: a pin per vendored package, and per platform pin."""
-    result = []
-    for name, entry in sorted(found.items()):
-        if entry['class'] == 'dead':
-            continue
-        for marker, fixed in pins(name, entry, envs):
-            pin = f'{name}=={fixed or version(name)}'
-            result.append(pin if marker is None else f'{pin}; {marker}')
-    return result
+    """:file:`conda/requirements.txt`'s lines, sorted: a pin per vendored package; :class:`Partial` on a marker."""
+    problems = partial(found, envs)
+    if problems:
+        raise Partial('\n'.join(problems))
+    return [f'{name}=={version(name)}' for name, entry in sorted(found.items()) if entry['class'] != 'dead']
 
 
 class Conflicting(ValueError):
@@ -475,19 +317,6 @@ def parse(text: 'str') -> 'dict[str, dict[Optional[str], str]]':
     return result
 
 
-def unpinnable(found: 'dict[str, dict[str, object]]') -> 'list[str]':
-    """Each :data:`PLATFORM_PINS` entry no conda build can use, one line apiece."""
-    problems = []
-    for name, fixed in sorted(PLATFORM_PINS.items()):
-        entry = found.get(name)
-        if entry is None or entry['class'] == 'dead':
-            problems.append(f'override: {name} is pinned for {", ".join(sorted(fixed))}, '
-                            'and no conda build vendors it')
-        for subdir in sorted(set(fixed) - set(PLATFORMS)):
-            problems.append(f'override: {name} is pinned for {subdir}, which no conda leg builds')
-    return problems
-
-
 def _show(markers: 'Iterable[Optional[str]]') -> 'str':
     shown = sorted(markers, key=str)
     return repr(shown[0]) if len(shown) == 1 else repr(shown)
@@ -496,244 +325,23 @@ def _show(markers: 'Iterable[Optional[str]]') -> 'str':
 def compare(text: 'str', found: 'dict[str, dict[str, object]]',
             envs: 'list[dict[str, str]]') -> 'list[str]':
     """Why ``text`` is stale against ``found``, one line per package; empty when current."""
-    from packaging.markers import Marker  # pylint: disable=import-outside-toplevel
-    problems = unpinnable(found)
+    problems = partial(found, envs)
     have, conflicts = _read(text)
     problems.extend(conflicts)
-    want = {name: {None if marker is None else str(Marker(marker)): fixed
-                   for marker, fixed in pins(name, entry, envs)}
-            for name, entry in found.items() if entry['class'] != 'dead'}
-    for name in sorted(set(have) | set(want)):
+    want = {name for name, entry in found.items() if entry['class'] != 'dead'}
+    for name in sorted(set(have) | want):
         if name not in have:
             problems.append(f'missing: {name} ({found[name]["class"]})')
         elif name not in want:
             if name in found:
                 problems.append(f'dead: {name} -- its marker {found[name]["marker"]} is false '
-                                'on every conda build')
+                                'on every interpreter the package installs on')
             else:
-                problems.append(f'stale: {name} -- neither the dependencies nor the '
-                                f'{", ".join(EXTRAS)} extra need it, directly or not')
-        elif set(have[name]) != set(want[name]):
-            problems.append(f'marker: {name} has {_show(have[name])}, derived {_show(want[name])}')
-        else:
-            for marker, fixed in sorted(want[name].items(), key=str):
-                if fixed is not None and have[name][marker] != fixed:
-                    problems.append(f'pin: {name} pins {have[name][marker]!r} where {marker}, '
-                                    f'and PLATFORM_PINS {fixed!r}')
+                problems.append(f'stale: {name} -- no [project] dependency outside CONDA_FORGE needs it, '
+                                'directly or not')
+        elif set(have[name]) != {None}:
+            problems.append(f'marker: {name} has {_show(have[name])}, and one noarch package takes no marker')
     return problems
-
-
-def _wheel_abis(python: 'str') -> 'frozenset[tuple[str, str]]':
-    """The interpreter and ABI tags CPython ``python`` installs a wheel for, as :mod:`packaging.tags` has them.
-
-    Its own ABI, the stable ``abi3`` of its own and every older CPython, and
-    ``none``. The free-threaded ABI is not among them, since no conda build is.
-
-    """
-    from packaging import tags  # pylint: disable=import-outside-toplevel
-    major, minor = map(int, python.split('.'))
-    interpreter = f'cp{major}{minor}'
-    found = [*tags.cpython_tags((major, minor), abis=[interpreter], platforms=['any']),
-             *tags.compatible_tags((major, minor), interpreter, platforms=['any'])]
-    return frozenset((tag.interpreter, tag.abi) for tag in found)
-
-
-def installs(filename: 'str', subdir: 'str', python: 'str', requires_python: 'Optional[str]' = None) -> 'bool':
-    """Whether CPython ``python`` on ``subdir`` of :data:`PLATFORMS` installs the wheel ``filename`` (#1851).
-
-    One of the wheel's tags has to carry an interpreter and ABI of
-    :func:`_wheel_abis` and a platform of :data:`WHEEL_PLATFORMS`, or ``any``. A
-    file that is not a wheel installs nowhere, nor does one whose
-    ``requires_python`` leaves ``python`` out, as PyPI's JSON gives it per file.
-
-    """
-    # pylint: disable-next=import-outside-toplevel
-    from packaging.specifiers import InvalidSpecifier, SpecifierSet
-    # pylint: disable-next=import-outside-toplevel
-    from packaging.utils import InvalidWheelFilename, parse_wheel_filename
-    try:
-        tags = parse_wheel_filename(filename)[3]
-    except InvalidWheelFilename:
-        return False
-    if requires_python:
-        try:
-            if f'{python}.0' not in SpecifierSet(requires_python):
-                return False
-        except InvalidSpecifier:
-            return False
-    abis, platforms = _wheel_abis(python), WHEEL_PLATFORMS[subdir]
-    return any((tag.interpreter, tag.abi) in abis and (tag.platform == 'any' or platforms.fullmatch(tag.platform))
-               for tag in tags)
-
-
-def _releases(project: 'dict[str, Any]', ceiling: 'Optional[str]' = None,
-              ) -> 'Iterator[tuple[Version, str, list[dict[str, Any]]]]':
-    """Each release in ``project`` :func:`newest_wheel` weighs, its version, its key and its wheels (#1851).
-
-    ``project`` is PyPI's JSON for a package, whose ``releases`` map each version
-    to its files. A yanked file is passed over, and so are a pre-release and,
-    given a ``ceiling``, a release above it. :class:`ValueError` when ``project``
-    lists no releases at all.
-
-    """
-    from packaging.version import InvalidVersion, Version  # pylint: disable=import-outside-toplevel
-    releases = project.get('releases') if isinstance(project, dict) else None
-    if not isinstance(releases, dict):
-        raise ValueError("PyPI's JSON has no releases")
-    top = None if ceiling is None else Version(ceiling)
-    for text, files in releases.items():
-        try:
-            version = Version(text)
-        except InvalidVersion:
-            continue
-        if version.is_prerelease or (top is not None and version > top):
-            continue
-        yield version, text, [file for file in files or () if isinstance(file, dict) and not file.get('yanked')
-                              and str(file.get('filename', '')).endswith('.whl')]
-
-
-def lacking(wheels: 'Iterable[dict[str, Any]]', subdir: 'str', pythons: 'Iterable[str]') -> 'list[str]':
-    """Each of ``pythons`` that none of ``wheels``, files of PyPI's JSON, installs on ``subdir`` (#2025)."""
-    wheels = list(wheels)
-    return [python for python in pythons
-            if not any(installs(file['filename'], subdir, python, file.get('requires_python')) for file in wheels)]
-
-
-def newest_wheel(project: 'dict[str, Any]', subdir: 'str', pythons: 'Iterable[str]',
-                 ceiling: 'Optional[str]' = None) -> 'Optional[str]':
-    """The newest release in ``project`` with a wheel each of ``pythons`` installs on ``subdir`` (#1851).
-
-    Of the releases :func:`_releases` weighs. :data:`None` when no release has
-    such a wheel; :class:`ValueError` when ``project`` lists no releases at all.
-
-    """
-    pythons = list(pythons)
-    best, found = None, None  # type: Optional[Version], Optional[str]
-    for version, text, wheels in _releases(project, ceiling):
-        if best is not None and version <= best:
-            continue
-        if pythons and not lacking(wheels, subdir, pythons):
-            best, found = version, text
-    return found
-
-
-def _tags(pythons: 'Iterable[str]') -> 'str':
-    """``pythons`` by their wheel tags, such as ``cp314`` for 3.14, for a note."""
-    return ', '.join(f"cp{python.replace('.', '')}" for python in pythons)
-
-
-def stuck(project: 'dict[str, Any]', subdir: 'str', pythons: 'list[str]', have: 'str') -> 'str':
-    """Why no release in ``project`` up to ``have`` moves a pin on ``subdir``, for its warning (#2025).
-
-    It names the conda Pythons that no such release has a wheel for at all, or,
-    when each has one in some release, says no release has one for every Python.
-
-    """
-    if not pythons:
-        return 'conda builds for no Python, so no release qualifies'
-    missing = lacking((file for _, _, files in _releases(project, have) for file in files), subdir, pythons)
-    if missing:
-        return f'no release up to {have} has a wheel for {_tags(missing)} on {subdir}'
-    return f'no release up to {have} has wheels for all of {_tags(pythons)} on {subdir} at once'
-
-
-def lost(project: 'dict[str, Any]', subdir: 'str', pythons: 'list[str]', pin: 'str') -> 'str':
-    """Why the release ``pin`` names no longer qualifies on ``subdir``, for its warning (#2028).
-
-    It names the conda Pythons the pinned release has no wheel for there, or
-    says PyPI lists no such release, as :func:`_releases` weighs them.
-
-    """
-    from packaging.version import Version  # pylint: disable=import-outside-toplevel
-    wheels = next((files for version, _, files in _releases(project) if version == Version(pin)), None)
-    if wheels is None:
-        return f'PyPI lists no stable release {pin}'
-    return f'{pin} has no wheel for {_tags(lacking(wheels, subdir, pythons))} on {subdir}'
-
-
-#: What :func:`_fetch` raises when PyPI cannot be read: :class:`OSError` for a
-#: failed request, and :class:`ValueError` for a reply that is not JSON, as
-#: requests releases before its own ``JSONDecodeError`` raise it.
-UNREADABLE = (OSError, ValueError)
-
-
-def refresh(table: 'dict[str, dict[str, Pin]]', fetch: 'Callable[[str], dict[str, Any]]',
-            installed: 'Callable[[str], Optional[str]]', pythons: 'Iterable[str]',
-            today: 'datetime.date') -> 'tuple[dict[str, dict[str, Pin]], list[tuple[str, str]]]':
-    """``table`` with each pin moved up as far as PyPI has a wheel for its platform, and notes on it (#1851).
-
-    ``fetch`` returns a package's PyPI JSON, raising one of :data:`UNREADABLE`
-    when it cannot, and ``installed`` the version installed here, or
-    :data:`None`. A pin moves to :func:`newest_wheel` up to the installed
-    version, due for review on ``today`` plus :data:`REVIEW_HORIZON`. A pin that
-    reaches the installed version that way, or already pins it, is dropped, as
-    the other platforms vendor that version. A package or pin it cannot settle
-    stays as it is, and so does a pin no release up to the installed version has
-    a wheel for every conda Python, which :func:`stuck` warns about (#2025), or
-    whose own release no longer has one when an older release does, which
-    :func:`lost` warns about (#2028). Each note is a workflow command,
-    ``notice`` for a change and ``warning`` for a pin left alone, and its text.
-
-    """
-    from packaging.version import Version  # pylint: disable=import-outside-toplevel
-    pythons = list(pythons)
-    result = {}  # type: dict[str, dict[str, Pin]]
-    notes = []  # type: list[tuple[str, str]]
-    for name, platforms in sorted(table.items()):
-        kept = result[name] = dict(platforms)
-        have = installed(name)
-        if have is None:
-            notes.append(('warning', f'{name} is not installed here, so its pins stay as they are'))
-            continue
-        try:
-            project = fetch(name)
-        except UNREADABLE as error:
-            notes.append(('warning', f'PyPI could not be read for {name} ({error}), so its pins stay as they are'))
-            continue
-        for subdir, pin in sorted(platforms.items()):
-            if subdir not in WHEEL_PLATFORMS:
-                notes.append(('warning', f'{name} is pinned for {subdir}, which no conda leg builds, '
-                                         'so that pin stays as it is'))
-                continue
-            try:
-                newest = newest_wheel(project, subdir, pythons, ceiling=have)
-                current, ceiling = Version(pin.version), Version(have)
-                target = None if newest is None or Version(newest) <= current else Version(newest)
-            except ValueError as error:
-                notes.append(('warning', f'{name} {pin.version} on {subdir} stays as it is: {error}'))
-                continue
-            if current == ceiling:
-                del kept[subdir]
-                notes.append(('notice', f'{name} {pin.version} on {subdir} is the installed release itself, '
-                                        'so the pin is dropped'))
-            elif newest is not None and target == ceiling:
-                del kept[subdir]
-                notes.append(('notice', f'{name} {have}, the installed release, has a wheel for {subdir}, '
-                                        f'so its {pin.version} pin there is dropped'))
-            elif newest is not None and target is not None:
-                kept[subdir] = pin._replace(version=newest, review_by=today + REVIEW_HORIZON)
-                notes.append(('notice', f'{name} on {subdir} moves from {pin.version} to {newest}, the newest '
-                                        f'release with a wheel there; due for review by {kept[subdir].review_by}'))
-            elif newest is None:
-                # #2025: a pin no release can move to stays, with a warning.
-                notes.append(('warning', f'{name} {pin.version} on {subdir} stays as it is, and may no longer '
-                                         f'hold: {stuck(project, subdir, pythons, have)}'))
-            elif Version(newest) < current < ceiling:
-                # #2028: the pinned release itself lost a wheel, which warns too.
-                notes.append(('warning', f'{name} {pin.version} on {subdir} stays as it is, and may no longer '
-                                         f'hold: {lost(project, subdir, pythons, pin.version)}, and the '
-                                         f'newest release up to {have} with wheels for all of {_tags(pythons)} '
-                                         f'there is {newest}'))
-    return {name: platforms for name, platforms in result.items() if platforms}, notes
-
-
-def review(table: 'dict[str, dict[str, Pin]]', today: 'datetime.date') -> 'list[str]':
-    """Each pin of ``table`` past its review-by date on ``today``, one line apiece (#1851)."""
-    return [f'overdue: {name} is pinned to {pin.version} on {subdir}, and was due for review by '
-            f'{pin.review_by}; check the pin still holds, then set a new review-by date, '
-            f'such as {today + REVIEW_HORIZON}'
-            for name, platforms in sorted(table.items()) for subdir, pin in sorted(platforms.items())
-            if pin.review_by < today]
 
 
 def _requires(name: 'str') -> 'Optional[list[str]]':
@@ -742,38 +350,6 @@ def _requires(name: 'str') -> 'Optional[list[str]]':
 
 def _version(name: 'str') -> 'str':
     return importlib.metadata.version(name)
-
-
-def _installed(name: 'str') -> 'Optional[str]':
-    try:
-        return importlib.metadata.version(name)
-    except importlib.metadata.PackageNotFoundError:
-        return None
-
-
-def _fetch(name: 'str') -> 'dict[str, Any]':
-    """``name``'s PyPI JSON, the one request this script makes, for ``--refresh-pins``.
-
-    :mod:`requests` is imported here, not with the module, so that the other
-    modes run on the standard library alone. Any :class:`requests.RequestException`,
-    an HTTP error status or a reply that is not JSON included, is raised as
-    :class:`OSError`, one of :data:`UNREADABLE`, whatever requests derives it from.
-
-    """
-    import requests  # pylint: disable=import-outside-toplevel
-    try:
-        response = requests.get(PYPI.format(urllib.parse.quote(name)), timeout=60,
-                                headers={'User-Agent': 'PyPCAPKit conda-update (#1851)',
-                                         'Accept': 'application/json'})
-        response.raise_for_status()
-        return response.json()
-    except requests.RequestException as error:
-        raise OSError(str(error)) from error
-
-
-def _today() -> 'datetime.date':
-    """Today's date in UTC, the runners' time zone."""
-    return datetime.datetime.now(datetime.timezone.utc).date()
 
 
 def _escape(text: 'str') -> 'str':
@@ -798,34 +374,21 @@ def same_dependencies(rev: 'str') -> 'int':
     theirs = sorted({str(requirement) for requirement in _direct(shown.stdout.decode('utf-8'))})
     ours = sorted({str(requirement) for requirement in direct()})
     if theirs == ours:
-        print(f'{rev} names the dependencies main does, which conda/requirements.txt vendors', flush=True)
+        print(f'{rev} names the dependencies main does, which the conda recipe takes from conda-forge or vendors',
+              flush=True)
         return 0
-    print(_escape(f"{rev}'s tree would be built with main's vendored requirements, and the two name different "
+    print(_escape(f"{rev}'s tree would be built with main's conda recipe, and the two name different "
                   f"dependencies. {rev}: {', '.join(theirs) or 'none'}. main: {', '.join(ours) or 'none'}."),
           flush=True)
     return NOT_SAME
 
 
-def refresh_pins() -> 'int':
-    """``--refresh-pins``: :func:`refresh` :data:`PLATFORM_PINS`, report it, and rewrite :data:`PINS` on a change."""
-    today = _today()
-    table, notes = refresh(PLATFORM_PINS, _fetch, _installed, conda_pythons(), today)
-    notes.extend(('warning', problem) for problem in review(table, today))
-    for level, text in notes:
-        print(f'::{level} title=Platform pins::{_escape(text)}')
-    if table != PLATFORM_PINS:
-        PINS.write_text(render_pins(table), encoding='utf-8')
-    return 0
-
-
-#: Run with ``-I -S`` and the unpacked ``site-packages`` as its argument, so that
-#: nothing outside the package can satisfy an import.
+#: Run with ``-I -S`` and the unpacked ``pcapkit/_extern`` as its argument, so
+#: that nothing outside it can satisfy an import.
 PROBE = textwrap.dedent('''\
     import importlib, os, sys
-    sys.path.insert(0, sys.argv[1])
-    import pcapkit
-    extern = os.path.realpath(pcapkit._extern)
-    assert extern in map(os.path.realpath, sys.path), 'pcapkit/_extern is not on sys.path'
+    extern = os.path.realpath(sys.argv[1])
+    sys.path.insert(0, extern)
     failures = 0
     infos = sorted(name for name in os.listdir(extern) if name.endswith('.dist-info'))
     tops = {}
@@ -907,16 +470,14 @@ def native(head: 'bytes') -> 'Optional[tuple[str, frozenset[str]]]':
     return None
 
 
-def foreign(root: 'pathlib.Path', subdir: 'str') -> 'tuple[int, list[str]]':
-    """How many native binaries ``root`` holds, and each one that does not run on ``subdir``.
+def foreign(root: 'pathlib.Path') -> 'list[str]':
+    """Each native binary ``root`` holds, which a ``noarch`` package may not (#1822).
 
-    ``noarch`` may hold none; a platform outside :data:`BINARIES` fails every one.
     A file named as a native library whose header is not ELF, Mach-O or PE is
     reported too, since this cannot vouch for it.
 
     """
-    want = BINARIES.get(subdir)
-    count, problems = 0, []
+    problems = []
     for path in sorted(root.rglob('*')):
         if path.is_symlink() or not path.is_file():
             continue
@@ -928,47 +489,13 @@ def foreign(root: 'pathlib.Path', subdir: 'str') -> 'tuple[int, list[str]]':
             if path.name.endswith(NATIVE_SUFFIXES) or '.so.' in path.name:
                 problems.append(f'{name}: not ELF, Mach-O or PE, so its machine is unknown')
             continue
-        count += 1
         kind, machines = found
-        if want is None or kind != want[0] or want[1] not in machines:
-            what = f'{kind} {", ".join(sorted(machines))}'
-            problems.append(f'{name}: {what}, but {subdir} has no native machine' if want is None else
-                            f'{name}: {what}, not {want[0]} {want[1]} as {subdir} needs')
-    return count, problems
-
-
-def runner_platform() -> 'Optional[str]':
-    """This machine's conda subdir among :data:`PLATFORMS`, or :data:`None` when it is none of them."""
-    here = (platform.system(), platform.machine())
-    return next((subdir for subdir, (_, system, machine) in PLATFORMS.items() if (system, machine) == here),
-                None)
-
-
-#: The ``site-packages`` of a Windows package, which names no Python: conda-forge's
-#: up to 3.14, and its CFEP-27 one from 3.15 on.
-WINDOWS_SITES = (('Lib', 'site-packages'), ('lib', 'python', 'site-packages'))
-
-
-def built_for(site: 'pathlib.Path', index: 'dict[str, Any]') -> 'str':
-    """The ``pythonX.Y`` a package's ``site-packages`` at ``site`` is for, or what it is if not that.
-
-    A POSIX package names it in the path, ``lib/pythonX.Y/site-packages``. A
-    Windows one does not (#2060): ``Lib/site-packages`` up to 3.14, and from 3.15
-    ``lib/python/site-packages``, conda-forge's CFEP-27 layout. So that is read
-    from the ``pyXY`` that starts the build string in ``info/index.json``.
-
-    """
-    layout = next((parts for parts in WINDOWS_SITES if site.parts[-len(parts):] == parts), None)
-    if layout is None:
-        return site.parent.name
-    match = re.match(r'py(\d)(\d+)(?![0-9])', str(index.get('build', '')))
-    if match is None:
-        return f'{"/".join(layout)} with build string {index.get("build")!r}'
-    return f'python{match.group(1)}.{match.group(2)}'
+        problems.append(f'{name}: {kind} {", ".join(sorted(machines))}, and noarch has no native machine')
+    return problems
 
 
 def smoke(package: 'pathlib.Path') -> 'int':
-    """Unpack a built ``.tar.bz2`` conda package, check its platform and binaries, and run :data:`PROBE`."""
+    """Unpack a built ``.tar.bz2`` conda package, check it is ``noarch: python``, and run :data:`PROBE`."""
     with tempfile.TemporaryDirectory() as temp:
         with tarfile.open(package, 'r:bz2') as archive:
             archive.extractall(temp, filter='data')
@@ -976,30 +503,23 @@ def smoke(package: 'pathlib.Path') -> 'int':
         if len(inits) != 1:
             print(f'{package}: expected one site-packages/pcapkit, found {len(inits)}', file=sys.stderr)
             return 1
-        site = inits[0].parents[1]
         try:
             index = json.loads((pathlib.Path(temp) / 'info' / 'index.json').read_text(encoding='utf-8'))
-            subdir = str(index['subdir'])
+            kind = (index['subdir'], index.get('noarch'))
         except (OSError, ValueError, TypeError, KeyError) as error:
             print(f'{package}: info/index.json names no subdir ({error!r}), so its platform is unknown',
                   file=sys.stderr)
             return 1
-        built = built_for(site, index)
-        if built != f'python{sys.version_info.major}.{sys.version_info.minor}':
-            print(f'{package} is built for {built}, and this is {sys.version}', file=sys.stderr)
+        if kind != ('noarch', 'python'):
+            print(f'{package} is filed under {kind[0]} as noarch {kind[1]!r}, and the package is one '
+                  'noarch: python build (#3133)', file=sys.stderr)
             return 1
-        runner = runner_platform()
-        if subdir not in ('noarch', runner):
-            print(f'{package} is filed under {subdir}, and this runner is '
-                  f'{runner or " ".join((platform.system(), platform.machine()))}: '
-                  'a package is checked on the platform it is for', file=sys.stderr)
-            return 1
-        count, problems = foreign(pathlib.Path(temp), subdir)
+        problems = foreign(pathlib.Path(temp))
         for problem in problems:
             print(f'FOREIGN {problem}')
-        print(f'{subdir}: {count} native binaries read, {len(problems) or "none"} failing', flush=True)
-        status = subprocess.run([sys.executable, '-I', '-S', '-c', PROBE, str(site)],  # nosec B603
-                                check=False).returncode
+        print(f'noarch: {len(problems) or "no"} native binaries', flush=True)
+        status = subprocess.run([sys.executable, '-I', '-S', '-c', PROBE,  # nosec B603
+                                 str(inits[0].parent / '_extern')], check=False).returncode
         return 1 if problems else status
 
 
@@ -1010,9 +530,6 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
                        help='write nothing; exit 1 when conda/requirements.txt is stale')
     group.add_argument('--smoke', metavar='PACKAGE', type=pathlib.Path,
                        help='check the vendored packages of a built .tar.bz2 conda package')
-    group.add_argument('--refresh-pins', action='store_true',
-                       help='move each platform pin up as far as PyPI has a wheel for its platform, '
-                            'and rewrite conda/platform-pins.toml; reads the network')
     group.add_argument('--same-dependencies', metavar='REV',
                        help="exit 3 when REV's pyproject.toml names other dependencies than this one's")
     args = parser.parse_args(argv)
@@ -1021,8 +538,6 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
         return smoke(args.smoke)
     if args.same_dependencies is not None:
         return same_dependencies(args.same_dependencies)
-    if args.refresh_pins:
-        return refresh_pins()
 
     envs = environments(conda_pythons())
     try:
@@ -1034,17 +549,16 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
     if args.check:
         problems = [f'{FILE.relative_to(ROOT)}: {problem}'
                     for problem in compare(FILE.read_text(encoding='utf-8'), found, envs)]
-        problems.extend(f'{PINS.relative_to(ROOT)}: {problem}' for problem in review(PLATFORM_PINS, _today()))
         for problem in problems:
             print(problem)
         return 1 if problems else 0
 
-    problems = unpinnable(found)
-    if problems:
-        print('\n'.join(problems), file=sys.stderr)
+    try:
+        text = ''.join(f'{line}\n' for line in lines(found, envs, _version))
+    except Partial as error:
+        print(error, file=sys.stderr)
         return 1
-
-    FILE.write_text(''.join(f'{line}\n' for line in lines(found, envs, _version)), encoding='utf-8')
+    FILE.write_text(text, encoding='utf-8')
     return 0
 
 

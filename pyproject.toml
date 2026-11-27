@@ -394,11 +394,10 @@ exclude = [
 ]
 
 # Only the conda recipe creates ``pcapkit/_extern``: ``conda/pypcapkit/build.sh``
-# and ``bld.bat`` install the packages ``conda/requirements.txt`` names there,
-# then run ``pip install .``, which builds the wheel from the tree. Package
-# discovery reaches their modules alone, so every other file -- ``emoji``'s JSON,
-# ``chardet``'s models, compiled extensions, each ``dist-info`` -- stays behind
-# without this entry (#1814). Elsewhere ``pcapkit._extern`` is no package at all,
+# installs the packages ``conda/requirements.txt`` names there, then runs
+# ``pip install .``, which builds the wheel from the tree. Package discovery
+# reaches their modules alone, so every other file -- a data file, each
+# ``dist-info`` -- stays behind without this entry (#1814). Elsewhere ``pcapkit._extern`` is no package at all,
 # and setuptools ignores these entries without a warning; ``MANIFEST.in`` could not
 # do this, since a line naming a missing directory warns in every such build. The
 # bytecode ``pip install --target`` compiles stays out, as from any other wheel.

@@ -66,9 +66,8 @@ EXEMPT = {
 #: The workflows whose manual run builds only.
 BUILD_ONLY = ('cron-conda.yml', 'cron-vendor.yml', 'deploy-pages.yml')
 #: What a step that publishes, or holds a credential, contains.
-MARKERS = ('git push', 'webfactory/ssh-agent', 'anaconda/actions/upload-package', 'release_conda.py upload',
-           'ncipollo/release-action', 'github-pages-deploy-action', 'discussion_report.py', 'gh release',
-           'secrets.')
+MARKERS = ('git push', 'webfactory/ssh-agent', 'anaconda/actions/upload-package', 'ncipollo/release-action',
+           'github-pages-deploy-action', 'discussion_report.py', 'gh release', 'secrets.')
 #: A job-level permission only a publishing job holds.
 PUBLISHING_SCOPES = ('discussions', 'pages', 'id-token', 'packages', 'deployments')
 #: The workflow-level ``concurrency:`` group, as one interpolation after a prefix.
@@ -192,7 +191,6 @@ class TestAManualRunPublishesNothing(unittest.TestCase):
         expected = {
             'cron-conda.yml': ['conda-update: Load maintenance deploy key', 'conda-update: Push Changes',
                                'conda-tag', 'conda-dist: Upload conda packages to Anaconda',
-                               'conda-dist: Upload conda packages to Anaconda (Intel)',
                                'conda-dist: Check the GitHub release exists',
                                'conda-dist: Upload package to GitHub Release', 'discussion'],
             'cron-vendor.yml': ['vendor-update: Load maintenance deploy key', 'vendor-update: Push changes',
@@ -282,12 +280,17 @@ class TestAManualRunStillBuilds(unittest.TestCase):
             with self.subTest(files_changed=files_changed):
                 self.assertTrue(job_runs(jobs, 'conda-update', context))
                 self.assertFalse(job_runs(jobs, 'conda-tag', context))
-                self.assertTrue(job_runs(jobs, 'conda-dist', context))
+                # #3133: it builds and tests the package, and publishes nothing.
+                self.assertTrue(job_runs(jobs, 'conda-build', context))
+                self.assertTrue(job_runs(jobs, 'conda-test', context))
+                self.assertFalse(job_runs(jobs, 'conda-dist', context))
                 self.assertFalse(job_runs(jobs, 'discussion', context))
         # On the schedule, no pushed bump means no build.
         context = conda_context(event_name='schedule', unit_tests='success', verdict='skipped', verified=NULL,
                                 files_changed='false', pushed=NULL, conda_tag='skipped')
-        self.assertFalse(job_runs(self.jobs['cron-conda.yml'], 'conda-dist', context))
+        for job_id in ('conda-build', 'conda-dist'):
+            with self.subTest(job=job_id):
+                self.assertFalse(job_runs(self.jobs['cron-conda.yml'], job_id, context))
 
     def test_conda_update_hands_conda_dist_a_version(self) -> None:
         version = next(step for step in _workflows.steps('cron-conda.yml', 'conda-update')
@@ -300,14 +303,14 @@ class TestAManualRunStillBuilds(unittest.TestCase):
                 self.assertIs(evaluate_condition(version['if'], context), expected)
 
     def test_conda_dist_builds_the_dispatched_commit_with_the_changes(self) -> None:
-        steps = _workflows.steps('cron-conda.yml', 'conda-dist')
+        steps = _workflows.steps('cron-conda.yml', 'conda-build')
         names = [step.get('id') or step.get('name') for step in steps]
         self.assertEqual(names[:4], ['checkout', 'checkout-dispatched', 'download-changes', 'apply-changes'])
         update = [step.get('name') for step in _workflows.steps('cron-conda.yml', 'conda-update')]
-        self.assertLess(update.index('Get Version'), update.index('Save the changes for conda-dist'))
+        self.assertLess(update.index('Get Version'), update.index('Save the changes for conda-build'))
         for step in steps:
             name = step.get('id') or step.get('name')
-            for os_label in _workflows.job('cron-conda.yml', 'conda-dist')['strategy']['matrix']['os']:
+            for os_label in [_workflows.job('cron-conda.yml', 'conda-build')['runs-on']]:
                 for event_name in (DISPATCH, 'schedule'):
                     context = {**mode_context(event_name), 'matrix': {'os': os_label},
                                'steps': {'conda_build': {'outcome': 'success'},
