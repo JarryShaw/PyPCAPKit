@@ -3,10 +3,10 @@
 """OSPFv1 Packet Types
 =========================
 
-.. module:: __main__
+.. module:: pcapkit.const.ospfv1.packet
 
 This module contains the constant enumeration for **OSPFv1 Packet Types**,
-which is automatically generated from :class:`__main__.Packet`.
+which is automatically generated from :class:`pcapkit.vendor.ospfv1.packet.Packet`.
 
 """
 
