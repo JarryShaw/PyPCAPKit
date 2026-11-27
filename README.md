@@ -97,6 +97,7 @@ knowing by name:
 | [Testing](https://jarryshaw.github.io/PyPCAPKit/contributing/testing.html) | Running the suite, and the sample captures it needs |
 | [How to ...](https://jarryshaw.github.io/PyPCAPKit/demo.html) | Worked examples, library and CLI |
 | [Extensions](https://jarryshaw.github.io/PyPCAPKit/ext.html) | Registering your own protocols, engines and dumpers |
+| [Documentation versions](https://jarryshaw.github.io/PyPCAPKit/#documentation-versions) | Where `stable`, `latest` and each release's documentation are served |
 
 The newest changelog entry is in [CHANGELOG.md](CHANGELOG.md), which links to the
 full history; contribution guidelines are in [CONTRIBUTING.md](CONTRIBUTING.md).

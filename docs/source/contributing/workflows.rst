@@ -2459,13 +2459,52 @@ its root, so ``clean`` keeps them, and fails rather than overwrite a page:
 **Read the Docs** builds the ``pypcapkit`` project outside GitHub Actions, at
 https://pypcapkit.jarryshaw.me/: ``stable``, at ``/en/stable/``, from the ``stable``
 branch, `Stable Branch (#3077)`_'s mirror of ``main``; ``latest``, at ``/en/latest/``,
-from ``develop``; and each release tag at ``/en/<tag>/`` from the first that carries
-:file:`.readthedocs.yaml`, since a version builds from that file in its own tree. It
-installs as the Pages build does. Every other build's sidebar links to it under the
-brand; there its own flyout menu switches versions, so :file:`docs/source/conf.py`
-leaves the link out and takes the canonical URL from ``READTHEDOCS_CANONICAL_URL``. No
-``dev`` version duplicates ``latest``, as the owner ruled in session, recorded on
-:issue:`3077`, so a Pages path under ``/dev/`` is not found.
+from ``develop``; and each release tag at ``/en/<tag>/``. A version builds from the
+:file:`.readthedocs.yaml` in its own tree, so a tag that carries none is served from an
+``rtd/<tag>`` branch, the tag plus that file, under the tag's slug. Its automation rule
+builds each final and ``.postN`` tag as it is pushed. It installs as the Pages build
+does, and :file:`docs/source/conf.py` takes its canonical URL from
+``READTHEDOCS_CANONICAL_URL``. No ``dev`` version duplicates ``latest``, as the owner
+ruled in session, recorded on :issue:`3077`, so a Pages path under ``/dev/`` is not
+found.
 
-:file:`tests/project/test_pages_versions_3077.py` and
-:file:`tests/project/test_readthedocs_config_3077.py` pin both.
+**The version switch** sits under the sidebar brand of GitHub Pages, of Read the Docs'
+``stable`` and ``latest``, and of each tag that carries it (:issue:`3134`).
+:file:`docs/source/conf.py` sets its ``html_context`` from ``READTHEDOCS_VERSION`` and
+``READTHEDOCS_VERSION_TYPE``, taking any build off Read the Docs for ``stable``, and
+:file:`docs/source/_templates/sidebar/versions.html` renders it:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
+
+   * - Entry
+     - Opens
+   * - ``stable``, ``latest (develop)``
+     - the same page in that version on Read the Docs, bar the build's own, so a Read
+       the Docs reader stays there
+   * - ``vX.Y.Z``
+     - the same page in the build's release: a tag's own, or on ``stable`` the one
+       ``main`` last released, where the automation rule builds it
+   * - ``all releases``
+     - the changelog
+
+``link_release_docs`` links each changelog entry to its release's build as the page is
+read -- after the entry's link on the index, and under its own page's title -- so no
+``.rst`` source names a URL. ``UNBUILT_RELEASES`` lists the releases Read the Docs holds
+no build of, which get none: a release whose tag build fails joins it, and leaves once a
+rebuild succeeds. On the tags that predate the switch, Read the Docs' flyout, which it
+injects only into the pages it serves, switches versions.
+
+.. mermaid::
+
+   flowchart TD
+       B["A build carrying the switch:<br/>GitHub Pages, or Read the Docs'<br/>stable, latest or a tag"]
+       B -->|"each other version"| V["The same page in that version,<br/>on Read the Docs"]
+       B -->|"all releases"| C["The changelog"]
+       C -->|"each entry's link"| T["The release's build,<br/>/en/vX.Y.Z/ on Read the Docs"]
+       T -->|"a tag older than the switch"| F["Read the Docs' flyout"]
+
+:file:`tests/project/test_pages_versions_3077.py`,
+:file:`tests/project/test_readthedocs_config_3077.py` and
+:file:`tests/project/test_changelog_release_docs_3134.py` pin them.
