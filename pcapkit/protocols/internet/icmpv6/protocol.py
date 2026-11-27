@@ -38,7 +38,7 @@ from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.corekit.schema.domain_name import make_name, name_to_text, read_name, text_to_labels
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
-from pcapkit.corekit.schema.shortread import hoist_short_read
+from pcapkit.corekit.schema.short_read import hoist_short_read
 from pcapkit.protocols.internet.icmp.protocol import ICMP
 from pcapkit.protocols.internet.icmpv6.const import PREF64_PREFIX_LENGTH
 from pcapkit.protocols.internet.icmpv6.data import \

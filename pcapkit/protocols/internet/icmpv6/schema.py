@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.icmpv6.nd_option import NDOption as Enum_NDOption
 from pcapkit.const.icmpv6.type import Type as Enum_Type
 from pcapkit.const.igmp.record_type import RecordType as Enum_RecordType
-from pcapkit.corekit.const.ipheader import IP_MAX_LENGTH
+from pcapkit.corekit.const.ip_header import IP_MAX_LENGTH
 from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.ipaddress import IPv6AddressField
 from pcapkit.corekit.fields.misc import ConditionalField, PayloadField, SchemaField, SwitchField
@@ -203,7 +203,7 @@ def mldv2_record_count(pkt: 'dict[str, Any]') -> 'int':
     Raises:
         ProtocolError: If the records counted, at the 20 fixed octets of each,
             behind the 8 octets ahead of them, reach past the
-            :data:`~pcapkit.corekit.const.ipheader.IP_MAX_LENGTH` octets
+            :data:`~pcapkit.corekit.const.ip_header.IP_MAX_LENGTH` octets
             an IP payload holds, so the count is no cut but one the message
             cannot carry.
 

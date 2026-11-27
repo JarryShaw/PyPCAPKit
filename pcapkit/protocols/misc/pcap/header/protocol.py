@@ -36,7 +36,7 @@ from typing import TYPE_CHECKING, overload
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.const.capture import MAGIC_NUMBER
-from pcapkit.corekit.schema.shortread import keep_short_read, replay_short_read
+from pcapkit.corekit.schema.short_read import keep_short_read, replay_short_read
 from pcapkit.corekit.version import VersionInfo
 from pcapkit.protocols.misc.pcap.header.const import _DECLARED_MAGIC, GLOBAL_HEADER_LEN
 from pcapkit.protocols.misc.pcap.header.data import Header as Data_Header

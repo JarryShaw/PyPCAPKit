@@ -53,7 +53,7 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.igmp.record_type import RecordType as Enum_RecordType
 from pcapkit.const.igmp.type import Type as Enum_Type
-from pcapkit.corekit.schema.shortread import hoist_short_read
+from pcapkit.corekit.schema.short_read import hoist_short_read
 from pcapkit.protocols.internet.igmp.protocol import IGMP as IGMPBase
 from pcapkit.protocols.internet.igmpv3.data import GroupRecord as Data_GroupRecord
 from pcapkit.protocols.internet.igmpv3.data import IGMPv3 as Data_IGMPv3

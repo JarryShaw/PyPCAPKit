@@ -95,9 +95,9 @@ owner in session on :issue:`2674`, grouping these helpers in one package rather 
 placing each by the questions above. So
 :func:`~pcapkit.corekit.schema.padding.pad_length` is in
 :mod:`pcapkit.corekit.schema.padding`, and
-:func:`~pcapkit.corekit.schema.shortread.keep_short_read` and
-:func:`~pcapkit.corekit.schema.shortread.replay_short_read` in
-:mod:`pcapkit.corekit.schema.shortread`. The header schema framework stays
+:func:`~pcapkit.corekit.schema.short_read.keep_short_read` and
+:func:`~pcapkit.corekit.schema.short_read.replay_short_read` in
+:mod:`pcapkit.corekit.schema.short_read`. The header schema framework stays
 :mod:`pcapkit.protocols.schema` and its :class:`~pcapkit.protocols.schema.Schema`;
 :mod:`pcapkit.corekit.schema` holds only the helpers shared across the layer.
 
@@ -106,15 +106,15 @@ placing each by the questions above. So
 <pcapkit.protocols.schema.Schema.unpack>` records the field the data ends
 inside, through ``_note_short_read``, as ``__short_read__``;
 :meth:`~pcapkit.protocols.schema.Schema._cut_short_read` packs back only the
-octets read; and :func:`~pcapkit.corekit.schema.shortread.keep_short_read` and
-:func:`~pcapkit.corekit.schema.shortread.replay_short_read` carry the record through
+octets read; and :func:`~pcapkit.corekit.schema.short_read.keep_short_read` and
+:func:`~pcapkit.corekit.schema.short_read.replay_short_read` carry the record through
 ``info`` and cut a rebuild back by it. A protocol reads and rebuilds a cut header
 through them, never through an ``unpack`` override of its own or a length callable
 clamped to the octets present, which hides the cut from the record. Ruled in review
 of :pr:`2682` (:issue:`2680`), and applied to option areas on :issue:`2694`.
 
 **A rebuild is read at the width its parse read the header at.**
-:func:`~pcapkit.corekit.schema.shortread.keep_short_read` records that width beside
+:func:`~pcapkit.corekit.schema.short_read.keep_short_read` records that width beside
 the record, as ``__short_width__``, and :meth:`Protocol.from_data
 <pcapkit.protocols.protocol.Protocol.from_data>` reads the rebuild at it, so it holds
 the values and the next layer its parse did. Ruled by the owner on :issue:`2761`, over
@@ -141,10 +141,10 @@ layer declares overruns it and warns, and the frame keeps a header its octets ca
 hold as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
 
 A protocol's own check follows the same rule through
-:func:`~pcapkit.corekit.schema.shortread.cut_on_its_own`. On its own, a version or
+:func:`~pcapkit.corekit.schema.short_read.cut_on_its_own`. On its own, a version or
 length the cut left as zero, or a header length the data ends before, is the short
 read's, as such a zero is for a field callback (:issue:`2727`).
-:func:`~pcapkit.corekit.schema.shortread.fill_short_options` rebuilds that header
+:func:`~pcapkit.corekit.schema.short_read.fill_short_options` rebuilds that header
 length, which :issue:`1404` refused because the rebuild filled the zeros in. A check
 the cut leaves nothing to decide by still refuses: the PCAP magic number, IGMP's
 classification by length, NGAP's PER decoding, and the TLS, DTLS and HTTP/2 framing.
@@ -164,7 +164,7 @@ and IPv6-Opts headers that share them, and stay there too.
 
 **A header's length converts to and from a field counting 8-octet units not
 including the first 8 octets** [:rfc:`6564#section-4`] through
-:mod:`pcapkit.corekit.schema.extlen`, MH's and HIP's included (:issue:`2854`).
+:mod:`pcapkit.corekit.schema.ext_len`, MH's and HIP's included (:issue:`2854`).
 AH counts 4-octet units with a bias of 2 [:rfc:`4302#section-2.2`], so it keeps
 its own arithmetic. :file:`tests/project/test_ext_len_arithmetic_2854_unit.py`
 fails on ``(field + 1) * 8``, split across a call or not, or its inverse written
@@ -198,10 +198,10 @@ enumerations generated from the vendor registries.
    engines, the dumpers and the toolkit read: magic numbers, timestamp
    resolutions, the record header length, the Byte-Order Magic and the block
    minimums.
-*  :mod:`pcapkit.corekit.const.ipheader` -- the IPv4, IPv6 and IP
+*  :mod:`pcapkit.corekit.const.ip_header` -- the IPv4, IPv6 and IP
    Authentication Header lengths and offsets, and
-   :data:`~pcapkit.corekit.const.ipheader.IP_MAX_LENGTH`.
-*  :mod:`pcapkit.corekit.const.tcpheader` -- the TCP header's minimum length
+   :data:`~pcapkit.corekit.const.ip_header.IP_MAX_LENGTH`.
+*  :mod:`pcapkit.corekit.const.tcp_header` -- the TCP header's minimum length
    and the octet holding its Data Offset.
 
 What counts as a reference was ruled in review of :pr:`2895` (:issue:`2883`) too. Any
@@ -310,3 +310,30 @@ reach :mod:`pcapkit.protocols`. :file:`tests/project/test_shared_contextvars_261
 fails on a module that takes a context variable from anywhere else, by name or as an
 attribute of an imported module, and on a variable there that is private, missing
 from ``__all__``, or read by one module alone.
+
+Module Names
+~~~~~~~~~~~~
+
+**A module whose name has several words separates them with underscores, unless the
+joined name is a common one.** Ruled by the owner in review of :pr:`3142`
+(:issue:`2934`), which named :mod:`pcapkit.corekit.schema.domain_name`, and applied on
+:issue:`3153`, which renamed ``pcapkit.corekit.schema.shortread``,
+``pcapkit.corekit.schema.extlen``, ``pcapkit.corekit.const.ipheader`` and
+``pcapkit.corekit.const.tcpheader`` to :mod:`~pcapkit.corekit.schema.short_read`,
+:mod:`~pcapkit.corekit.schema.ext_len`, :mod:`~pcapkit.corekit.const.ip_header` and
+:mod:`~pcapkit.corekit.const.tcp_header`, with no alias at the old paths. These keep
+their joined names, as settled on :issue:`3153`:
+
+*  :mod:`pcapkit.corekit.schema.byteorder`, spelled as :data:`sys.byteorder` is;
+*  :mod:`pcapkit.corekit.multidict`, :mod:`pcapkit.corekit.infoclass` and
+   :mod:`pcapkit.corekit.protochain`, established names -- the ``multidict``
+   package's, after :func:`~dataclasses.dataclass`, and the public
+   :attr:`~pcapkit.protocols.protocol.Protocol.protochain` property's -- whose paths
+   a pickle stores;
+*  :mod:`pcapkit.foundation.traceflow`, whose name :issue:`2882` keeps;
+*  a module named after the standard-library or third-party module it mirrors, as
+   :mod:`pcapkit.corekit.schema.ipaddress` and :mod:`pcapkit.utilities.chardet` are;
+*  a protocol's package, named after the protocol (:ref:`protocol-family-grouping`),
+   as :mod:`pcapkit.protocols.internet.hopopt` is;
+*  the modules of :mod:`pcapkit.const` and :mod:`pcapkit.vendor`, which their
+   crawlers generate (:ref:`const-vendor-pairing`).

@@ -6,8 +6,8 @@
 
    ``pcapkit.protocols.transport.tcp.schema.TCP_MIN_HEADER_LEN`` and
    ``pcapkit.protocols.transport.tcp.schema.TCP_DATA_OFFSET_OCTET``, now
-   :data:`pcapkit.corekit.const.tcpheader.TCP_MIN_HEADER_LEN` and
-   :data:`pcapkit.corekit.const.tcpheader.TCP_DATA_OFFSET_OCTET` (:issue:`2883`).
+   :data:`pcapkit.corekit.const.tcp_header.TCP_MIN_HEADER_LEN` and
+   :data:`pcapkit.corekit.const.tcp_header.TCP_DATA_OFFSET_OCTET` (:issue:`2883`).
 
 """
 
@@ -19,7 +19,7 @@ from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtoco
 from pcapkit.const.tcp.checksum import Checksum as Enum_Checksum
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
 from pcapkit.const.tcp.option import Option as Enum_Option
-from pcapkit.corekit.const.tcpheader import TCP_MIN_HEADER_LEN
+from pcapkit.corekit.const.tcp_header import TCP_MIN_HEADER_LEN
 from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.ipaddress import IPv4AddressField, IPv6AddressField
 from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, NoValueField,

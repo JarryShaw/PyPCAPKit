@@ -5,7 +5,7 @@
 .. versionremoved:: 1.7.0
 
    ``pcapkit.protocols.internet.ipv4.schema.IPV4_HEADER_LEN``, now
-   :data:`pcapkit.corekit.const.ipheader.IPV4_HEADER_LEN` (:issue:`2883`).
+   :data:`pcapkit.corekit.const.ip_header.IPV4_HEADER_LEN` (:issue:`2883`).
 
 """
 
@@ -19,7 +19,7 @@ from pcapkit.const.ipv4.qs_function import QSFunction as Enum_QSFunction
 from pcapkit.const.ipv4.router_alert import RouterAlert as Enum_RouterAlert
 from pcapkit.const.ipv4.ts_flag import TSFlag as Enum_TSFlag
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.const.ipheader import IPV4_HEADER_LEN
+from pcapkit.corekit.const.ip_header import IPV4_HEADER_LEN
 from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.ipaddress import IPv4AddressField
 from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, PayloadField,

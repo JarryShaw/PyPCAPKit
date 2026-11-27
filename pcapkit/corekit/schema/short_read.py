@@ -2,9 +2,9 @@
 """Short-Read Replay
 =======================
 
-.. module:: pcapkit.corekit.schema.shortread
+.. module:: pcapkit.corekit.schema.short_read
 
-:mod:`pcapkit.corekit.schema.shortread` carries a header cut short by the end of the
+:mod:`pcapkit.corekit.schema.short_read` carries a header cut short by the end of the
 capture through to the protocol's info, by which a protocol rebuilt from that info
 is cut back to the octets its header had (:issue:`1458`), for the layer base classes
 and the PCAP global header alike, and tells a protocol's checks of a header parsed on
@@ -16,6 +16,15 @@ helpers shared across the schema layer, not part of the header schema framework 
 .. versionadded:: 1.6.0
 
    Moved here from ``pcapkit.protocols.schema.schema`` (:issue:`2674`).
+
+.. versionchanged:: 1.9.0
+
+   Renamed from ``pcapkit.corekit.schema.shortread`` (:issue:`3153`).
+
+.. versionremoved:: 1.9.0
+
+   ``pcapkit.corekit.schema.shortread``, now
+   :mod:`pcapkit.corekit.schema.short_read` (:issue:`3153`).
 
 """
 

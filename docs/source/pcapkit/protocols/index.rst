@@ -259,8 +259,8 @@ Header Schema
 
    ``pcapkit.protocols.schema.schema.keep_short_read`` and
    ``pcapkit.protocols.schema.schema.replay_short_read``, now
-   :func:`pcapkit.corekit.schema.shortread.keep_short_read` and
-   :func:`pcapkit.corekit.schema.shortread.replay_short_read` (:issue:`2674`).
+   :func:`pcapkit.corekit.schema.short_read.keep_short_read` and
+   :func:`pcapkit.corekit.schema.short_read.replay_short_read` (:issue:`2674`).
 
 .. autoclass:: pcapkit.protocols.schema.Schema
    :no-members:

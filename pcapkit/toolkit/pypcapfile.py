@@ -48,8 +48,8 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.const import ipheader as Module_IPHeader
-from pcapkit.corekit.const import tcpheader as Module_TCPHeader
+from pcapkit.corekit.const import ip_header as Module_IPHeader
+from pcapkit.corekit.const import tcp_header as Module_TCPHeader
 from pcapkit.corekit.const.capture import RESOLUTION
 from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
 from pcapkit.foundation.reassembly.ip.data import Packet as IP_Packet
@@ -550,7 +550,7 @@ def _walk_extension_headers(protocol: 'int', data: 'bytes') -> 'Optional[tuple[i
         :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`
         follow in a row. An AH is ``(Payload Length + 2) * 4`` octets long
         (:rfc:`4302#section-2.2`), and no shorter than
-        :data:`~pcapkit.corekit.const.ipheader.AH_HEADER_LEN`. Any other
+        :data:`~pcapkit.corekit.const.ip_header.AH_HEADER_LEN`. Any other
         is stepped over by the length :func:`_default_extension_header` gives,
         so one it keeps though cut short leaves no octets after it
         (:issue:`2695`).

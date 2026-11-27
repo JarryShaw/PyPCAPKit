@@ -36,7 +36,7 @@ from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode as Enum_SMFDPDMode
 from pcapkit.const.ipv6.tagger_id import TaggerID as Enum_TaggerID
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.multidict import OrderedMultiDict
-from pcapkit.corekit.schema.extlen import ext_len_to_octets, octets_to_ext_len
+from pcapkit.corekit.schema.ext_len import ext_len_to_octets, octets_to_ext_len
 from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.corekit.sentinels import NO_VALUE
 from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext

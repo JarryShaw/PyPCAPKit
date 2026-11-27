@@ -20,5 +20,5 @@ other: import each constant from its own module.
 
    capture
    domain_name
-   ipheader
-   tcpheader
+   ip_header
+   tcp_header

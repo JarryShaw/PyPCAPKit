@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.ipv6.routing import Routing as Enum_Routing
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.schema.extlen import octets_to_ext_len
+from pcapkit.corekit.schema.ext_len import octets_to_ext_len
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext

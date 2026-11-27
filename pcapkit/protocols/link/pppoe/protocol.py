@@ -37,7 +37,7 @@ from pcapkit.const.pppoe.code import Code as Enum_Code
 from pcapkit.const.pppoe.tag import Tag as Enum_Tag
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
-from pcapkit.corekit.schema.shortread import cut_on_its_own
+from pcapkit.corekit.schema.short_read import cut_on_its_own
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.link.pppoe.data import PPPoE as Data_PPPoE
 from pcapkit.protocols.link.pppoe.data import Tag as Data_Tag

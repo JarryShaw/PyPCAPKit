@@ -86,10 +86,10 @@ from pcapkit.corekit.context import ProtocolContext
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
-from pcapkit.corekit.schema.extlen import ext_len_to_octets, octets_to_ext_len
+from pcapkit.corekit.schema.ext_len import ext_len_to_octets, octets_to_ext_len
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.schema.padding import pad_length
-from pcapkit.corekit.schema.shortread import cut_on_its_own
+from pcapkit.corekit.schema.short_read import cut_on_its_own
 from pcapkit.protocols.internet.hip.const import (CIPHER_KEY_LEN, ECDSA_CURVE_LEN, EDDSA_CURVE_LEN,
                                                   HI_ALGORITHM_SUITE, HIT_SUITE_HASH, ORCHID_PREFIX)
 from pcapkit.protocols.internet.hip.data import HIP as Data_HIP

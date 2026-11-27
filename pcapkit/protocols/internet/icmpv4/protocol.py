@@ -30,7 +30,7 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.icmp.type import Type as Enum_Type
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.corekit.schema.shortread import hoist_short_read
+from pcapkit.corekit.schema.short_read import hoist_short_read
 from pcapkit.protocols.internet.icmp.protocol import ICMP
 from pcapkit.protocols.internet.icmpv4.data import \
     DestinationUnreachable as Data_DestinationUnreachable

@@ -27,7 +27,7 @@ from typing import TYPE_CHECKING, Generic
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.corekit.module import ModuleDescriptor
-from pcapkit.corekit.schema.shortread import keep_short_read, replay_short_read
+from pcapkit.corekit.schema.short_read import keep_short_read, replay_short_read
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
