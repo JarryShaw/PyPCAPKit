@@ -1072,14 +1072,15 @@ Create Release has had the day to publish, so its <code class="docutils literal 
 <p>To debug Vendor Update, Conda Update or GitHub Pages without waiting for
 Saturday, start a manual run on a branch, as in <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">workflow</span> <span class="pre">run</span> <span class="pre">cron-conda.yml</span>
 <span class="pre">--ref</span> <span class="pre">&lt;branch&gt;</span></code>. A manual run is build-only by default: Cron Head’s test gate
-and every build and test step the schedule runs still run – each <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> leg,
-Windows included, builds the dispatched commit with <code class="docutils literal notranslate"><span class="pre">conda-update</span></code>’s changes
-applied – while every step that pushes, tags, uploads, deploys or posts a
-report skips, no job that runs names an environment, and the Create Release run
-it raises releases nothing. <code class="file docutils literal notranslate"><span class="pre">tests/project/test_build_only_dispatch.py</span></code>
+and every build and test step the schedule runs still run – <code class="docutils literal notranslate"><span class="pre">conda-build</span></code>
+builds the dispatched commit with <code class="docutils literal notranslate"><span class="pre">conda-update</span></code>’s changes applied, and
+<code class="docutils literal notranslate"><span class="pre">conda-test</span></code> installs that package – while <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> and every step that
+pushes, tags, uploads to an index or a release, deploys or posts a report skip,
+no job that runs names an environment, and the Create Release run it raises
+releases nothing. <code class="file docutils literal notranslate"><span class="pre">tests/project/test_build_only_dispatch.py</span></code>
 pins this.</p>
 <p>Conda Update’s manual run also takes a <code class="docutils literal notranslate"><span class="pre">publish</span></code> input, off by default, for
-putting a version’s missing platform files on Anaconda (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>). A
+putting a version’s missing noarch file on Anaconda (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3133">#3133</a>). A
 scheduled run uploads only a build it bumped, and it bumps only when
 <code class="docutils literal notranslate"><span class="pre">Verify</span> <span class="pre">Changed</span> <span class="pre">files</span></code> sees a change, which <code class="file docutils literal notranslate"><span class="pre">util/conda_vendor.py</span></code> does
 not make when no dependency moved. <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">workflow</span> <span class="pre">run</span> <span class="pre">cron-conda.yml</span> <span class="pre">--ref</span> <span class="pre">main</span>
@@ -1087,8 +1088,9 @@ not make when no dependency moved. <code class="docutils literal notranslate"><s
 gate, environments and <code class="docutils literal notranslate"><span class="pre">repository-maintenance</span></code> group, but with the build
 bumped regardless: <code class="docutils literal notranslate"><span class="pre">Decide</span> <span class="pre">whether</span> <span class="pre">to</span> <span class="pre">bump</span></code> says so although nothing changed,
 so <code class="docutils literal notranslate"><span class="pre">Bump</span> <span class="pre">Version</span></code>, <code class="docutils literal notranslate"><span class="pre">Commit</span> <span class="pre">Changes</span></code> and <code class="docutils literal notranslate"><span class="pre">Push</span> <span class="pre">Changes</span></code> run, <code class="docutils literal notranslate"><span class="pre">conda-tag</span></code>
-tags the pushed commit, every <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> leg builds and uploads, the GitHub
-Release steps run, and <code class="docutils literal notranslate"><span class="pre">discussion</span></code> posts the report as <code class="docutils literal notranslate"><span class="pre">scheduled</span></code>.</p>
+tags the pushed commit, <code class="docutils literal notranslate"><span class="pre">conda-build</span></code> builds, <code class="docutils literal notranslate"><span class="pre">conda-test</span></code> installs,
+<code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> uploads, the GitHub Release steps run, and <code class="docutils literal notranslate"><span class="pre">discussion</span></code> posts
+the report as <code class="docutils literal notranslate"><span class="pre">scheduled</span></code>.</p>
 <p>Every publishing bump, scheduled or manual, builds the tree of the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag for
 <code class="docutils literal notranslate"><span class="pre">main</span></code>’s version, not <code class="docutils literal notranslate"><span class="pre">main</span></code>’s (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2841">#2841</a>). Before the bump,
 <code class="docutils literal notranslate"><span class="pre">Find</span> <span class="pre">the</span> <span class="pre">release</span> <span class="pre">tag</span></code> resolves that tag and
@@ -1123,7 +1125,7 @@ sets; the report posts as <code class="docutils literal notranslate"><span class
 </table>
 </div>
 <p>The report says which withheld the tag and upload. Otherwise the bump’s commit
-message names the tag, and <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code>’s <code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">out</span> <span class="pre">the</span> <span class="pre">release</span> <span class="pre">tag's</span> <span class="pre">tree</span></code>
+message names the tag, and <code class="docutils literal notranslate"><span class="pre">conda-build</span></code>’s <code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">out</span> <span class="pre">the</span> <span class="pre">release</span> <span class="pre">tag's</span> <span class="pre">tree</span></code>
 switches from the bump to the tagged commit, keeping only the bump’s
 <code class="file docutils literal notranslate"><span class="pre">conda/</span></code> and <code class="file docutils literal notranslate"><span class="pre">util/</span></code> (<a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a> says why).
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_conda_publish_from_tag_2841.py</span></code> pins this. The
@@ -1208,8 +1210,10 @@ skipping it. <code class="docutils literal notranslate"><span class="pre">unit-t
 calls no status-check function, so a skipped dependency skips it too – and
 every job past it is gated the same way: <code class="docutils literal notranslate"><span class="pre">github</span></code> needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">unit-tests,</span>
 <span class="pre">version_check</span> <span class="pre">]</span></code>, <code class="docutils literal notranslate"><span class="pre">tag</span></code> and <code class="docutils literal notranslate"><span class="pre">pypi</span></code> need <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">github,</span> <span class="pre">unit-tests,</span>
-<span class="pre">version_check</span> <span class="pre">]</span></code>, and <code class="docutils literal notranslate"><span class="pre">conda</span></code> needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">tag,</span> <span class="pre">github,</span> <span class="pre">unit-tests,</span>
-<span class="pre">version_check</span> <span class="pre">]</span></code>.</p>
+<span class="pre">version_check</span> <span class="pre">]</span></code>, <code class="docutils literal notranslate"><span class="pre">conda-build</span></code> needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">tag,</span> <span class="pre">github,</span> <span class="pre">unit-tests,</span>
+<span class="pre">version_check</span> <span class="pre">]</span></code>, <code class="docutils literal notranslate"><span class="pre">conda-test</span></code> needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">conda-build,</span> <span class="pre">version_check</span> <span class="pre">]</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">conda</span></code> needs what <code class="docutils literal notranslate"><span class="pre">conda-build</span></code> does, plus <code class="docutils literal notranslate"><span class="pre">conda-build</span></code> and <code class="docutils literal notranslate"><span class="pre">conda-test</span></code>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3133">#3133</a>).</p>
 <pre  class="mermaid">
         flowchart TD
     WR[&quot;Vendor Update completed&lt;br/&gt;conclusion != success,&lt;br/&gt;or vendor-update skipped&quot;]
@@ -1218,6 +1222,8 @@ every job past it is gated the same way: <code class="docutils literal notransla
     GH[&quot;github (GitHub Release)&lt;br/&gt;SKIPPED&quot;]
     TAGJ[&quot;tag (Conda Tag)&lt;br/&gt;SKIPPED&quot;]
     PY[&quot;pypi (PyPI distribution)&lt;br/&gt;SKIPPED&quot;]
+    CB[&quot;conda-build&lt;br/&gt;SKIPPED&quot;]
+    CT[&quot;conda-test&lt;br/&gt;SKIPPED&quot;]
     CD[&quot;conda&lt;br/&gt;SKIPPED&quot;]
 
     WR --&gt;|if: false| VC
@@ -1225,14 +1231,18 @@ every job past it is gated the same way: <code class="docutils literal notransla
     UTX --&gt;|needs| GH
     GH --&gt;|needs| TAGJ
     GH --&gt;|needs| PY
-    GH --&gt;|needs| CD
-    TAGJ --&gt;|needs| CD
+    GH --&gt;|needs| CB
+    TAGJ --&gt;|needs| CB
+    CB --&gt;|needs| CT
+    CT --&gt;|needs| CD
 
     classDef skipped fill:#fdecea,stroke:#c0392b,stroke-dasharray:4 2
-    class UTX,VC,GH,TAGJ,PY,CD skipped
+    class UTX,VC,GH,TAGJ,PY,CB,CT,CD skipped
     </pre><p>This is a transitive reduction, as in <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>: <code class="docutils literal notranslate"><span class="pre">version_check</span></code> and
-<code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> are also direct <code class="docutils literal notranslate"><span class="pre">needs:</span></code> of <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code>, but
-<code class="docutils literal notranslate"><span class="pre">github</span></code> depends on both and so already implies those edges.</p>
+<code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> are also direct <code class="docutils literal notranslate"><span class="pre">needs:</span></code> of <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code>, <code class="docutils literal notranslate"><span class="pre">conda-build</span></code>
+and <code class="docutils literal notranslate"><span class="pre">conda</span></code>, but <code class="docutils literal notranslate"><span class="pre">github</span></code> depends on both and so already implies those
+edges, as <code class="docutils literal notranslate"><span class="pre">conda-test</span></code> does <code class="docutils literal notranslate"><span class="pre">conda</span></code>’s on <code class="docutils literal notranslate"><span class="pre">conda-build</span></code>, <code class="docutils literal notranslate"><span class="pre">tag</span></code> and
+<code class="docutils literal notranslate"><span class="pre">github</span></code>.</p>
 <p>The whole run then reports <strong>skipped</strong>, not failed, so there is no red X to notice:
 <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> Create Release runs <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/actions/runs/36511610205">36511610205</a> and
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/actions/runs/36510774776">36510774776</a> on <code class="docutils literal notranslate"><span class="pre">main</span></code>
@@ -1784,8 +1794,9 @@ nor <code class="docutils literal notranslate"><span class="pre">unittest-orderi
 as a lost runner or the job cap, reaches a gate. Each runs its gating twin’s steps,
 by YAML alias (<a class="reference external" href="https://docs.github.com/en/actions/reference/workflows-and-actions/reusing-workflow-configurations#yaml-anchors-and-aliases">Reusing workflow configurations</a>),
 and keeps its legs’ check names, <code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">3.10</span> <span class="pre">(KTLO)</span></code> and so on. In
-<code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code> and <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> a KTLO leg shares its job
-with supported legs. Every job holding KTLO legs works the same way:</p>
+<code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> and <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code> a KTLO
+leg shares its job with supported legs. Every job holding KTLO legs works the
+same way:</p>
 <ul class="simple">
 <li><p>Every step that can fail on a KTLO leg has an <code class="docutils literal notranslate"><span class="pre">id</span></code> and
 <code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">${{</span> <span class="pre">matrix.ktlo</span> <span class="pre">==</span> <span class="pre">true</span> <span class="pre">}}</span></code> (see the comment above
@@ -1813,6 +1824,17 @@ so the Unit Tests run its <code class="docutils literal notranslate"><span class
 runner’s <code class="docutils literal notranslate"><span class="pre">Process</span> <span class="pre">completed</span> <span class="pre">with</span> <span class="pre">exit</span> <span class="pre">code</span> <span class="pre">N.</span></code> for a <code class="docutils literal notranslate"><span class="pre">run:</span></code> step, and an
 action’s own. And <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1634">#1634</a>’s tag check still blocks the <code class="docutils literal notranslate"><span class="pre">pypi</span></code> KTLO legs: it fails
 every leg alike, and masked, the leg would go on to publish.</p>
+<p><code class="docutils literal notranslate"><span class="pre">conda-test</span></code>, in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> and <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3133">#3133</a>), installs the noarch package <code class="docutils literal notranslate"><span class="pre">conda-build</span></code> built on linux-64,
+linux-aarch64, osx-64, osx-arm64 and win-64, under each CPython of both tiers.
+Its Pythons come from conda-forge, not setup-python, so no runner pin applies and
+Python Versions’ weekly job counts none of its labels. Its KTLO legs carry the
+guards above, so only a supported leg’s failure holds back the upload that
+follows it. The arm64 Ubuntu is <code class="docutils literal notranslate"><span class="pre">ubuntu-24.04-arm</span></code>, which <code class="file docutils literal notranslate"><span class="pre">lint.yml</span></code>’s
+pinned actionlint knows, where it does not know <code class="docutils literal notranslate"><span class="pre">ubuntu-26.04-arm</span></code>. The
+<code class="docutils literal notranslate"><span class="pre">macos-26-intel</span></code> leg installs Miniforge, since the runner’s default Miniconda
+is frozen at conda 25.7.0, too old for conda-forge’s conda-content-trust
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2044">#2044</a>); <code class="file docutils literal notranslate"><span class="pre">tests/project/test_conda_intel_miniforge_2044.py</span></code> pins it.</p>
 <p>PyPy is tiered the same way. <code class="docutils literal notranslate"><span class="pre">test</span></code> and <code class="docutils literal notranslate"><span class="pre">integration</span></code> run its supported
 versions after CPython’s, and <code class="docutils literal notranslate"><span class="pre">test-ktlo</span></code> and <code class="docutils literal notranslate"><span class="pre">integration-ktlo</span></code> its KTLO ones,
 each leg running the <code class="docutils literal notranslate"><span class="pre">ALL</span></code> test tier (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1958">#1958</a>,
@@ -1874,7 +1896,7 @@ was measured on that job.</p>
 setup-python reads them (<code class="docutils literal notranslate"><span class="pre">3.14t</span></code>, <code class="docutils literal notranslate"><span class="pre">graalpy-25.4</span></code>). Each runs a leg of
 <code class="docutils literal notranslate"><span class="pre">experimental</span></code>, the matrix job of <code class="file docutils literal notranslate"><span class="pre">.github/workflows/experimental.yml</span></code>
 (“Experimental Tests”), named <code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">&lt;version&gt;</span> <span class="pre">(experimental)</span></code>, and nothing
-else: no <code class="docutils literal notranslate"><span class="pre">integration</span></code>, <code class="docutils literal notranslate"><span class="pre">Compat</span></code>, wheel or conda leg, so never a required
+else: no <code class="docutils literal notranslate"><span class="pre">integration</span></code>, <code class="docutils literal notranslate"><span class="pre">Compat</span></code> or wheel leg, so never a required
 context. They run in a workflow of their own, rather than as legs of <code class="docutils literal notranslate"><span class="pre">test</span></code>, by
 the owner’s ruling on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1732">#1732</a> that nothing waits on them. <strong>That
 workflow reports separately and holds up nothing</strong>: a job cannot <code class="docutils literal notranslate"><span class="pre">needs:</span></code> one in
@@ -1946,8 +1968,8 @@ stays, changing no conclusion, as <code class="docutils literal notranslate"><sp
 Everything but the install and the tests took under 20 seconds on every uncovered
 leg of runs 38569321543-38569522442. <code class="docutils literal notranslate"><span class="pre">test</span></code>’s caps are main’s: 45 minutes for the
 job, and none on a step. Promoting one whose leg stays green is a hand edit, which
-<code class="file docutils literal notranslate"><span class="pre">util/python_versions.py</span></code> refuses until the build has a wheel, a conda build
-and a <code class="docutils literal notranslate"><span class="pre">Compat</span></code> leg.</p>
+<code class="file docutils literal notranslate"><span class="pre">util/python_versions.py</span></code> refuses until the build has a wheel and a
+<code class="docutils literal notranslate"><span class="pre">Compat</span></code> leg.</p>
 <p>The tests’ 190 minutes are sized for GraalPy, the slowest of the legs that share
 them: its leg reached 26% of the unit tier in 25 minutes (job 115915976024), where
 3.14t’s ran the whole tier in 5.8 (run 38581834697). The experimental legs run the
@@ -2102,10 +2124,10 @@ from the 88-113 above, not measured), and job 125752017215’s came to about 119
 the shards above (estimate). A leg that still ends on the 180-minute timeout does so as
 a warning that blocks nothing.</p>
 <p><strong>The Windows leg.</strong> <code class="file docutils literal notranslate"><span class="pre">experimental.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">windows</span></code> job runs the <code class="docutils literal notranslate"><span class="pre">ALL</span></code> tier
-on <code class="docutils literal notranslate"><span class="pre">windows-latest</span></code> under <code class="docutils literal notranslate"><span class="pre">latest</span></code>, the newest CPython the conda builds target, as
+on <code class="docutils literal notranslate"><span class="pre">windows-latest</span></code> under <code class="docutils literal notranslate"><span class="pre">latest</span></code>, the newest supported CPython, as
 <code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">&lt;latest&gt;</span> <span class="pre">on</span> <span class="pre">Windows</span> <span class="pre">(experimental)</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>),
-so the first published
-<code class="docutils literal notranslate"><span class="pre">win-64</span></code> conda package has had a test run. It needs <code class="docutils literal notranslate"><span class="pre">current</span></code>, <code class="docutils literal notranslate"><span class="pre">changes</span></code> and
+so a release has had a test run on the platform, where the wheel and the noarch
+conda package install. It needs <code class="docutils literal notranslate"><span class="pre">current</span></code>, <code class="docutils literal notranslate"><span class="pre">changes</span></code> and
 <code class="docutils literal notranslate"><span class="pre">python-versions</span></code> and runs on <code class="docutils literal notranslate"><span class="pre">experimental</span></code>’s condition, and it is non-blocking by
 the same mechanics: every step continues on error, setup-python, the install and <code class="docutils literal notranslate"><span class="pre">Run</span>
 <span class="pre">unit</span> <span class="pre">tests</span></code> are capped at 5, 10 and 60 minutes within its 80, the job carries
@@ -2352,9 +2374,10 @@ to a script. Each script’s docstring says what it does; each has tests under
 <tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/leg_summary.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">KTLO</span> <span class="pre">summary</span></code> in <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code> and
 <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> (and so their KTLO twins), <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">compatibility</span></code> and <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">pypi</span></code>, as <code class="docutils literal notranslate"><span class="pre">leg_summary.py</span>
-<span class="pre">ktlo</span></code>; <code class="docutils literal notranslate"><span class="pre">Experimental</span> <span class="pre">summary</span></code> in <code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">experimental</span></code>
-and <code class="docutils literal notranslate"><span class="pre">windows</span></code>, as <code class="docutils literal notranslate"><span class="pre">leg_summary.py</span> <span class="pre">experimental</span></code>.</p></td>
+<code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda-test</span></code> and
+<code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">conda-test</span></code>, as <code class="docutils literal notranslate"><span class="pre">leg_summary.py</span> <span class="pre">ktlo</span></code>;
+<code class="docutils literal notranslate"><span class="pre">Experimental</span> <span class="pre">summary</span></code> in <code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">experimental</span></code> and
+<code class="docutils literal notranslate"><span class="pre">windows</span></code>, as <code class="docutils literal notranslate"><span class="pre">leg_summary.py</span> <span class="pre">experimental</span></code>.</p></td>
 <td><p>No.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/classify_changes.py</span></code></p></td>
@@ -2428,8 +2451,8 @@ Reports</a>).</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_tags.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">the</span> <span class="pre">release</span> <span class="pre">tags</span> <span class="pre">name</span> <span class="pre">this</span> <span class="pre">run's</span> <span class="pre">commit</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">github</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code>, as <code class="docutils literal notranslate"><span class="pre">release_tags.py</span> <span class="pre">check</span></code>, and <code class="docutils literal notranslate"><span class="pre">Check</span>
-<span class="pre">which</span> <span class="pre">commit</span> <span class="pre">the</span> <span class="pre">version's</span> <span class="pre">tag</span> <span class="pre">names</span></code> in its <code class="docutils literal notranslate"><span class="pre">version_check</span></code>, as
+<code class="docutils literal notranslate"><span class="pre">github</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code>, <code class="docutils literal notranslate"><span class="pre">conda-build</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code>, as <code class="docutils literal notranslate"><span class="pre">release_tags.py</span>
+<span class="pre">check</span></code>, and <code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">which</span> <span class="pre">commit</span> <span class="pre">the</span> <span class="pre">version's</span> <span class="pre">tag</span> <span class="pre">names</span></code> in its <code class="docutils literal notranslate"><span class="pre">version_check</span></code>, as
 <code class="docutils literal notranslate"><span class="pre">release_tags.py</span> <span class="pre">owner</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1634">#1634</a>,
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1748">#1748</a>).</p></td>
 <td><p>No.</p></td>
@@ -2459,12 +2482,10 @@ after a checkout of <code class="file docutils literal notranslate"><span class=
 </tr>
 <tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_conda.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">whether</span> <span class="pre">this</span> <span class="pre">leg</span> <span class="pre">is</span> <span class="pre">already</span> <span class="pre">on</span> <span class="pre">Anaconda</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">conda</span></code>, as <code class="docutils literal notranslate"><span class="pre">release_conda.py</span> <span class="pre">leg</span></code>; <code class="docutils literal notranslate"><span class="pre">Build</span> <span class="pre">conda</span> <span class="pre">packages</span></code> and <code class="docutils literal notranslate"><span class="pre">Upload</span>
-<span class="pre">conda</span> <span class="pre">packages</span> <span class="pre">to</span> <span class="pre">Anaconda</span> <span class="pre">(Intel)</span></code> in that job and in <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">conda-dist</span></code>, as <code class="docutils literal notranslate"><span class="pre">release_conda.py</span> <span class="pre">build</span></code> and <code class="docutils literal notranslate"><span class="pre">upload</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1822">#1822</a>,
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2044">#2044</a>),
-and <code class="docutils literal notranslate"><span class="pre">Upload</span> <span class="pre">conda</span>
-<span class="pre">packages</span> <span class="pre">to</span> <span class="pre">Anaconda</span> <span class="pre">(Windows)</span></code> in both as <code class="docutils literal notranslate"><span class="pre">upload</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>).</p></td>
+<code class="docutils literal notranslate"><span class="pre">conda</span></code>, as <code class="docutils literal notranslate"><span class="pre">release_conda.py</span> <span class="pre">leg</span></code>; <code class="docutils literal notranslate"><span class="pre">Find</span> <span class="pre">the</span> <span class="pre">conda</span> <span class="pre">package</span></code> in that
+job and in <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code>, as <code class="docutils literal notranslate"><span class="pre">release_conda.py</span>
+<span class="pre">downloaded</span></code>; <code class="docutils literal notranslate"><span class="pre">Build</span> <span class="pre">conda</span> <span class="pre">packages</span></code> in both workflows’ <code class="docutils literal notranslate"><span class="pre">conda-build</span></code>,
+as <code class="docutils literal notranslate"><span class="pre">release_conda.py</span> <span class="pre">build</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1822">#1822</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3133">#3133</a>).</p></td>
 <td><p>No.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_reset_build.py</span></code></p></td>
@@ -2480,7 +2501,9 @@ and <code class="docutils literal notranslate"><span class="pre">Upload</span> <
 interpreter, which may have failed to set up or be too broken to run anything, so
 they need only the standard library, as <code class="docutils literal notranslate"><span class="pre">classify_changes.py</span></code> does on the
 runner’s <code class="docutils literal notranslate"><span class="pre">python3</span></code>. The Windows leg, which has no <code class="docutils literal notranslate"><span class="pre">/usr/bin/python3</span></code>, runs its
-summary on <code class="docutils literal notranslate"><span class="pre">python</span></code>, setup-python’s or the image’s. <code class="file docutils literal notranslate"><span class="pre">util/pytest_shards.py</span></code> runs on <code class="docutils literal notranslate"><span class="pre">/usr/bin/python3</span></code>
+summary on <code class="docutils literal notranslate"><span class="pre">python</span></code>, setup-python’s or the image’s, and <code class="docutils literal notranslate"><span class="pre">conda-test</span></code>’s legs,
+which have no setup-python, on the first of <code class="docutils literal notranslate"><span class="pre">python</span></code> and <code class="docutils literal notranslate"><span class="pre">python3</span></code> the runner
+has (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3133">#3133</a>). <code class="file docutils literal notranslate"><span class="pre">util/pytest_shards.py</span></code> runs on <code class="docutils literal notranslate"><span class="pre">/usr/bin/python3</span></code>
 too, standard library only, so on GraalPy’s leg the leg’s interpreter runs pytest
 alone; on PyPy’s legs the leg’s interpreter runs the script as well, under the
 file-size cap every test command of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> takes.
@@ -2502,12 +2525,14 @@ apt’s own children, which a timeout in the script, running as the runner’s u
 could not signal. Both <code class="docutils literal notranslate"><span class="pre">changes</span></code> jobs check out on every event, since the script is in the
 tree. The release scripts run as <code class="docutils literal notranslate"><span class="pre">python3</span></code>, from a checkout of the whole tree, and are
 standard library only: <code class="file docutils literal notranslate"><span class="pre">util/release_tags.py</span></code> on the image’s
-own, since <code class="docutils literal notranslate"><span class="pre">github</span></code> has no setup-python and <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> run the check
-before theirs, and <code class="file docutils literal notranslate"><span class="pre">util/release_upload.py</span></code> on the leg’s, after it.
+own, since <code class="docutils literal notranslate"><span class="pre">github</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> have no setup-python and <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and
+<code class="docutils literal notranslate"><span class="pre">conda-build</span></code> run the check before theirs, and <code class="file docutils literal notranslate"><span class="pre">util/release_upload.py</span></code>
+on <code class="docutils literal notranslate"><span class="pre">pypi</span></code>’s leg’s, after it, and on the image’s in <code class="docutils literal notranslate"><span class="pre">conda</span></code>.
 <code class="file docutils literal notranslate"><span class="pre">util/release_reset_build.py</span></code> runs on the image’s own too, as <code class="docutils literal notranslate"><span class="pre">tag</span></code> has no
-setup-python. <code class="file docutils literal notranslate"><span class="pre">util/release_conda.py</span></code> runs <code class="docutils literal notranslate"><span class="pre">leg</span></code> on the image’s <code class="docutils literal notranslate"><span class="pre">python3</span></code>, before
-setup-python, <code class="docutils literal notranslate"><span class="pre">build</span></code> on conda’s base <code class="docutils literal notranslate"><span class="pre">python</span></code> under the login shell, from
-<code class="file docutils literal notranslate"><span class="pre">conda/pypcapkit</span></code>, and <code class="docutils literal notranslate"><span class="pre">upload</span></code> on setup-python’s. A project
+setup-python. <code class="file docutils literal notranslate"><span class="pre">util/release_conda.py</span></code> runs <code class="docutils literal notranslate"><span class="pre">leg</span></code> and <code class="docutils literal notranslate"><span class="pre">downloaded</span></code> on the
+image’s <code class="docutils literal notranslate"><span class="pre">python3</span></code>, in <code class="docutils literal notranslate"><span class="pre">conda</span></code> and <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code>, which have no setup-python,
+and <code class="docutils literal notranslate"><span class="pre">build</span></code> on conda’s base <code class="docutils literal notranslate"><span class="pre">python</span></code> under the login shell, from
+<code class="file docutils literal notranslate"><span class="pre">conda/pypcapkit</span></code>. A project
 pin runs each, and the step’s inline shell form it must match, on the same cases
 and requires the same status, output and calls.
 <code class="file docutils literal notranslate"><span class="pre">util/_actions.py</span></code> is standard library only, and keeps to 3.8’s syntax,
@@ -2559,16 +2584,14 @@ directory a change touches, when it moves imports or module state (see
 <a class="reference internal" href="conventions/test-coverage.html"><span class="doc">Testing a Change</span></a>).</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/conda_vendor.py</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">Refresh</span> <span class="pre">the</span> <span class="pre">platform</span> <span class="pre">pins</span></code> and <code class="docutils literal notranslate"><span class="pre">Setup</span> <span class="pre">Conda</span> <span class="pre">Distribution</span></code> in
+<td><p><code class="docutils literal notranslate"><span class="pre">Setup</span> <span class="pre">Conda</span> <span class="pre">Distribution</span></code> in
 <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">conda-update</span></code>, and there
 <code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">the</span> <span class="pre">release</span> <span class="pre">tag's</span> <span class="pre">dependencies</span></code> as
 <code class="docutils literal notranslate"><span class="pre">conda_vendor.py</span> <span class="pre">--same-dependencies</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2841">#2841</a>);
 <code class="docutils literal notranslate"><span class="pre">Smoke-test</span> <span class="pre">the</span> <span class="pre">vendored</span> <span class="pre">packages</span></code>
-in its <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> and <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">conda</span></code>, as
-<code class="docutils literal notranslate"><span class="pre">conda_vendor.py</span> <span class="pre">--smoke</span></code>.</p></td>
+in both workflows’ <code class="docutils literal notranslate"><span class="pre">conda-build</span></code>, as <code class="docutils literal notranslate"><span class="pre">conda_vendor.py</span> <span class="pre">--smoke</span></code>.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">util/conda_vendor.py</span> <span class="pre">--check</span></code>, which no workflow runs: whether
-<code class="file docutils literal notranslate"><span class="pre">conda/requirements.txt</span></code> is stale or a platform pin is past its
-review-by date.</p></td>
+<code class="file docutils literal notranslate"><span class="pre">conda/requirements.txt</span></code> is stale.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/ci_timing.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Report</span> <span class="pre">CI</span> <span class="pre">timing</span></code> in <code class="docutils literal notranslate"><span class="pre">ci-timing.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">report</span></code>.</p></td>
@@ -2627,12 +2650,13 @@ gate. A failed or cancelled <code class="docutils literal notranslate"><span cla
 verdict for another commit, skips it too.</p>
 <p><code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code> posts to <code class="docutils literal notranslate"><span class="pre">cron-conda:</span> <span class="pre">conda</span> <span class="pre">distribution</span> <span class="pre">update</span> <span class="pre">report</span></code> by
 the same rules: <code class="docutils literal notranslate"><span class="pre">push</span></code> on its <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>, <code class="docutils literal notranslate"><span class="pre">scheduled</span></code> otherwise, and a
-line of its own for a failed or cancelled <code class="docutils literal notranslate"><span class="pre">head</span></code>. Its report lists each <code class="docutils literal notranslate"><span class="pre">Platform</span> <span class="pre">pins</span></code> notice and
-warning from <code class="docutils literal notranslate"><span class="pre">Refresh</span> <span class="pre">the</span> <span class="pre">platform</span> <span class="pre">pins</span></code>, whose output that step keeps in a log,
-the files the run changed, and the build Push Changes pushed, or that it pushed
-none. Its <code class="docutils literal notranslate"><span class="pre">discussion</span></code> job waits for <code class="docutils literal notranslate"><span class="pre">conda-tag</span></code> and <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> and adds
-their results, so a failed tag or upload posts as <code class="docutils literal notranslate"><span class="pre">failure</span></code>. A pin warning
-reports <code class="docutils literal notranslate"><span class="pre">warning</span></code>. <code class="docutils literal notranslate"><span class="pre">cron-python-versions.yml</span></code> runs only on <code class="docutils literal notranslate"><span class="pre">schedule</span></code> and
+line of its own for a failed or cancelled <code class="docutils literal notranslate"><span class="pre">head</span></code>. Its report lists the files the
+run changed, and the build Push Changes pushed, or that it pushed
+none. Its <code class="docutils literal notranslate"><span class="pre">discussion</span></code> job waits for <code class="docutils literal notranslate"><span class="pre">conda-tag</span></code>, <code class="docutils literal notranslate"><span class="pre">conda-build</span></code>,
+<code class="docutils literal notranslate"><span class="pre">conda-test</span></code> and <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> and adds their results, so a failed tag, build,
+supported install leg or upload posts as <code class="docutils literal notranslate"><span class="pre">failure</span></code>. A forced bump left
+unpushed, or a release tag naming other dependencies, reports <code class="docutils literal notranslate"><span class="pre">warning</span></code>.
+<code class="docutils literal notranslate"><span class="pre">cron-python-versions.yml</span></code> runs only on <code class="docutils literal notranslate"><span class="pre">schedule</span></code> and
 <code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code>, so it posts as <code class="docutils literal notranslate"><span class="pre">scheduled</span></code> to <code class="docutils literal notranslate"><span class="pre">cron-python-versions:</span>
 <span class="pre">Python</span> <span class="pre">version</span> <span class="pre">update</span> <span class="pre">report</span></code>. <code class="docutils literal notranslate"><span class="pre">detect</span></code>’s report, read from the plan
 <code class="docutils literal notranslate"><span class="pre">Recompute</span> <span class="pre">the</span> <span class="pre">tiers</span></code> writes, lists each tier that moved and why, the files it
@@ -2841,8 +2865,8 @@ minor rather than on the released line (<a class="extlink-issue reference extern
 (<a class="reference external" href="https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference">Dependabot options reference</a>,
 <code class="docutils literal notranslate"><span class="pre">target-branch</span></code>).</p>
 <p>Neither <code class="file docutils literal notranslate"><span class="pre">conda/requirements.txt</span></code> nor the benchmark’s image digests are
-watched: Conda Update’s <code class="docutils literal notranslate"><span class="pre">Refresh</span> <span class="pre">the</span> <span class="pre">platform</span> <span class="pre">pins</span></code> and <code class="docutils literal notranslate"><span class="pre">Setup</span> <span class="pre">Conda</span>
-<span class="pre">Distribution</span></code> steps rewrite the former, and Dependabot reads only a <code class="docutils literal notranslate"><span class="pre">FROM</span></code> line
+watched: Conda Update’s <code class="docutils literal notranslate"><span class="pre">Setup</span> <span class="pre">Conda</span> <span class="pre">Distribution</span></code> step rewrites the former,
+and Dependabot reads only a <code class="docutils literal notranslate"><span class="pre">FROM</span></code> line
 that names its image, while the benchmark’s <code class="file docutils literal notranslate"><span class="pre">Dockerfile</span></code> takes its base image
 through <code class="docutils literal notranslate"><span class="pre">ARG</span> <span class="pre">PYTHON_IMAGE</span></code> from <code class="file docutils literal notranslate"><span class="pre">examples/benchmark/python-images.txt</span></code>.</p>
 <p>PyUp opens no bump: <code class="file docutils literal notranslate"><span class="pre">.pyup.yml</span></code> sets
@@ -2864,11 +2888,12 @@ the runner’s own <code class="docutils literal notranslate"><span class="pre">
 runs it has 3.12 or newer – and writes each matrix as JSON: a <code class="docutils literal notranslate"><span class="pre">python-versions</span></code>
 job in <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> and <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">version_check</span></code> in
 <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> and <code class="docutils literal notranslate"><span class="pre">conda-update</span></code> in <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code> hand theirs on
-through <code class="docutils literal notranslate"><span class="pre">fromJSON</span></code>, and each single-interpreter job reads <code class="docutils literal notranslate"><span class="pre">latest</span></code>.</p>
+through <code class="docutils literal notranslate"><span class="pre">fromJSON</span></code>, and each
+single-interpreter job reads <code class="docutils literal notranslate"><span class="pre">latest</span></code>.</p>
 <p><strong>A tier change is a one-line edit to that file, plus the matching edit to both
 rulesets’</strong> <code class="docutils literal notranslate"><span class="pre">Compat</span></code> <strong>contexts.</strong> The file’s <code class="docutils literal notranslate"><span class="pre">exemptions</span></code> list each pin kept
-off <code class="docutils literal notranslate"><span class="pre">latest</span></code>, with its reason in the comment above it, such as the conda
-jobs’ <code class="docutils literal notranslate"><span class="pre">!=</span> <span class="pre">'3.15'</span></code>. <code class="docutils literal notranslate"><span class="pre">tests/project/test_python_versions_1660.py</span></code> fails on a
+off <code class="docutils literal notranslate"><span class="pre">latest</span></code>, with its reason in the comment above it, such as the parity
+job’s <code class="docutils literal notranslate"><span class="pre">APT_CACHE_SAVE</span></code>. <code class="docutils literal notranslate"><span class="pre">tests/project/test_python_versions_1660.py</span></code> fails on a
 pin the file does not list, on an exemption with no comment, and on a
 classifier, doc or comment that no longer matches the file – a tier range,
 the coverage leg’s version. Its tests, and the other tests that
@@ -3016,13 +3041,6 @@ it, so the scheduled jobs reading them name it too
 name them as the schedule’s do (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>). Sync Develop’s <code class="docutils literal notranslate"><span class="pre">merge</span></code> names
 <code class="docutils literal notranslate"><span class="pre">conda-tag</span></code> on every run, for the deploy key it pushes <code class="docutils literal notranslate"><span class="pre">develop</span></code> with
 (<a class="reference internal" href="#sync-develop-2942">Sync Develop (#2942)</a>).</p>
-<p>Both <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> and the release <code class="docutils literal notranslate"><span class="pre">conda</span></code> job have a <code class="docutils literal notranslate"><span class="pre">windows-latest</span></code> leg,
-which builds, smoke-tests and publishes the <code class="docutils literal notranslate"><span class="pre">win-64</span></code> package (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>).
-It blocks as the other legs do: no step continues on error. Its one step that
-reads <code class="docutils literal notranslate"><span class="pre">ANACONDA_TOKEN</span></code> is <code class="docutils literal notranslate"><span class="pre">Upload</span> <span class="pre">conda</span> <span class="pre">packages</span> <span class="pre">to</span> <span class="pre">Anaconda</span> <span class="pre">(Windows)</span></code>, the
-Intel leg’s anaconda-client call (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2044">#2044</a>) under <code class="docutils literal notranslate"><span class="pre">bash</span> <span class="pre">-el</span></code>, which skips a
-build-only manual run as every upload does.
-<code class="file docutils literal notranslate"><span class="pre">tests/project/test_conda_windows_leg_2060.py</span></code> pins the leg.</p>
 <p>A required reviewer on <code class="docutils literal notranslate"><span class="pre">conda-tag</span></code> or <code class="docutils literal notranslate"><span class="pre">anaconda</span></code> would therefore hold every
 scheduled bump, and every merge Sync Develop pushes, for an approval, besides the
 release-graph reason <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a> gives for keeping them without one. Each run

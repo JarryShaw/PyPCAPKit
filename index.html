@@ -785,6 +785,22 @@ compiler and the <a class="reference external" href="https://www.tcpdump.org">li
 pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="w"> </span>emoji
 </pre></div>
 </div>
+<p>From conda, one <code class="docutils literal notranslate"><span class="pre">noarch</span></code> package serves every platform and Python, with the
+core functionality alone (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3133">#3133</a>). Its run requirements come from
+conda-forge:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>jarryshaw<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>pypcapkit
+</pre></div>
+</div>
+<p>An optional feature takes its package from <code class="docutils literal notranslate"><span class="pre">pip</span></code> in that environment, which
+<a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> uses ahead of what it vendors. Naming the package installs that
+alone; an extra, such as <code class="docutils literal notranslate"><span class="pre">pypcapkit[crypto]</span></code>, also installs the vendored
+<code class="docutils literal notranslate"><span class="pre">dictdumper</span></code> and <code class="docutils literal notranslate"><span class="pre">tbtrim</span></code> again from PyPI:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># NGAP decoding, ESP decryption and the CLI display</span>
+pip<span class="w"> </span>install<span class="w"> </span>pycrate<span class="w"> </span>cryptography<span class="w"> </span>emoji
+<span class="c1"># an engine, such as DPKT</span>
+pip<span class="w"> </span>install<span class="w"> </span>dpkt
+</pre></div>
+</div>
 </section>
 <section id="documentation-versions">
 <h2>Documentation Versions<a class="headerlink" href="#documentation-versions" title="Link to this heading">¶</a></h2>

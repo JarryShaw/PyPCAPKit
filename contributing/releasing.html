@@ -737,8 +737,8 @@ without failing, if that entry’s heading still reads “unreleased”.</p>
 alpha, beta or release candidate, which this project ships for real (<code class="docutils literal notranslate"><span class="pre">1.5.0b14</span></code>)
 and must keep publishable. <code class="docutils literal notranslate"><span class="pre">version_check</span></code>’s <code class="docutils literal notranslate"><span class="pre">PCAPKIT_DEV_RELEASE</span></code> output reads
 <code class="docutils literal notranslate"><span class="pre">Version(__version__).is_devrelease</span></code>, never <code class="docutils literal notranslate"><span class="pre">is_prerelease</span></code> (which a real beta
-sets too), and <code class="docutils literal notranslate"><span class="pre">github</span></code>, <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> all refuse to run while it
-is <code class="docutils literal notranslate"><span class="pre">true</span></code>, so a scheduled Vendor Update can never tag or publish a dev version on
+sets too), and <code class="docutils literal notranslate"><span class="pre">github</span></code>, <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code>, <code class="docutils literal notranslate"><span class="pre">conda-build</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> all refuse
+to run while it is <code class="docutils literal notranslate"><span class="pre">true</span></code>, so a scheduled Vendor Update can never tag or publish a dev version on
 <code class="docutils literal notranslate"><span class="pre">github-release</span></code>’s one approval alone (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/887">#887</a>, below). That approval is one
 person approving a diff, usually for reasons unrelated to the version string, so a
 stray <code class="docutils literal notranslate"><span class="pre">.devN</span></code> is easy to miss there, and a re-run of a job that already skipped
@@ -823,9 +823,9 @@ names that commit.</p></li>
 it reads <code class="docutils literal notranslate"><span class="pre">main</span></code> at all; the <code class="file docutils literal notranslate"><span class="pre">conda/build</span></code> reset, “Reset Build
 Number”, is a separate commit on top of <code class="docutils literal notranslate"><span class="pre">main</span></code>, described under
 <a class="reference internal" href="#precautions">Precautions</a>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> check out that commit and, before building, check
-that every tag they publish under names it, as <code class="docutils literal notranslate"><span class="pre">tag</span></code> does for the <code class="docutils literal notranslate"><span class="pre">v*</span></code>
-tag. A run created for a <em>later</em> commit of the same version therefore never
+<li><p><code class="docutils literal notranslate"><span class="pre">pypi</span></code>, <code class="docutils literal notranslate"><span class="pre">conda-build</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> check out that commit and, before
+building or uploading, check that every tag the files are published under
+names it, as <code class="docutils literal notranslate"><span class="pre">tag</span></code> does for the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag. A run created for a <em>later</em> commit of the same version therefore never
 publishes a second tree under that version. <code class="docutils literal notranslate"><span class="pre">version_check</span></code> resolves the
 <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag the same way first, in “Check which commit the version’s tag
 names”, and off a <code class="docutils literal notranslate"><span class="pre">v*</span></code> ref a tag naming another commit skips the gate and every publisher
@@ -834,7 +834,7 @@ names”, and off a <code class="docutils literal notranslate"><span class="pre"
 <code class="docutils literal notranslate"><span class="pre">::warning</span></code> naming both commits and what is missing, and the run stays
 green. A <code class="docutils literal notranslate"><span class="pre">v*</span></code> push of such a version still fails with the
 check’s <code class="docutils literal notranslate"><span class="pre">::error</span></code>. A partial release is finished by re-running the run that
-tagged it, or, for Anaconda files that run’s own <code class="docutils literal notranslate"><span class="pre">conda</span></code> legs cannot
+tagged it, or, for Anaconda files that run’s own <code class="docutils literal notranslate"><span class="pre">conda-build</span></code> cannot
 build, by Conda Update’s <code class="docutils literal notranslate"><span class="pre">publish</span></code> dispatch (see <a class="reference internal" href="#recovery">Recovery</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> attach their files with <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">release</span> <span class="pre">upload</span></code>, in
 their “Upload package to GitHub Release” steps, not <code class="docutils literal notranslate"><span class="pre">action-gh-release</span></code>,
@@ -848,7 +848,7 @@ counts: <a class="reference external" href="https://docs.github.com/en/rest/rele
 says a <code class="docutils literal notranslate"><span class="pre">502</span></code> “may leave an empty asset with a state of starter. It can be
 safely deleted.”, so an asset in any other state is deleted and uploaded
 again (<code class="docutils literal notranslate"><span class="pre">--clobber</span></code>). <code class="docutils literal notranslate"><span class="pre">conda</span></code>’s upload is not gated on <code class="docutils literal notranslate"><span class="pre">check_leg</span></code>, so a
-leg whose Anaconda upload landed but whose GitHub upload failed still gets
+run whose Anaconda upload landed but whose GitHub upload failed still gets
 its asset on a re-run.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">release</span> <span class="pre">upload</span></code> also fails, deliberately, where the action does not.
 With no release for the tag, the upload fails with <code class="docutils literal notranslate"><span class="pre">gh</span></code>’s
@@ -1022,27 +1022,18 @@ exists.</p></li>
 <a class="reference internal" href="workflows.html#ktlo-tier"><span class="std std-ref">KTLO</span></a> legs’ wheels (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1633">#1633</a>) are not counted. This job is
 already idempotent (<code class="docutils literal notranslate"><span class="pre">skip-existing:</span> <span class="pre">true</span></code> on every upload step), so the
 check exists only to save the cost of the build matrix, not for correctness.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">conda</span></code> compares Anaconda’s aggregate count against the expected one (the
-<code class="docutils literal notranslate"><span class="pre">linux-64</span></code>, <code class="docutils literal notranslate"><span class="pre">osx-64</span></code>, <code class="docutils literal notranslate"><span class="pre">osx-arm64</span></code> and <code class="docutils literal notranslate"><span class="pre">win-64</span></code> files for each Python
-version of its matrix, one platform per <code class="docutils literal notranslate"><span class="pre">os</span></code> leg,
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1922">#1922</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>) as the same
-kind of job-level cost saver, and <em>also</em>
-checks, per matrix leg, whether that leg’s own platform/Python distribution
-is already there – this second check is the actual correctness fix, because
+<li><p><code class="docutils literal notranslate"><span class="pre">conda</span></code> compares Anaconda’s count against the expected one – the one
+<code class="docutils literal notranslate"><span class="pre">noarch</span></code> file (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3133">#3133</a>) – as the same kind of job-level cost saver,
+which <code class="docutils literal notranslate"><span class="pre">conda-build</span></code> reads too, so a complete release builds and installs
+nothing. <code class="docutils literal notranslate"><span class="pre">conda</span></code> <em>also</em> checks, just before it uploads, whether that file is
+already there – this second check is the actual correctness fix, because
 <code class="docutils literal notranslate"><span class="pre">anaconda/actions/upload-package</span></code> has no <code class="docutils literal notranslate"><span class="pre">skip-existing</span></code> equivalent, only
 <code class="docutils literal notranslate"><span class="pre">force:</span></code> (never set), so re-uploading a file it already has fails outright
-rather than being absorbed. The <code class="docutils literal notranslate"><span class="pre">macos-26-intel</span></code> leg is the exception: the
-action’s CLI download returns 404 there, so its “Upload conda packages to
-Anaconda (Intel)” step runs <code class="docutils literal notranslate"><span class="pre">anaconda</span> <span class="pre">upload</span> <span class="pre">--skip-existing</span></code> instead
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2044">#2044</a>), which skips
-such a file. The <code class="docutils literal notranslate"><span class="pre">windows-latest</span></code> leg’s “Upload conda packages to Anaconda
-(Windows)” makes the same call (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>). Conda Update’s Intel and
-Windows legs run the same steps, so they keep a file anaconda.org already has,
-where the action’s <code class="docutils literal notranslate"><span class="pre">force:</span> <span class="pre">true</span></code> on its other legs replaces it.</p></li>
+rather than being absorbed.</p></li>
 </ul>
 <p>These evidence checks all run inside <code class="docutils literal notranslate"><span class="pre">version_check</span></code>, curling PyPI’s and
-Anaconda’s public, unauthenticated JSON APIs; the per-leg check runs inside
-<code class="docutils literal notranslate"><span class="pre">conda</span></code> itself, once per matrix leg, against the same Anaconda endpoint.</p>
+Anaconda’s public, unauthenticated JSON APIs; the second Anaconda check runs
+inside <code class="docutils literal notranslate"><span class="pre">conda</span></code> itself, against the same Anaconda endpoint.</p>
 <p>The PyPI and Anaconda counts are of the tiers the version was released with.
 Until its <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag exists, that is this run’s
 <code class="file docutils literal notranslate"><span class="pre">.github/python-versions.toml</span></code>; once it does, <code class="docutils literal notranslate"><span class="pre">version_check</span></code> reads the
@@ -1057,16 +1048,23 @@ workflows of the time.
 The Anaconda count’s platforms follow the same rule, from the <code class="docutils literal notranslate"><span class="pre">SUBDIRS</span></code> line
 of <code class="file docutils literal notranslate"><span class="pre">util/release_published.py</span></code> at the tag’s commit or, for a tag older
 than that file, the line it was added with, so a version released before
-<code class="docutils literal notranslate"><span class="pre">win-64</span></code> was published is not read as lacking it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>).</p>
+<code class="docutils literal notranslate"><span class="pre">win-64</span></code> was published is not read as lacking it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>). So a
+version tagged before <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3133">#3133</a> still expects a file per platform and
+supported Python, its tag’s <code class="docutils literal notranslate"><span class="pre">SUBDIRS</span></code> and <code class="docutils literal notranslate"><span class="pre">conda-builds</span></code>, and one tagged
+after it the single <code class="docutils literal notranslate"><span class="pre">noarch</span></code> file. 1.8.1 is one of the former, and stays
+partial on Anaconda as a known issue: the account’s 3 GiB storage quota
+refused 12 of its 20 uploads, when each vendored the optional dependencies. The
+noarch package carries the core alone and measured about 1.5 MiB; freeing space on
+anaconda.org is the owner’s, by hand.</p>
 <p>On the tag-push path <code class="docutils literal notranslate"><span class="pre">startsWith(github.ref_name,</span> <span class="pre">'v')</span></code> bypasses the
 evidence check unconditionally; on the <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> path it falls through
 to whichever evidence that job owns.</p>
 </section>
 <section id="the-skip-cascade-guard">
 <h2>The Skip-Cascade Guard<a class="headerlink" href="#the-skip-cascade-guard" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> each depend on <code class="docutils literal notranslate"><span class="pre">github</span></code> (and <code class="docutils literal notranslate"><span class="pre">conda</span></code> also
-on <code class="docutils literal notranslate"><span class="pre">tag</span></code>), and GitHub Actions skips a job whose <code class="docutils literal notranslate"><span class="pre">needs:</span></code> included a job
-that itself skipped – <em>before</em> that job’s own <code class="docutils literal notranslate"><span class="pre">if:</span></code> is even evaluated –
+<p><code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code>, <code class="docutils literal notranslate"><span class="pre">conda-build</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> each depend on <code class="docutils literal notranslate"><span class="pre">github</span></code> (and
+the two conda jobs also on <code class="docutils literal notranslate"><span class="pre">tag</span></code>), and GitHub Actions skips a job whose
+<code class="docutils literal notranslate"><span class="pre">needs:</span></code> included a job that itself skipped – <em>before</em> that job’s own <code class="docutils literal notranslate"><span class="pre">if:</span></code> is even evaluated –
 unless the <code class="docutils literal notranslate"><span class="pre">if:</span></code> calls a status-check function itself. <code class="docutils literal notranslate"><span class="pre">github</span></code>
 legitimately skips whenever its own tag already exists, which is exactly the
 retry case this guard is for. Left alone, that skip would cascade: <code class="docutils literal notranslate"><span class="pre">pypi</span></code>’s
@@ -1075,32 +1073,36 @@ default status check GitHub Actions prepends to an <code class="docutils literal
 itself call a status-check function – effectively <code class="docutils literal notranslate"><span class="pre">success()</span></code> over
 <code class="docutils literal notranslate"><span class="pre">needs:</span></code> – would still skip it, because <code class="docutils literal notranslate"><span class="pre">github</span></code> did not <em>succeed</em> in
 this run, it <em>skipped</em>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> all guard against this the same way the
-other workflows gated on a test run already do for the identical problem –
+<p><code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code>, <code class="docutils literal notranslate"><span class="pre">conda-build</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> all guard against this the same
+way the other workflows gated on a test run already do for the identical problem –
 <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code> and <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code> each open
 with <code class="docutils literal notranslate"><span class="pre">!cancelled()</span></code> and require <code class="docutils literal notranslate"><span class="pre">needs.head.result</span> <span class="pre">!=</span> <span class="pre">'failure'</span></code> (and, in
 <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>, its <code class="docutils literal notranslate"><span class="pre">mode</span></code> job’s success, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>), <code class="docutils literal notranslate"><span class="pre">head</span></code> being their
 call to <code class="docutils literal notranslate"><span class="pre">cron-head.yml</span></code>, so that a skipped gate does not cascade-skip them,
-while an outright failure or a genuine run cancellation still does. <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> are
-stricter about their <em>publishing</em> predecessors – <code class="docutils literal notranslate"><span class="pre">github</span></code>, and for
-<code class="docutils literal notranslate"><span class="pre">conda</span></code> also <code class="docutils literal notranslate"><span class="pre">tag</span></code>: <code class="docutils literal notranslate"><span class="pre">!cancelled()</span> <span class="pre">&amp;&amp;</span> <span class="pre">(needs.&lt;job&gt;.result</span> <span class="pre">==</span> <span class="pre">'success'</span> <span class="pre">||</span>
+while an outright failure or a genuine run cancellation still does. <code class="docutils literal notranslate"><span class="pre">tag</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pypi</span></code>, <code class="docutils literal notranslate"><span class="pre">conda-build</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> are stricter about their <em>publishing</em>
+predecessors – <code class="docutils literal notranslate"><span class="pre">github</span></code>, and for the two conda jobs also <code class="docutils literal notranslate"><span class="pre">tag</span></code>:
+<code class="docutils literal notranslate"><span class="pre">!cancelled()</span> <span class="pre">&amp;&amp;</span> <span class="pre">(needs.&lt;job&gt;.result</span> <span class="pre">==</span> <span class="pre">'success'</span> <span class="pre">||</span>
 <span class="pre">needs.&lt;job&gt;.result</span> <span class="pre">==</span> <span class="pre">'skipped')</span></code>, not <code class="docutils literal notranslate"><span class="pre">!=</span> <span class="pre">'failure'</span></code>. The two spellings
 differ only when a predecessor’s own result is <code class="docutils literal notranslate"><span class="pre">cancelled</span></code>, which
 <code class="docutils literal notranslate"><span class="pre">!=</span> <span class="pre">'failure'</span></code> still admits and the equality pair does not. Concretely: if
 <code class="docutils literal notranslate"><span class="pre">tag</span></code> is cancelled while the run itself is not, <code class="docutils literal notranslate"><span class="pre">!=</span> <span class="pre">'failure'</span></code> would let
-<code class="docutils literal notranslate"><span class="pre">conda</span></code> proceed into its check that <code class="docutils literal notranslate"><span class="pre">conda-&lt;version&gt;+0</span></code> names this run’s
-commit, a tag <code class="docutils literal notranslate"><span class="pre">tag</span></code> never pushed, trading a clean skip for a failed step; the
-equality pair skips <code class="docutils literal notranslate"><span class="pre">conda</span></code> outright instead.</p>
-<p><code class="docutils literal notranslate"><span class="pre">version_check</span></code> is the exception, and deliberately so: <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and
-<code class="docutils literal notranslate"><span class="pre">conda</span></code> each require <code class="docutils literal notranslate"><span class="pre">needs.version_check.result</span> <span class="pre">==</span> <span class="pre">'success'</span></code> with no
-<code class="docutils literal notranslate"><span class="pre">||</span> <span class="pre">'skipped'</span></code>. It produces the evidence the gates read, so a skipped or
-cancelled <code class="docutils literal notranslate"><span class="pre">version_check</span></code> leaves them nothing to decide on. <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> is
+<code class="docutils literal notranslate"><span class="pre">conda-build</span></code> proceed into its check that <code class="docutils literal notranslate"><span class="pre">conda-&lt;version&gt;+0</span></code> names this
+run’s commit, a tag <code class="docutils literal notranslate"><span class="pre">tag</span></code> never pushed, trading a clean skip for a failed step; the
+equality pair skips it, and so <code class="docutils literal notranslate"><span class="pre">conda-test</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code>, outright instead.</p>
+<p><code class="docutils literal notranslate"><span class="pre">version_check</span></code> is the exception, and deliberately so: <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code>,
+<code class="docutils literal notranslate"><span class="pre">conda-build</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> each require
+<code class="docutils literal notranslate"><span class="pre">needs.version_check.result</span> <span class="pre">==</span> <span class="pre">'success'</span></code> with no <code class="docutils literal notranslate"><span class="pre">||</span> <span class="pre">'skipped'</span></code>. It
+produces the evidence the gates read, so a skipped or cancelled
+<code class="docutils literal notranslate"><span class="pre">version_check</span></code> leaves them nothing to decide on. <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> is
 held to the same bar for a different reason: it is the release test gate, and
 it skips when nothing is publishable
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1052">#1052</a>), so accepting
 <code class="docutils literal notranslate"><span class="pre">skipped</span></code> there would publish untested. <code class="docutils literal notranslate"><span class="pre">github</span></code> names it in <code class="docutils literal notranslate"><span class="pre">needs:</span></code> instead and relies on the implicit
-<code class="docutils literal notranslate"><span class="pre">success()</span></code>. The gate’s own <code class="docutils literal notranslate"><span class="pre">if:</span></code> is the union of the publishers’
-conditions, with <code class="docutils literal notranslate"><span class="pre">!=</span> <span class="pre">'true'</span></code> so unknown evidence runs it; should the two
+<code class="docutils literal notranslate"><span class="pre">success()</span></code>. <code class="docutils literal notranslate"><span class="pre">conda-test</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> require <code class="docutils literal notranslate"><span class="pre">conda-build</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">success</span></code>, and <code class="docutils literal notranslate"><span class="pre">conda</span></code> <code class="docutils literal notranslate"><span class="pre">conda-test</span></code>’s, the same way: a skipped build left
+nothing to install or upload (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3133">#3133</a>). The gate’s own <code class="docutils literal notranslate"><span class="pre">if:</span></code> is the
+union of the publishers’ conditions, with <code class="docutils literal notranslate"><span class="pre">!=</span> <span class="pre">'true'</span></code> so unknown evidence runs it; should the two
 ever drift apart, the failure is a release that did not happen, which
 <code class="docutils literal notranslate"><span class="pre">release_status</span></code> reports loudly, never one that went out untested.</p>
 </section>
@@ -1116,30 +1118,45 @@ ever drift apart, the failure is a release that did not happen, which
     GH[&quot;github -- GitHub Release&lt;br/&gt;creates/attaches the v* tag&lt;br/&gt;THE ONLY APPROVAL&quot;]
     GH --&gt; TG[&quot;tag -- Conda Tag&lt;br/&gt;conda-&amp;lt;version&amp;gt;+0 tag at github.sha&lt;br/&gt;then conda/build reset on main&quot;]
     GH --&gt; PY[&quot;pypi -- build + publish&lt;br/&gt;OIDC trusted publishing&quot;]
-    TG --&gt; CD[&quot;conda -- build + upload&lt;br/&gt;matrix: OS x Python, per-leg evidence&quot;]
-    GH --&gt; CD
+    TG --&gt; CB[&quot;conda-build -- one noarch package&lt;br/&gt;its own evidence, an artifact&quot;]
+    GH --&gt; CB
+    CB --&gt; CT[&quot;conda-test -- installs that file&lt;br/&gt;on each platform and Python&quot;]
+    CT --&gt; CD[&quot;conda -- upload&lt;br/&gt;once every supported leg passed&quot;]
     VC --&gt; RS
     UT --&gt; RS
     GH --&gt; RS
     TG --&gt; RS
+    CB --&gt; RS
+    CT --&gt; RS
     CD --&gt; RS
     PY --&gt; RS
     RS[&quot;release_status -- always runs&lt;br/&gt;reports why nothing released, or that it did&quot;]
     classDef gate stroke-dasharray:6 3,stroke-width:2px
     class GH gate
     </pre><p>A transitive reduction: <code class="docutils literal notranslate"><span class="pre">version_check</span></code> and <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> are also direct
-<code class="docutils literal notranslate"><span class="pre">needs:</span></code> of <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> in the file, but <code class="docutils literal notranslate"><span class="pre">github</span></code>
-already implies them (<code class="docutils literal notranslate"><span class="pre">github</span></code> itself depends on both), so drawing them would
-add edges without changing which job can start before which. <code class="docutils literal notranslate"><span class="pre">release_status</span></code>’s
-edges are drawn in full, since it depends directly on <em>every</em> job precisely so
-that it can run regardless of which of them skipped.</p>
+<code class="docutils literal notranslate"><span class="pre">needs:</span></code> of <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code>, <code class="docutils literal notranslate"><span class="pre">conda-build</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> in the file, but
+<code class="docutils literal notranslate"><span class="pre">github</span></code> already implies them (<code class="docutils literal notranslate"><span class="pre">github</span></code> itself depends on both), as
+<code class="docutils literal notranslate"><span class="pre">conda-test</span></code> does <code class="docutils literal notranslate"><span class="pre">conda</span></code>’s on <code class="docutils literal notranslate"><span class="pre">conda-build</span></code>, <code class="docutils literal notranslate"><span class="pre">tag</span></code> and <code class="docutils literal notranslate"><span class="pre">github</span></code>, so
+drawing them would add edges without changing which job can start before which.
+<code class="docutils literal notranslate"><span class="pre">release_status</span></code>’s edges are drawn in full, since it depends directly on
+<em>every</em> job precisely so that it can run regardless of which of them skipped.</p>
+<p><code class="docutils literal notranslate"><span class="pre">conda-build</span></code> builds the package once and hands it on as the
+<code class="docutils literal notranslate"><span class="pre">conda-package</span></code> artifact (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3133">#3133</a>). <code class="docutils literal notranslate"><span class="pre">conda-test</span></code> installs that file
+from a local channel beside conda-forge, on linux-64, linux-aarch64, osx-64,
+osx-arm64 and win-64 under each CPython of both tiers, and runs the recipe’s
+test commands; <code class="docutils literal notranslate"><span class="pre">conda</span></code> uploads the same file once every supported leg has
+passed. A <a class="reference internal" href="workflows.html#ktlo-tier"><span class="std std-ref">KTLO</span></a> leg’s failure is a warning on a green leg
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1672">#1672</a>), so it never holds the upload back. <code class="docutils literal notranslate"><span class="pre">release_status</span></code> reads a
+failed or cancelled build or supported leg as <code class="docutils literal notranslate"><span class="pre">conda</span></code>’s own result, rather
+than as a skip its evidence cannot explain.</p>
 <p>Only <code class="docutils literal notranslate"><span class="pre">github-release</span></code> carries a required reviewer; <code class="docutils literal notranslate"><span class="pre">conda-tag</span></code>,
 <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">anaconda</span></code> kept their environments but had their reviewers
 removed on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/887">#887</a>, and <code class="docutils literal notranslate"><span class="pre">release-app</span></code>, which no Create Release job names,
 has none either (<a class="reference internal" href="#the-release-app">The Release App</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2648">#2648</a>).
 What still makes one approval mean <em>the whole release</em> is the <code class="docutils literal notranslate"><span class="pre">needs:</span></code>
-graph: <code class="docutils literal notranslate"><span class="pre">tag</span></code> and <code class="docutils literal notranslate"><span class="pre">pypi</span></code> both depend on <code class="docutils literal notranslate"><span class="pre">github</span></code>, and <code class="docutils literal notranslate"><span class="pre">conda</span></code> depends on
-<code class="docutils literal notranslate"><span class="pre">tag</span></code> and <code class="docutils literal notranslate"><span class="pre">github</span></code> – so nothing downstream of <code class="docutils literal notranslate"><span class="pre">github</span></code> can
+graph: <code class="docutils literal notranslate"><span class="pre">tag</span></code> and <code class="docutils literal notranslate"><span class="pre">pypi</span></code> both depend on <code class="docutils literal notranslate"><span class="pre">github</span></code>, and <code class="docutils literal notranslate"><span class="pre">conda-build</span></code>,
+which <code class="docutils literal notranslate"><span class="pre">conda-test</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> follow, depends on <code class="docutils literal notranslate"><span class="pre">tag</span></code> and <code class="docutils literal notranslate"><span class="pre">github</span></code> –
+so nothing downstream of <code class="docutils literal notranslate"><span class="pre">github</span></code> can
 start before it is approved, and rejecting it leaves nothing tagged and
 nothing published. Without its <code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">github</span></code>, <code class="docutils literal notranslate"><span class="pre">tag</span></code>, which has no
 reviewer of its own, could push a commit to <code class="docutils literal notranslate"><span class="pre">main</span></code> and cut a <code class="docutils literal notranslate"><span class="pre">conda-*</span></code> tag
@@ -1231,15 +1248,15 @@ release rather than re-tagging it. A re-run is a real fix, since under
 whether <em>their own</em> artefact is missing, so it finishes whichever jobs did not
 complete instead of skipping them on the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag’s mere existence. <code class="docutils literal notranslate"><span class="pre">pypi</span></code> is
 safe to re-run (<code class="docutils literal notranslate"><span class="pre">skip-existing:</span> <span class="pre">true</span></code>), and so is
-<code class="docutils literal notranslate"><span class="pre">conda</span></code>, because each matrix leg checks Anaconda for its own
-platform/Python distribution before uploading and skips only that leg’s
-upload if it is already there. Neither replaces a file the GitHub Release
-already has (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1640">#1640</a>).</p>
+<code class="docutils literal notranslate"><span class="pre">conda</span></code>, because it checks Anaconda for its distribution before uploading
+and skips the upload if it is already there. Neither replaces a file the
+GitHub Release already has (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1640">#1640</a>).</p>
 <p>A re-run repeats the tagged commit’s own workflow, so it cannot upload
-Anaconda files that commit’s <code class="docutils literal notranslate"><span class="pre">conda</span></code> legs cannot build: 1.5.0b14’s
+Anaconda files that commit’s <code class="docutils literal notranslate"><span class="pre">conda-build</span></code> cannot build: 1.5.0b14’s
 <code class="docutils literal notranslate"><span class="pre">osx-64</span></code> legs were broken at its tag (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2140">#2140</a>). Dispatching Conda Update
-with <code class="docutils literal notranslate"><span class="pre">publish</span></code> on <code class="docutils literal notranslate"><span class="pre">main</span></code> uploads every platform under a bumped build
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>). Like every Conda Update bump, it <strong>packages only the tree of the</strong>
+with <code class="docutils literal notranslate"><span class="pre">publish</span></code> on <code class="docutils literal notranslate"><span class="pre">main</span></code> uploads the noarch package under a bumped build
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3133">#3133</a>), which completes a release made as noarch, not one
+counted per platform. Like every Conda Update bump, it <strong>packages only the tree of the</strong>
 <code class="docutils literal notranslate"><span class="pre">v*</span></code> <strong>tag for</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code>’s <strong>version</strong>, never <code class="docutils literal notranslate"><span class="pre">main</span></code>’s own, taking
 <code class="file docutils literal notranslate"><span class="pre">conda/</span></code> and <code class="file docutils literal notranslate"><span class="pre">util/</span></code> from the bump it commits to <code class="docutils literal notranslate"><span class="pre">main</span></code>: the recipe
 that can build what the tag’s legs could not, and the scripts <code class="docutils literal notranslate"><span class="pre">main</span></code>’s workflow
