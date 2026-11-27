@@ -70,8 +70,9 @@ RELEASES = ('v0.9.0', 'v1.2.0', 'v1.10.0.dev1', 'v1.10.0a1', 'v1.10.0a2', 'v1.10
             'v1.10.0', 'v1.10.0.post1.dev1', 'v1.10.0.post1', 'v1.10.0.post2', 'v1.10.1')
 #: Tags that name no docs version.
 NOT_RELEASES = ('conda-1.10.0', 'conda-v1.10.0', 'v1.10.0+local', 'vfoo', 'v1.10.0-rc1', '1.10.0')
-#: The release tags Read the Docs never built, as its API listed them for #3135:
-#: each active, with its one build failed. Read the Docs itself is not read here.
+#: The release tags Read the Docs never built, as its API listed them for #3135 and
+#: again for #3144: each active, with every build failed. Read the Docs itself is not
+#: read here.
 UNBUILT = frozenset({'v1.0.0b1', 'v1.3.1.dev0', 'v1.3.1.dev1', 'v1.3.1.dev2', 'v1.3.5.post38', 'v1.3.5.post39',
                      'v1.3.5.post40', 'v1.3.5.post42', 'v1.3.5.post43', 'v1.4.0', 'v1.5.0a1', 'v1.5.0b1',
                      'v1.5.0b2', 'v1.5.0b4'})
