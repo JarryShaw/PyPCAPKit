@@ -7,8 +7,9 @@ two RFC 3253 methods whose name differs from their value (``BASELINE_CONTROL``
 / ``'BASELINE-CONTROL'``, ``VERSION_CONTROL`` / ``'VERSION-CONTROL'``) missed,
 and ``Method('baseline-control')`` minted an unregistered member with
 ``idempotent=False`` instead of returning the registered one. #908 fixed the
-same gap in ``Method.get``; that override stays case-sensitive and is repinned
-here. Strings that are no method still mint an unregistered member (#860).
+same gap in ``Method.get``; that override stays case-sensitive, as
+:mod:`tests.const.test_const_method_value_lookup_908_unit` pins. Strings that
+are no method still mint an unregistered member (#860).
 
 """
 from __future__ import annotations
@@ -50,15 +51,6 @@ class HyphenatedLookupTests(unittest.TestCase):
 
         self.assertIs(Method('get'), Method.GET)
         self.assertIs(Method('Get'), Method.GET)
-
-    def test_get_stays_case_sensitive(self) -> None:
-        """#908/#896: ``get`` does not fold case, so a lower-case hyphenated
-        spelling is still a distinct, unregistered method there."""
-        from pcapkit.const.http.method import Method
-
-        probed = Method.get('baseline-control')
-        self.assertIsNot(probed, Method.BASELINE_CONTROL)
-        self.assertEqual(probed.value, 'baseline-control')
 
 
 class UnregisteredMemberTests(unittest.TestCase):
