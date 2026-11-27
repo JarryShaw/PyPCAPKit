@@ -43,10 +43,11 @@ BRANCHES = ('latest', 'stable')
 RELEASE = re.compile(r'v(?P<release>\d+(?:\.\d+)*)(?:(?P<pre>a|b|rc)(?P<pre_n>\d+))?'
                      r'(?:\.post(?P<post>\d+))?(?:\.dev(?P<dev>\d+))?')
 #: The release tags Read the Docs holds no build of, so their Pages paths stay not
-#: found rather than redirect to its 404 (#3135). Each is active there with its only
-#: build failed, as its API (``/api/v3/projects/pypcapkit/versions/``) lists them.
-#: Pinned rather than fetched, so a publish does not hang on that API; a tag whose
-#: build is retried and succeeds leaves the set, and one whose build fails joins it.
+#: found rather than redirect to its 404 (#3135), and docs/source/conf.py reads them,
+#: so the changelog links none either (#3144). Each is active there with every build
+#: failed, as its API (``/api/v3/projects/pypcapkit/versions/``) lists them. Pinned
+#: rather than fetched, so a publish does not hang on that API; a tag whose build is
+#: retried and succeeds leaves the set, and one whose build fails joins it.
 UNBUILT = frozenset({
     'v1.0.0b1',
     'v1.3.1.dev0', 'v1.3.1.dev1', 'v1.3.1.dev2',

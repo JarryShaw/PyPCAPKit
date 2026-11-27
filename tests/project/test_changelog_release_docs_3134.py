@@ -5,11 +5,14 @@
 is read, so no ``.rst`` source names a URL and a new entry needs no step of its own.
 
 * :class:`TestTheHook` builds a scratch project with the hook connected: the
-  changelog's index, an entry's page, an entry in ``UNBUILT_RELEASES``, and a page
-  that is neither. It needs Sphinx, and skips without it.
+  changelog's index, an entry's page, an entry whose tag a scratch
+  :file:`util/pages_versions.py` names in ``UNBUILT``, and a page that is neither.
+  It needs Sphinx, and skips without it.
 * :class:`TestTheTree` holds the hook to the real changelog: every entry link on
-  its index is one the hook reads, ``UNBUILT_RELEASES`` names only real entries,
-  and ``setup`` connects the hook.
+  its index is one the hook reads, and ``setup`` connects the hook.
+* :class:`TestOneSet` holds the links to the Pages redirects (#3144):
+  ``UNBUILT_RELEASES`` is the script's ``UNBUILT``, each ``v`` stripped, a scratch
+  script's set moves it, and each entry is linked where the redirects send its tag.
 
 The hook runs as conf.py defines it, its statements taken by :mod:`ast`, so the
 rest of conf.py and its pinned extensions are not needed.
@@ -22,14 +25,16 @@ import ast
 import html.parser
 import importlib.util
 import io
+import os
 import pathlib
 import re
+import runpy
 import tempfile
 import unittest
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any, Iterable, Optional
 
 #: Test tier (#1958): reads the repository's text and runs a hook of its docs build.
 __tier__ = 'LATEST'
@@ -37,15 +42,18 @@ __tier__ = 'LATEST'
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 CONF = ROOT / 'docs' / 'source' / 'conf.py'
 CHANGELOG = ROOT / 'docs' / 'source' / 'changelog.rst'
+SCRIPT = ROOT / 'util' / 'pages_versions.py'
 #: The statements of conf.py the hook needs.
 NAMES = frozenset({'READ_THE_DOCS', 'UNBUILT_RELEASES', 'CHANGELOG_ENTRY', 'link_release_docs'})
+#: The statement of conf.py that ``UNBUILT_RELEASES`` reads the script's path from.
+SUPPORT = frozenset({'PAGES_VERSIONS'})
 #: Where Read the Docs serves a release's build.
 RELEASE_DOCS = 'https://pypcapkit.jarryshaw.me/en/v{}/'
 #: A ``:doc:`` role's target, with or without a title.
 DOC_ROLE = re.compile(r':doc:`(?:[^`<]*<(?P<titled>[^`>]+)>|(?P<bare>[^`<]+))`')
 HAS_SPHINX = all(importlib.util.find_spec(name) is not None for name in ('docutils', 'sphinx'))
 
-#: The scratch project, by document. ``1.4.0`` is in ``UNBUILT_RELEASES``.
+#: The scratch project, by document. ``1.4.0``'s tag is in the scratch ``UNBUILT``.
 PAGES = {
     'index': 'Index\n=====\n\n.. toctree::\n\n   changelog\n   other\n',
     'changelog': (
@@ -65,20 +73,39 @@ def conf_tree() -> 'ast.Module':
     return ast.parse(CONF.read_text(encoding='utf-8'))
 
 
-def load_hook() -> 'dict[str, Any]':
+def run_conf(names: 'frozenset[str]', conf: 'pathlib.Path', **namespace: 'Any') -> 'dict[str, Any]':
+    """What conf.py's statements binding ``names`` or :data:`SUPPORT` bind, run as if from ``conf``."""
+    wanted = names | SUPPORT
+    body = [node for node in conf_tree().body
+            if getattr(node, 'name', None) in wanted
+            or {getattr(target, 'id', None) for target in getattr(node, 'targets', [])} & wanted]
+    namespace.update({'__file__': str(conf), 'os': os, 'pathlib': pathlib, 're': re, 'runpy': runpy})
+    exec(compile(ast.Module(body=body, type_ignores=[]), str(CONF), 'exec'), namespace)  # nosec: B102
+    missing = names - set(namespace)
+    if missing:
+        raise AssertionError(f'conf.py defines none of {sorted(missing)}')
+    return namespace
+
+
+def load_hook(conf: 'pathlib.Path' = CONF) -> 'dict[str, Any]':
     """The hook and its constants, run from conf.py's own statements."""
     # pylint: disable=import-outside-toplevel
     from docutils import nodes
     from sphinx import addnodes
-    body = [node for node in conf_tree().body
-            if getattr(node, 'name', None) in NAMES
-            or {getattr(target, 'id', None) for target in getattr(node, 'targets', [])} & NAMES]
-    namespace = {'re': re, 'nodes': nodes, 'addnodes': addnodes}  # type: dict[str, Any]
-    exec(compile(ast.Module(body=body, type_ignores=[]), str(CONF), 'exec'), namespace)  # nosec: B102
-    missing = NAMES - set(namespace)
-    if missing:
-        raise AssertionError(f'conf.py defines none of {sorted(missing)}')
-    return namespace
+    return run_conf(NAMES, conf, nodes=nodes, addnodes=addnodes)
+
+
+def load_unbuilt(conf: 'pathlib.Path' = CONF) -> 'frozenset[str]':
+    """``UNBUILT_RELEASES``, run from conf.py's own statements."""
+    return run_conf(frozenset({'UNBUILT_RELEASES'}), conf)['UNBUILT_RELEASES']
+
+
+def scratch_conf(root: 'pathlib.Path', unbuilt: 'Iterable[str]') -> 'pathlib.Path':
+    """Where conf.py sits in a scratch tree at ``root``, whose script names ``unbuilt``."""
+    (root / 'util').mkdir(parents=True)
+    (root / 'util' / 'pages_versions.py').write_text(f'UNBUILT = frozenset({sorted(unbuilt)!r})\n',
+                                                     encoding='utf-8')
+    return root / 'docs' / 'source' / 'conf.py'
 
 
 class Page(html.parser.HTMLParser):
@@ -125,10 +152,10 @@ class TestTheHook(unittest.TestCase):
         # pylint: disable=import-outside-toplevel
         from sphinx.application import Sphinx
         from sphinx.util.docutils import docutils_namespace
-        hook = load_hook()['link_release_docs']
         tmp = tempfile.TemporaryDirectory()  # pylint: disable=consider-using-with
         cls.addClassCleanup(tmp.cleanup)
         root = pathlib.Path(tmp.name)
+        hook = load_hook(scratch_conf(root, {'v1.4.0'}))['link_release_docs']
         src = root / 'src'
         for name, text in PAGES.items():
             (src / f'{name}.rst').parent.mkdir(parents=True, exist_ok=True)
@@ -187,14 +214,6 @@ class TestTheTree(unittest.TestCase):
             pattern = load_hook()['CHANGELOG_ENTRY']
             self.assertEqual([target for target in targets if not pattern.fullmatch(target)], [])
 
-    @unittest.skipUnless(HAS_SPHINX, 'Sphinx is not installed')
-    def test_unbuilt_releases_name_real_entries(self) -> None:
-        unbuilt = load_hook()['UNBUILT_RELEASES']
-        self.assertIn('1.4.0', unbuilt)
-        for release in unbuilt:
-            with self.subTest(release=release):
-                self.assertTrue((CHANGELOG.parent / 'changelog' / f'{release}.rst').is_file())
-
     def test_setup_connects_the_hook_as_each_page_is_read(self) -> None:
         setup = next(node for node in conf_tree().body if isinstance(node, ast.FunctionDef) and node.name == 'setup')
         calls = [(call.args[0].value, call.args[1].id) for call in ast.walk(setup)
@@ -202,6 +221,34 @@ class TestTheTree(unittest.TestCase):
                  and len(call.args) == 2 and isinstance(call.args[0], ast.Constant)
                  and isinstance(call.args[1], ast.Name)]
         self.assertIn(('doctree-read', 'link_release_docs'), calls)
+
+
+class TestOneSet(unittest.TestCase):
+    """#3144: the changelog links no release whose tag the Pages redirects leave out, and every other."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        spec = importlib.util.spec_from_file_location('pages_versions', SCRIPT)
+        assert spec is not None and spec.loader is not None
+        cls.script = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.script)
+
+    def test_the_links_leave_out_the_tags_the_redirects_do(self) -> None:
+        self.assertEqual(load_unbuilt(), {tag[1:] for tag in self.script.UNBUILT})
+
+    def test_a_tag_the_script_moves_moves_the_links(self) -> None:
+        for unbuilt in ({'v1.9.0', 'v1.10.0rc1'}, set()):
+            with self.subTest(unbuilt=sorted(unbuilt)), tempfile.TemporaryDirectory() as tmp:
+                conf = scratch_conf(pathlib.Path(tmp), unbuilt)
+                self.assertEqual(load_unbuilt(conf), {tag[1:] for tag in unbuilt})
+
+    def test_each_entry_is_linked_where_the_redirects_send_its_tag(self) -> None:
+        releases = sorted(path.stem for path in (CHANGELOG.parent / 'changelog').glob('*.rst'))
+        mapping = self.script.versions(f'v{release}' for release in releases)
+        unbuilt = load_unbuilt()
+        self.assertEqual({f'v{release}': RELEASE_DOCS.format(release) for release in releases
+                          if release not in unbuilt},
+                         {tag: url for tag, url in mapping.items() if tag not in self.script.BRANCHES})
 
 
 if __name__ == '__main__':
