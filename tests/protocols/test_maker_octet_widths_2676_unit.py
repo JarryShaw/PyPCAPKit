@@ -501,10 +501,12 @@ class OtherMakerTests(_Case):
         from pcapkit.protocols.application.ospf.protocol import OSPF
 
         rebuild = (lambda data: OSPF.from_data(OSPF(data).info).data)  # noqa: E731
-        self.assertWidth('OSPF', 'checksum', 2, lambda value: OSPF.from_fields(checksum=value).data, rebuild, offset=12)
+        self.assertWidth('OSPF', 'checksum', 2, lambda value: OSPF.from_fields(version=2, checksum=value).data,
+                         rebuild, offset=12)
         auth = {'key_id': 1, 'len': 16, 'seq': 1}
         self.assertWidth('OSPF', 'reserved octets', 2,
-                         lambda value: OSPF.from_fields(auth_type=Authentication.Cryptographic_authentication,
+                         lambda value: OSPF.from_fields(version=2,
+                                                        auth_type=Authentication.Cryptographic_authentication,
                                                         auth_data={**auth, 'reserved': value}).data,
                          rebuild, offset=16)
 
@@ -634,7 +636,7 @@ class CapturedOctetTests(_Case):
         from pcapkit.const.ospf.authentication import Authentication
         from pcapkit.protocols.application.ospf.protocol import OSPF
 
-        data = OSPF.from_fields(auth_type=Authentication.Cryptographic_authentication,
+        data = OSPF.from_fields(version=2, auth_type=Authentication.Cryptographic_authentication,
                                 auth_data={'key_id': 1, 'len': 16, 'seq': 1, 'reserved': b'\xa1\xa2'}).data
         self.assertEqual(data.index(b'\xa1\xa2'), 16)
         start = data.index(b'\xa1\xa2')
@@ -676,7 +678,7 @@ class CapturedOctetTests(_Case):
         self.assertTrue(self.assertEditRefused(IPv6_Frag, IPv6_Frag.from_fields(next=59, reserved_octet=b'\xa1').data, b'\xa1',
                                                update('reserved_octet'),
                                                'IPv6-Frag: invalid reserved octet: must be 1 octet', extension=True))
-        data = OSPF.from_fields(auth_type=Authentication.Cryptographic_authentication,
+        data = OSPF.from_fields(version=2, auth_type=Authentication.Cryptographic_authentication,
                                 auth_data={'key_id': 1, 'len': 16, 'seq': 1, 'reserved': b'\xa1\xa2'}).data
         self.assertTrue(self.assertEditRefused(OSPF, data, b'\xa1\xa2',
                                                lambda info, value: info.auth.__update__({'reserved': value}),
@@ -728,7 +730,7 @@ class CapturedOctetTests(_Case):
                         IPv6_Route.from_data(info)
                     self.assertEqual(str(caught.exception),
                                      f'IPv6-Route: invalid reserved octets: must be 4 octets, not {value!r}')
-        ospf = OSPF.from_fields(auth_type=Authentication.Cryptographic_authentication,
+        ospf = OSPF.from_fields(version=2, auth_type=Authentication.Cryptographic_authentication,
                                 auth_data={'key_id': 1, 'len': 16, 'seq': 1, 'reserved': b'\xa1\xa2'}).data
         for width in (0, 1, 5):
             value = b'\xff' * width

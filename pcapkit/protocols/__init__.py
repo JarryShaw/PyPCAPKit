@@ -77,7 +77,7 @@ __all__ = [
     'FTP', 'FTP_DATA',
     'HTTP', 'HTTPv1', 'HTTPv2',
     'NGAP',
-    'OSPF',
+    'OSPF', 'OSPFv1', 'OSPFv2', 'OSPFv3',
     'RARP', 'DRARP',
     'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS',
 

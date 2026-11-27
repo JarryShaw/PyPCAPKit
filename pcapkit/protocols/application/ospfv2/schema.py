@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # mypy: disable-error-code=assignment
-"""header schema for OSPF protocol"""
+"""header schema for OSPFv2 protocol"""
 
 from typing import TYPE_CHECKING
 
@@ -12,7 +12,7 @@ from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, U
 from pcapkit.corekit.fields.strings import BytesField, PaddingField
 from pcapkit.protocols.schema import Schema, schema_final
 
-__all__ = ['OSPF', 'CryptographicAuthentication']
+__all__ = ['OSPFv2', 'CryptographicAuthentication']
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address
@@ -23,16 +23,20 @@ if TYPE_CHECKING:
 
 
 def ospf_auth_data_selector(pkt: 'dict[str, Any]') -> 'Field':
-    """Selector function for :attr:`OSPF.auth_data` field.
+    """Selector function for :attr:`OSPFv2.auth_data` field.
 
     Args:
         pkt: Packet data.
 
     Returns:
         A :class:`~pcapkit.corekit.fields.misc.SchemaField` wrapped
-        :class:`~pcapkit.protocols.application.ospf.schema.CryptographicAuthentication`
-        instance if :attr:`OSPF.auth_type` is 2, and a
+        :class:`~pcapkit.protocols.application.ospfv2.schema.CryptographicAuthentication`
+        instance if :attr:`OSPFv2.auth_type` is 2, and a
         :class:`~pcapkit.corekit.fields.strings.BytesField` instance otherwise.
+
+    .. versionchanged:: 1.8.1
+
+       Moved here from ``pcapkit.protocols.application.ospf.schema`` (:issue:`3105`).
 
     """
     if pkt['auth_type'] == Enum_Authentication.Cryptographic_authentication:
@@ -42,7 +46,7 @@ def ospf_auth_data_selector(pkt: 'dict[str, Any]') -> 'Field':
 
 @schema_final
 class CryptographicAuthentication(Schema):
-    """Header schema for OSPF cryptographic authentication.
+    """Header schema for OSPFv2 cryptographic authentication.
 
     .. versionadded:: 1.5.0
 
@@ -54,6 +58,10 @@ class CryptographicAuthentication(Schema):
 
        ``CrytographicAuthentication`` and ``OSPF_CrytographicAuthentication``,
        with no alias (:issue:`1090`).
+
+    .. versionchanged:: 1.8.1
+
+       Moved here from ``pcapkit.protocols.application.ospf.schema`` (:issue:`3105`).
 
     """
 
@@ -71,8 +79,16 @@ class CryptographicAuthentication(Schema):
 
 
 @schema_final
-class OSPF(Schema):
-    """Header schema for OSPF packet."""
+class OSPFv2(Schema):
+    """Header schema for OSPFv2 packet: the 24-octet header of
+    :rfc:`2328#appendix-A.3.1`.
+
+    .. versionadded:: 1.8.1
+
+       Renamed from ``OSPF`` in ``pcapkit.protocols.application.ospf.schema``
+       (:issue:`3105`).
+
+    """
 
     #: Version.
     version: 'int' = UInt8Field()

@@ -73,7 +73,7 @@ HELPERS = (
     ('pcapkit/protocols/application/ngap.rst', 'pcapkit.protocols.application.ngap.protocol._revert'),
     ('pcapkit/protocols/application/ngap.rst', 'pcapkit.protocols.application.ngap.protocol._PYCRATE'),
     ('pcapkit/protocols/application/ngap.rst', 'pcapkit.protocols.application.ngap.protocol._PDU_LOCK'),
-    ('pcapkit/protocols/application/ospf.rst', 'pcapkit.protocols.application.ospf.protocol.OSPF._make_id_numbers'),
+    ('pcapkit/protocols/application/ospfv2.rst', 'pcapkit.protocols.application.ospfv2.protocol.OSPFv2._make_id_numbers'),
     ('pcapkit/protocols/internet/esp.rst', 'pcapkit.protocols.internet.esp.protocol._resolve'),
     ('pcapkit/protocols/internet/esp.rst', 'pcapkit.protocols.internet.esp.protocol._CRYPTO'),
     ('pcapkit/protocols/internet/ipv6.rst', 'pcapkit.protocols.internet.ipv6.protocol.IPv6._read_ip_hextet'),

@@ -58,7 +58,9 @@ def _member(path: str, name: str) -> 'Any':
     return getattr(_load(path), name)
 
 
-OSPF = 'pcapkit.protocols.application.ospf.protocol:OSPF'
+OSPFV1 = 'pcapkit.protocols.application.ospfv1.protocol:OSPFv1'
+OSPFV2 = 'pcapkit.protocols.application.ospfv2.protocol:OSPFv2'
+OSPFV3 = 'pcapkit.protocols.application.ospfv3.protocol:OSPFv3'
 HTTPV1 = 'pcapkit.protocols.application.httpv1.protocol:HTTPv1'
 HTTPV2 = 'pcapkit.protocols.application.httpv2.protocol:HTTPv2'
 TLS = 'pcapkit.protocols.application.tls.protocol:TLS'
@@ -117,10 +119,16 @@ class Field(NamedTuple):
 
 
 FIELDS = (
-    Field('OSPF.make', 'type', 'pcapkit.const.ospf.packet:Packet', 8, 'Link_State_Request',
-          lambda value: _make(OSPF, type=value)),
-    Field('OSPF.make', 'auth_type', 'pcapkit.const.ospf.authentication:Authentication', 16,
-          'Simple_Password_Authentication', lambda value: _make(OSPF, auth_type=value)),
+    Field('OSPFv1.make', 'type', 'pcapkit.const.ospfv1.packet:Packet', 8, 'Link_State_Request',
+          lambda value: _make(OSPFV1, type=value)),
+    Field('OSPFv1.make', 'auth_type', 'pcapkit.const.ospfv1.authentication:Authentication', 16,
+          'Simple_password', lambda value: _make(OSPFV1, auth_type=value)),
+    Field('OSPFv2.make', 'type', 'pcapkit.const.ospf.packet:Packet', 8, 'Link_State_Request',
+          lambda value: _make(OSPFV2, type=value)),
+    Field('OSPFv2.make', 'auth_type', 'pcapkit.const.ospf.authentication:Authentication', 16,
+          'Simple_Password_Authentication', lambda value: _make(OSPFV2, auth_type=value)),
+    Field('OSPFv3.make', 'type', 'pcapkit.const.ospf.packet:Packet', 8, 'Link_State_Request',
+          lambda value: _make(OSPFV3, type=value)),
     # NOTE: 10 bits hold every three-digit status code; StatusCode's range stops at 999.
     Field('HTTPv1._make_start_line', 'status', 'pcapkit.const.http.status_code:StatusCode', 10,
           'CODE_404', lambda value: _make(HTTPV1, status=value), refused=(1000, 1023)),

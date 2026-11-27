@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """OSPFv2 verifies and computes its checksum.
 
-GitHub issue #2475: :meth:`OSPF.read <pcapkit.protocols.application.ospf.protocol.OSPF.read>`
+GitHub issue #2475: :meth:`OSPFv2.read <pcapkit.protocols.application.ospfv2.protocol.OSPFv2.read>`
 verifies the OSPFv2 checksum under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`,
-and :meth:`OSPF.make <pcapkit.protocols.application.ospf.protocol.OSPF.make>` computes one it
+and :meth:`OSPFv2.make <pcapkit.protocols.application.ospfv2.protocol.OSPFv2.make>` computes one it
 is not given under :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE`. It covers the
 packet but its Authentication field, with no pseudo-header
 (:rfc:`2328#appendix-A.3.1`), and is unused under cryptographic authentication
@@ -95,7 +95,7 @@ class OSPFChecksumTests(unittest.TestCase):
     def test_cryptographic_authentication_leaves_it_unused(self) -> None:
         packet = BUILT[0][:14] + b'\x00\x02' + bytes([0, 0, 1, 16]) + bytes(4) + HELLO
         self.assertEqual(self.status(packet), (self.Status.NOT_COMPUTED, []))
-        made = self.OSPF.from_fields(type=self.Hello, router_id='192.0.2.1', auth_type=2,
+        made = self.OSPF.from_fields(version=2, type=self.Hello, router_id='192.0.2.1', auth_type=2,
                                      auth_data={'key_id': 1, 'len': 16, 'seq': 0}, payload=HELLO).data
         self.assertEqual(made[12:14], b'\x00\x00')
 
@@ -117,7 +117,8 @@ class OSPFChecksumTests(unittest.TestCase):
     def test_make_computes_the_checksum(self) -> None:
         for packet, kwargs in zip(BUILT, ({}, {'auth_type': 1, 'auth_data': b'secret!!'})):
             with self.subTest(kwargs=kwargs):
-                made = self.OSPF.from_fields(type=self.Hello, router_id='192.0.2.1', payload=HELLO, **kwargs).data
+                made = self.OSPF.from_fields(version=2, type=self.Hello, router_id='192.0.2.1', payload=HELLO,
+                                             **kwargs).data
                 self.assertEqual(made, packet)
                 ospf, messages = self.parse(made)
                 self.assertEqual((ospf.info.checksum_status, messages), (self.Status.VALID, []))
@@ -127,15 +128,15 @@ class OSPFChecksumTests(unittest.TestCase):
     def test_make_agrees_with_scapy(self) -> None:
         from scapy.contrib.ospf import OSPF_Hdr
 
-        made = self.OSPF.from_fields(type=self.Hello, router_id='192.0.2.1', payload=HELLO).data
+        made = self.OSPF.from_fields(version=2, type=self.Hello, router_id='192.0.2.1', payload=HELLO).data
         packet = OSPF_Hdr(made)
         del packet.chksum
         self.assertEqual(bytes(packet), made)
 
     def test_off_or_given_is_written_as_is(self) -> None:
         with mock.patch.object(self.config, 'CHECKSUM_COMPUTE', False):
-            self.assertEqual(self.OSPF.from_fields(payload=HELLO).data[12:14], b'\x00\x00')
-        self.assertEqual(self.OSPF.from_fields(checksum=b'\xbe\xef', payload=HELLO).data[12:14], b'\xbe\xef')
+            self.assertEqual(self.OSPF.from_fields(version=2, payload=HELLO).data[12:14], b'\x00\x00')
+        self.assertEqual(self.OSPF.from_fields(version=2, checksum=b'\xbe\xef', payload=HELLO).data[12:14], b'\xbe\xef')
 
 
 if __name__ == '__main__':

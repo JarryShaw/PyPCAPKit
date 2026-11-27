@@ -53,6 +53,10 @@ parsing a packet from its octets or building one from field values:
                FTP & FTP_DATA
            end
 
+           subgraph ospf [OSPF Family]
+               OSPF --> OSPFv1 & OSPFv2 & OSPFv3
+           end
+
            subgraph rarp [RARP Family]
                RARP --> DRARP
            end
@@ -186,6 +190,9 @@ parsing a packet from its octets or building one from field values:
        click FTP_DATA "application/ftp_data.html#pcapkit.protocols.application.ftp_data.protocol.FTP_DATA"
        click NGAP "application/ngap.html#pcapkit.protocols.application.ngap.protocol.NGAP"
        click OSPF "application/ospf.html#pcapkit.protocols.application.ospf.protocol.OSPF"
+       click OSPFv1 "application/ospfv1.html#pcapkit.protocols.application.ospfv1.protocol.OSPFv1"
+       click OSPFv2 "application/ospfv2.html#pcapkit.protocols.application.ospfv2.protocol.OSPFv2"
+       click OSPFv3 "application/ospfv3.html#pcapkit.protocols.application.ospfv3.protocol.OSPFv3"
        click RARP "application/rarp.html#pcapkit.protocols.application.rarp.protocol.RARP"
        click DRARP "application/drarp.html#pcapkit.protocols.application.drarp.protocol.DRARP"
        click SSL "application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL"

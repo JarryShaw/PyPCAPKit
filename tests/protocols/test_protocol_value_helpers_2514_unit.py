@@ -46,7 +46,7 @@ from tests._support import reimport_once_per_class
 if TYPE_CHECKING:
     from typing import Callable
 
-    from pcapkit.protocols.application.ospf.protocol import OSPF
+    from pcapkit.protocols.application.ospfv2.protocol import OSPFv2
     from pcapkit.protocols.misc.raw.protocol import Raw
 
 #: Test tier (#1958): the per-helper cases of the protocol base, beside the
@@ -75,11 +75,11 @@ class _HelperTestCase(unittest.TestCase):
             with self.assertRaisesRegex(ProtocolError, f'^{ALIAS}: {pattern}'):
                 func(*args, **kwargs)
 
-    def unread(self) -> 'OSPF':
-        """An OSPF instance ``read()`` has not run on, so its ``alias`` raises."""
-        from pcapkit.protocols.application.ospf.protocol import OSPF
+    def unread(self) -> 'OSPFv2':
+        """An OSPFv2 instance ``read()`` has not run on, so its ``alias`` raises."""
+        from pcapkit.protocols.application.ospfv2.protocol import OSPFv2
 
-        proto = object.__new__(OSPF)
+        proto = object.__new__(OSPFv2)
         with self.assertRaises(AttributeError):
             getattr(proto, 'alias')
         return proto

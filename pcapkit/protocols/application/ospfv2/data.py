@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""data models for OSPF protocol"""
+"""data models for OSPFv2 protocol"""
 
 from typing import TYPE_CHECKING
 
@@ -13,12 +13,12 @@ if TYPE_CHECKING:
     from pcapkit.const.ospf.packet import Packet
     from pcapkit.corekit.checksum.internet import ChecksumStatus
 
-__all__ = ['OSPF', 'CryptographicAuthentication']
+__all__ = ['OSPFv2', 'CryptographicAuthentication']
 
 
 @info_final
 class CryptographicAuthentication(Data):
-    """Data model for OSPF cryptographic authentication.
+    """Data model for OSPFv2 cryptographic authentication.
 
     .. versionadded:: 1.5.0
 
@@ -30,6 +30,10 @@ class CryptographicAuthentication(Data):
 
        ``CrytographicAuthentication`` and ``OSPF_CrytographicAuthentication``,
        with no alias (:issue:`1090`).
+
+    .. versionchanged:: 1.8.1
+
+       Moved here from ``pcapkit.protocols.application.ospf.data`` (:issue:`3105`).
 
     """
 
@@ -47,8 +51,15 @@ class CryptographicAuthentication(Data):
 
 
 @info_final
-class OSPF(Protocol):
-    """Data model for OSPF packet."""
+class OSPFv2(Protocol):
+    """Data model for OSPFv2 packet (:rfc:`2328#appendix-A.3.1`).
+
+    .. versionadded:: 1.8.1
+
+       Renamed from ``OSPF`` in ``pcapkit.protocols.application.ospf.data``
+       (:issue:`3105`).
+
+    """
 
     #: Version number.
     version: 'int'
@@ -71,7 +82,7 @@ class OSPF(Protocol):
         #: Octets captured past the Packet Length, present only when there are
         #: any.
         trailer: 'bytes'
-        #: Outcome of verifying :attr:`chksum`, present only for OSPFv2 when
+        #: Outcome of verifying :attr:`chksum`, present only for version 2 when
         #: :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY` is on.
         checksum_status: 'ChecksumStatus'
 

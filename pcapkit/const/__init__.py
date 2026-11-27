@@ -44,6 +44,7 @@ if TYPE_CHECKING:
     from pcapkit.const.mh import *
     from pcapkit.const.ngap import *
     from pcapkit.const.ospf import *
+    from pcapkit.const.ospfv1 import *
     from pcapkit.const.ppp import *
     from pcapkit.const.pppoe import *
     from pcapkit.const.radiotap import *
@@ -116,6 +117,8 @@ __all__ = [
     'NGAP_ProcedureCode', 'NGAP_ProtocolIE',
     # OSPF
     'OSPF_Authentication', 'OSPF_Packet',
+    # OSPFv1
+    'OSPFv1_Authentication', 'OSPFv1_Packet',
     # PPP
     'PPP_Protocol',
     # PPPoE
@@ -150,5 +153,5 @@ __all__ = [
 __getattr__, __dir__ = lazy_exports(__name__, globals(), packages=(
     'reg', 'pcapng', 'arp', 'dccp', 'dns', 'esp', 'ftp', 'hip', 'http', 'icmp', 'icmpv6',
     'ieee802_11', 'igmp', 'ipv4', 'ipv6', 'ipx', 'l2tp', 'linux', 'mh', 'ngap', 'ospf',
-    'ppp', 'pppoe', 'radiotap', 'sctp', 'sslv2', 'tcp', 'tls', 'vlan',
+    'ospfv1', 'ppp', 'pppoe', 'radiotap', 'sctp', 'sslv2', 'tcp', 'tls', 'vlan',
 ))
