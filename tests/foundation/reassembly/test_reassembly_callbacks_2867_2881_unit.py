@@ -24,6 +24,7 @@ from ipaddress import ip_address
 from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
+from tests.foundation.reassembly._reassemblers import shipped
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Iterator
@@ -135,6 +136,7 @@ class ReassemblerCases:
                        chunk=Chunk.Payload_Data, tsn=tsn, stream_id=0, unordered=False,
                        beginning=not tail, ending=tail, ssn=0, mid=None, fsn=None,
                        ppid=PayloadProtocolIdentifier(0), payload=payload, timestamp=ts)]
+
     def build_tls(self, num: int, ident: int, tail: bool, ts: float) -> 'list[Any]':
         from pcapkit.foundation.reassembly.tcp.data import Packet
 
@@ -146,18 +148,10 @@ class ReassemblerCases:
 
     # harness
 
-    def shipped(self) -> 'dict[str, type]':
-        """Each reassembler ``Extractor`` ships, by its registered name."""
-        from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.foundation.extraction import Extractor
-
-        return {name: entry.klass if isinstance(entry, ModuleDescriptor) else entry
-                for (name, entry) in Extractor._shipped_reassembly.items()}
-
     def cases(self) -> 'list[tuple[str, type, Builder]]':
         """Each shipped reassembler with its builder."""
         return [(name, klass, getattr(self, f'build_{name}'))
-                for (name, klass) in self.shipped().items()]
+                for (name, klass) in shipped().items()]
 
     @contextlib.contextmanager
     def registered(self, klass: type, *callbacks: 'Callable[[list[Any]], None]') -> 'Iterator[None]':
@@ -177,7 +171,7 @@ class CallbackReadTests(ReassemblerCases, unittest.TestCase):
 
     def test_every_shipped_reassembler_has_a_builder(self) -> None:
         """#2867, #2881: a reassembler ``Extractor`` ships with no builder here has no case."""
-        missing = sorted(name for name in self.shipped() if not hasattr(self, f'build_{name}'))
+        missing = sorted(name for name in shipped() if not hasattr(self, f'build_{name}'))
         self.assertEqual(missing, [])
 
     def test_a_callback_reading_datagram_gets_the_stored_ones(self) -> None:

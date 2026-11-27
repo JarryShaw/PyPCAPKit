@@ -29,8 +29,10 @@ import types
 import unittest
 import warnings
 from typing import TYPE_CHECKING
+from unittest import mock
 
 from tests._support import reimport_once_per_class
+from tests.foundation.reassembly._reassemblers import ENGINES, builtins
 
 if TYPE_CHECKING:
     from typing import Any
@@ -148,7 +150,8 @@ class RegisteredReassemblerTestCase(unittest.TestCase):
 
 
 class DummyFedOnEveryEngineTests(RegisteredReassemblerTestCase):
-    """The dummy is fed through each engine's adapter, and sees every frame's timestamp."""
+    """The dummy is fed through each engine's adapter, and sees every frame's timestamp;
+    each built-in is fed where an engine maps it, and dropped elsewhere."""
 
     def _engines(self) -> 'list[tuple[str, str, str]]':
         """``(engine key, capture suffix, engine class name)`` for each engine that runs here."""
@@ -201,6 +204,55 @@ class DummyFedOnEveryEngineTests(RegisteredReassemblerTestCase):
                 self.assertIsNone(extractor.reassembly.ipv4)
                 self.assertIsNone(extractor.reassembly.dtls)
                 self.assertFalse([message for message in messages if 'reassembly' in message], messages)
+
+    def test_each_engine_feeds_the_built_ins_it_maps(self) -> None:
+        """One engine matrix over every shipped reassembler (#3148).
+
+        Each engine maps a built-in to the ``<name>_reassembly`` of its own toolkit
+        module where :data:`~tests.foundation.reassembly._reassemblers.ENGINES` lists
+        it, and to nothing elsewhere; an extraction with every built-in enabled feeds
+        that adapter each frame, and drops the others with a warning.
+
+        """
+        from pcapkit.corekit.module import ModuleDescriptor
+        from pcapkit.foundation.engines.pcap import PCAP
+        from pcapkit.foundation.engines.pcapng import PCAPNG
+        from pcapkit.foundation.extraction import Extractor
+
+        names = builtins()
+        self.assertEqual(sorted(ENGINES), sorted(names))
+        engines = {engine.__name__: engine for engine in (
+            PCAP, PCAPNG, *(entry.klass for entry in Extractor._shipped_engine.values()))}
+        for (klass, engine) in engines.items():
+            toolkit = f"pcapkit.toolkit.{engine.__module__.rsplit('.', 1)[1]}"
+            self.assertLessEqual(set(engine.__reassembly__), set(names), klass)
+            for name in names:
+                with self.subTest(engine=klass, reassembler=name):
+                    if klass in ENGINES[name]:
+                        self.assertEqual(engine.__reassembly__.get(name),
+                                         ModuleDescriptor(toolkit, f'{name}_reassembly'))
+                    else:
+                        self.assertNotIn(name, engine.__reassembly__)
+
+        frames = [(timestamp, ipv4_udp()) for timestamp in TIMES]
+        captures = {'.pcap': self._capture(pcap(frames), '.pcap'),
+                    '.pcapng': self._capture(pcapng(frames), '.pcapng')}
+        for (key, suffix, klass) in self._engines():
+            adapters = engines[klass].__reassembly__
+            spies = {name: mock.Mock(wraps=getattr(entry, 'klass', entry)) for (name, entry) in adapters.items()}
+            with mock.patch.dict(adapters, spies):
+                extractor, messages = self._extract(captures[suffix], key, list(names))
+            self.assertEqual(type(extractor.engine).__name__, klass, messages)
+            for name in names:
+                with self.subTest(engine=klass, capture=suffix, reassembler=name):
+                    dropped = [text for text in messages if f'reassembly; so {name!r} will be ignored' in text]
+                    if klass in ENGINES[name]:
+                        self.assertEqual(getattr(spies.get(name), 'call_count', None), len(TIMES))
+                        self.assertEqual(getattr(extractor.reassembly, name), ())
+                        self.assertFalse(dropped, messages)
+                    else:
+                        self.assertEqual(len(dropped), 1, messages)
+                        self.assertIsNone(getattr(extractor.reassembly, name))
 
     def test_extractor_options_reach_the_dummy(self) -> None:
         from pcapkit.foundation.options import ReassemblyOptions
@@ -375,15 +427,14 @@ class LookupTests(RegisteredReassemblerTestCase):
         self.assertEqual([name for (name, _) in manager.items()], [NAME, 'tcp'])
         self.assertEqual(list(ReassemblyManager(manager)), [NAME, 'tcp'])
 
-        self.assertEqual(list(ReassemblyData(late=(), early=()))[6:], ['late', 'early'])
-        self.assertEqual(list(ReassemblyData(early=(), late=())),
-                         ['ipv4', 'ipv6', 'tcp', 'dtls', 'sctp', 'tls', 'early', 'late'])
+        self.assertEqual(list(ReassemblyData(late=(), early=()))[len(builtins()):], ['late', 'early'])
+        self.assertEqual(list(ReassemblyData(early=(), late=())), [*builtins(), 'early', 'late'])
 
     def test_data_keeps_the_built_in_fields(self) -> None:
         from pcapkit.foundation.reassembly.data import ReassemblyData
 
         data = ReassemblyData(tcp=(), dummy=('datagram',))
-        self.assertEqual(list(data), ['ipv4', 'ipv6', 'tcp', 'dtls', 'sctp', 'tls', NAME])
+        self.assertEqual(list(data), [*builtins(), NAME])
         self.assertIsNone(data.ipv4)
         self.assertEqual(data.dummy, ('datagram',))
 

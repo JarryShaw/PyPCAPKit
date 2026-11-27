@@ -49,6 +49,7 @@ import unittest
 from ipaddress import ip_address
 
 from tests._support import reimport_once_per_class
+from tests.foundation.reassembly._reassemblers import shipped
 
 #: Test tier (#1958): reads an annotation and a handful of in-memory
 #: reassemblies, so the same text and the same values on every leg; nothing
@@ -224,17 +225,26 @@ class DeclaredProtoTypeTests(unittest.TestCase):
             for constraint in cls._proto_type_variable().__constraints__
         )
 
-    def _ip_proto(self):
-        """The ``proto`` ``IP.submit`` hands to :class:`Deferred`."""
+    def _ip_proto(self, version):
+        """The ``proto`` ``IP.submit`` hands to :class:`Deferred`, for IPv4 or IPv6 reassembly."""
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.reassembly.ip.data import Packet
         from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
 
-        reasm = IPv4()
-        reasm(Packet((ip_address('192.0.2.1'), ip_address('198.51.100.2'), 42, TransType.UDP),
-                     1, 0, 20, False, 25, b'ip-header', bytearray(b'hello'), 1000.0))
+        klass, src, dst, ihl = {4: (IPv4, '192.0.2.1', '198.51.100.2', 20),
+                                6: (IPv6, '2001:db8::1', '2001:db8::2', 40)}[version]
+        reasm = klass()
+        reasm(Packet((ip_address(src), ip_address(dst), 42, TransType.UDP),
+                     1, 0, ihl, False, ihl + 5, b'H' * ihl, bytearray(b'hello'), 1000.0))
         datagram, = reasm.datagram
         return held(datagram).proto
+
+    def _ipv4_proto(self):
+        return self._ip_proto(4)
+
+    def _ipv6_proto(self):
+        return self._ip_proto(6)
 
     def _tcp_proto(self, bufid=TCP_BUFID):
         """The ``proto`` ``TCP.submit`` hands to :class:`Deferred`."""
@@ -309,7 +319,9 @@ class DeclaredProtoTypeTests(unittest.TestCase):
         """IP reassembly reads it from the datagram's **Protocol** field."""
         from pcapkit.const.reg.transtype import TransType
 
-        self.assertIs(self._ip_proto(), TransType.UDP)
+        for version in (4, 6):
+            with self.subTest(version=version):
+                self.assertIs(self._ip_proto(version), TransType.UDP)
 
     def test_tcp_passes_a_port_pair(self) -> None:
         """A reassembled stream carries no protocol number, so it keys on ports.
@@ -345,26 +357,32 @@ class DeclaredProtoTypeTests(unittest.TestCase):
     def test_declared_type_admits_what_each_reassembler_passes(self) -> None:
         """The regression: the port pair was outside the declared type.
 
-        Each value has to land on *exactly one* constraint, and each on a
-        different one -- otherwise the type parameter is not distinguishing the
-        reassemblers and a union would have done.
+        Each shipped reassembler's value has to land on *exactly one*
+        constraint, and each ``submit`` on a different one -- otherwise the
+        type parameter is not distinguishing the reassemblers and a union would
+        have done. IPv4 and IPv6 share IP's ``submit``, and so one constraint.
 
         """
         declared = self._declared_proto_types()
+        reassemblers = shipped()
         matched = {}
-        values = (('ip', self._ip_proto()), ('tcp', self._tcp_proto()), ('dtls', self._dtls_proto()),
-                  ('sctp', self._sctp_proto()), ('tls', self._tls_proto()))
-        for name, value in values:
+        for (name, klass) in reassemblers.items():
             with self.subTest(reassembler=name):
+                proto = getattr(self, f'_{name}_proto', None)
+                self.assertIsNotNone(proto, f'no proto case for the shipped reassembler {name!r}')
+                value = proto()
                 admitting = [each for each in declared if admits(each, value)]
                 self.assertEqual(len(admitting), 1,
                                  f'{value!r} is admitted by {admitting!r}, not by exactly '
                                  f'one of {declared!r}')
-                matched[name] = admitting[0]
+                matched[name] = (klass.submit, admitting[0])
         # NOTE: a failing ``subTest`` does not stop the loop, so one of these may
         # be absent; comparing anyway would report a collision that is not there.
-        if len(matched) == len(values):
-            self.assertEqual(len(set(matched.values())), len(values),
+        if len(matched) == len(reassemblers):
+            submits = dict(matched.values())
+            self.assertEqual(len(set(matched.values())), len(submits),
+                             f'one submit passes values of two constraints in {matched!r}')
+            self.assertEqual(len(set(submits.values())), len(submits),
                              f'reassemblers share a constraint in {matched!r}, so the type '
                              'parameter distinguishes nothing a union would not')
 

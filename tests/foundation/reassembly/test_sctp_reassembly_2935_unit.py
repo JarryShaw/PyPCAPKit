@@ -32,7 +32,6 @@ if TYPE_CHECKING:
 __tier__ = 'LATEST'
 
 HAS_PYCRATE = importlib.util.find_spec('pycrate_asn1dir') is not None
-HAS_DPKT = importlib.util.find_spec('dpkt') is not None
 
 #: The association direction every fragment below is carried along, and its buffer ID.
 FLOW = (ipaddress.ip_address('192.0.2.1'), 2905, ipaddress.ip_address('198.51.100.1'), 38412)
@@ -551,42 +550,10 @@ class SCTPExtractorTests(unittest.TestCase):
         from pcapkit.protocols.transport.sctp.protocol import SCTP as SCTP_Protocol
 
         self.assertIsNone(ReassemblyData().sctp)
-        self.assertEqual(list(ReassemblyData()), ['ipv4', 'ipv6', 'tcp', 'dtls', 'sctp', 'tls'])
         self.assertIsInstance(Extractor.make_reassembly('sctp'), SCTP)
         for protocol in ('sctp', 'SCTP', SCTP_Protocol):
             with self.subTest(protocol=protocol):
                 self.assertIsInstance(reassemble(protocol), SCTP)
-
-    def test_the_default_engines_feed_it_and_no_third_party_one_does(self) -> None:
-        from pcapkit.foundation.engines.dpkt import DPKT
-        from pcapkit.foundation.engines.pcap import PCAP
-        from pcapkit.foundation.engines.pcapng import PCAPNG
-        from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
-        from pcapkit.foundation.engines.scapy import Scapy
-
-        from pcapkit.toolkit import pcap as toolkit_pcap
-        from pcapkit.toolkit import pcapng as toolkit_pcapng
-
-        for engine, adapter in ((PCAP, toolkit_pcap.sctp_reassembly), (PCAPNG, toolkit_pcapng.sctp_reassembly)):
-            with self.subTest(engine=engine.__name__):
-                entry = engine.__reassembly__['sctp']
-                self.assertIs(getattr(entry, 'klass', entry), adapter)
-        for engine in (DPKT, Scapy, PyPCAPFile):
-            with self.subTest(engine=engine.__name__):
-                self.assertNotIn('sctp', engine.__reassembly__)
-
-    @unittest.skipUnless(HAS_DPKT, 'dpkt not installed')
-    def test_a_third_party_engine_disables_it_with_a_warning(self) -> None:
-        from pcapkit import extract
-        from pcapkit.utilities.warnings import AttributeWarning
-
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter('always')
-            extractor = extract(fin=io.BytesIO(_pcap(self.FRAMES)), engine='dpkt', reassembly=['sctp', 'tcp'])
-        self.addCleanup(close_extractor, extractor)
-        self.assertTrue(any(issubclass(w.category, AttributeWarning) and "'sctp'" in str(w.message)
-                            for w in caught))
-        self.assertIsNone(extractor.reassembly.sctp)
 
 
 if __name__ == '__main__':
