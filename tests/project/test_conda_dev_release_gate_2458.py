@@ -12,8 +12,8 @@ scheduled Vendor Update publish it with no human in the path.
 ``conda-<version>+<build>`` tag and ``conda-dist`` uploads to anaconda.org, both
 when ``mode``'s ``publishes`` output and ``conda-update``'s ``CONDA_CHANGED`` are
 ``'true'``. With no ``version_check`` job to share #2452's output, ``conda-update``'s
-own ``Get Version`` step computes ``PCAPKIT_DEV_RELEASE``, and ``conda-tag`` and
-``conda-dist`` each read it.
+own ``Get Version`` step computes ``PCAPKIT_DEV_RELEASE``, and ``conda-tag``,
+``conda-build`` and ``conda-dist`` each read it (#3133 split the build from the upload).
 
 Deliberately ``is_devrelease``, never ``is_prerelease``: the latter is also ``true``
 for an alpha, beta or rc this project has shipped (e.g. ``1.5.0b14``), and gating
@@ -25,8 +25,8 @@ runs the real step script against both shapes to show the two outputs disagree.
   and the job's declared ``outputs:``, by text and by running the script.
 * :class:`TestTheGateIsAToplevelConjunct`: ``conda-tag`` and ``conda-dist``
   each read ``PCAPKIT_DEV_RELEASE`` exactly once, as a top-level ``&&``
-  conjunct (``conda-dist``'s inside its publishing branch only, so a
-  build-only run still builds and smoke-tests a dev version).
+  conjunct, and ``conda-build`` inside its publishing branch only, so a
+  build-only run still builds, smoke-tests and installs a dev version.
 * :class:`TestTheGateBlocksPublishing`: :func:`tests.project.test_release_gates
   .job_runs` on dev-release rows built on top of
   :func:`tests.project.test_release_gates.conda_context`: tagging and
@@ -189,8 +189,16 @@ class TestTheGateIsAToplevelConjunct(unittest.TestCase):
         self.assertTrue(compact.endswith(CONJUNCT), compact)
         self.assertEqual(compact.count('PCAPKIT_DEV_RELEASE'), 1)
 
-    def test_conda_dist_reads_it_inside_the_publishing_branch_only(self) -> None:
+    def test_conda_dist_reads_it_as_a_toplevel_conjunct(self) -> None:
+        """#3133: it runs on a publishing run alone, so the gate needs no branch of its own."""
         condition = _workflows.job(CONDA, 'conda-dist')['if']
+        assert isinstance(condition, str)
+        compact = re.sub(r'\s+', '', condition)
+        self.assertTrue(compact.endswith(f'&&{CONJUNCT}'), compact)
+        self.assertEqual(compact.count('PCAPKIT_DEV_RELEASE'), 1)
+
+    def test_conda_build_reads_it_inside_the_publishing_branch_only(self) -> None:
+        condition = _workflows.job(CONDA, 'conda-build')['if']
         assert isinstance(condition, str)
         compact = re.sub(r'\s+', '', condition)
         escape = "&&(needs.mode.outputs.publishes!='true'||("
@@ -292,10 +300,13 @@ class TestTheGateBlocksPublishing(unittest.TestCase):
                               conda_tag='skipped')
         self.assertTrue(job_runs(self.jobs, 'conda-update', context))
         self.assertFalse(job_runs(self.jobs, 'conda-tag', context))
-        self.assertTrue(
-            job_runs(self.jobs, 'conda-dist', context),
-            '`conda-dist` does not build a dev-release version on a build-only '
-            'manual run, which uploads nothing regardless of the version')
+        for job in ('conda-build', 'conda-test'):
+            with self.subTest(job=job):
+                self.assertTrue(
+                    job_runs(self.jobs, job, context),
+                    f'`{job}` does not build a dev-release version on a build-only '
+                    'manual run, which uploads nothing regardless of the version')
+        self.assertFalse(job_runs(self.jobs, 'conda-dist', context))
 
     def test_removing_the_conjunct_reproduces_the_defect(self) -> None:
         """The headline tests above have to be able to fail: with the clause

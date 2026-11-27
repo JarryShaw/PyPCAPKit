@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """The release conda leg smoke-tests its package as Conda Update does (#1855).
 
-``conda-dist`` in :file:`.github/workflows/cron-conda.yml` runs
+``conda-build`` in :file:`.github/workflows/cron-conda.yml` runs
 ``util/conda_vendor.py --smoke`` after ``conda build`` and before any upload
-(#1821). ``conda`` in :file:`.github/workflows/create-release.yml`, which
-publishes the release packages, runs the same step, and its build step writes
+(#1821). ``conda-build`` in :file:`.github/workflows/create-release.yml`, whose
+package ``conda`` publishes (#3133), runs the same step, and its build step writes
 the ``host_package`` output the step reads; without either, a release package
 is published untested. The jobs are read with
 :func:`tests._workflows.steps`, and each build step is run with a stand-in ``conda``,
@@ -39,10 +39,13 @@ if TYPE_CHECKING:
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKFLOWS = ROOT / '.github' / 'workflows'
-#: The conda jobs, as (workflow, job); the first is the one the release mirrors.
-CRON, RELEASE = ('cron-conda.yml', 'conda-dist'), ('create-release.yml', 'conda')
-#: The steps that publish what the leg built.
+#: The conda build jobs, as (workflow, job); the first is the one the release mirrors.
+CRON, RELEASE = ('cron-conda.yml', 'conda-build'), ('create-release.yml', 'conda-build')
+#: The jobs publishing what each built (#3133), and the steps that do.
+PUBLISHERS = {CRON: ('cron-conda.yml', 'conda-dist'), RELEASE: ('create-release.yml', 'conda')}
 UPLOADS = ('Upload conda packages to Anaconda', 'Upload package to GitHub Release')
+#: The step handing the smoke-tested package to ``conda-test`` and the publisher.
+ARTIFACT = 'Upload the conda package'
 
 
 def steps(workflow: 'str', job_id: 'str') -> 'list[dict[str, Any]]':
@@ -60,6 +63,7 @@ class TestTheReleaseLegSmokeTests(unittest.TestCase):
     """The release leg checks its package before publishing it."""
 
     def test_the_smoke_test_runs_after_the_build_and_before_every_upload(self) -> None:
+        """#3133: before the artifact, which the publisher uploads only once ``conda-test`` passed."""
         for workflow, job_id in (CRON, RELEASE):
             found = steps(workflow, job_id)
             smoke = smoke_steps(found)
@@ -67,23 +71,28 @@ class TestTheReleaseLegSmokeTests(unittest.TestCase):
                 self.assertEqual(len(smoke), 1, f'{workflow} {job_id} runs no smoke test')
                 build = next(index for index, step in enumerate(found) if step.get('id') == 'conda_build')
                 self.assertGreater(smoke[0], build)
-                uploads = [index for index, step in enumerate(found) if step.get('name') in UPLOADS]
-                self.assertEqual(len(uploads), len(UPLOADS))
-                self.assertLess(smoke[0], min(uploads))
+                artifact = [index for index, step in enumerate(found) if step.get('name') == ARTIFACT]
+                self.assertEqual(len(artifact), 1)
+                self.assertLess(smoke[0], artifact[0])
+                self.assertFalse([step for step in found if step.get('name') in UPLOADS])
+                publisher = PUBLISHERS[(workflow, job_id)]
+                self.assertLessEqual({job_id, 'conda-test'}, set(_workflows.job(WORKFLOWS / publisher[0],
+                                                                                publisher[1])['needs']))
+                self.assertEqual(sorted(step.get('name') for step in steps(*publisher)
+                                        if step.get('name') in UPLOADS), sorted(UPLOADS))
 
     def test_it_is_conda_updates_step(self) -> None:
         """The same interpreter and package: setup-python's, ``host_package``.
 
-        #2060: both find that interpreter on their Windows legs too. Conda
-        Update's step alone has an ``id``, which its build-only run's pin reads.
+        Conda Update's step alone has an ``id``, which its build-only run's pin reads.
 
         """
         cron = steps(*CRON)
         release = steps(*RELEASE)
         expected = cron[smoke_steps(cron)[0]]
         self.assertEqual(expected['env'], {'PCAPKIT_CONDA_PACKAGE': '${{ steps.conda_build.outputs.host_package }}'})
-        self.assertIn('python="${pythonLocation}/bin/python"\n', expected['run'])
-        self.assertIn('"$python" util/conda_vendor.py --smoke "$PCAPKIT_CONDA_PACKAGE"', expected['run'])
+        self.assertEqual(expected['run'], '"${pythonLocation}/bin/python" util/conda_vendor.py --smoke '
+                                          '"$PCAPKIT_CONDA_PACKAGE"')
         found = smoke_steps(release)
         self.assertEqual(len(found), 1, 'the release leg runs no smoke test')
         self.assertEqual(expected['id'], 'smoke')
@@ -111,7 +120,7 @@ class TestEachBuildStepNamesItsPackage(unittest.TestCase):
             result = subprocess.run(
                 [sys.executable, str(ROOT / 'util' / 'release_conda.py'), 'build'], cwd=temp,  # nosec: B603
                 env=dict(os.environ, PATH=f'{scratch / "bin"}{os.pathsep}{os.environ["PATH"]}',
-                         TMPDIR=temp, GITHUB_OUTPUT=str(output), FAKE_SUBDIR='linux-64',
+                         TMPDIR=temp, GITHUB_OUTPUT=str(output), FAKE_SUBDIR='noarch',
                          PCAPKIT_VERSION='1.0', PCAPKIT_BUILD='0', PCAPKIT_CONDA_OS='ubuntu-latest',
                          PCAPKIT_PYTHON_VERSION='3.14'),
                 capture_output=True, text=True, check=False, timeout=scale_timeout(60))
@@ -127,7 +136,7 @@ class TestEachBuildStepNamesItsPackage(unittest.TestCase):
                 packages = [value for name, value in outputs if name == 'packages']
                 self.assertEqual(len(packages), 1, log)
                 self.assertEqual(host, packages[0].splitlines())
-                self.assertEqual(pathlib.PurePosixPath(host[0]).parent.name, 'linux-64')
+                self.assertEqual(pathlib.PurePosixPath(host[0]).parent.name, 'noarch')
 
 
 if __name__ == '__main__':

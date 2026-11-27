@@ -450,15 +450,16 @@ exists`` step finds the release rather than skipping the GitHub upload
 To debug Vendor Update, Conda Update or GitHub Pages without waiting for
 Saturday, start a manual run on a branch, as in ``gh workflow run cron-conda.yml
 --ref <branch>``. A manual run is build-only by default: Cron Head's test gate
-and every build and test step the schedule runs still run -- each ``conda-dist`` leg,
-Windows included, builds the dispatched commit with ``conda-update``'s changes
-applied -- while every step that pushes, tags, uploads, deploys or posts a
-report skips, no job that runs names an environment, and the Create Release run
-it raises releases nothing. :file:`tests/project/test_build_only_dispatch.py`
+and every build and test step the schedule runs still run -- ``conda-build``
+builds the dispatched commit with ``conda-update``'s changes applied, and
+``conda-test`` installs that package -- while ``conda-dist`` and every step that
+pushes, tags, uploads to an index or a release, deploys or posts a report skip,
+no job that runs names an environment, and the Create Release run it raises
+releases nothing. :file:`tests/project/test_build_only_dispatch.py`
 pins this.
 
 Conda Update's manual run also takes a ``publish`` input, off by default, for
-putting a version's missing platform files on Anaconda (:issue:`2060`). A
+putting a version's missing noarch file on Anaconda (:issue:`2060`, :issue:`3133`). A
 scheduled run uploads only a build it bumped, and it bumps only when
 ``Verify Changed files`` sees a change, which :file:`util/conda_vendor.py` does
 not make when no dependency moved. ``gh workflow run cron-conda.yml --ref main
@@ -466,8 +467,9 @@ not make when no dependency moved. ``gh workflow run cron-conda.yml --ref main
 gate, environments and ``repository-maintenance`` group, but with the build
 bumped regardless: ``Decide whether to bump`` says so although nothing changed,
 so ``Bump Version``, ``Commit Changes`` and ``Push Changes`` run, ``conda-tag``
-tags the pushed commit, every ``conda-dist`` leg builds and uploads, the GitHub
-Release steps run, and ``discussion`` posts the report as ``scheduled``.
+tags the pushed commit, ``conda-build`` builds, ``conda-test`` installs,
+``conda-dist`` uploads, the GitHub Release steps run, and ``discussion`` posts
+the report as ``scheduled``.
 
 Every publishing bump, scheduled or manual, builds the tree of the ``v*`` tag for
 ``main``'s version, not ``main``'s (:issue:`2841`). Before the bump,
@@ -493,7 +495,7 @@ so the ``main`` run is not red:
        sets; the report posts as ``warning``
 
 The report says which withheld the tag and upload. Otherwise the bump's commit
-message names the tag, and ``conda-dist``'s ``Check out the release tag's tree``
+message names the tag, and ``conda-build``'s ``Check out the release tag's tree``
 switches from the bump to the tagged commit, keeping only the bump's
 :file:`conda/` and :file:`util/` (:doc:`releasing` says why).
 :file:`tests/project/test_conda_publish_from_tag_2841.py` pins this. The
@@ -586,8 +588,10 @@ skipping it. ``unit-tests`` then depends on that job with
 calls no status-check function, so a skipped dependency skips it too -- and
 every job past it is gated the same way: ``github`` needs ``[ unit-tests,
 version_check ]``, ``tag`` and ``pypi`` need ``[ github, unit-tests,
-version_check ]``, and ``conda`` needs ``[ tag, github, unit-tests,
-version_check ]``.
+version_check ]``, ``conda-build`` needs ``[ tag, github, unit-tests,
+version_check ]``, ``conda-test`` needs ``[ conda-build, version_check ]``, and
+``conda`` needs what ``conda-build`` does, plus ``conda-build`` and ``conda-test``
+(:issue:`3133`).
 
 .. mermaid::
 
@@ -598,6 +602,8 @@ version_check ]``.
        GH["github (GitHub Release)<br/>SKIPPED"]
        TAGJ["tag (Conda Tag)<br/>SKIPPED"]
        PY["pypi (PyPI distribution)<br/>SKIPPED"]
+       CB["conda-build<br/>SKIPPED"]
+       CT["conda-test<br/>SKIPPED"]
        CD["conda<br/>SKIPPED"]
 
        WR -->|if: false| VC
@@ -605,15 +611,19 @@ version_check ]``.
        UTX -->|needs| GH
        GH -->|needs| TAGJ
        GH -->|needs| PY
-       GH -->|needs| CD
-       TAGJ -->|needs| CD
+       GH -->|needs| CB
+       TAGJ -->|needs| CB
+       CB -->|needs| CT
+       CT -->|needs| CD
 
        classDef skipped fill:#fdecea,stroke:#c0392b,stroke-dasharray:4 2
-       class UTX,VC,GH,TAGJ,PY,CD skipped
+       class UTX,VC,GH,TAGJ,PY,CB,CT,CD skipped
 
 This is a transitive reduction, as in :doc:`releasing`: ``version_check`` and
-``unit-tests`` are also direct ``needs:`` of ``tag``, ``pypi`` and ``conda``, but
-``github`` depends on both and so already implies those edges.
+``unit-tests`` are also direct ``needs:`` of ``tag``, ``pypi``, ``conda-build``
+and ``conda``, but ``github`` depends on both and so already implies those
+edges, as ``conda-test`` does ``conda``'s on ``conda-build``, ``tag`` and
+``github``.
 
 The whole run then reports **skipped**, not failed, so there is no red X to notice:
 ``workflow_run`` Create Release runs `36511610205
@@ -1160,8 +1170,9 @@ as a lost runner or the job cap, reaches a gate. Each runs its gating twin's ste
 by YAML alias (`Reusing workflow configurations
 <https://docs.github.com/en/actions/reference/workflows-and-actions/reusing-workflow-configurations#yaml-anchors-and-aliases>`__),
 and keeps its legs' check names, ``Python 3.10 (KTLO)`` and so on. In
-``python-compatibility.yml`` and ``create-release.yml`` a KTLO leg shares its job
-with supported legs. Every job holding KTLO legs works the same way:
+``python-compatibility.yml``, ``create-release.yml`` and ``cron-conda.yml`` a KTLO
+leg shares its job with supported legs. Every job holding KTLO legs works the
+same way:
 
 * Every step that can fail on a KTLO leg has an ``id`` and
   ``continue-on-error: ${{ matrix.ktlo == true }}`` (see the comment above
@@ -1190,6 +1201,18 @@ Errors remain on a failed KTLO step, though none changes a conclusion: the
 runner's ``Process completed with exit code N.`` for a ``run:`` step, and an
 action's own. And :issue:`1634`'s tag check still blocks the ``pypi`` KTLO legs: it fails
 every leg alike, and masked, the leg would go on to publish.
+
+``conda-test``, in ``create-release.yml`` and ``cron-conda.yml``
+(:issue:`3133`), installs the noarch package ``conda-build`` built on linux-64,
+linux-aarch64, osx-64, osx-arm64 and win-64, under each CPython of both tiers.
+Its Pythons come from conda-forge, not setup-python, so no runner pin applies and
+Python Versions' weekly job counts none of its labels. Its KTLO legs carry the
+guards above, so only a supported leg's failure holds back the upload that
+follows it. The arm64 Ubuntu is ``ubuntu-24.04-arm``, which :file:`lint.yml`'s
+pinned actionlint knows, where it does not know ``ubuntu-26.04-arm``. The
+``macos-26-intel`` leg installs Miniforge, since the runner's default Miniconda
+is frozen at conda 25.7.0, too old for conda-forge's conda-content-trust
+(:issue:`2044`); :file:`tests/project/test_conda_intel_miniforge_2044.py` pins it.
 
 PyPy is tiered the same way. ``test`` and ``integration`` run its supported
 versions after CPython's, and ``test-ktlo`` and ``integration-ktlo`` its KTLO ones,
@@ -1257,7 +1280,7 @@ The **experimental** tier is free-threaded CPython and GraalPy, spelt as
 setup-python reads them (``3.14t``, ``graalpy-25.4``). Each runs a leg of
 ``experimental``, the matrix job of :file:`.github/workflows/experimental.yml`
 ("Experimental Tests"), named ``Python <version> (experimental)``, and nothing
-else: no ``integration``, ``Compat``, wheel or conda leg, so never a required
+else: no ``integration``, ``Compat`` or wheel leg, so never a required
 context. They run in a workflow of their own, rather than as legs of ``test``, by
 the owner's ruling on :issue:`1732` that nothing waits on them. **That
 workflow reports separately and holds up nothing**: a job cannot ``needs:`` one in
@@ -1334,8 +1357,8 @@ stays, changing no conclusion, as ``Process completed with exit code N.`` does.
 Everything but the install and the tests took under 20 seconds on every uncovered
 leg of runs 38569321543-38569522442. ``test``'s caps are main's: 45 minutes for the
 job, and none on a step. Promoting one whose leg stays green is a hand edit, which
-:file:`util/python_versions.py` refuses until the build has a wheel, a conda build
-and a ``Compat`` leg.
+:file:`util/python_versions.py` refuses until the build has a wheel and a
+``Compat`` leg.
 
 The tests' 190 minutes are sized for GraalPy, the slowest of the legs that share
 them: its leg reached 26% of the unit tier in 25 minutes (job 115915976024), where
@@ -1500,10 +1523,10 @@ the shards above (estimate). A leg that still ends on the 180-minute timeout doe
 a warning that blocks nothing.
 
 **The Windows leg.** :file:`experimental.yml`'s ``windows`` job runs the ``ALL`` tier
-on ``windows-latest`` under ``latest``, the newest CPython the conda builds target, as
+on ``windows-latest`` under ``latest``, the newest supported CPython, as
 ``Python <latest> on Windows (experimental)`` (:issue:`2060`),
-so the first published
-``win-64`` conda package has had a test run. It needs ``current``, ``changes`` and
+so a release has had a test run on the platform, where the wheel and the noarch
+conda package install. It needs ``current``, ``changes`` and
 ``python-versions`` and runs on ``experimental``'s condition, and it is non-blocking by
 the same mechanics: every step continues on error, setup-python, the install and ``Run
 unit tests`` are capped at 5, 10 and 60 minutes within its 80, the job carries
@@ -1753,9 +1776,10 @@ to a script. Each script's docstring says what it does; each has tests under
    * - :file:`util/leg_summary.py`
      - ``KTLO summary`` in ``unit-tests.yml``'s ``test``, ``integration`` and
        ``pypcap-parity`` (and so their KTLO twins), ``python-compatibility.yml``'s
-       ``compatibility`` and ``create-release.yml``'s ``pypi``, as ``leg_summary.py
-       ktlo``; ``Experimental summary`` in ``experimental.yml``'s ``experimental``
-       and ``windows``, as ``leg_summary.py experimental``.
+       ``compatibility``, ``create-release.yml``'s ``pypi`` and ``conda-test`` and
+       ``cron-conda.yml``'s ``conda-test``, as ``leg_summary.py ktlo``;
+       ``Experimental summary`` in ``experimental.yml``'s ``experimental`` and
+       ``windows``, as ``leg_summary.py experimental``.
      - No.
    * - :file:`util/classify_changes.py`
      - ``Classify the diff`` in the ``changes`` job of ``unit-tests.yml``, of
@@ -1819,8 +1843,8 @@ to a script. Each script's docstring says what it does; each has tests under
      - No.
    * - :file:`util/release_tags.py`
      - ``Check the release tags name this run's commit`` in ``create-release.yml``'s
-       ``github``, ``pypi`` and ``conda``, as ``release_tags.py check``, and ``Check
-       which commit the version's tag names`` in its ``version_check``, as
+       ``github``, ``pypi``, ``conda-build`` and ``conda``, as ``release_tags.py
+       check``, and ``Check which commit the version's tag names`` in its ``version_check``, as
        ``release_tags.py owner`` (:issue:`1634`,
        :issue:`1748`).
      - No.
@@ -1845,12 +1869,10 @@ to a script. Each script's docstring says what it does; each has tests under
      - No.
    * - :file:`util/release_conda.py`
      - ``Check whether this leg is already on Anaconda`` in ``create-release.yml``'s
-       ``conda``, as ``release_conda.py leg``; ``Build conda packages`` and ``Upload
-       conda packages to Anaconda (Intel)`` in that job and in ``cron-conda.yml``'s
-       ``conda-dist``, as ``release_conda.py build`` and ``upload`` (:issue:`1822`,
-       :issue:`2044`),
-       and ``Upload conda
-       packages to Anaconda (Windows)`` in both as ``upload`` (:issue:`2060`).
+       ``conda``, as ``release_conda.py leg``; ``Find the conda package`` in that
+       job and in ``cron-conda.yml``'s ``conda-dist``, as ``release_conda.py
+       downloaded``; ``Build conda packages`` in both workflows' ``conda-build``,
+       as ``release_conda.py build`` (:issue:`1822`, :issue:`3133`).
      - No.
    * - :file:`util/release_reset_build.py`
      - ``Reset Build Number`` in ``create-release.yml``'s ``tag``, on the image's
@@ -1862,7 +1884,9 @@ The summaries run on the image's ``/usr/bin/python3`` rather than the leg's
 interpreter, which may have failed to set up or be too broken to run anything, so
 they need only the standard library, as ``classify_changes.py`` does on the
 runner's ``python3``. The Windows leg, which has no ``/usr/bin/python3``, runs its
-summary on ``python``, setup-python's or the image's. :file:`util/pytest_shards.py` runs on ``/usr/bin/python3``
+summary on ``python``, setup-python's or the image's, and ``conda-test``'s legs,
+which have no setup-python, on the first of ``python`` and ``python3`` the runner
+has (:issue:`3133`). :file:`util/pytest_shards.py` runs on ``/usr/bin/python3``
 too, standard library only, so on GraalPy's leg the leg's interpreter runs pytest
 alone; on PyPy's legs the leg's interpreter runs the script as well, under the
 file-size cap every test command of ``unit-tests.yml`` takes.
@@ -1884,12 +1908,14 @@ apt's own children, which a timeout in the script, running as the runner's user,
 could not signal. Both ``changes`` jobs check out on every event, since the script is in the
 tree. The release scripts run as ``python3``, from a checkout of the whole tree, and are
 standard library only: :file:`util/release_tags.py` on the image's
-own, since ``github`` has no setup-python and ``pypi`` and ``conda`` run the check
-before theirs, and :file:`util/release_upload.py` on the leg's, after it.
+own, since ``github`` and ``conda`` have no setup-python and ``pypi`` and
+``conda-build`` run the check before theirs, and :file:`util/release_upload.py`
+on ``pypi``'s leg's, after it, and on the image's in ``conda``.
 :file:`util/release_reset_build.py` runs on the image's own too, as ``tag`` has no
-setup-python. :file:`util/release_conda.py` runs ``leg`` on the image's ``python3``, before
-setup-python, ``build`` on conda's base ``python`` under the login shell, from
-:file:`conda/pypcapkit`, and ``upload`` on setup-python's. A project
+setup-python. :file:`util/release_conda.py` runs ``leg`` and ``downloaded`` on the
+image's ``python3``, in ``conda`` and ``conda-dist``, which have no setup-python,
+and ``build`` on conda's base ``python`` under the login shell, from
+:file:`conda/pypcapkit`. A project
 pin runs each, and the step's inline shell form it must match, on the same cases
 and requires the same status, output and calls.
 :file:`util/_actions.py` is standard library only, and keeps to 3.8's syntax,
@@ -1937,16 +1963,14 @@ script not listed here is CI-only.
        directory a change touches, when it moves imports or module state (see
        :doc:`conventions/test-coverage`).
    * - :file:`util/conda_vendor.py`
-     - ``Refresh the platform pins`` and ``Setup Conda Distribution`` in
+     - ``Setup Conda Distribution`` in
        ``cron-conda.yml``'s ``conda-update``, and there
        ``Check the release tag's dependencies`` as
        ``conda_vendor.py --same-dependencies`` (:issue:`2841`);
        ``Smoke-test the vendored packages``
-       in its ``conda-dist`` and ``create-release.yml``'s ``conda``, as
-       ``conda_vendor.py --smoke``.
+       in both workflows' ``conda-build``, as ``conda_vendor.py --smoke``.
      - ``python util/conda_vendor.py --check``, which no workflow runs: whether
-       :file:`conda/requirements.txt` is stale or a platform pin is past its
-       review-by date.
+       :file:`conda/requirements.txt` is stale.
    * - :file:`util/ci_timing.py`
      - ``Report CI timing`` in ``ci-timing.yml``'s ``report``.
      - ``GH_TOKEN=$(gh auth token) python util/ci_timing.py --repo
@@ -2002,12 +2026,13 @@ verdict for another commit, skips it too.
 
 ``cron-conda.yml`` posts to ``cron-conda: conda distribution update report`` by
 the same rules: ``push`` on its ``workflow_run``, ``scheduled`` otherwise, and a
-line of its own for a failed or cancelled ``head``. Its report lists each ``Platform pins`` notice and
-warning from ``Refresh the platform pins``, whose output that step keeps in a log,
-the files the run changed, and the build Push Changes pushed, or that it pushed
-none. Its ``discussion`` job waits for ``conda-tag`` and ``conda-dist`` and adds
-their results, so a failed tag or upload posts as ``failure``. A pin warning
-reports ``warning``. ``cron-python-versions.yml`` runs only on ``schedule`` and
+line of its own for a failed or cancelled ``head``. Its report lists the files the
+run changed, and the build Push Changes pushed, or that it pushed
+none. Its ``discussion`` job waits for ``conda-tag``, ``conda-build``,
+``conda-test`` and ``conda-dist`` and adds their results, so a failed tag, build,
+supported install leg or upload posts as ``failure``. A forced bump left
+unpushed, or a release tag naming other dependencies, reports ``warning``.
+``cron-python-versions.yml`` runs only on ``schedule`` and
 ``workflow_dispatch``, so it posts as ``scheduled`` to ``cron-python-versions:
 Python version update report``. ``detect``'s report, read from the plan
 ``Recompute the tiers`` writes, lists each tier that moved and why, the files it
@@ -2242,8 +2267,8 @@ minor rather than on the released line (:issue:`2942`). A security update still 
 ``target-branch``).
 
 Neither :file:`conda/requirements.txt` nor the benchmark's image digests are
-watched: Conda Update's ``Refresh the platform pins`` and ``Setup Conda
-Distribution`` steps rewrite the former, and Dependabot reads only a ``FROM`` line
+watched: Conda Update's ``Setup Conda Distribution`` step rewrites the former,
+and Dependabot reads only a ``FROM`` line
 that names its image, while the benchmark's :file:`Dockerfile` takes its base image
 through ``ARG PYTHON_IMAGE`` from :file:`examples/benchmark/python-images.txt`.
 
@@ -2267,12 +2292,13 @@ the runner's own ``python3`` -- its ``tomllib`` needs 3.11, and every image that
 runs it has 3.12 or newer -- and writes each matrix as JSON: a ``python-versions``
 job in ``unit-tests.yml`` and ``python-compatibility.yml``, ``version_check`` in
 ``create-release.yml`` and ``conda-update`` in ``cron-conda.yml`` hand theirs on
-through ``fromJSON``, and each single-interpreter job reads ``latest``.
+through ``fromJSON``, and each
+single-interpreter job reads ``latest``.
 
 **A tier change is a one-line edit to that file, plus the matching edit to both
 rulesets'** ``Compat`` **contexts.** The file's ``exemptions`` list each pin kept
-off ``latest``, with its reason in the comment above it, such as the conda
-jobs' ``!= '3.15'``. ``tests/project/test_python_versions_1660.py`` fails on a
+off ``latest``, with its reason in the comment above it, such as the parity
+job's ``APT_CACHE_SAVE``. ``tests/project/test_python_versions_1660.py`` fails on a
 pin the file does not list, on an exemption with no comment, and on a
 classifier, doc or comment that no longer matches the file -- a tier range,
 the coverage leg's version. Its tests, and the other tests that
@@ -2429,14 +2455,6 @@ A manual run names neither, except Conda Update's with ``publish``, whose jobs
 name them as the schedule's do (:issue:`2060`). Sync Develop's ``merge`` names
 ``conda-tag`` on every run, for the deploy key it pushes ``develop`` with
 (`Sync Develop (#2942)`_).
-
-Both ``conda-dist`` and the release ``conda`` job have a ``windows-latest`` leg,
-which builds, smoke-tests and publishes the ``win-64`` package (:issue:`2060`).
-It blocks as the other legs do: no step continues on error. Its one step that
-reads ``ANACONDA_TOKEN`` is ``Upload conda packages to Anaconda (Windows)``, the
-Intel leg's anaconda-client call (:issue:`2044`) under ``bash -el``, which skips a
-build-only manual run as every upload does.
-:file:`tests/project/test_conda_windows_leg_2060.py` pins the leg.
 
 A required reviewer on ``conda-tag`` or ``anaconda`` would therefore hold every
 scheduled bump, and every merge Sync Develop pushes, for an approval, besides the

@@ -263,9 +263,8 @@ REFERENCE_PYPI = textwrap.dedent(r'''
 REFERENCE_ANACONDA = textwrap.dedent(r'''
     set -euo pipefail
 
-    # Each platform the ``conda`` legs publish, for each supported version.
-    # win-64 since the conda job's Windows leg publishes it (#2060).
-    export PCAPKIT_CONDA_SUBDIRS="linux-64 osx-64 osx-arm64 win-64"
+    # The one noarch package the ``conda`` job publishes (#3133).
+    export PCAPKIT_CONDA_SUBDIRS="noarch"
     read -r -a subdirs <<< "$PCAPKIT_CONDA_SUBDIRS"
     read -r -a builds <<< "$PCAPKIT_CONDA_BUILDS"
     expected=$(( ${#subdirs[@]} * ${#builds[@]} ))
@@ -299,7 +298,7 @@ REFERENCE_ANACONDA = textwrap.dedent(r'''
       complete=true
     fi
 
-    echo "http $status, found $count of $expected expected platform/Python combinations for ${PCAPKIT_VERSION} on Anaconda"
+    echo "http $status, found $count of $expected expected platform/build combinations for ${PCAPKIT_VERSION} on Anaconda"
     echo "PCAPKIT_CONDA_COMPLETE=$complete" >> "$GITHUB_OUTPUT"
 ''').lstrip()
 
@@ -442,8 +441,8 @@ PYPI_CASES = (
 #: "Check Anaconda publish completeness"'s base, and its platforms.
 #: #2060: untagged, as the shell form knows no tag; a tagged version's platforms are
 #: test_release_tags_the_run_sha_1634.TestTheCountsAreOfTheReleasedPlatforms'.
-ANACONDA_BASE = {'PCAPKIT_VERSION': '1.5.0', 'PCAPKIT_CONDA_BUILDS': 'py311 py312', 'PCAPKIT_TAG_EXISTS': 'false'}
-PLATFORMS = ('linux-64', 'osx-64', 'osx-arm64', 'win-64')
+ANACONDA_BASE = {'PCAPKIT_VERSION': '1.5.0', 'PCAPKIT_CONDA_BUILDS': 'py', 'PCAPKIT_TAG_EXISTS': 'false'}
+PLATFORMS = ('noarch',)
 
 
 def distributions(*pairs: 'tuple[str, str]') -> 'str':
@@ -452,24 +451,23 @@ def distributions(*pairs: 'tuple[str, str]') -> 'str':
                                                   for pair in pairs)
 
 
-EVERY = tuple((platform, f'{build}_0') for platform in PLATFORMS for build in ('py311', 'py312'))
+EVERY = tuple((platform, 'py_0') for platform in PLATFORMS)
 #: Its cases: ``(name, overrides, the reply's body)``.
 ANACONDA_CASES = (
     ('complete', {}, distributions(*EVERY)),
     ('complete twice over', {}, distributions(*EVERY, *EVERY)),
-    ('a platform missing', {}, distributions(*(pair for pair in EVERY if pair[0] != 'osx-64'))),
-    ('osx-arm64 missing for one build', {}, distributions(*(pair for pair in EVERY
-                                                             if pair != ('osx-arm64', 'py312_0')))),
-    ('another platform is not counted', {}, distributions(*EVERY[1:], ('linux-aarch64', 'py311_0'))),
-    ('a build without its underscore', {}, distributions(*EVERY[1:], ('linux-64', 'py311'))),
-    ('a build of another tag', {}, distributions(*EVERY[1:], ('linux-64', 'py3110_0'))),
+    ('only per-platform files', {}, distributions(('linux-64', 'py314_0'), ('win-64', 'py314_0'))),
+    ('a bumped build counts once', {}, distributions(*EVERY, ('noarch', 'py_1'))),
+    ('another platform is not counted', {}, distributions(*EVERY[1:], ('linux-64', 'py_0'))),
+    ('a build without its underscore', {}, distributions(*EVERY[1:], ('noarch', 'py'))),
+    ('a build of another tag', {}, distributions(*EVERY[1:], ('noarch', 'py314_0'))),
     ('no attrs', {}, '{"distributions": [{}]}'),
     ('no distributions', {}, '{}'),
     ('no builds expected, found', {'PCAPKIT_CONDA_BUILDS': ''}, distributions()),
     ('no builds expected, not found', {'PCAPKIT_CONDA_BUILDS': '', 'CURL_CODE': '404'}, ''),
     ('no builds expected, no connection', {'PCAPKIT_CONDA_BUILDS': '  ', 'CURL_CODE': '000', 'CURL_FAIL': '6'},
      ''),
-    ('the builds on two lines', {'PCAPKIT_CONDA_BUILDS': 'py311\npy312'}, distributions(*EVERY)),
+    ('the builds on two lines', {'PCAPKIT_CONDA_BUILDS': 'py\npy312'}, distributions(*EVERY)),
     ('not found', {'CURL_CODE': '404'}, ''),
     ('no connection', {'CURL_CODE': '000', 'CURL_FAIL': '7'}, ''),
     ('curl was killed', {'CURL_CODE': '', 'CURL_FAIL': 'TERM'}, ''),
@@ -756,8 +754,8 @@ PLANTS = (
      "len(words(var('PCAPKIT_PYPI_WHEELS')))"),
     ('Check PyPI publish completeness', 'release_published.py', 'value >= expected', 'value > expected'),
     ('Check PyPI publish completeness', 'release_published.py', "value.split(b'\\n', 1)[0]", 'value'),
-    ('Check Anaconda publish completeness', 'release_published.py', "SUBDIRS = 'linux-64 osx-64 osx-arm64 win-64'",
-     "SUBDIRS = 'linux-64 osx-64 osx-arm64'"),
+    ('Check Anaconda publish completeness', 'release_published.py', "SUBDIRS = 'noarch'",
+     "SUBDIRS = 'noarch linux-64'"),
     ('Check Anaconda publish completeness', 'release_published.py',
      "    os.environ['PCAPKIT_CONDA_SUBDIRS'] = os.fsdecode(subdirs)\n", ''),
     ('Check Anaconda publish completeness', 'release_published.py', "ANACONDA_URL = 'https://api.anaconda.org/",

@@ -268,5 +268,5 @@ def getenvb(name: 'str') -> 'bytes':
     if os.supports_bytes_environ:
         return os.environb[name.encode()]
     # #2120: Windows keeps its environment as text and has no os.environb, so
-    # reading it there raises AttributeError, as on the win-64 conda leg.
+    # reading it there raises AttributeError.
     return os.fsencode(os.environ[name])

@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
-"""The conda legs do not install pcapkit into setup-python's interpreter (#1854).
+"""The conda jobs do not install pcapkit into setup-python's interpreter (#1854).
 
-``conda-dist`` in :file:`.github/workflows/cron-conda.yml` and ``conda`` in
+``conda-build`` in :file:`.github/workflows/cron-conda.yml` and in
 :file:`.github/workflows/create-release.yml` need no ``pip install -e .[all]``,
 nor ``pathlib2`` and ``typing_extensions``, for no later step uses them:
 ``pip download`` needs pip alone, ``conda build`` installs into its own
 host environment, the version comes from job outputs, and ``--smoke`` runs its
-probe under ``-I -S``. On ``macos-26-intel`` the extras resolve a cryptography
-with no Intel wheel, which pip has to compile or fail on. The jobs are read
-with :func:`tests._workflows.job`.
+probe under ``-I -S``. The jobs are read with :func:`tests._workflows.job`.
 
 """
 
@@ -32,10 +30,10 @@ if TYPE_CHECKING:
 
 WORKFLOWS = pathlib.Path(__file__).resolve().parents[2] / '.github' / 'workflows'
 #: The conda jobs, as (workflow, job).
-JOBS = (('cron-conda.yml', 'conda-dist'), ('create-release.yml', 'conda'))
+JOBS = (('cron-conda.yml', 'conda-build'), ('create-release.yml', 'conda-build'))
 #: What each install step upgrades: ``pip download`` runs on this pip.
 BUILD_TOOLS = ['python', '-m', 'pip', 'install', '-U', 'pip', 'setuptools', 'wheel']
-#: The backports the conda legs do not install (#1821).
+#: The backports the conda jobs do not install (#1821).
 BACKPORTS = {'pathlib2', 'typing_extensions', 'typing-extensions'}
 #: A step running pcapkit from setup-python's interpreter, which would need it installed.
 USES_PCAPKIT = re.compile(r'\bimport\s+pcapkit\b|-m\s+pcapkit\b|\bpcapkit-(?:cli|vendor)\b')

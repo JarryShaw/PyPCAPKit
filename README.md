@@ -47,6 +47,15 @@ an older interpreter -- and `pypcap` and `pcap-ct` must not be installed togethe
 give each constraint and its reason. Asking for an engine that cannot run here warns
 with the cause and falls back to `pcapkit`'s own parser.
 
+From conda, one package serves every platform and Python, with the core functionality alone:
+
+```shell
+conda install -c jarryshaw -c conda-forge pypcapkit
+```
+
+An optional feature takes its package from `pip` in that environment, such as `pip install pycrate`
+for NGAP, `cryptography` for ESP decryption or `emoji` for the command line interface.
+
 ## Usage
 
 ```python

@@ -3,10 +3,11 @@
 
 The owner's ruling took the recommendation: a ``publish`` input on Conda
 Update's manual run, accepted on ``main`` only, that enters the ``conda-tag``
-and ``anaconda`` environments and forces a build bump, so the run uploads every
-platform -- 1.5.0b14's ``win-64`` and ``osx-64`` files among them -- even when
-:file:`util/conda_vendor.py` regenerates the same recipe. Without it a manual
-run stays build-only, which :mod:`tests.project.test_build_only_dispatch` pins.
+and ``anaconda`` environments and forces a build bump, so the run uploads even
+when :file:`util/conda_vendor.py` regenerates the same recipe. #2060 wanted
+1.5.0b14's missing ``win-64`` and ``osx-64`` files; since #3133 the upload is the
+one noarch package. Without it a manual run stays build-only, which
+:mod:`tests.project.test_build_only_dispatch` pins.
 
 * :class:`TestThePublishInput`: the input is a boolean, ``false`` by default.
 * :class:`TestTheModeJob`: ``mode`` is the one job reading the input. Its step,
@@ -15,8 +16,8 @@ run stays build-only, which :mod:`tests.project.test_build_only_dispatch` pins.
   any other manual run; with ``publish`` on another ref it fails with an
   ``::error``, and nothing after it runs.
 * :class:`TestAPublishingManualRun`: on such a run every job and step that
-  pushes, tags, uploads or posts runs, as on the schedule, every
-  ``conda-dist`` leg uploads, each job enters its environment, and
+  pushes, tags, uploads or posts runs, as on the schedule, ``conda-dist``
+  uploads, each job enters its environment, and
   ``conda-update`` joins ``repository-maintenance``; on a manual run without
   ``publish`` none of them does.
 * :class:`TestTheBumpIsForced`: ``Decide whether to bump`` says 'true' on such a
@@ -64,16 +65,15 @@ BASH = shutil.which('bash')
 PUBLISHERS = {
     'conda-update': ['Load maintenance deploy key', 'Push Changes'],
     'conda-tag': ['Load maintenance deploy key', 'Checkout code', 'Push Tag'],
-    'conda-dist': ['Upload conda packages to Anaconda', 'Upload conda packages to Anaconda (Intel)',
-                   'Upload conda packages to Anaconda (Windows)', 'Check the GitHub release exists',
+    'conda-dist': ['Upload conda packages to Anaconda', 'Check the GitHub release exists',
                    'Upload package to GitHub Release'],
     'discussion': ['Post the report to Discussions'],
 }
 #: The steps that bump, and the one that hands the build on.
 BUMP_STEPS = ('Bump Version', 'Commit Changes', 'Push Changes', 'Get Version')
-#: The steps only a build-only run takes, which hand ``conda-dist`` the unpushed tree.
-BUILD_ONLY_STEPS = {'conda-update': ('Save the changes for conda-dist', 'Upload the changes for conda-dist'),
-                    'conda-dist': ('checkout-dispatched', 'download-changes', 'apply-changes')}
+#: The steps only a build-only run takes, which hand ``conda-build`` the unpushed tree.
+BUILD_ONLY_STEPS = {'conda-update': ('Save the changes for conda-build', 'Upload the changes for conda-build'),
+                    'conda-build': ('checkout-dispatched', 'download-changes', 'apply-changes')}
 
 
 def name_of(entry: 'dict[str, Any]') -> 'str':
@@ -106,7 +106,9 @@ def step_runs(job_id: 'str', label: 'str', scope: 'dict[str, Any]') -> 'bool':
 
 
 def legs() -> 'list[str]':
-    return list(_workflows.job(CONDA, 'conda-dist')['strategy']['matrix']['os'])
+    """``conda-dist``'s runners: its one, as it publishes one noarch package (#3133)."""
+    spec = _workflows.job(CONDA, 'conda-dist')
+    return list(spec['strategy']['matrix']['os']) if 'strategy' in spec else [str(spec['runs-on'])]
 
 
 def environment(job_id: 'str', publishes: 'object') -> 'object':
@@ -194,7 +196,7 @@ class TestTheModeJob(unittest.TestCase):
         scope = conda_context(event_name=DISPATCH, unit_tests='success', verdict='skipped', verified=NULL,
                               mode='failure', conda_update='skipped', conda_tag='skipped',
                               conda_dist='skipped', outputs_present=False)
-        for job_id in ('conda-update', 'conda-tag', 'conda-dist', 'discussion'):
+        for job_id in ('conda-update', 'conda-tag', 'conda-build', 'conda-test', 'conda-dist', 'discussion'):
             with self.subTest(job=job_id):
                 self.assertFalse(job_runs(jobs, job_id, scope))
         for job_id in ('conda-update', 'conda-dist'):
@@ -228,11 +230,12 @@ class TestAPublishingManualRun(unittest.TestCase):
                 self.assertEqual(found, labels)
 
     def test_every_publishing_job_runs(self) -> None:
-        for job_id in ('conda-update', 'conda-tag', 'conda-dist', 'discussion'):
+        for job_id in ('conda-update', 'conda-tag', 'conda-build', 'conda-test', 'conda-dist', 'discussion'):
             with self.subTest(job=job_id):
                 self.assertTrue(job_runs(self.jobs, job_id, manual_run('true')))
+                # #3133: a build-only run builds and tests, and publishes nothing.
                 self.assertIs(job_runs(self.jobs, job_id, manual_run('false')),
-                              job_id in ('conda-update', 'conda-dist'))
+                              job_id in ('conda-update', 'conda-build', 'conda-test'))
 
     def reachable(self, job_id: 'str', label: 'str', publishes: 'str') -> 'bool':
         """Whether the step runs on some leg: its job runs, and then its own ``if:`` holds."""
@@ -248,7 +251,7 @@ class TestAPublishingManualRun(unittest.TestCase):
                     self.assertFalse(self.reachable(job_id, label, 'false'))
 
     def test_every_leg_uploads(self) -> None:
-        """Intel and Windows included, which is what 1.5.0b14 lacks."""
+        """The one noarch leg (#3133), so a version lacking its file gets it."""
         uploads = [label for label in PUBLISHERS['conda-dist'] if label.startswith('Upload conda packages')]
         for os_label in legs():
             with self.subTest(os=os_label):
@@ -256,11 +259,11 @@ class TestAPublishingManualRun(unittest.TestCase):
                                      for label in uploads), 1)
                 self.assertEqual(sum(step_runs('conda-dist', label, context(DISPATCH, 'false', os_label))
                                      for label in uploads), 0)
-        self.assertLessEqual({'macos-26-intel', 'windows-latest'}, set(legs()))
+        self.assertEqual(legs(), ['ubuntu-latest'])
 
     def test_conda_dist_checks_out_the_tag(self) -> None:
         """Not the dispatched commit with a patch, which only a build-only run hands on."""
-        self.assertTrue(step_runs('conda-dist', 'checkout', context(DISPATCH, 'true')))
+        self.assertTrue(step_runs('conda-build', 'checkout', context(DISPATCH, 'true')))
         for job_id, labels in BUILD_ONLY_STEPS.items():
             for label in labels:
                 with self.subTest(job=job_id, step=label):
@@ -475,7 +478,6 @@ class TestTheReportOfAnUnpushedForcedBump(_ReportStep):
         super().setUp()
         (self.work / 'conda').mkdir()
         (self.work / 'conda' / 'build').write_text('4\n', encoding='utf-8')
-        (self.temp / 'platform-pins.log').write_text('', encoding='utf-8')
 
     def test_it_says_nothing_was_published(self) -> None:
         text, status = self.report(PUBLISHES='true', FILES_CHANGED='false', BUMP='true', FORCED='true',

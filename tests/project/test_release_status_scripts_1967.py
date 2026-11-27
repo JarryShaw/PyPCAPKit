@@ -287,7 +287,7 @@ UNSET = None
 #: The sentence ending the unfinished warning where Anaconda files are missing
 #: (#2140), which the shell form never prints.
 ANACONDA_REMEDY = re.compile(r"(?m) Its Anaconda files are the exception: while main's version is still .*?, "
-                             r"dispatch Conda Update with publish on main, .*? only if that run's own conda legs "
+                             r"dispatch Conda Update with publish on main, .*? only if that run's own conda job "
                              r'can still succeed\.$')
 
 #: ``release_status``'s cases: ``(name, overrides of STATUS_BASE)``.

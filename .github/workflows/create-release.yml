@@ -72,12 +72,10 @@ concurrency:
 # the two diverge on a half-completed release, and a run reading the tag would
 # skip every job and report green. ``github`` still reads ``PCAPKIT_TAG_EXISTS``,
 # since that tag is its own artefact; ``tag`` reads whether ``conda-<version>+0``
-# exists, ``pypi`` PyPI's file count, and ``conda`` Anaconda's aggregate count
-# (a cost saver) plus, per leg, its own distribution -- the correctness fix,
+# exists, ``pypi`` PyPI's file count, and ``conda`` Anaconda's count (a cost
+# saver) plus, before it uploads, its own distribution -- the correctness fix,
 # since ``anaconda/actions/upload-package`` has no ``skip-existing``, only
-# ``force:``, never set here. The ``macos-26-intel`` and ``windows-latest``
-# legs upload with the anaconda-client CLI and ``--skip-existing`` instead
-# (#2044, #2060).
+# ``force:``, never set here.
 #
 # GitHub skips a job whose ``needs:`` skipped before evaluating its ``if:``,
 # unless the ``if:`` calls a status-check function, and ``github`` skips on
@@ -233,9 +231,9 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 0
 
-      # #1660: `latest` for this job and the ``pypi`` and ``conda`` matrices,
-      # from this run's commit, and the tags the completeness checks count until
-      # the version is tagged.
+      # #1660: `latest` for this job and ``conda-build``, the ``pypi`` and
+      # ``conda-test`` matrices, from this run's commit, and the tags the
+      # completeness checks count until the version is tagged.
       - name: Read the Python versions
         id: python-versions
         run: python3 util/python_versions.py --github-output
@@ -318,9 +316,10 @@ jobs:
           PCAPKIT_PYPI_WHEELS: ${{ steps.released.outputs.pypi-wheels }}
         run: python3 util/release_published.py pypi /tmp/pypi_release.json
 
-      # Anaconda evidence, as PyPI's above, per platform and Python: the
-      # job-level cost saver, under which ``conda``'s per-leg checks, the
-      # correctness fix, still run. This endpoint read ``cf-cache-status:
+      # Anaconda evidence, as PyPI's above: the noarch package (#3133), or for
+      # an older tag each platform and Python it was released with. The
+      # job-level cost saver, under which ``conda``'s own check, the
+      # correctness fix, still runs. This endpoint read ``cf-cache-status:
       # DYNAMIC`` (uncached) on every request checked, so no staleness applies.
       - name: Check Anaconda publish completeness
         id: check_conda
@@ -355,7 +354,9 @@ jobs:
       # #1660: from .github/python-versions.toml, for ``pypi`` and ``conda``.
       PYTHON_LATEST: ${{ steps.python-versions.outputs.latest }}
       PYTHON_PYPI: ${{ steps.python-versions.outputs.pypi }}
+      # #3133: ``conda-test``'s Python axis, and the entries marking its KTLO legs.
       PYTHON_CONDA: ${{ steps.python-versions.outputs.conda }}
+      PYTHON_CONDA_KTLO: ${{ steps.python-versions.outputs.conda-ktlo }}
 
   # No ``environment:``: no outward effect, and a job calling a reusable
   # workflow may not declare one. Runs exactly when a publisher could (#1052,
@@ -770,15 +771,18 @@ jobs:
           STEPS: ${{ toJSON(steps) }}
         run: /usr/bin/python3 util/leg_summary.py ktlo
 
-  conda:
-    name: Conda deployment (release) on ${{ matrix.os }} with Python ${{ matrix.python-version }}
-    runs-on: ${{ matrix.os }}
-    # Uploads with ``ANACONDA_TOKEN``, gated through ``needs:`` (#641, #887; see
-    # the note above ``jobs:``). #888: the aggregate evidence is a cost saver;
-    # "Check whether this leg is already on Anaconda" is the correctness fix.
-    environment: anaconda
+  # #3133: one ``noarch: python`` package for every platform and Python,
+  # carrying the core functionality alone; an optional feature is pip-installed
+  # into the environment. ``conda-build`` builds it once, on ``latest``, whose
+  # wheels conda/wheels holds; ``conda-test`` installs that file on each
+  # platform and Python; ``conda`` publishes it once every supported leg passed.
+  # Each reads the release's gates, so all three skip together.
+  conda-build:
+    name: Conda build (release)
+    runs-on: ubuntu-latest
+    # No ``environment:``: it builds, and publishes nothing.
     permissions:
-      contents: write
+      contents: read
     needs: [ tag, github, unit-tests, version_check ]
     if: >-
       ${{ !cancelled() && needs.version_check.result == 'success' &&
@@ -788,26 +792,6 @@ jobs:
       (needs.tag.result == 'success' || needs.tag.result == 'skipped') &&
       (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_RELEASED_ELSEWHERE != 'true') &&
       (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_CONDA_COMPLETE == 'false') }}
-    strategy:
-      fail-fast: false
-      matrix:
-        # #1822: each leg builds and publishes its own runner's platform only,
-        # since ``conda convert`` copies binaries unchanged. ``macos-latest`` is
-        # arm64, so osx-arm64, and ``macos-26-intel`` is Intel, so osx-64, per
-        # https://docs.github.com/en/actions/reference/runners/github-hosted-runners
-        # (GA in actions/runner-images#13739). The osx-64 leg ends with GitHub's
-        # Intel images, which actions/runner-images#13045 says will end.
-        os:
-          - macos-latest
-          - macos-26-intel
-          - ubuntu-latest
-          # #2060: win-64. Its `run:` steps name `bash`, as Windows runs `pwsh`.
-          - windows-latest
-        # #1633, #1660: the supported tier only. No KTLO 3.10 leg: the list
-        # util/conda_vendor.py derives omits typing-extensions, which
-        # pcapkit/utilities/compat.py imports below 3.11, and pins each
-        # dependency's newest release, a rising floor.
-        python-version: ${{ fromJSON(needs.version_check.outputs.PYTHON_CONDA) }}
     steps:
       # #1634: this run's commit, not ``ref: conda-<version>+0``, then the check
       # that both tags these packages are filed under name it.
@@ -823,31 +807,14 @@ jobs:
           PCAPKIT_RUN_SHA: ${{ github.sha }}
         run: python3 util/release_tags.py check
 
-      # #888: the per-leg correctness fix. Uncached, per ``version_check``'s
-      # Anaconda check, so this reads the live state. #1967: util/release_conda.py
-      # holds this step's shell, and the build's and the Intel upload's, which
-      # cron-conda.yml's ``conda-dist`` runs too; before setup-python, so here
-      # on the image's ``python3``. On Windows, Git Bash hands it ``/tmp`` as
-      # the user's temporary directory.
-      - name: Check whether this leg is already on Anaconda
-        id: check_leg
-        shell: bash
-        env:
-          PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
-          PCAPKIT_CONDA_OS: ${{ matrix.os }}
-          PCAPKIT_PYTHON_VERSION: ${{ matrix.python-version }}
-        run: python3 util/release_conda.py leg /tmp/anaconda_release.json
-
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ needs.version_check.outputs.PYTHON_LATEST }}
 
       # #1854: nothing below imports pcapkit from this interpreter. ``pip
       # download`` needs pip alone, ``conda build`` installs into its own host
       # environment, the version comes from job outputs, and the smoke test
-      # runs its probe under ``-I -S``. So pcapkit and its extras are not
-      # installed here: on ``macos-26-intel`` they resolve a cryptography with
-      # no Intel wheel, which pip has to compile or fail on.
+      # runs its probe under ``-I -S``.
       - name: Install and Setup
         shell: bash
         run: |
@@ -863,28 +830,14 @@ jobs:
           mkdir -p conda/wheels
           python -m pip download -r conda/requirements.txt -d conda/wheels
 
-      # With `activate-environment: base`, `python-version` installs that Python
-      # into base, next to conda itself. conda-forge's conda has no py315
-      # build, so on 3.15 that fails with "RemoveError: Conda cannot remove
-      # itself" (#1633, measured with conda 26.7.2). So 3.15 leaves base on its
-      # own Python: `conda build --python` below builds against 3.15 regardless,
-      # measured to build and import pypcapkit-*-py315_0. Drop the exception
-      # once conda publishes a py315 build. #2123: nor on macos-26-intel, where
-      # changing base's Python rebuilds conda-forge's libmambapy at a version
-      # conda-libmamba-solver cannot drive, failing "Install conda build tools".
+      # Base keeps its own Python: the recipe pins its host Python to
+      # ``PCAPKIT_PYTHON_VERSION`` below, whatever base runs.
       - name: Conda environment creation and activation
         uses: conda-incubator/setup-miniconda@be893c923ea9cf1cf7cd510fbdde27c7e18cbdcb # v4.1.0
         env:
           PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           PCAPKIT_BUILD: "0"
         with:
-          # #2044: with no installer named, the Intel runner downloads
-          # Miniconda3-latest-MacOSX-x86_64.sh, frozen at conda 25.7.0: too old
-          # for conda-forge's conda-content-trust, and with no py314 build. So
-          # that leg installs Miniforge. An empty string names no installer, so
-          # the other legs keep the bundled or downloaded Miniconda.
-          miniforge-version: ${{ matrix.os == 'macos-26-intel' && 'latest' || '' }}
-          python-version: ${{ matrix.os != 'macos-26-intel' && matrix.python-version != '3.15' && matrix.python-version || '' }}
           activate-environment: base
           auto-update-conda: false
           auto-activate: true
@@ -892,8 +845,7 @@ jobs:
           conda-remove-defaults: false
           show-channel-urls: true
 
-      # A login shell, as for the build below: on Windows only that one has the
-      # `conda` setup-miniconda's `conda init` defines.
+      # A login shell, as for the build below, which activates base.
       - name: Install conda build tools
         shell: bash -el {0}
         run: |
@@ -901,7 +853,7 @@ jobs:
           conda build --version
 
       # On conda's base ``python``, which the login shell activates, from this
-      # directory, as conda-dist's step of the same name.
+      # directory, as cron-conda.yml's ``conda-build`` step of the same name.
       - name: Build conda packages
         id: conda_build
         shell: bash -el {0}
@@ -911,85 +863,216 @@ jobs:
           # because ``conda/build`` says so: at a hand-tagged commit it may still
           # hold the previous version's counter until ``tag``'s reset (#1634).
           PCAPKIT_BUILD: "0"
-          PCAPKIT_CONDA_OS: ${{ matrix.os }}
-          PCAPKIT_PYTHON_VERSION: ${{ matrix.python-version }}
+          PCAPKIT_CONDA_OS: ubuntu-latest
+          PCAPKIT_PYTHON_VERSION: ${{ needs.version_check.outputs.PYTHON_LATEST }}
         working-directory: conda/pypcapkit
         run: python ../../util/release_conda.py build
 
-      # #1855: cron-conda.yml's ``conda-dist`` step of the same name, which says
-      # what it checks and why it runs setup-python's interpreter, so a release
-      # package is checked as a Conda Update bump's is, before anything below
-      # uploads it. Not gated on ``check_leg``, since the GitHub upload is not.
+      # #1855: cron-conda.yml's ``conda-build`` step of the same name, which says
+      # what it checks, so a release package is checked as a Conda Update
+      # bump's is, before anything uploads it.
       - name: Smoke-test the vendored packages
         shell: bash
         env:
           PCAPKIT_CONDA_PACKAGE: ${{ steps.conda_build.outputs.host_package }}
-        run: |
-          python="${pythonLocation}/bin/python"
-          if [ "$RUNNER_OS" = Windows ]; then
-            python="$(cygpath -u "$pythonLocation")/python.exe"
-          fi
-          "$python" util/conda_vendor.py --smoke "$PCAPKIT_CONDA_PACKAGE"
+        run: '"${pythonLocation}/bin/python" util/conda_vendor.py --smoke "$PCAPKIT_CONDA_PACKAGE"'
 
-      # #2044: not on macos-26-intel, whose leg "Upload conda packages to
-      # Anaconda (Intel)" uploads instead, nor, #2060, on windows-latest, whose
-      # "Upload conda packages to Anaconda (Windows)" does.
+      # The file ``conda-test`` installs and ``conda`` publishes, so both have
+      # the one this job built.
+      - name: Upload the conda package
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: conda-package
+          path: ${{ steps.conda_build.outputs.packages }}
+          if-no-files-found: error
+
+  # #3133: the package ``conda-build`` built, installed from a local channel
+  # beside conda-forge on each platform and each Python of both tiers. Every
+  # step is #1672's: a KTLO leg's failure is a warning on a green leg, so only a
+  # supported leg's failure fails the job and holds ``conda`` back.
+  conda-test:
+    name: Conda install on ${{ matrix.os }} with Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    needs: [ conda-build, version_check ]
+    if: ${{ !cancelled() && needs.conda-build.result == 'success' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # linux-64, linux-aarch64, osx-64, osx-arm64 and win-64. The arm64
+        # Ubuntu is 24.04, which lint.yml's pinned actionlint knows, where it
+        # does not know benchmark.yml's 26.04; the Intel macOS is the one the
+        # conda jobs built on before #3133.
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+          - macos-26-intel
+          - macos-latest
+          - windows-latest
+        # #1633, #1660: CPython's KTLO and supported tiers, the KTLO legs marked.
+        python-version: ${{ fromJSON(needs.version_check.outputs.PYTHON_CONDA) }}
+        include: ${{ fromJSON(needs.version_check.outputs.PYTHON_CONDA_KTLO) }}
+    steps:
+      - name: Checkout code
+        id: checkout
+        continue-on-error: ${{ matrix.ktlo == true }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          sparse-checkout: util
+          persist-credentials: false
+
+      - name: Download the conda package
+        id: download
+        continue-on-error: ${{ matrix.ktlo == true }}
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: conda-package
+          path: ${{ runner.temp }}/conda-channel/noarch
+
+      - name: Conda environment creation and activation
+        id: miniconda
+        if: ${{ steps.download.outcome == 'success' }}
+        continue-on-error: ${{ matrix.ktlo == true }}
+        uses: conda-incubator/setup-miniconda@be893c923ea9cf1cf7cd510fbdde27c7e18cbdcb # v4.1.0
+        with:
+          # #2044: with no installer named, the Intel runner downloads
+          # Miniconda3-latest-MacOSX-x86_64.sh, frozen at conda 25.7.0: too old
+          # for conda-forge's conda-content-trust. So that leg installs
+          # Miniforge. An empty string names no installer, so the other legs
+          # keep the bundled or downloaded Miniconda.
+          miniforge-version: ${{ matrix.os == 'macos-26-intel' && 'latest' || '' }}
+          activate-environment: base
+          auto-update-conda: false
+          auto-activate: true
+          channels: conda-forge
+          conda-remove-defaults: true
+          show-channel-urls: true
+
+      # A login shell, which activates base, and on Windows defines ``conda``.
+      - name: Index the local channel
+        id: index
+        if: ${{ steps.miniconda.outcome == 'success' }}
+        continue-on-error: ${{ matrix.ktlo == true }}
+        shell: bash -el {0}
+        run: |
+          conda install -n base --override-channels -c conda-forge -y conda-index
+          python -m conda_index "$RUNNER_TEMP/conda-channel"
+
+      - name: Install the conda package
+        id: install
+        if: ${{ steps.index.outcome == 'success' }}
+        continue-on-error: ${{ matrix.ktlo == true }}
+        shell: bash -el {0}
+        env:
+          PCAPKIT_PYTHON_VERSION: ${{ matrix.python-version }}
+        run: |
+          conda create -y -p "$RUNNER_TEMP/conda-test" --override-channels \
+            -c "$RUNNER_TEMP/conda-channel" -c conda-forge "python=$PCAPKIT_PYTHON_VERSION" pypcapkit
+
+      # The recipe's test commands, conda/pypcapkit/meta.yaml's ``test:``.
+      - name: Test the conda package
+        id: test
+        if: ${{ steps.install.outcome == 'success' }}
+        continue-on-error: ${{ matrix.ktlo == true }}
+        shell: bash -el {0}
+        run: |
+          conda activate "$RUNNER_TEMP/conda-test"
+          python -c "import pcapkit"
+          pcapkit-cli --help
+          python -c "import os, pcapkit, dictdumper, tbtrim; assert all(os.path.realpath(m.__file__).startswith(os.path.realpath(pcapkit._extern) + os.sep) for m in (dictdumper, tbtrim))"
+
+      # #1672, on the runner's own interpreter: ``python`` on Windows, which
+      # has no ``python3``, and ``python3`` where there is no ``python``.
+      - name: KTLO summary
+        if: ${{ !cancelled() && matrix.ktlo == true }}
+        continue-on-error: ${{ matrix.ktlo == true }}
+        shell: bash
+        env:
+          LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
+          STEPS: ${{ toJSON(steps) }}
+        run: '"$(command -v python || command -v python3)" util/leg_summary.py ktlo'
+
+  # #3133: publishes the package ``conda-build`` built, once every supported
+  # leg of ``conda-test`` installed it.
+  conda:
+    name: Conda deployment (release)
+    runs-on: ubuntu-latest
+    # Uploads with ``ANACONDA_TOKEN``, gated through ``needs:`` (#641, #887; see
+    # the note above ``jobs:``). #888: the aggregate evidence is a cost saver;
+    # "Check whether this leg is already on Anaconda" is the correctness fix.
+    environment: anaconda
+    permissions:
+      contents: write
+    needs: [ conda-build, conda-test, tag, github, unit-tests, version_check ]
+    if: >-
+      ${{ !cancelled() && needs.version_check.result == 'success' &&
+      needs.unit-tests.result == 'success' &&
+      needs.conda-build.result == 'success' && needs.conda-test.result == 'success' &&
+      needs.version_check.outputs.PCAPKIT_DEV_RELEASE != 'true' &&
+      (needs.github.result == 'success' || needs.github.result == 'skipped') &&
+      (needs.tag.result == 'success' || needs.tag.result == 'skipped') &&
+      (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_RELEASED_ELSEWHERE != 'true') &&
+      (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_CONDA_COMPLETE == 'false') }}
+    steps:
+      # #1634: this run's commit, not ``ref: conda-<version>+0``, then the check
+      # that both tags these packages are filed under name it.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Check the release tags name this run's commit
+        shell: bash
+        env:
+          PCAPKIT_TAGS: v${{ needs.version_check.outputs.PCAPKIT_VERSION }} conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0
+          PCAPKIT_RUN_SHA: ${{ github.sha }}
+        run: python3 util/release_tags.py check
+
+      # #888: the correctness fix. Uncached, per ``version_check``'s Anaconda
+      # check, so this reads the live state. #1967: util/release_conda.py holds
+      # this step's shell, and the build's, which cron-conda.yml's
+      # ``conda-build`` runs too; on the image's ``python3``.
+      - name: Check whether this leg is already on Anaconda
+        id: check_leg
+        shell: bash
+        env:
+          PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
+          PCAPKIT_CONDA_OS: ubuntu-latest
+        run: python3 util/release_conda.py leg /tmp/anaconda_release.json
+
+      - name: Download the conda package
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: conda-package
+          path: ${{ runner.temp }}/conda-package
+
+      - name: Find the conda package
+        id: conda_package
+        shell: bash
+        run: python3 util/release_conda.py downloaded "$RUNNER_TEMP/conda-package"
+
       - name: Upload conda packages to Anaconda
-        if: ${{ matrix.os != 'macos-26-intel' && matrix.os != 'windows-latest' && steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}
+        if: ${{ steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}
         uses: anaconda/actions/upload-package@a6f488910b4a1e4f3fe01736241ca1b92b4b355a # v0.3.1
         with:
           token: ${{ secrets.ANACONDA_TOKEN }}
           channel: jarryshaw
-          packages: ${{ steps.conda_build.outputs.packages }}
+          packages: ${{ steps.conda_package.outputs.packages }}
           labels: ${{ needs.version_check.outputs.PCAPKIT_CONDA_LABEL }}
 
-      # #2044: upload-package v0.3.1 installs its CLI from
-      # anaconda.sh/releases/stable/v0.2.1/ana-darwin-x86_64, which returns 404,
-      # so the Intel leg runs the call the action makes -- `anaconda --token
-      # upload --user`, with the same channel, labels and files and the new CLI
-      # parser -- from conda-forge's anaconda-client in base. One difference:
-      # `--skip-existing`, so a file anaconda.org already has is skipped where
-      # the action, with no `force:`, fails on it. "Check whether this leg is
-      # already on Anaconda" still gates both. ``release_conda.py upload`` runs
-      # on setup-python's ``python3``.
-      - name: Upload conda packages to Anaconda (Intel)
-        if: ${{ matrix.os == 'macos-26-intel' && steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}
-        shell: bash
-        env:
-          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
-          ANACONDA_CLI_FORCE_NEW: "1"
-          PCAPKIT_CONDA_CHANNEL: jarryshaw
-          PCAPKIT_CONDA_PACKAGES: ${{ steps.conda_build.outputs.packages }}
-          PCAPKIT_CONDA_LABELS: ${{ needs.version_check.outputs.PCAPKIT_CONDA_LABEL }}
-        run: python3 util/release_conda.py upload
-
-      # #2060: the Intel leg's call, on win-64, under a login shell as "Build
-      # conda packages" is: only there is base active, so the script can start
-      # `conda` as base's `Scripts\conda.exe`, and `python` is base's. The
-      # script runs base's `Scripts\anaconda.exe`.
-      - name: Upload conda packages to Anaconda (Windows)
-        if: ${{ matrix.os == 'windows-latest' && steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}
-        shell: bash -el {0}
-        env:
-          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
-          ANACONDA_CLI_FORCE_NEW: "1"
-          PCAPKIT_CONDA_CHANNEL: jarryshaw
-          PCAPKIT_CONDA_PACKAGES: ${{ steps.conda_build.outputs.packages }}
-          PCAPKIT_CONDA_LABELS: ${{ needs.version_check.outputs.PCAPKIT_CONDA_LABEL }}
-        run: python util/release_conda.py upload
-
       # ``pypi``'s upload script, for the same reasons (#1634, #1640). Not
-      # gated on ``check_leg`` as the Anaconda upload is: a leg whose Anaconda
+      # gated on ``check_leg`` as the Anaconda upload is: a run whose Anaconda
       # upload landed and whose GitHub upload then failed would get no GitHub
       # asset on any re-run. Skipping a file the release already has is what
       # stops the replacement #1640 measured.
       - name: Upload package to GitHub Release
-        if: ${{ matrix.os == 'ubuntu-latest' }}
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PCAPKIT_RELEASE_TAG: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
-          PCAPKIT_ASSETS: ${{ steps.conda_build.outputs.packages }}
+          PCAPKIT_ASSETS: ${{ steps.conda_package.outputs.packages }}
         run: python3 util/release_upload.py
 
   # #888: a run that released nothing says why, in one place. ``version_check``
@@ -1006,7 +1089,7 @@ jobs:
   release_status:
     name: Release status
     runs-on: ubuntu-latest
-    needs: [ vendor_update, unit-tests, version_check, github, tag, pypi, conda ]
+    needs: [ vendor_update, unit-tests, version_check, github, tag, pypi, conda-build, conda-test, conda ]
     if: ${{ !cancelled() }}
     permissions:
       contents: read
@@ -1032,7 +1115,11 @@ jobs:
           PCAPKIT_GITHUB_JOB: ${{ needs.github.result }}
           PCAPKIT_TAG_JOB: ${{ needs.tag.result }}
           PCAPKIT_PYPI_JOB: ${{ needs.pypi.result }}
-          PCAPKIT_CONDA_JOB: ${{ needs.conda.result }}
+          # #3133: the Anaconda target is its build, its install matrix and its
+          # upload, so a build or a supported leg that failed or was cancelled
+          # reads as the target's own result, not as a skip its evidence cannot
+          # explain (#888).
+          PCAPKIT_CONDA_JOB: ${{ (needs.conda-build.result == 'failure' || needs.conda-build.result == 'cancelled') && needs.conda-build.result || (needs.conda-test.result == 'failure' || needs.conda-test.result == 'cancelled') && needs.conda-test.result || needs.conda.result }}
           PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           PCAPKIT_TAG_EXISTS: ${{ needs.version_check.outputs.PCAPKIT_TAG_EXISTS }}
           PCAPKIT_CONDA_TAG_EXISTS: ${{ needs.version_check.outputs.PCAPKIT_CONDA_TAG_EXISTS }}

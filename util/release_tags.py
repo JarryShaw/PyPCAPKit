@@ -29,8 +29,8 @@ with ``git``'s status, as ``set -e`` would end a shell step.
 ``${PCAPKIT_TAGS}`` would apply, which changes nothing: every tag is ``v`` or
 ``conda-`` and a :pep:`440` version, which holds no ``*``, ``?`` or ``[``.
 
-The ``conda`` legs run it before setup-python, so ``python3`` is the image's,
-and ``github`` has no setup-python at all. So the script is standard library
+``conda-build`` runs it before setup-python, so ``python3`` is the image's,
+and ``github`` and ``conda`` have no setup-python at all (#3133). So the script is standard library
 only, and keeps to Python 3.8's syntax.
 
 """

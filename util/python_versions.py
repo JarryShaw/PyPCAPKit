@@ -43,14 +43,16 @@ actions/runner-images' READMEs at 2c421200c.
     The supported versions below 3.12.
 ``pypi``
     CPython, then PyPy, both tiers, on ``ubuntu-latest``.
-``conda``
-    The supported CPython versions, as one matrix axis.
+``conda``, ``conda-ktlo``
+    The CPython versions the conda jobs' ``conda-test`` installs the noarch
+    package on, both tiers, oldest first, as one matrix axis; and the KTLO ones
+    as the ``include`` entries marking their legs ``ktlo: true`` (#3133).
 ``engine-supported``, ``engine-ktlo``
     What ``engine-tests`` installs on ``ubuntu-latest``, one version per line,
     as ``actions/setup-python`` reads a list.
 ``pypi-wheels``, ``conda-builds``
-    The supported tier's wheel tags and conda build tags, which Create Release's
-    completeness checks count.
+    The supported tier's wheel tags, and :data:`CONDA_BUILD`, which Create
+    Release's completeness checks count.
 
 Each matrix has the shape of the one its job spelled out by hand at the commit
 ``tests/project/test_python_versions_1660.py`` pins -- a ``python-version`` axis,
@@ -106,6 +108,8 @@ TIERS = ('supported', 'ktlo', 'pre-release', 'experimental')
 RUNNER = re.compile(r'ubuntu-\d{2}\.04')
 #: Wheel tag prefix per implementation, as util/wheel_rename.py writes it.
 WHEEL_PREFIX = {'cpython': 'cp', 'pypy': 'pp'}
+#: The build tag of the one conda package, ``noarch: python``, whose build string is ``py_<number>`` (#3133).
+CONDA_BUILD = 'py'
 #: PyPCAP's and PyPCAPFile's ``python_version < '3.12'`` markers in pyproject.toml:
 #: from 3.12 the parity job would install neither and cover nothing new.
 PARITY_BELOW = (3, 12)
@@ -124,7 +128,7 @@ def key(version: 'str') -> 'tuple[int, int]':
 def experimental_only(impl: 'str', version: 'str') -> 'bool':
     """Whether ``version`` is a build the experimental tier holds, and no other (#1660).
 
-    Free-threaded CPython and GraalPy: no wheel tag, conda build or ``Compat`` leg
+    Free-threaded CPython and GraalPy: no wheel tag or ``Compat`` leg
     handles either, and the weekly job (:file:`util/update_python_versions.py`)
     has no source to compute a tier for one, so it keeps their lines as written.
 
@@ -145,7 +149,7 @@ def load(path: 'pathlib.Path' = FILE) -> 'dict[str, Any]':
 
     The experimental tier holds free-threaded CPython and GraalPy, and they hold
     no other (:func:`experimental_only`): promoting one to a blocking tier needs
-    its wheel, conda build and ``Compat`` leg first, so that fails here too. They
+    its wheel and ``Compat`` leg first, so that fails here too. They
     are listed after the other versions of their table, which keeps each tier's
     lines one run for the prose that cites them.
 
@@ -176,7 +180,7 @@ def load(path: 'pathlib.Path' = FILE) -> 'dict[str, Any]':
                                  'only; the weekly job computes the tier of every other version (#1660)')
             if entry['tier'] != 'experimental' and experimental_only(impl, version):
                 raise ValueError(f'{where}: free-threaded CPython and GraalPy are experimental only; give them '
-                                 'a wheel, a conda build and a Compat leg before a blocking tier (#1660)')
+                                 'a wheel and a Compat leg before a blocking tier (#1660)')
             if 'runner' in entry and not RUNNER.fullmatch(str(entry['runner'])):
                 raise ValueError(f'{where}: runner {entry["runner"]!r} is not an ubuntu-YY.04 image')
         rest = [version for version, entry in entries.items() if entry['tier'] != 'experimental']
@@ -370,11 +374,12 @@ OUTPUTS = {
     'pypcap-parity': parity_matrix,
     'pypcap-parity-ktlo': parity_ktlo_matrix,
     'pypi': pypi_matrix,
-    'conda': lambda data: tier(data, 'cpython', 'supported'),
+    'conda': lambda data: [*tier(data, 'cpython', 'ktlo'), *tier(data, 'cpython', 'supported')],
+    'conda-ktlo': lambda data: [{'python-version': version, 'ktlo': True} for version in tier(data, 'cpython', 'ktlo')],
     'engine-supported': lambda data: '\n'.join(on_latest(data, 'cpython', 'supported', 'engine-tests')),
     'engine-ktlo': lambda data: '\n'.join(on_latest(data, 'cpython', 'ktlo', 'engine-tests')),
     'pypi-wheels': lambda data: ' '.join(map(wheel_tag, pypi_matrix(data)['python-version'])),
-    'conda-builds': lambda data: ' '.join('py' + ''.join(map(str, key(v))) for v in tier(data, 'cpython', 'supported')),
+    'conda-builds': lambda data: CONDA_BUILD,
 }  # type: dict[str, Callable[[dict[str, Any]], Any]]
 
 

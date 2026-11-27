@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-"""#2060: a non-blocking Windows unit-test leg, ahead of the win-64 conda package's release.
+"""#2060: a non-blocking Windows unit-test leg, where the wheel and the noarch conda package install.
 
-The plan for #2060 asks that a Windows unit-test leg run before a win-64 package
-publishes. :file:`.github/workflows/experimental.yml` has ``windows``, a job of its own
+The plan for #2060 asked that a Windows unit-test leg run before a win-64 package
+published; the noarch package (#3133) installs there too. :file:`.github/workflows/experimental.yml` has ``windows``, a job of its own
 beside ``experimental``, whose Linux containment (cgroup scope, ``prlimit``, resource
 monitor, superseded watcher) cannot run on Windows.
 
 * :class:`TestTheLeg`: one leg on ``windows-latest``, on ``latest``, the newest
-  CPython the conda builds target, named ``Python <latest> on Windows (experimental)``,
+  supported CPython, named ``Python <latest> on Windows (experimental)``,
   gated as ``experimental`` is, and needed by nothing.
 * :class:`TestItNeverBlocks`: every step that runs is ``continue-on-error``, so no
   failure fails the job; the long steps have caps under the job's; ``Experimental
@@ -45,7 +45,7 @@ from tests.project.test_ktlo_legs_stay_green_1672 import (EXPERIMENTAL_REASON, J
                                                           SUMMARY_COPY, commands, interpolate, label, scenarios)
 from tests.project.test_python_versions_1660 import live_outputs, prose, resolve
 from tests.project.test_release_gates import evaluate_condition
-from util import check_suite_report, ci_timing
+from util import check_suite_report, ci_timing, python_versions
 
 if TYPE_CHECKING:
     from typing import Any
@@ -117,13 +117,13 @@ class TestTheLeg(unittest.TestCase):
         self.assertEqual(spec()['name'], JOB_NAME)
         self.assertNotIn('strategy', spec())
 
-    def test_it_runs_the_newest_cpython_the_conda_builds_target(self) -> None:
+    def test_it_runs_the_newest_supported_cpython(self) -> None:
         setup = uses('actions/setup-python')
         self.assertEqual(setup['with'], {'python-version': LATEST, 'cache': 'pip'})
         version = resolve(NAME, JOB, LATEST)
-        conda = json.loads(live_outputs()['conda'])
+        supported = python_versions.tier(python_versions.load(), 'cpython', 'supported')
         self.assertEqual(version, live_outputs()['latest'])
-        self.assertEqual(version, conda[-1])
+        self.assertEqual(version, max(supported, key=python_versions.key))
         self.assertEqual(interpolate(spec()['name'], {'needs': {'python-versions': {'outputs': {'latest': version}}}}),
                          f'Python {version} on Windows (experimental)')
 
