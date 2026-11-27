@@ -8,20 +8,32 @@ from pcapkit.protocols.data import Data, Protocol
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
+    from typing import Optional
 
     from typing_extensions import Literal
 
+    from pcapkit.const.icmpv6.nd_option import NDOption as Enum_NDOption
+    from pcapkit.const.icmpv6.router_preference import RouterPreference as Enum_RouterPreference
     from pcapkit.const.icmpv6.type import Type as Enum_Type
     from pcapkit.const.igmp.record_type import RecordType as Enum_RecordType
     from pcapkit.corekit.checksum.internet import ChecksumStatus
+    from pcapkit.corekit.infoclass import OrderedMultiInfo
+    from pcapkit.corekit.multidict import OrderedMultiDict
 
 __all__ = [
     'ICMPv6',
 
     'Unknown', 'DestinationUnreachable', 'PacketTooBig', 'TimeExceeded',
     'ParameterProblem', 'Echo', 'MLDv1', 'MLDv2Query', 'MLDv2Report',
+    'RouterSolicitation', 'RouterAdvertisement', 'NeighborSolicitation', 'NeighborAdvertisement',
+    'Redirect',
 
     'MulticastAddressRecord',
+
+    'NDOption', 'UnknownOption', 'LinkLayerAddressOption', 'PrefixInformationOption',
+    'RedirectedHeaderOption', 'MTUOption', 'AdvertisementIntervalOption',
+    'HomeAgentInformationOption', 'NonceOption', 'RouteInformationOption', 'RDNSSOption',
+    'RAFlagsExtensionOption', 'DNSSLOption', 'CaptivePortalOption', 'PREF64Option',
 ]
 
 
@@ -323,3 +335,435 @@ class MLDv2Report(ICMPv6):
         def __init__(self, type: 'Enum_Type', code: 'int', checksum: 'bytes', length: 'int',  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
                      version: 'Literal[2]', flags: 'int', num_records: 'int',
                      records: 'tuple[MulticastAddressRecord, ...]', data: 'bytes') -> 'None': ...
+
+
+@info_final
+class RouterSolicitation(ICMPv6):
+    """Data model for a Router Solicitation (type 133, :rfc:`4861#section-4.1`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Reserved, as captured.
+    reserved: 'bytes'
+    #: Options (:rfc:`4861#section-4.6`).
+    options: 'OrderedMultiInfo[Enum_NDOption, NDOption]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Type', code: 'int', checksum: 'bytes', length: 'int',  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+                     reserved: 'bytes', options: 'OrderedMultiDict[Enum_NDOption, NDOption]') -> 'None': ...
+
+
+@info_final
+class RouterAdvertisement(ICMPv6):
+    """Data model for a Router Advertisement (type 134, :rfc:`4861#section-4.2`).
+
+    Its flags are those IANA's Router Advertisement Flags assigns to the octet
+    (:rfc:`5175#section-3`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Current hop limit, zero for unspecified.
+    cur_hop_limit: 'int'
+    #: Managed Address Configuration flag (:rfc:`4861#section-4.2`).
+    m_flag: 'bool'
+    #: Other Configuration flag (:rfc:`4861#section-4.2`).
+    o_flag: 'bool'
+    #: Mobile IPv6 Home Agent flag (:rfc:`6275#section-7.1`).
+    h_flag: 'bool'
+    #: Default Router Preference (:rfc:`4191#section-2.2`).
+    prf: 'Enum_RouterPreference'
+    #: Neighbor Discovery Proxy flag (:rfc:`4389#section-4.1.3.3`).
+    p_flag: 'bool'
+    #: SNAC Router flag.
+    s_flag: 'bool'
+    #: Reserved, the octet's last bit, as captured.
+    reserved: 'int'
+    #: Router lifetime, in seconds; zero for no default router.
+    router_lifetime: 'int'
+    #: Reachable time, in milliseconds; zero for unspecified.
+    reachable_time: 'int'
+    #: Retransmission timer, in milliseconds; zero for unspecified.
+    retrans_timer: 'int'
+    #: Options (:rfc:`4861#section-4.6`).
+    options: 'OrderedMultiInfo[Enum_NDOption, NDOption]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Type', code: 'int', checksum: 'bytes', length: 'int',  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+                     cur_hop_limit: 'int', m_flag: 'bool', o_flag: 'bool', h_flag: 'bool',
+                     prf: 'Enum_RouterPreference', p_flag: 'bool', s_flag: 'bool', reserved: 'int',
+                     router_lifetime: 'int', reachable_time: 'int', retrans_timer: 'int',
+                     options: 'OrderedMultiDict[Enum_NDOption, NDOption]') -> 'None': ...
+
+
+@info_final
+class NeighborSolicitation(ICMPv6):
+    """Data model for a Neighbor Solicitation (type 135, :rfc:`4861#section-4.3`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Reserved, as captured.
+    reserved: 'bytes'
+    #: Target address.
+    target_address: 'IPv6Address'
+    #: Options (:rfc:`4861#section-4.6`).
+    options: 'OrderedMultiInfo[Enum_NDOption, NDOption]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Type', code: 'int', checksum: 'bytes', length: 'int',  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+                     reserved: 'bytes', target_address: 'IPv6Address',
+                     options: 'OrderedMultiDict[Enum_NDOption, NDOption]') -> 'None': ...
+
+
+@info_final
+class NeighborAdvertisement(ICMPv6):
+    """Data model for a Neighbor Advertisement (type 136, :rfc:`4861#section-4.4`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Router flag.
+    r_flag: 'bool'
+    #: Solicited flag.
+    s_flag: 'bool'
+    #: Override flag.
+    o_flag: 'bool'
+    #: Reserved, the 29 bits after the flags, as captured.
+    reserved: 'int'
+    #: Target address.
+    target_address: 'IPv6Address'
+    #: Options (:rfc:`4861#section-4.6`).
+    options: 'OrderedMultiInfo[Enum_NDOption, NDOption]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Type', code: 'int', checksum: 'bytes', length: 'int',  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+                     r_flag: 'bool', s_flag: 'bool', o_flag: 'bool', reserved: 'int',
+                     target_address: 'IPv6Address',
+                     options: 'OrderedMultiDict[Enum_NDOption, NDOption]') -> 'None': ...
+
+
+@info_final
+class Redirect(ICMPv6):
+    """Data model for a Redirect (type 137, :rfc:`4861#section-4.5`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Reserved, as captured.
+    reserved: 'bytes'
+    #: Target address, the better first hop.
+    target_address: 'IPv6Address'
+    #: Destination address, the one redirected.
+    destination_address: 'IPv6Address'
+    #: Options (:rfc:`4861#section-4.6`).
+    options: 'OrderedMultiInfo[Enum_NDOption, NDOption]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Type', code: 'int', checksum: 'bytes', length: 'int',  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+                     reserved: 'bytes', target_address: 'IPv6Address', destination_address: 'IPv6Address',
+                     options: 'OrderedMultiDict[Enum_NDOption, NDOption]') -> 'None': ...
+
+
+class NDOption(Data):
+    """Data model for ICMPv6 Neighbor Discovery options (:rfc:`4861#section-4.6`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Option type.
+    type: 'Enum_NDOption'
+    #: Option length, in octets, type and length included, eight times the
+    #: Length on the wire.
+    length: 'int'
+
+
+@info_final
+class UnknownOption(NDOption):
+    """Data model for an ND option of a type not decoded.
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Option data, as captured.
+    data: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin
+
+
+@info_final
+class LinkLayerAddressOption(NDOption):
+    """Data model for a Source or Target Link-layer Address option (:rfc:`4861#section-4.6.1`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Link-layer address, as captured, laid out and padded as the link's own
+    #: specification gives, e.g. six octets on Ethernet (:rfc:`2464#section-6`).
+    link_layer_address: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', link_layer_address: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+
+
+@info_final
+class PrefixInformationOption(NDOption):
+    """Data model for a Prefix Information option (:rfc:`4861#section-4.6.2`).
+
+    Its flags are those IANA's Prefix Information Option Flags assigns
+    (:rfc:`8425`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Prefix length, in bits.
+    prefix_length: 'int'
+    #: On-link flag (:rfc:`4861#section-4.6.2`).
+    l_flag: 'bool'
+    #: Autonomous Address Configuration flag (:rfc:`4861#section-4.6.2`).
+    a_flag: 'bool'
+    #: Router Address flag (:rfc:`6275#section-7.2`).
+    r_flag: 'bool'
+    #: DHCPv6-PD Preferred flag (:rfc:`9762#section-5`).
+    p_flag: 'bool'
+    #: Reserved1, the low-order 4 bits of the flags octet, as captured.
+    reserved1: 'int'
+    #: Valid lifetime, in seconds; all ones for infinity.
+    valid_lifetime: 'int'
+    #: Preferred lifetime, in seconds; all ones for infinity.
+    preferred_lifetime: 'int'
+    #: Reserved2, as captured.
+    reserved2: 'bytes'
+    #: Prefix.
+    prefix: 'IPv6Address'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', prefix_length: 'int',  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+                     l_flag: 'bool', a_flag: 'bool', r_flag: 'bool', p_flag: 'bool', reserved1: 'int',
+                     valid_lifetime: 'int', preferred_lifetime: 'int', reserved2: 'bytes',
+                     prefix: 'IPv6Address') -> 'None': ...
+
+
+@info_final
+class RedirectedHeaderOption(NDOption):
+    """Data model for a Redirected Header option (:rfc:`4861#section-4.6.3`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Reserved, as captured.
+    reserved: 'bytes'
+    #: As much of the redirected packet, from its IP header, as fits.
+    data: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', reserved: 'bytes', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+
+
+@info_final
+class MTUOption(NDOption):
+    """Data model for an MTU option (:rfc:`4861#section-4.6.4`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Reserved, as captured.
+    reserved: 'bytes'
+    #: Recommended MTU of the link.
+    mtu: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', reserved: 'bytes', mtu: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+
+
+@info_final
+class AdvertisementIntervalOption(NDOption):
+    """Data model for an Advertisement Interval option (:rfc:`6275#section-7.3`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Reserved, as captured.
+    reserved: 'bytes'
+    #: Largest time between unsolicited Router Advertisements, in milliseconds.
+    interval: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', reserved: 'bytes', interval: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+
+
+@info_final
+class HomeAgentInformationOption(NDOption):
+    """Data model for a Home Agent Information option (:rfc:`6275#section-7.4`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Reserved, as captured.
+    reserved: 'bytes'
+    #: Home agent preference; a higher value is more preferable.
+    preference: 'int'
+    #: Home agent lifetime, in seconds.
+    lifetime: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', reserved: 'bytes', preference: 'int',  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+                     lifetime: 'int') -> 'None': ...
+
+
+@info_final
+class NonceOption(NDOption):
+    """Data model for a Nonce option (:rfc:`3971#section-5.3.2`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Nonce, as captured.
+    nonce: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', nonce: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+
+
+@info_final
+class RouteInformationOption(NDOption):
+    """Data model for a Route Information option (:rfc:`4191#section-2.3`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Prefix length, in bits.
+    prefix_length: 'int'
+    #: Reserved, the high-order 3 bits of the octet holding :attr:`prf`.
+    reserved1: 'int'
+    #: Route Preference.
+    prf: 'Enum_RouterPreference'
+    #: Reserved, the low-order 3 bits of the octet holding :attr:`prf`.
+    reserved2: 'int'
+    #: Route lifetime, in seconds; all ones for infinity.
+    lifetime: 'int'
+    #: Prefix, the 0, 8 or 16 octets the Length leaves, zero-extended.
+    prefix: 'IPv6Address'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', prefix_length: 'int', reserved1: 'int',  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+                     prf: 'Enum_RouterPreference', reserved2: 'int', lifetime: 'int',
+                     prefix: 'IPv6Address') -> 'None': ...
+
+
+@info_final
+class RDNSSOption(NDOption):
+    """Data model for a Recursive DNS Server option (:rfc:`8106#section-5.1`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Reserved, as captured.
+    reserved: 'bytes'
+    #: Lifetime, in seconds; all ones for infinity.
+    lifetime: 'int'
+    #: Addresses of the recursive DNS servers.
+    addresses: 'tuple[IPv6Address, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', reserved: 'bytes', lifetime: 'int',  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+                     addresses: 'tuple[IPv6Address, ...]') -> 'None': ...
+
+
+@info_final
+class RAFlagsExtensionOption(NDOption):
+    """Data model for an RA Flags Extension option (:rfc:`5175#section-4`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Bits 8 onwards of IANA's Router Advertisement Flags, as captured;
+    #: none is assigned but to Private Experimentation.
+    bits: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', bits: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+
+
+@info_final
+class DNSSLOption(NDOption):
+    """Data model for a DNS Search List option (:rfc:`8106#section-5.2`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Reserved, as captured.
+    reserved: 'bytes'
+    #: Lifetime, in seconds; all ones for infinity.
+    lifetime: 'int'
+    #: Domain names, in presentation form (:rfc:`1035#section-5.1`).
+    domain_names: 'tuple[str, ...]'
+    #: Octets past the last name, as captured; zeros for a conformant sender.
+    padding: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', reserved: 'bytes', lifetime: 'int',  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+                     domain_names: 'tuple[str, ...]', padding: 'bytes') -> 'None': ...
+
+
+@info_final
+class CaptivePortalOption(NDOption):
+    """Data model for a Captive-Portal option (:rfc:`8910#section-2.3`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: URI of the captive portal API endpoint, the octets ahead of the first NUL.
+    uri: 'bytes'
+    #: NUL padding, from the first NUL on, as captured.
+    padding: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', uri: 'bytes', padding: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+
+
+@info_final
+class PREF64Option(NDOption):
+    """Data model for a PREF64 option (:rfc:`8781#section-4`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Scaled Lifetime, in units of 8 seconds, as on the wire.
+    scaled_lifetime: 'int'
+    #: Lifetime, in seconds, decoded from :attr:`scaled_lifetime`
+    #: (:rfc:`8781#section-4.1`).
+    lifetime: 'int'
+    #: Prefix Length Code, as on the wire.
+    plc: 'int'
+    #: Prefix length, in bits, decoded from :attr:`plc`; :data:`None` for a
+    #: code :rfc:`8781#section-4` assigns none.
+    prefix_length: 'Optional[int]'
+    #: Prefix, its highest 96 bits as carried and the rest zero.
+    prefix: 'IPv6Address'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', scaled_lifetime: 'int', lifetime: 'int',  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+                     plc: 'int', prefix_length: 'Optional[int]', prefix: 'IPv6Address') -> 'None': ...

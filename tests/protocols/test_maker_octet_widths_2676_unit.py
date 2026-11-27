@@ -41,6 +41,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 EXEMPT = {
     ('pcapkit/protocols/application/httpv2/protocol.py', '_make_http_ping', 'data'):
         'its own length check refuses any width but eight',
+    ('pcapkit/protocols/internet/icmpv6/protocol.py', '_make_opt_pref64', 'prefix'):
+        'the first 12 of the 16 octets of the IPv6 address it parses, so always 12',
     ('pcapkit/protocols/internet/mh/protocol.py', '_make_opt_mn_lla_iid', 'iid'):
         'its own length check refuses any width but eight',
     ('pcapkit/protocols/link/linux_sll1/protocol.py', 'make', 'link_addr'):

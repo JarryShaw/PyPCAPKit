@@ -19,5 +19,6 @@ other: import each constant from its own module.
    :maxdepth: 2
 
    capture
+   domain_name
    ipheader
    tcpheader

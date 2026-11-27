@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.hip.parameter import Parameter as HIP_Parameter
 from pcapkit.const.icmp.type import Type as ICMPv4_Type
+from pcapkit.const.icmpv6.nd_option import NDOption as ICMPv6_NDOption
 from pcapkit.const.icmpv6.type import Type as ICMPv6_Type
 from pcapkit.const.ipv4.option_number import OptionNumber as IPv4_OptionNumber
 from pcapkit.const.ipv6.option import Option as IPv6_Option
@@ -36,6 +37,7 @@ from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 from pcapkit.protocols.internet.hopopt.schema import Option as Schema_HOPOPT_Option
 from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
+from pcapkit.protocols.internet.icmpv6.schema import NDOption as Schema_ICMPv6_NDOption
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.protocols.internet.ipv4.protocol import IPv4
 from pcapkit.protocols.internet.ipv4.schema import Option as Schema_IPv4_Option
@@ -62,6 +64,9 @@ if TYPE_CHECKING:
     from pcapkit.protocols.internet.hopopt.protocol import \
         OptionConstructor as HOPOPT_OptionConstructor
     from pcapkit.protocols.internet.hopopt.protocol import OptionParser as HOPOPT_OptionParser
+    from pcapkit.protocols.internet.icmpv6.protocol import \
+        OptionConstructor as ICMPv6_OptionConstructor
+    from pcapkit.protocols.internet.icmpv6.protocol import OptionParser as ICMPv6_OptionParser
     from pcapkit.protocols.internet.ipv4.protocol import OptionConstructor as IPv4_OptionConstructor
     from pcapkit.protocols.internet.ipv4.protocol import OptionParser as IPv4_OptionParser
     from pcapkit.protocols.internet.ipv6_opts.protocol import \
@@ -82,7 +87,7 @@ if TYPE_CHECKING:
 __all__ = [
     'register_transtype',
     'register_ipx',
-    'register_icmp_type',
+    'register_icmp_type', 'register_icmpv6_option',
     'register_ipv4_option', 'register_hip_parameter', 'register_hopopt_option',
     'register_ipv6_opts_option', 'register_ipv6_route_routing',
     'register_mh_message', 'register_mh_option', 'register_mh_extension',
@@ -237,6 +242,45 @@ def register_icmp_type(code: 'ICMPv4_Type | ICMPv6_Type',
 
     protocol.register_type(code, meth)
     logger.debug('registered ICMP type parser: %s', code.name)
+
+
+# NOTE: pcapkit.protocols.internet.icmpv6.protocol.ICMPv6.__option__
+def register_icmpv6_option(code: 'ICMPv6_NDOption',
+                           meth: 'str | tuple[ICMPv6_OptionParser, ICMPv6_OptionConstructor]', *,
+                           schema: 'Optional[Type[Schema_ICMPv6_NDOption]]' = None) -> 'None':
+    """Register a Neighbor Discovery option parser.
+
+    The function will register the given option parser to the
+    :data:`pcapkit.protocols.internet.icmpv6.protocol.ICMPv6.__option__` registry.
+
+    Args:
+        code: :class:`~pcapkit.protocols.internet.icmpv6.protocol.ICMPv6` ND
+            option type as in :class:`~pcapkit.const.icmpv6.nd_option.NDOption`.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the option. A name names the
+            ``_read_opt_*`` and ``_make_opt_*`` methods, and has to name
+            an existing ``_read_opt_*`` one.
+        schema: :class:`~pcapkit.protocols.schema.Schema` class for the option.
+            It should be a subclass of :class:`pcapkit.protocols.internet.icmpv6.schema.NDOption`.
+
+    Raises:
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.icmpv6.nd_option.NDOption`
+            member, e.g. a member of another enum, or ``meth``
+            is a name with no matching ``_read_opt_*`` method, or neither a name
+            nor a pair of two callables.
+
+    .. versionadded:: 1.9.0
+
+    """
+    _check_code(code, ICMPv6_NDOption, ICMPv6)
+    _check_meth(meth, ICMPv6)
+    if isinstance(meth, str) and not hasattr(ICMPv6, f'_read_opt_{meth}'):
+        raise RegistryError('method must be a valid ICMPv6 ND option parser function')
+
+    ICMPv6.register_option(code, meth)
+    if schema is not None:
+        Schema_ICMPv6_NDOption.register(code, schema)
+    logger.debug('registered ICMPv6 ND option parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.internet.hip.protocol.HIP.__parameter__

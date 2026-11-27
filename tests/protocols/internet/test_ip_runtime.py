@@ -40,9 +40,9 @@ class InternetProtocolRuntimeTests(unittest.TestCase):
     def test_ipv6_icmpv6_payload_dispatches_to_icmpv6(self) -> None:
         """``IPv6_ICMP`` (58) dispatches to :class:`ICMPv6`.
 
-        This frame's message (Neighbor Solicitation, type 135) is Neighbor
-        Discovery (:rfc:`4861`), which is unimplemented, so it is
-        :class:`~pcapkit.protocols.internet.icmpv6.data.Unknown`.
+        This frame's message is a Neighbor Solicitation, type 135 (:rfc:`4861`),
+        so it is :class:`~pcapkit.protocols.internet.icmpv6.data.NeighborSolicitation`
+        (#2934).
         """
         extractor = self._extract('ipv6.pcap')
         frame = extractor.frame[2]
@@ -57,7 +57,7 @@ class InternetProtocolRuntimeTests(unittest.TestCase):
         self.assertEqual(ipv6.info.next.name, 'IPv6_ICMP')
         self.assertEqual(type(icmpv6).__name__, 'ICMPv6')
         self.assertEqual(icmpv6.info.type, 135)
-        self.assertEqual(type(icmpv6.info).__name__, 'Unknown')
+        self.assertEqual(type(icmpv6.info).__name__, 'NeighborSolicitation')
 
     def test_ipv6_udp_packet_exposes_multicast_and_reply_addresses(self) -> None:
         extractor = self._extract('stream.pcap')

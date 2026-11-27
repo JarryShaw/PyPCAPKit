@@ -18,6 +18,7 @@ from it load no other group: import each helper from its own module.
    :maxdepth: 2
 
    byteorder
+   domain_name
    extlen
    ipaddress
    jumbogram

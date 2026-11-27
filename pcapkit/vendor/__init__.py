@@ -164,7 +164,7 @@ __all__ = [
     'ICMP_Type', 'ICMP_DestinationUnreachableCode', 'ICMP_TimeExceededCode', 'ICMP_ParameterProblemCode',
     # ICMPv6
     'ICMPv6_Type', 'ICMPv6_DestinationUnreachableCode', 'ICMPv6_TimeExceededCode',
-    'ICMPv6_ParameterProblemCode',
+    'ICMPv6_ParameterProblemCode', 'ICMPv6_NDOption', 'ICMPv6_RouterPreference',
     # IEEE 802.11
     'IEEE802_11_Type', 'IEEE802_11_ManagementSubtype', 'IEEE802_11_ControlSubtype',
     'IEEE802_11_DataSubtype', 'IEEE802_11_ExtensionSubtype',

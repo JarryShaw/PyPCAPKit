@@ -49,6 +49,7 @@ from pcapkit.const.dns.rr_class import RRClass as Enum_RRClass
 from pcapkit.const.dns.rr_type import RRType as Enum_RRType
 from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.corekit.schema.domain_name import make_name, name_to_text, read_name, text_to_labels
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.sentinels import NO_VALUE, NoValueType
 from pcapkit.protocols.application.application import Application
@@ -75,8 +76,7 @@ from pcapkit.protocols.application.dns.data import Question as Data_Question
 from pcapkit.protocols.application.dns.data import ResourceRecord as Data_ResourceRecord
 from pcapkit.protocols.application.dns.data import TCPKeepalive as Data_TCPKeepalive
 from pcapkit.protocols.application.dns.schema import DNS as Schema_DNS
-from pcapkit.protocols.application.dns.schema import (compress_name, make_name, name_to_text,
-                                                      read_name, record_name, text_to_labels)
+from pcapkit.protocols.application.dns.schema import compress_name, record_name
 from pcapkit.utilities.exceptions import CaughtByCaller, ProtocolError
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
@@ -1544,7 +1544,7 @@ class DNS(Application[Data_DNS, Schema_DNS], schema=Schema_DNS, data=Data_DNS):
             The name, and the offset just past it.
 
         Raises:
-            ProtocolError: As :func:`~pcapkit.protocols.application.dns.schema.read_name`
+            ProtocolError: As :func:`~pcapkit.corekit.schema.domain_name.read_name`
                 raises it, or if the name ends past ``limit``.
 
         """

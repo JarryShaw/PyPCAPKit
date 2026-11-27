@@ -61,9 +61,15 @@ MLD_SOURCE = bytes.fromhex('20010db8' + '0' * 22 + '01')
 #: An MLDv1 Report or Done: Maximum Response Delay, Reserved, then the group (#2812).
 MLDV1 = bytes.fromhex('1234' '0000') + MLD_GROUP
 
+#: A Source (1) or Target (2) Link-layer Address option on Ethernet, and the
+#: neighbor and the destination a Redirect names (#2934).
+ND_LLA = bytes.fromhex('01' '01' '001122334455')
+ND_TARGET = bytes.fromhex('fe80' + '0' * 26 + '01')
+ND_DESTINATION = bytes.fromhex('20010db8' + '0' * 22 + '01')
+
 #: ICMPv6 type -> the data model it parses into, and its body after the 4-octet
 #: header (:rfc:`4443#section-3`, :rfc:`4443#section-4`, :rfc:`2710#section-3`,
-#: :rfc:`9777#section-5`).
+#: :rfc:`9777#section-5`, :rfc:`4861#section-4`).
 ICMPV6 = {
     1: ('DestinationUnreachable', bytes(4) + QUOTED6),        # 4 unused octets
     2: ('PacketTooBig', (1280).to_bytes(4, 'big') + QUOTED6),  # 32-bit MTU
@@ -76,6 +82,14 @@ ICMPV6 = {
           + MLD_SOURCE),
     131: ('MLDv1', MLDV1),                                     # Multicast Listener Report
     132: ('MLDv1', MLDV1),                                     # Multicast Listener Done
+    133: ('RouterSolicitation', bytes(4) + ND_LLA),            # Reserved, options
+    # Cur Hop Limit 64, M and Prf 1 (High), Router Lifetime, Reachable Time, Retrans Timer.
+    134: ('RouterAdvertisement', bytes.fromhex('40' '88' '0708' '00007530' '000003e8') + ND_LLA),
+    135: ('NeighborSolicitation', bytes(4) + ND_TARGET + ND_LLA),  # Reserved, target
+    # R and S, then 29 reserved bits; a Target Link-layer Address option.
+    136: ('NeighborAdvertisement', bytes.fromhex('c0000000') + ND_TARGET + b'\x02' + ND_LLA[1:]),
+    # Reserved, target, destination; a Redirected Header option of 6 reserved octets.
+    137: ('Redirect', bytes(4) + ND_TARGET + ND_DESTINATION + bytes.fromhex('0407') + bytes(6) + QUOTED6),
     # Flags, one record: type 4, one word of aux data, one source.
     143: ('MLDv2Report', bytes.fromhex('8000' '0001' '04' '01' '0001') + MLD_GROUP + MLD_SOURCE
           + b'AUX!'),

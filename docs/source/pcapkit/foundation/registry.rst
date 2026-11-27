@@ -155,6 +155,8 @@ Internet Layer Registries
 
 .. autofunction:: pcapkit.foundation.registry.protocols.internet.register_icmp_type
 
+.. autofunction:: pcapkit.foundation.registry.protocols.internet.register_icmpv6_option
+
 .. autofunction:: pcapkit.foundation.registry.protocols.internet.register_hip_parameter
 
 .. autofunction:: pcapkit.foundation.registry.protocols.internet.register_hopopt_option

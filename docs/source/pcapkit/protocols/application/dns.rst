@@ -164,18 +164,23 @@ Type Stubs
    :members:
    :show-inheritance:
 
-Domain Name Codec
-~~~~~~~~~~~~~~~~~
+Auxiliary Functions
+~~~~~~~~~~~~~~~~~~~
 
-The codec works on octets and labels, with no protocol state, so another
-protocol carrying domain names can call it.
+:func:`~pcapkit.protocols.application.dns.schema.compress_name` and
+:func:`~pcapkit.protocols.application.dns.schema.record_name` lay a message's names
+out for the codec of :mod:`pcapkit.corekit.schema.domain_name`.
 
-.. autofunction:: pcapkit.protocols.application.dns.schema.read_name
-.. autofunction:: pcapkit.protocols.application.dns.schema.make_name
+.. versionremoved:: 1.9.0
+
+   ``pcapkit.protocols.application.dns.schema.read_name``,
+   ``pcapkit.protocols.application.dns.schema.make_name``,
+   ``pcapkit.protocols.application.dns.schema.name_to_text`` and
+   ``pcapkit.protocols.application.dns.schema.text_to_labels``, now in
+   :mod:`pcapkit.corekit.schema.domain_name` (:issue:`2934`).
+
 .. autofunction:: pcapkit.protocols.application.dns.schema.compress_name
 .. autofunction:: pcapkit.protocols.application.dns.schema.record_name
-.. autofunction:: pcapkit.protocols.application.dns.schema.name_to_text
-.. autofunction:: pcapkit.protocols.application.dns.schema.text_to_labels
 .. autofunction:: pcapkit.protocols.application.dns.schema.dns_body_length
 
 Data Models
@@ -286,6 +291,9 @@ Constants
 
 .. module:: pcapkit.protocols.application.dns.const
 
-.. autodata:: pcapkit.protocols.application.dns.const.HEADER_LENGTH
+.. versionremoved:: 1.9.0
 
-.. autodata:: pcapkit.protocols.application.dns.const.POINTER_LIMIT
+   ``pcapkit.protocols.application.dns.const.POINTER_LIMIT``, now
+   :data:`pcapkit.corekit.const.domain_name.POINTER_LIMIT` (:issue:`2934`).
+
+.. autodata:: pcapkit.protocols.application.dns.const.HEADER_LENGTH
