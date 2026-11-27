@@ -21,17 +21,21 @@ message as ``data`` and an option, sub-option or request in its list. Every case
 builds its own octets in memory and reads no capture; the protocol classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`.
 
+The checks the ``*_make_codes_2594`` modules share run from
+:class:`~tests.protocols._make_codes.MakeCodeChecks` over this module's own table (#3148).
+
 """
 # Deferring these is the design: each build runs after the per-class re-import.
 # pylint: disable=import-outside-toplevel
 
+import functools
 import importlib
-import inspect
 import io
 import unittest
 from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
+from tests.protocols._make_codes import Case, MakeCodeChecks, RefusalChecks, removed_keywords
 
 if TYPE_CHECKING:
     from typing import Any
@@ -215,8 +219,10 @@ def load(spec: 'str') -> 'type':
     return getattr(importlib.import_module(module), name)
 
 
-class MHMakeCodeTests(unittest.TestCase):
+class MHMakeCodeTests(MakeCodeChecks, unittest.TestCase):
     """Each enumeration field of MH's makers, one row at a time."""
+
+    ONE_BIT = ('_make_opt_ipv4_dhcp.mode',)
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -259,50 +265,9 @@ class MHMakeCodeTests(unittest.TestCase):
         name, key, sub_spec, sub = target
         return getattr(getattr(info.options[Option[name]], key)[load(sub_spec)[sub]], field)
 
-    def assertRefused(self, row: 'tuple', value: 'object') -> None:
-        """The ``row`` field refuses ``value`` with a ProtocolError naming it."""
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        with self.assertRaises(ProtocolError) as caught:
-            self._build(row, value)
-        self.assertEqual(str(caught.exception), f'MH: invalid {row[7]}: {value!r}')
-
-    def test_a_code_too_wide_for_its_field_is_refused(self) -> None:
-        for row in ROWS:
-            with self.subTest(row=row[0]):
-                self.assertRefused(row, 1 << row[6])
-
-    def test_a_bool_is_refused_for_a_field_wider_than_one_bit(self) -> None:
-        for row in ROWS:
-            with self.subTest(row=row[0]):
-                if row[6] > 1:
-                    self.assertRefused(row, True)
-                else:
-                    # A one-bit field takes a flag, as Protocol._make_uint lets it.
-                    self.assertEqual(self._build(row, True), self._build(row, 1))
-
-    def test_a_name_is_refused(self) -> None:
-        for row in ROWS:
-            with self.subTest(row=row[0]):
-                self.assertRefused(row, row[5])
-
-    def test_a_member_and_its_code_build_the_same_octets(self) -> None:
-        for row in ROWS:
-            member = load(row[4])[row[5]]
-            with self.subTest(row=row[0]):
-                octets = self._build(row, member)
-                self.assertEqual(self._build(row, int(member)), octets)
-                self.assertEqual(self._read(row, octets), member)
-
-    def test_a_name_resolved_first_builds_the_members_octets(self) -> None:
-        # The path the docstrings give a caller holding the name.
-        from pcapkit.protocols.internet.mh.protocol import MH
-
-        for row in ROWS:
-            namespace = load(row[4])
-            with self.subTest(row=row[0]):
-                self.assertEqual(self._build(row, MH.resolve_index(row[5], namespace=namespace)),
-                                 self._build(row, namespace[row[5]]))
+    def cases(self) -> 'list[Case]':
+        return [Case(row[0], row[6], load(row[4])[row[5]], functools.partial(self._build, row),
+                     f'MH: invalid {row[7]}: ', read=functools.partial(self._read, row)) for row in ROWS]
 
     def test_the_widest_code_builds_parses_back_and_rebuilds(self) -> None:
         # #2594: the field width decides what is refused, so the widest code
@@ -347,18 +312,10 @@ class MHMakeCodeTests(unittest.TestCase):
         """#2594: no maker's signature declares a ``*_default``, ``*_namespace`` or ``*_reversed`` keyword."""
         from pcapkit.protocols.internet.mh.protocol import MH
 
-        for name in sorted(vars(MH)):
-            if name != 'make' and not name.startswith('_make_'):
-                continue
-            func = getattr(MH, name)
-            if not callable(func):
-                continue
-            for param in inspect.signature(func).parameters:
-                with self.subTest(maker=name, argument=param):
-                    self.assertFalse(param.endswith(('_default', '_namespace', '_reversed')))
+        self.assertEqual(removed_keywords(MH), [])
 
 
-class MHListTypeTests(unittest.TestCase):
+class MHListTypeTests(RefusalChecks, unittest.TestCase):
     """The type of each item of an option, sub-option, attribute or extension list."""
 
     def setUp(self) -> None:
@@ -410,20 +367,6 @@ class MHListTypeTests(unittest.TestCase):
             'parsed': lambda value: self._octets(row, OrderedMultiDict([(value, item)])),
         }
 
-    def assertRefused(self, row: 'tuple', build: 'Any', value: 'object') -> None:
-        """``build(value)`` raises a ProtocolError naming the ``row`` field, and nothing else."""
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        message = f'MH: invalid {row[5]}: {value!r}'
-        try:
-            octets = build(value)
-        except ProtocolError as error:
-            self.assertEqual(str(error), message)
-        except Exception as error:  # pylint: disable=broad-except
-            self.fail(f'{value!r} raised {type(error).__name__}: {error}; expected {message}')
-        else:
-            self.fail(f'{value!r} was accepted, building {octets.hex()}; expected {message}')
-
     def test_a_type_the_field_cannot_carry_is_refused(self) -> None:
         # #2594: a type checked as the field width checks it, before anything
         # reads it as a registry key or a padding code.
@@ -431,7 +374,7 @@ class MHListTypeTests(unittest.TestCase):
             for form, build in self._builders(row).items():
                 for value in (1 << row[4], -1, True, row[3]):
                     with self.subTest(maker=row[0], form=form, value=value):
-                        self.assertRefused(row, build, value)
+                        self.assertRefused(build, value, f'MH: invalid {row[5]}: ')
 
     def test_the_widest_type_builds_parses_back_and_rebuilds(self) -> None:
         from pcapkit.protocols.internet.mh.protocol import MH

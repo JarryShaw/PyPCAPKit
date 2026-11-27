@@ -16,6 +16,9 @@ width of its field. ``make()`` is called directly, so that a value its own
 checks let through cannot pass as refused because the parse of the octets
 refuses them.
 
+The checks the ``*_make_codes_2594`` modules share run from
+:class:`~tests.protocols._make_codes.MakeCodeChecks` over this module's own table (#3148).
+
 """
 from __future__ import annotations
 
@@ -26,6 +29,7 @@ from typing import TYPE_CHECKING, NamedTuple
 from unittest import mock
 
 from tests._support import reimport_once_per_class
+from tests.protocols._make_codes import Case, MakeCodeChecks
 
 if TYPE_CHECKING:
     from typing import Any, Callable
@@ -166,26 +170,27 @@ FIELDS = (
 )
 
 
-class ApplicationMakeCodeTests(unittest.TestCase):
+class ApplicationMakeCodeTests(MakeCodeChecks, unittest.TestCase):
     """Each field refuses what it cannot carry, and builds a member and its code alike."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
-        from pcapkit.utilities.exceptions import ProtocolError
 
-        self.ProtocolError = ProtocolError
+    def cases(self) -> 'list[Case]':
+        return [Case(f'{row.maker} {row.field}', row.bits, _member(row.enum, row.member), row.build,
+                     refused=row.refused, row=row,
+                     skip=None if row.encoder is None or HAS_PYCRATE else 'pycrate not installed')
+                for row in FIELDS]
 
-    def assertRefused(self, row: 'Field', value: 'Any') -> None:  # pylint: disable=invalid-name
-        """``row``'s maker raises ProtocolError for ``value``, before any encoder runs."""
-        if row.encoder is None:
-            with self.assertRaises(self.ProtocolError):
-                row.build(value)
+    def assertFieldRefuses(self, case: 'Case', value: 'Any') -> None:  # pylint: disable=invalid-name
+        """``case``'s maker refuses ``value``, before any encoder runs."""
+        if case.row.encoder is None:
+            super().assertFieldRefuses(case, value)
             return
         # NOTE: the encoder's own failure is a ProtocolError too, so it must not be reached.
-        module = importlib.import_module(row.encoder)
-        with mock.patch.object(module, 'load_pycrate', side_effect=AssertionError('reached the encoder')), \
-                self.assertRaises(self.ProtocolError):
-            row.build(value)
+        module = importlib.import_module(case.row.encoder)
+        with mock.patch.object(module, 'load_pycrate', side_effect=AssertionError('reached the encoder')):
+            super().assertFieldRefuses(case, value)
 
     def test_rows_name_real_members(self) -> None:
         for row in FIELDS:
@@ -194,31 +199,6 @@ class ApplicationMakeCodeTests(unittest.TestCase):
                 member = getattr(enum, row.member)
                 self.assertIsInstance(member, enum)
                 self.assertLess(int(member), 1 << row.bits)
-
-    def test_code_past_the_field_is_refused(self) -> None:
-        for row in FIELDS:
-            for code in (1 << row.bits,) + row.refused:
-                with self.subTest(maker=row.maker, field=row.field, code=code):
-                    self.assertRefused(row, code)
-
-    def test_bool_is_refused_for_a_wider_field(self) -> None:
-        for row in FIELDS:
-            if row.bits > 1:
-                with self.subTest(maker=row.maker, field=row.field):
-                    self.assertRefused(row, True)
-
-    def test_name_is_refused(self) -> None:
-        for row in FIELDS:
-            with self.subTest(maker=row.maker, field=row.field, name=row.member):
-                self.assertRefused(row, row.member)
-
-    def test_member_and_code_build_the_same_octets(self) -> None:
-        for row in FIELDS:
-            with self.subTest(maker=row.maker, field=row.field):
-                if row.encoder is not None and not HAS_PYCRATE:
-                    self.skipTest('pycrate not installed')
-                member = _member(row.enum, row.member)
-                self.assertEqual(row.build(member), row.build(int(member)))
 
 
 if __name__ == '__main__':

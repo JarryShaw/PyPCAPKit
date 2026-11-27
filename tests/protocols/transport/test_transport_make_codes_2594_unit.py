@@ -19,15 +19,19 @@ those codes are.
 
 Every case builds its own octets, so this belongs to the unit tier.
 
+The checks the ``*_make_codes_2594`` modules share run from
+:class:`~tests.protocols._make_codes.MakeCodeChecks` over this module's own table (#3148).
+
 """
 from __future__ import annotations
 
+import functools
 import importlib
-import re
 import unittest
 from typing import TYPE_CHECKING, NamedTuple
 
 from tests._support import reimport_once_per_class
+from tests.protocols._make_codes import Case, MakeCodeChecks
 
 if TYPE_CHECKING:
     from typing import Any
@@ -77,8 +81,10 @@ FIELDS = (
 OPTION_LISTS = ('TCP._make_tcp_options', 'DCCP._make_dccp_options')
 
 
-class EnumerationFieldTests(unittest.TestCase):
+class EnumerationFieldTests(MakeCodeChecks, unittest.TestCase):
     """Each field in :data:`FIELDS` takes a member or a code, and refuses the rest."""
+
+    NEGATIVE = True
 
     def setUp(self) -> 'None':
         reimport_once_per_class(self)
@@ -88,6 +94,11 @@ class EnumerationFieldTests(unittest.TestCase):
         """The enumeration ``field`` holds."""
         module, name = field.enum.split(':')
         return getattr(importlib.import_module(f'pcapkit.const.{module}'), name)
+
+    def cases(self) -> 'list[Case]':
+        return [Case(f'{field.maker} {field.keyword}', field.bits, self.enumeration(field)[field.member],
+                     functools.partial(self.build, field), f"{field.maker.split('.')[0]}: invalid {field.name}: ",
+                     row=field) for field in FIELDS]
 
     @staticmethod
     def build(field: 'Field', value: 'Any') -> 'bytes':
@@ -129,56 +140,6 @@ class EnumerationFieldTests(unittest.TestCase):
             return TCP.from_fields(options=options).data
         return DCCP.from_fields(type=PacketType.DCCP_Ack, ack=1, checksum=b'\x00\x00', options=options).data
 
-    def assertRefused(self, field: 'Field', value: 'Any', options: 'Any' = None) -> 'None':  # pylint: disable=invalid-name
-        """Building ``value`` in ``field``, or the option list ``options``, raises the ``ProtocolError`` naming it."""
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        alias = field.maker.split('.')[0]
-        try:
-            if options is None:
-                self.build(field, value)
-            else:
-                self.build_list(field, options)
-        except ProtocolError as error:
-            self.assertRegex(str(error), rf'^{alias}: invalid {re.escape(field.name)}: {re.escape(repr(value))}$')
-        except Exception as error:  # pylint: disable=broad-except
-            self.fail(f'{field.maker} {field.keyword}={value!r} raised {type(error).__name__}, '
-                      f'not ProtocolError: {error}')
-        else:
-            self.fail(f'{field.maker} {field.keyword}={value!r} was accepted')
-
-    def test_a_code_past_the_field_is_refused(self) -> 'None':
-        for field in FIELDS:
-            with self.subTest(maker=field.maker, field=field.keyword, value=1 << field.bits):
-                self.assertRefused(field, 1 << field.bits)
-
-    def test_a_negative_code_is_refused(self) -> 'None':
-        for field in FIELDS:
-            with self.subTest(maker=field.maker, field=field.keyword):
-                self.assertRefused(field, -1)
-
-    def test_a_bool_is_refused_for_a_field_wider_than_one_bit(self) -> 'None':
-        for field in FIELDS:
-            if field.bits > 1:
-                with self.subTest(maker=field.maker, field=field.keyword):
-                    self.assertRefused(field, True)
-
-    def test_a_name_is_refused_and_resolve_index_resolves_it(self) -> 'None':
-        from pcapkit.protocols.protocol import Protocol
-
-        for field in FIELDS:
-            namespace = self.enumeration(field)
-            with self.subTest(maker=field.maker, field=field.keyword, value=field.member):
-                self.assertRefused(field, field.member)
-                self.assertEqual(self.build(field, Protocol.resolve_index(field.member, namespace=namespace)),
-                                 self.build(field, namespace[field.member]))
-
-    def test_a_member_and_its_code_build_the_same_octets(self) -> 'None':
-        for field in FIELDS:
-            member = self.enumeration(field)[field.member]
-            with self.subTest(maker=field.maker, field=field.keyword, member=member):
-                self.assertEqual(self.build(field, member), self.build(field, int(member)))
-
     def test_every_code_the_field_carries_is_taken(self) -> 'None':
         """The width is not too narrow: the widest code builds, as does zero.
 
@@ -201,16 +162,18 @@ class EnumerationFieldTests(unittest.TestCase):
         from pcapkit.protocols.transport.dccp.protocol import DCCP
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        for field in FIELDS:
+        for case in self.cases():
+            field = case.row
             if field.maker not in OPTION_LISTS:
                 continue
-            octets = self.build(field, self.enumeration(field)[field.member])
+            octets = case.build(case.member)
             parsed = (TCP if field.maker.startswith('TCP') else DCCP)(octets, len(octets)).info.options
             option = next(iter(parsed.items(multi=True)))[1]
             with self.subTest(maker=field.maker):
                 self.assertEqual(self.build_list(field, parsed), octets)
-                for value in (1 << field.bits, -1, True, field.member):
-                    self.assertRefused(field, value, OrderedMultiDict([(value, option)]))
+                for value in self.refusals(case):
+                    self.assertRefused(lambda value, field=field, option=option: self.build_list(
+                        field, OrderedMultiDict([(value, option)])), value, case.message)
 
 
 if __name__ == '__main__':

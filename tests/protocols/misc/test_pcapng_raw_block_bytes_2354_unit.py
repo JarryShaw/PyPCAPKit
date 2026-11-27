@@ -28,12 +28,9 @@ is imported inside each test, after
 
 import unittest
 import warnings
-from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
-
-if TYPE_CHECKING:
-    from typing import Any
+from tests.protocols.misc._pcapng import make_context
 
 #: Test tier (#1958): a hand-picked round trip, one case per block type.
 __tier__ = 'ALL'
@@ -81,20 +78,6 @@ class TestPCAPNGRawBlockBytes(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def _context(self) -> 'Any':
-        """A one-section context with one Ethernet interface, as the engine builds it."""
-        from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
-
-        section = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
-        context = Context(section.info)  # type: Any
-        interface = PCAPNG.from_fields(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
-                                       block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
-        context.interfaces.append(interface.info)
-        return context
-
     def test_a_dsb_handed_its_octets_parses_them(self) -> None:
         """#2354: the issue's own case, a DSB built from raw bytes."""
         from pcapkit.const.pcapng.block_type import BlockType
@@ -103,7 +86,7 @@ class TestPCAPNGRawBlockBytes(unittest.TestCase):
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         body = _dsb_body(TLS_LOG)
-        block = PCAPNG.from_fields(num=2, sct=1, ctx=self._context(),
+        block = PCAPNG.from_fields(num=2, sct=1, ctx=make_context(),
                                    type=BlockType.Decryption_Secrets_Block, block=body)
 
         self.assertEqual(block.info.secrets_type, SecretsType.TLS_Key_Log)
@@ -122,7 +105,7 @@ class TestPCAPNGRawBlockBytes(unittest.TestCase):
         for label, (name, keywords) in CASES.items():
             with self.subTest(block=label):
                 type_ = getattr(BlockType, name)
-                context = self._context()
+                context = make_context()
                 with warnings.catch_warnings():
                     # a Packet Block warns that the block is obsolete
                     warnings.simplefilter('ignore')
@@ -138,7 +121,7 @@ class TestPCAPNGRawBlockBytes(unittest.TestCase):
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError, StreamEOFError
 
-        context = self._context()
+        context = make_context()
         # Shorter than the twelve octets a block takes, the Block Type counted.
         for body in (b'', b'raw', b'\x00' * 7):
             with self.subTest(body=body):

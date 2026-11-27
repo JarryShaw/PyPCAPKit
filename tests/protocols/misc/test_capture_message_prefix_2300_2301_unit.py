@@ -46,6 +46,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
+from tests.protocols.misc._pcapng import make_context
 
 if TYPE_CHECKING:
     from typing import Any
@@ -137,21 +138,6 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def _context(self) -> 'Any':
-        """A one-section context with one Ethernet interface, as the engine builds it."""
-        from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
-
-        section = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
-        context = Context(section.info)  # type: Any
-        interface = PCAPNG.from_fields(num=1, sct=1, ctx=context,
-                                       type=BlockType.Interface_Description_Block,
-                                       block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
-        context.interfaces.append(interface.info)
-        return context
-
     def test_placement_guard_names_the_block_type(self) -> None:
         """The block type is named, not numbered, and the message has no full stop."""
         from pcapkit.const.pcapng.block_type import BlockType
@@ -160,7 +146,7 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
-            PCAPNG.from_fields(num=2, sct=1, ctx=self._context(),
+            PCAPNG.from_fields(num=2, sct=1, ctx=make_context(),
                                type=BlockType.Interface_Statistics_Block,
                                block={'interface_id': 0, 'timestamp': 0,
                                       'options': [(OptionType.if_name, {'name': 'eth0'})]})
@@ -185,7 +171,7 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         PCAPNG._make_option_if_name = spy  # type: ignore[method-assign]
         try:
             with self.assertRaises(ProtocolError):
-                PCAPNG.from_fields(num=2, sct=1, ctx=self._context(),
+                PCAPNG.from_fields(num=2, sct=1, ctx=make_context(),
                                    type=BlockType.Interface_Statistics_Block,
                                    block={'interface_id': 0, 'timestamp': 0,
                                           'options': [(OptionType.if_name, {'name': 'eth0'})]})
@@ -239,7 +225,7 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
-            PCAPNG.from_fields(num=2, sct=1, ctx=self._context(),
+            PCAPNG.from_fields(num=2, sct=1, ctx=make_context(),
                                type=BlockType.Interface_Description_Block,
                                block={'linktype': 1, 'snaplen': 65535,
                                       'options': [(OptionType.if_name, {'name': 'eth0'}),
@@ -255,7 +241,7 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
-            PCAPNG.from_fields(num=2, sct=1, ctx=self._context(),
+            PCAPNG.from_fields(num=2, sct=1, ctx=make_context(),
                                type=BlockType.Interface_Description_Block,
                                block={'linktype': 1, 'snaplen': 65535,
                                       'options': [(OptionType.if_tsresol, {'resolution': 3})]})
@@ -271,7 +257,7 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
-            PCAPNG.from_fields(num=2, sct=1, ctx=self._context(),
+            PCAPNG.from_fields(num=2, sct=1, ctx=make_context(),
                                type=BlockType.Interface_Description_Block,
                                block={'linktype': 1, 'snaplen': 65535,
                                       'options': [(OptionType.if_tzone, {'tzone': 'UTC'})]})

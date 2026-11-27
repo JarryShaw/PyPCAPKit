@@ -34,15 +34,19 @@ reaches it. Every case builds its own octets in memory and reads no capture.
 Classes are imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`.
 
+The checks the ``*_make_codes_2594`` modules share run from
+:class:`~tests.protocols._make_codes.MakeCodeChecks` over this module's own table (#3148).
+
 """
 
 import importlib
-import inspect
 import unittest
 import warnings
 from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
+from tests.protocols._make_codes import Case, MakeCodeChecks, removed_keywords
+from tests.protocols.misc._pcapng import make_context
 
 if TYPE_CHECKING:
     from typing import Any, Callable
@@ -90,25 +94,13 @@ TIMESTAMP = 1500000000
 PACKET = bytes(16)
 
 
-class MiscMakeCodeTests(unittest.TestCase):
+class MiscMakeCodeTests(MakeCodeChecks, unittest.TestCase):
     """Each migrated field takes a member or a code its width carries, and nothing else."""
+
+    NEGATIVE = True
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
-
-    def _context(self) -> 'Any':
-        """A one-section context with one Ethernet interface, as the engine builds it."""
-        from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
-
-        section = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
-        context = Context(section.info)  # type: Any
-        interface = PCAPNG.from_fields(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
-                                       block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
-        context.interfaces.append(interface.info)
-        return context
 
     def _block(self, name: 'str', block: 'dict[str, Any]') -> 'bytes':
         """The octets of the block named ``name``, built from ``block`` in a section."""
@@ -117,7 +109,7 @@ class MiscMakeCodeTests(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')  # the Packet Block is obsolete
-            return PCAPNG.from_fields(num=2, sct=1, ctx=self._context(), type=BlockType[name], block=block).data
+            return PCAPNG.from_fields(num=2, sct=1, ctx=make_context(), type=BlockType[name], block=block).data
 
     def _option(self, name: 'str', option: 'str', args: 'dict[str, Any]') -> 'bytes':
         """The octets of the block named ``name`` carrying the option ``option`` made from ``args``."""
@@ -166,45 +158,14 @@ class MiscMakeCodeTests(unittest.TestCase):
         }  # type: dict[str, Callable[[Any], bytes]]
         return builders[maker]
 
-    def _rows(self) -> 'list[tuple[str, int, Any, str, Callable[[Any], bytes]]]':
-        """Each row as its label, its width, its member, its message prefix and its builder."""
-        rows = []
-        for maker, field, module, enum, bits, code, prefix in ROWS:
-            member = getattr(importlib.import_module(module), enum).get(code)
-            rows.append((f'{maker} {field}', bits, member, prefix, self._builder(maker, field)))
-        return rows
+    def cases(self) -> 'list[Case]':
+        return [Case(f'{maker} {field}', bits, getattr(importlib.import_module(module), enum).get(code),
+                     self._builder(maker, field), prefix) for maker, field, module, enum, bits, code, prefix in ROWS]
 
-    def assertRefused(self, build: 'Callable[[Any], bytes]', value: 'Any', prefix: 'str') -> None:  # pylint: disable=invalid-name
-        """Building with ``value`` raises the field's own ProtocolError, naming ``value``."""
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        try:
-            build(value)
-        except ProtocolError as error:
-            self.assertEqual(str(error), f'{prefix}{value!r}')
-            return
-        except Exception as error:  # pylint: disable=broad-except
-            self.fail(f'{value!r} raised {type(error).__name__}, not ProtocolError: {error}')
-        self.fail(f'{value!r} was accepted')
-
-    def test_a_code_past_the_field_is_refused(self) -> None:
-        for label, bits, _, prefix, build in self._rows():
-            with self.subTest(field=label):
-                self.assertRefused(build, -1, prefix)
-                self.assertRefused(build, 1 << bits, prefix)
-                build((1 << bits) - 1)
-
-    def test_a_bool_is_refused(self) -> None:
-        for label, bits, _, prefix, build in self._rows():
-            with self.subTest(field=label):
-                self.assertGreater(bits, 1)
-                self.assertRefused(build, True, prefix)
-
-    def test_a_member_and_its_code_build_alike_and_its_name_is_refused(self) -> None:
-        for label, _, member, prefix, build in self._rows():
-            with self.subTest(field=label):
-                self.assertRefused(build, member.name, prefix)
-                self.assertEqual(build(member).hex(), build(int(member)).hex())
+    def test_the_widest_code_builds(self) -> None:
+        for case in self.cases():
+            with self.subTest(field=case.label):
+                case.build((1 << case.bits) - 1)
 
     def test_a_block_type_no_member_holds_is_written_as_given(self) -> None:
         """An in-range code no member holds builds, and a parse of it rebuilds byte-exact.
@@ -253,7 +214,7 @@ class MiscMakeCodeTests(unittest.TestCase):
         )  # type: tuple[tuple[str, dict[str, Any], str, Any, dict[str, Any], int, str], ...]
         for name, fixed, key, member, args, bits, prefix in cases:
             octets = self._block(name, dict(fixed, **{key: [(member, args)]}))
-            parsed = getattr(PCAPNG(octets, len(octets), num=2, sct=1, ctx=self._context()).info, key)
+            parsed = getattr(PCAPNG(octets, len(octets), num=2, sct=1, ctx=make_context()).info, key)
             item = next(iter(parsed.items(multi=True)))[1]
 
             def build(value: 'Any', name: 'str' = name, fixed: 'dict[str, Any]' = fixed,
@@ -270,14 +231,7 @@ class MiscMakeCodeTests(unittest.TestCase):
         from pcapkit.protocols.misc.pcap.header.protocol import Header
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        for cls in (PCAPNG, Header, IP_Pseudo):
-            for name in vars(cls):
-                if name != 'make' and not name.startswith('_make_'):
-                    continue
-                with self.subTest(maker=f'{cls.__name__}.{name}'):
-                    removed = [param for param in inspect.signature(getattr(cls, name)).parameters
-                               if param.endswith(('_default', '_namespace', '_reversed'))]
-                    self.assertEqual(removed, [])
+        self.assertEqual(removed_keywords(PCAPNG, Header, IP_Pseudo), [])
 
 
 if __name__ == '__main__':
