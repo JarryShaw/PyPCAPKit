@@ -1424,7 +1424,41 @@ warnings:
   other shards of that split 2.3-8.1 (:issue:`2739`). So those two are split again by
   that job's JUnit seconds, at ``test_igmp*`` and ``test_tls*``, which leaves every
   other shard fewer JUnit seconds there than ``tests/const`` took, whose largest
-  worker peaked at 2.05 GiB. The runs share the step's ``timeout``, scope and
+  worker peaked at 2.05 GiB. ``tests/protocols`` outgrew its heap too
+  (:issue:`3146`). Jobs 140219500063 and 140372705752, on ``3719f8496`` and
+  ``38c6519da``, and 140399757924, on :pr:`3141`'s ``90d1dfcfb``, lost 1, 2 and 2
+  workers, all in that run and 988-1454 s into it, with no OOM kill and no
+  ``MemoryError``. Each was 16-24 minutes old and last sampled at 2.43-2.71 GiB RSS.
+  The run took 1107-1478 s, and its JUnit seconds came to 3.9-4.4 times
+  ``tests/const``'s, against 2.2-2.4 in jobs 139948577089 and 140112918875, which
+  lost none: ``3719f8496`` is 1.8.0's merge, which brought :issue:`2840`'s and
+  :issue:`3081`'s tests. ``tests/protocols/application`` ran 928 s in job
+  140301451397, on ``a1164edd2``, its largest worker reaching 2.48 GiB, within that
+  range, so it is split too. Both are split by job 140372705752's JUnit seconds, so
+  that no new run takes more than ``tests/const``'s 981.6 there. By the estimate
+  above, with 46-110 s in place of the 50, as the three jobs' shards that lost no
+  worker took, the rest aside, no new run takes more than 6.8 minutes in any of them,
+  against the 9.8 at which :issue:`2713`'s first worker went down. The leg took
+  8772 s of the ``timeout``'s 10800 in job 140372705752, and comes to 8950-9220 s
+  there (estimate). ``tests/protocols``' own files are cut by name range,
+  ``test_[a-o]*``, ``test_protocol_[a-m]*``, the other ``test_p*``, ``test_q*`` and
+  ``test_t*``, rather than around the slowest files: a glob around those leaves the
+  directory's run every module added after it, which is how that run doubled, while
+  ranges over the names spread new modules over several runs. In run order, each
+  taking what the runs above it leave:
+
+  .. mermaid::
+
+     flowchart TD
+         SUB["tests/protocols' subdirectories, application/test_[o-s]* among them"]
+         SUB --> A["tests/protocols/test_[a-o]*"]
+         A --> PM["tests/protocols/test_protocol_[a-m]*"]
+         PM --> PO["tests/protocols/test_p*"]
+         PO --> Q["tests/protocols/test_q*"]
+         Q --> T["tests/protocols/test_t*"]
+         T --> D["tests/protocols: schema/ and the names no range takes"]
+
+  The runs share the step's ``timeout``, scope and
   watcher, so the caps hold over the whole tier; on ``timeout``'s SIGINT the run in
   progress writes its JUnit file and no later one starts. Each shard's run writes a
   JUnit file of its own beside ``junit.xml``, such as ``junit-tests-protocols.xml``,
