@@ -6,9 +6,9 @@
 .. module:: pcapkit.foundation.reassembly
 
 :mod:`pcapkit.foundation.reassembly`, based on algorithms described
-in :rfc:`791`, :rfc:`815`, :rfc:`6347`, :rfc:`9260` and :rfc:`8260`,
+in :rfc:`791`, :rfc:`815`, :rfc:`6347`, :rfc:`9260`, :rfc:`8260` and :rfc:`9846`,
 implements datagram reassembly of IP packets, TCP segments, DTLS handshake
-messages and SCTP user messages.
+messages, SCTP user messages and TLS records.
 
 """
 # Reassembly for DTLS handshake messages
@@ -23,12 +23,15 @@ from pcapkit.foundation.reassembly.reassembly import Reassembly
 from pcapkit.foundation.reassembly.sctp.reassembly import SCTP as SCTP_Reassembly
 # Reassembly for TCP
 from pcapkit.foundation.reassembly.tcp.reassembly import TCP as TCP_Reassembly
+# Reassembly for TLS records
+from pcapkit.foundation.reassembly.tls.reassembly import TLS as TLS_Reassembly
 
 __all__ = [
     'IPv4_Reassembly', 'IPv6_Reassembly',   # IP Reassembly
     'TCP_Reassembly',                       # TCP Reassembly
     'DTLS_Reassembly',                      # DTLS Reassembly
     'SCTP_Reassembly',                      # SCTP Reassembly
+    'TLS_Reassembly',                       # TLS Reassembly
     'ReassemblyManager',                    # Reassembly Manager, defined below
 ]
 

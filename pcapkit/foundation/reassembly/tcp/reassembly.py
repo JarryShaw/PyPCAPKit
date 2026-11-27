@@ -21,6 +21,7 @@ from pcapkit.foundation.reassembly.tcp.data import (HOLE_OPEN_BOUND, Buffer, Buf
                                                     DatagramID, Fragment, HoleDescriptor, Packet)
 from pcapkit.protocols.transport.tcp.protocol import TCP as TCP_Protocol
 from pcapkit.utilities import config
+from pcapkit.utilities.seqnum import unwrap
 
 if TYPE_CHECKING:
     from typing import Type
@@ -213,7 +214,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             if fragment is None:
                 fragment = next(reversed(buffer.ack.values()))
             END = fragment.isn + fragment.len
-            UNWRAPPED = self._unwrap(PSN, END)
+            UNWRAPPED = unwrap(PSN, END)
             # the zero-filled gap merging this segment would open, either side
             limit = config.TCP_GAP_LIMIT
             if limit != -1 and max(UNWRAPPED - END, fragment.isn - (UNWRAPPED + info.len)) > limit:
@@ -470,22 +471,6 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
     ##########################################################################
     # Utilities.
     ##########################################################################
-
-    @staticmethod
-    def _unwrap(seq: 'int', ref: 'int') -> 'int':
-        """Place a 32-bit sequence number on the unwrapped line near ``ref``.
-
-        Arguments:
-            seq: sequence number as carried on the wire, i.e. modulo 2**32
-            ref: unwrapped sequence number the segment is expected to be near
-
-        Returns:
-            The integer congruent to ``seq`` modulo 2**32 that lies within
-            2**31 of ``ref``, which is how :rfc:`9293#section-3.4` compares
-            sequence numbers.
-
-        """
-        return ref + (seq - ref + 0x80000000) % 0x100000000 - 0x80000000
 
     @staticmethod
     def _anchored(buf: 'Buffer') -> 'bool':

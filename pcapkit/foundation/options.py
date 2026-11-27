@@ -103,7 +103,7 @@ class ReassemblyOptions(Info):
         timeout: reassembly timeout in seconds, on the *capture's* own clock;
             :data:`None` selects each protocol's own default -- 60 seconds for
             IPv4 (:rfc:`1122#section-3.3.2`) and IPv6 (:rfc:`8200#section-4.5`),
-            disabled for TCP, DTLS and SCTP, which no specification gives a
+            disabled for TCP, DTLS, SCTP and TLS, which no specification gives a
             deadline (:rfc:`6347#section-4.2.3`, :rfc:`9260#section-6.9`). Pass
             :data:`math.inf` to disable it everywhere
 

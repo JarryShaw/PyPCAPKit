@@ -21,7 +21,8 @@ from pcapkit.protocols.internet.ipv4.protocol import IPv4
 from pcapkit.protocols.internet.ipv6.protocol import IPv6
 from pcapkit.protocols.misc.pcap.frame.data import Frame as Data_Frame
 from pcapkit.protocols.misc.pcap.frame.data import FrameInfo as Data_FrameInfo
-from pcapkit.toolkit.pcap import _dtls_fragments, _fragment, _sctp_fragments, tcp_segment
+from pcapkit.toolkit.pcap import (_dtls_fragments, _fragment, _sctp_fragments, _tls_segment,
+                                  tcp_segment)
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
@@ -35,7 +36,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.misc.pcapng.protocol import PCAPNG, Packet
 
 __all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly',
-           'sctp_reassembly', 'tcp_traceflow', 'block2frame']
+           'sctp_reassembly', 'tls_reassembly', 'tcp_traceflow', 'block2frame']
 
 
 def ipv4_reassembly(frame: 'PCAPNG') -> 'IP_Packet[IPv4Address] | None':
@@ -238,6 +239,30 @@ def sctp_reassembly(frame: 'PCAPNG') -> 'Optional[tuple[SCTP_Packet, ...]]':
     """
     frame_info = cast('Packet', frame.info)
     return _sctp_fragments(frame, num=frame_info.number, timestamp=float(frame_info.timestamp_epoch))
+
+
+def tls_reassembly(frame: 'PCAPNG') -> 'TCP_Packet | None':
+    """Make data for TLS record reassembly.
+
+    A frame can be reassembled if it can be for TCP reassembly (see
+    :func:`tcp_reassembly`) and the port its TCP layer looks the next layer up by
+    binds TLS (see :func:`pcapkit.toolkit.pcap._tls_segment`), whether its payload
+    opens a record or continues one.
+
+    Args:
+        frame: PCAP-NG frame.
+
+    Returns:
+        Data for TCP reassembly (:term:`reasm.tcp.packet`) if the ``frame`` can be
+        reassembled; otherwise :data:`None`.
+
+    See Also:
+        :class:`pcapkit.foundation.reassembly.tls.reassembly.TLS`
+
+    .. versionadded:: 1.9.0
+
+    """
+    return _tls_segment(tcp_reassembly(frame))
 
 
 def tcp_traceflow(frame: 'PCAPNG', *, nanosecond: 'bool' = False) -> 'TF_TCP_Packet | None':

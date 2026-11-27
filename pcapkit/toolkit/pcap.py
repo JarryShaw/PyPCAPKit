@@ -11,7 +11,9 @@ cannot be used for it. The TCP adapters here and in
 :mod:`pcapkit.toolkit.pcapng` read the segment with
 :func:`~pcapkit.toolkit.pcap.tcp_segment`, the DTLS ones the record with
 :func:`~pcapkit.toolkit.pcap._dtls_fragments`, and the SCTP ones the packet with
-:func:`~pcapkit.toolkit.pcap._sctp_fragments`.
+:func:`~pcapkit.toolkit.pcap._sctp_fragments`. The TLS adapters of every engine
+keep the TCP ones' records of a TLS stream with
+:func:`~pcapkit.toolkit.pcap._tls_segment`.
 
 """
 from typing import TYPE_CHECKING, NamedTuple, cast
@@ -28,6 +30,7 @@ from pcapkit.foundation.traceflow.tcp.data import Packet as TF_TCP_Packet
 from pcapkit.protocols.application.dtls.data import DTLS as Data_DTLS
 from pcapkit.protocols.application.dtls.data import DTLSHandshake as Data_DTLSHandshake
 from pcapkit.protocols.application.dtls.protocol import DTLS
+from pcapkit.protocols.application.tls.protocol import TLS
 from pcapkit.protocols.internet.ip.protocol import IP as Protocol_IP
 from pcapkit.protocols.internet.ipv4.protocol import IPv4
 from pcapkit.protocols.internet.ipv6.protocol import IPv6
@@ -51,7 +54,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.misc.pcap import Frame
 
 __all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly',
-           'sctp_reassembly', 'tcp_traceflow', 'tcp_segment', 'TCPSegment']
+           'sctp_reassembly', 'tls_reassembly', 'tcp_traceflow', 'tcp_segment', 'TCPSegment']
 
 
 class TCPSegment(NamedTuple):
@@ -565,6 +568,56 @@ def sctp_reassembly(frame: 'Frame') -> 'Optional[tuple[SCTP_Packet, ...]]':
 
     """
     return _sctp_fragments(frame, num=frame.info.number, timestamp=float(frame.info.time_epoch))
+
+
+def _tls_segment(packet: 'Optional[TCP_Packet]') -> 'Optional[TCP_Packet]':
+    """Keep a segment's TCP reassembly record if its stream carries TLS.
+
+    The TLS adapters of this module and of the other :mod:`pcapkit.toolkit` modules
+    keep their TCP adapter's record with this.
+
+    Args:
+        packet: Data for TCP reassembly (:term:`reasm.tcp.packet`), or :data:`None`.
+
+    Returns:
+        ``packet`` if the port a frame's TCP layer looks its next layer up by
+        binds TLS in :attr:`TCP.__proto__
+        <pcapkit.protocols.transport.tcp.protocol.TCP.__proto__>`; otherwise
+        :data:`None`.
+
+    .. versionadded:: 1.9.0
+
+    """
+    if packet is None:
+        return None
+    port = TCP._next_layer_port((packet.bufid[1], packet.bufid[3]))  # pylint: disable=protected-access
+    if not issubclass(TCP._lookup_next_layer(TCP.__proto__, port), TLS):  # pylint: disable=protected-access
+        return None
+    return packet
+
+
+def tls_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
+    """Make data for TLS record reassembly.
+
+    A frame can be reassembled if it can be for TCP reassembly (see
+    :func:`tcp_reassembly`) and the port its TCP layer looks the next layer up by
+    binds TLS (see :func:`_tls_segment`), whether its payload opens a record or
+    continues one.
+
+    Args:
+        frame: PCAP frame.
+
+    Returns:
+        Data for TCP reassembly (:term:`reasm.tcp.packet`) if the ``frame`` can be
+        reassembled; otherwise :data:`None`.
+
+    See Also:
+        :class:`pcapkit.foundation.reassembly.tls.reassembly.TLS`
+
+    .. versionadded:: 1.9.0
+
+    """
+    return _tls_segment(tcp_reassembly(frame))
 
 
 def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_TCP_Packet | None':

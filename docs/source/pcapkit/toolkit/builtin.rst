@@ -16,7 +16,8 @@ adapters here and in
 :mod:`pcapkit.toolkit.pcapng` read the segment with
 :func:`~pcapkit.toolkit.pcap.tcp_segment`, the DTLS ones the record with
 :func:`~pcapkit.toolkit.pcap._dtls_fragments`, and the SCTP ones the packet with
-:func:`~pcapkit.toolkit.pcap._sctp_fragments`.
+:func:`~pcapkit.toolkit.pcap._sctp_fragments`. The TLS adapters of every engine keep
+the TCP ones' records of a TLS stream with :func:`~pcapkit.toolkit.pcap._tls_segment`.
 
 .. autofunction:: pcapkit.toolkit.pcap.ipv4_reassembly
 
@@ -27,6 +28,8 @@ adapters here and in
 .. autofunction:: pcapkit.toolkit.pcap.dtls_reassembly
 
 .. autofunction:: pcapkit.toolkit.pcap.sctp_reassembly
+
+.. autofunction:: pcapkit.toolkit.pcap.tls_reassembly
 
 .. autofunction:: pcapkit.toolkit.pcap.tcp_traceflow
 
@@ -40,6 +43,8 @@ Auxiliary Functions
 .. autofunction:: pcapkit.toolkit.pcap._dtls_fragments
 
 .. autofunction:: pcapkit.toolkit.pcap._sctp_fragments
+
+.. autofunction:: pcapkit.toolkit.pcap._tls_segment
 
 .. autoclass:: pcapkit.toolkit.pcap.TCPSegment
    :members:
@@ -61,6 +66,8 @@ PCAP-NG Tools
 .. autofunction:: pcapkit.toolkit.pcapng.dtls_reassembly
 
 .. autofunction:: pcapkit.toolkit.pcapng.sctp_reassembly
+
+.. autofunction:: pcapkit.toolkit.pcapng.tls_reassembly
 
 .. autofunction:: pcapkit.toolkit.pcapng.tcp_traceflow
 

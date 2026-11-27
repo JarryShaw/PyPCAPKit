@@ -9,7 +9,7 @@
 :mod:`pcapkit`, including PCAP file extraction tool
 :class:`~pcapkit.foundation.extraction.Extractor`, flow tracing
 :mod:`~pcapkit.foundation.traceflow`, registry management
-APIs for :mod:`pcapkit`, TCP/IP, DTLS and SCTP reassembly implementations, and
+APIs for :mod:`pcapkit`, TCP/IP, DTLS, SCTP and TLS reassembly implementations, and
 the :mod:`~pcapkit.foundation.analysis` of what they reassemble.
 
 """
@@ -25,9 +25,10 @@ __all__ = [
     'DumpOptions', 'ReassemblyOptions', 'TraceFlowOptions', 'StreamOptions',
 
     'IPv4_Reassembly', 'IPv6_Reassembly', 'TCP_Reassembly', 'DTLS_Reassembly', 'SCTP_Reassembly',
+    'TLS_Reassembly',
     'ReassemblyManager',
 
-    'ip_datagram', 'tcp_datagram', 'dtls_handshake', 'sctp_message',
+    'ip_datagram', 'tcp_datagram', 'dtls_handshake', 'sctp_message', 'tls_record',
 
     'TCP_TraceFlow',
     'TraceFlowManager',

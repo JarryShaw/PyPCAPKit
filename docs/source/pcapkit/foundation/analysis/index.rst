@@ -19,3 +19,4 @@ itself is a method of the protocol class, which the function calls.
    tcp
    dtls
    sctp
+   tls

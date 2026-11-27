@@ -213,13 +213,14 @@ class DeclaredProtoTypeTests(unittest.TestCase):
         from pcapkit.const.reg.apptype import TCP as AppType_TCP
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
+        from pcapkit.const.tls.content_type import ContentType
         from pcapkit.const.tls.handshake_type import HandshakeType
 
         return tuple(
             eval(getattr(constraint, '__forward_arg__', constraint),  # pylint: disable=eval-used
                  {'TransType': TransType, 'AppType_TCP': AppType_TCP,
                   'HandshakeType': HandshakeType, 'Optional': typing.Optional,
-                  'PayloadProtocolIdentifier': PayloadProtocolIdentifier})
+                  'PayloadProtocolIdentifier': PayloadProtocolIdentifier, 'ContentType': ContentType})
             for constraint in cls._proto_type_variable().__constraints__
         )
 
@@ -274,6 +275,27 @@ class DeclaredProtoTypeTests(unittest.TestCase):
         from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
 
         self.assertIs(self._sctp_proto(), PayloadProtocolIdentifier(46))
+
+    def _tls_proto(self):
+        """The ``proto`` TLS reassembly hands :class:`Deferred` for a complete
+        record (#2938): its ``(type, legacy_record_version)``."""
+        from pcapkit.foundation.reassembly.tcp.data import Packet
+        from pcapkit.foundation.reassembly.tls.reassembly import TLS
+
+        reasm = TLS()
+        record = b'\x17\x03\x03\x00\x05hello'
+        reasm(Packet(TCP_BUFID, 1, 500, 1, False, False, False, len(record), 1, len(record),
+                     b'', bytearray(record), 1000.0))
+        datagram, = reasm.datagram
+        return held(datagram).proto
+
+    def test_tls_passes_the_record_header(self) -> None:
+        """The fragment decodes by its content type; the version brands the record."""
+        from pcapkit.const.tls.content_type import ContentType
+
+        content_type, version = self._tls_proto()
+        self.assertIs(content_type, ContentType.application_data)
+        self.assertEqual(version, 0x0303)
 
     def test_dtls_passes_the_handshake_header(self) -> None:
         """The body decodes by ``msg_type``; ``length`` and ``message_seq`` frame it."""
@@ -331,7 +353,7 @@ class DeclaredProtoTypeTests(unittest.TestCase):
         declared = self._declared_proto_types()
         matched = {}
         values = (('ip', self._ip_proto()), ('tcp', self._tcp_proto()), ('dtls', self._dtls_proto()),
-                  ('sctp', self._sctp_proto()))
+                  ('sctp', self._sctp_proto()), ('tls', self._tls_proto()))
         for name, value in values:
             with self.subTest(reassembler=name):
                 admitting = [each for each in declared if admits(each, value)]

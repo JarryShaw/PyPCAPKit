@@ -69,8 +69,9 @@ the last (:rfc:`9147#section-4`). The exceptions:
   :class:`~pcapkit.protocols.misc.raw.protocol.Raw` together with everything after it.
 * Octets that open no whole record stay raw, with no error: an unsupported
   content type, a legacy version outside ``0xFExx``, a header cut short, a
-  length past the end of the datagram, or a connection ID whose length is
-  not known, which leaves the record's end unknown.
+  length past the end of the datagram or past the RFCs' bound (``2 ** 14 +
+  2048``, or ``2 ** 14 + 256`` for a unified header), or a connection ID whose
+  length is not known, which leaves the record's end unknown.
 * A parse told to stop at DTLS (``protocol='DTLS'`` or ``layer='Application'``)
   keeps the rest of the datagram raw.
 * Each record is a layer, so :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`
@@ -114,7 +115,7 @@ from pcapkit.protocols.application.dtls.const import (_CID_MAX_LENGTH, _CID_OFFS
                                                       _CIPHERTEXT_MIN_LENGTH,
                                                       _DTLS13_LEGACY_VERSIONS, _DTLSV1_0_VERSION,
                                                       _DTLSV1_2_VERSION, _LEGACY_HEADER_LENGTH,
-                                                      _UNIFIED_PREFIX)
+                                                      _UNIFIED_MAX_LENGTH, _UNIFIED_PREFIX)
 from pcapkit.protocols.application.dtls.data import DTLS as Data_DTLS
 from pcapkit.protocols.application.dtls.data import DTLSCIDCiphertext as Data_DTLSCIDCiphertext
 from pcapkit.protocols.application.dtls.data import DTLSCiphertext as Data_DTLSCiphertext
@@ -122,8 +123,8 @@ from pcapkit.protocols.application.dtls.data import DTLSHandshake as Data_DTLSHa
 from pcapkit.protocols.application.dtls.schema import DTLS as Schema_DTLS
 from pcapkit.protocols.application.dtls.schema import DTLSCIDCiphertext as Schema_DTLSCIDCiphertext
 from pcapkit.protocols.application.dtls.schema import DTLSCiphertext as Schema_DTLSCiphertext
-from pcapkit.protocols.application.ssl.const import (_DTLS_VERSION_MAJOR, _WIRE_CONTENT_TYPES,
-                                                     DTLS13_VERSION)
+from pcapkit.protocols.application.ssl.const import (_DTLS_VERSION_MAJOR, _RECORD_MAX_LENGTH,
+                                                     _WIRE_CONTENT_TYPES, DTLS13_VERSION)
 from pcapkit.protocols.application.ssl.data import ConnectionId as Data_ConnectionId
 from pcapkit.protocols.application.ssl.protocol import SSL
 from pcapkit.utilities.exceptions import CaughtByCaller, ProtocolError
@@ -241,11 +242,13 @@ def _opens_whole_record(data: 'bytes', context: 'Optional[DTLSContext]') -> 'boo
     :meth:`SSL._validate_tls_record
     <pcapkit.protocols.application.ssl.protocol.SSL._validate_tls_record>`: a content
     type a genuine record carries, a ``0xFExx`` legacy version, and a fragment
-    that ends inside ``data``. A ``tls12_cid`` header needs DTLS 1.2's version
-    and a connection ID ``context`` knows the length of. A unified header needs
-    the same of its connection ID, if it carries one, and a fragment that ends
-    inside ``data``; without a length it runs to the end of ``data``, as the
-    last record of a datagram does (:rfc:`9147#section-4`).
+    of at most ``2 ** 14 + 2048`` octets that ends inside ``data``. A
+    ``tls12_cid`` header needs DTLS 1.2's version, a connection ID ``context``
+    knows the length of, and the same of its fragment. A unified header needs
+    the same of its connection ID, if it carries one, and a fragment of at most
+    ``2 ** 14 + 256`` octets that ends inside ``data``; without a length it runs
+    to the end of ``data``, as the last record of a datagram does
+    (:rfc:`9147#section-4`).
 
     Args:
         data: Octets after a record.
@@ -266,7 +269,8 @@ def _opens_whole_record(data: 'bytes', context: 'Optional[DTLSContext]') -> 'boo
         if len(data) < header:
             return False
         if not flags['length_present']:
-            return True
+            return len(data) - header <= _UNIFIED_MAX_LENGTH
+        limit = _UNIFIED_MAX_LENGTH
     elif data[0] == Enum_ContentType.tls12_cid:
         cid_length = _record_cid_length(data, context)
         if cid_length is None or int.from_bytes(data[1:3], 'big') != _DTLSV1_2_VERSION:
@@ -274,12 +278,15 @@ def _opens_whole_record(data: 'bytes', context: 'Optional[DTLSContext]') -> 'boo
         header = _LEGACY_HEADER_LENGTH + cid_length
         if len(data) < header:
             return False
+        limit = _RECORD_MAX_LENGTH
     else:
         header = _LEGACY_HEADER_LENGTH
         if len(data) < header or data[0] not in _WIRE_CONTENT_TYPES or data[1] != _DTLS_VERSION_MAJOR:
             return False
+        limit = _RECORD_MAX_LENGTH
     # Every header ends with its 16-bit length.
-    return header + int.from_bytes(data[header - 2:header], 'big') <= len(data)
+    length = int.from_bytes(data[header - 2:header], 'big')
+    return length <= limit and header + length <= len(data)
 
 
 class DTLSContext(ProtocolContext):
@@ -551,8 +558,10 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
                 record, or given for a legacy-format one of another type; if a
                 legacy-format record's ``content_type`` is a name, a
                 :obj:`bool`, or a member or code the 8-bit content type field
-                cannot carry; or if an extension of ``content`` given as a
-                ``(type, kwargs)`` pair has such a type for its 16-bit field.
+                cannot carry; if an extension of ``content`` given as a
+                ``(type, kwargs)`` pair has such a type for its 16-bit field; or
+                if the fragment is longer than the RFCs allow, ``2 ** 14 + 2048``
+                octets, or ``2 ** 14 + 256`` for a unified header.
             StructError: If another record-header field, or a field of
                 ``content``, does not fit its width.
             FieldValueError: If a unified-header record's ``epoch`` does not
@@ -568,6 +577,9 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
             self._make_pack(sequence_number, size=2 if sequence_long else 1)
             if length_present:
                 self._make_pack(len(content), size=2)
+            if len(content) > _UNIFIED_MAX_LENGTH:
+                raise ProtocolError(f'{self.alias}: invalid ciphertext length {len(content)}: exceeds '
+                                    f'{_UNIFIED_MAX_LENGTH} (record_overflow)')
             return Schema_DTLSCiphertext(
                 flags={
                     'fixed': _UNIFIED_PREFIX,
@@ -591,6 +603,9 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         for value, size in ((version, 2), (epoch, 2), (len(fragment), 2)):
             self._make_pack(value, size=size)
         self._make_pack(sequence_number, size=6)
+        if len(fragment) > _RECORD_MAX_LENGTH:
+            raise ProtocolError(f'{self.alias}: invalid record length {len(fragment)}: exceeds '
+                                f'{_RECORD_MAX_LENGTH} (record_overflow)')
         if content_type_ == Enum_ContentType.tls12_cid:
             if cid is None or not _is_cid(cid):
                 raise ProtocolError(f'{self.alias}: invalid connection ID: {cid!r} '
@@ -944,7 +959,8 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
             ProtocolError: If ``C`` is set but no connection ID is carried; if
                 the header or its declared length runs past the buffer; or if
                 the ciphertext is shorter than the record-number sample
-                (:rfc:`9147#section-4.2.3`).
+                (:rfc:`9147#section-4.2.3`), or longer than a TLS 1.3 record's
+                ``2 ** 14 + 256`` (:rfc:`9147#section-4`, :rfc:`9846#section-5.2`).
 
         """
         self._alias = 'DTLS 1.3'
@@ -962,6 +978,9 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         if len(schema.fragment or b'') < _CIPHERTEXT_MIN_LENGTH:
             raise ProtocolError(f'{self.alias}: invalid format: ciphertext is shorter than the '
                                 'record-number sample (RFC 9147 section 4.2.3)')
+        if len(schema.fragment or b'') > _UNIFIED_MAX_LENGTH:
+            raise ProtocolError(f'{self.alias}: invalid format: ciphertext of {len(schema.fragment)} '
+                                f'octets exceeds {_UNIFIED_MAX_LENGTH} (record_overflow)')
 
         dtls = Data_DTLSCiphertext(
             epoch=flags['epoch'],
@@ -1001,8 +1020,9 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         Raises:
             ProtocolError: If the legacy version is not DTLS 1.2's, the only
                 one ``tls12_cid`` applies to (:rfc:`9146#section-10.3`); if the
-                connection ID is empty; or if the record runs past the end of
-                the buffer.
+                connection ID is empty; or if the record's length runs past the
+                end of the buffer, or past the ``2 ** 14 + 2048`` of DTLS 1.2
+                (:rfc:`9146#section-4`, :rfc:`5246#section-6.2.3`).
 
         """
         schema = cast('Schema_DTLSCIDCiphertext', self.__header__)
@@ -1014,6 +1034,9 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         self._alias = 'DTLS 1.2'
         if not _is_cid(schema.cid):
             raise ProtocolError(f'{self.alias}: invalid format: a tls12_cid record carries no connection ID')
+        if schema.length > _RECORD_MAX_LENGTH:
+            raise ProtocolError(f'{self.alias}: invalid format: record length {schema.length} exceeds '
+                                f'{_RECORD_MAX_LENGTH} (record_overflow)')
         if self.length + schema.length > available:
             raise ProtocolError(f'{self.alias}: invalid format: record length {schema.length} runs past '
                                 'the end of the buffer')

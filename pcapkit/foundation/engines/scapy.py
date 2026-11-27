@@ -305,6 +305,7 @@ class Scapy(EngineBase['ScapyPacket']):
         'ipv4': ModuleDescriptor('pcapkit.toolkit.scapy', 'ipv4_reassembly'),
         'ipv6': ModuleDescriptor('pcapkit.toolkit.scapy', 'ipv6_reassembly'),
         'tcp': ModuleDescriptor('pcapkit.toolkit.scapy', 'tcp_reassembly'),
+        'tls': ModuleDescriptor('pcapkit.toolkit.scapy', 'tls_reassembly'),
     }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
     #: Flow tracing adapters, each called as ``adapter(packet, count=n)`` on the

@@ -41,6 +41,7 @@ from pcapkit.foundation.reassembly.tcp.data import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data import FrameRecord
 from pcapkit.foundation.traceflow.tcp.data import Packet as TF_TCP_Packet
 from pcapkit.protocols.misc.pcap.frame.data import FrameInfo as Data_FrameInfo
+from pcapkit.toolkit.pcap import _tls_segment
 from pcapkit.toolkit.pypcapfile import (IP_TUNNELS, IPV4_EXTENSION_HEADERS, _default_accepts,
                                         _walk_extension_headers)
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
@@ -71,7 +72,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     'attach_linktype', 'attach_resolution', 'packet2chain', 'packet2dict', 'packet2frame',
-    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow'
+    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tls_reassembly', 'tcp_traceflow'
 ]
 
 
@@ -698,6 +699,31 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
         )
         return data
     return None
+
+
+def tls_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None':
+    """Make data for TLS record reassembly.
+
+    A packet can be reassembled if it can be for TCP reassembly (see
+    :func:`tcp_reassembly`) and the port its TCP segment's next layer is looked up
+    by binds TLS (see :func:`pcapkit.toolkit.pcap._tls_segment`), whether its
+    payload opens a record or continues one.
+
+    Args:
+        packet: Scapy packet.
+        count: Packet index. If not provided, defaults to ``-1``.
+
+    Returns:
+        Data for TCP reassembly (:term:`reasm.tcp.packet`) if the ``packet`` can be
+        reassembled; otherwise :data:`None`.
+
+    See Also:
+        :class:`pcapkit.foundation.reassembly.tls.reassembly.TLS`
+
+    .. versionadded:: 1.9.0
+
+    """
+    return _tls_segment(tcp_reassembly(packet, count=count))
 
 
 def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | None':

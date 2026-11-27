@@ -152,6 +152,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         'tcp': ModuleDescriptor('pcapkit.toolkit.pcapng', 'tcp_reassembly'),
         'dtls': ModuleDescriptor('pcapkit.toolkit.pcapng', 'dtls_reassembly'),
         'sctp': ModuleDescriptor('pcapkit.toolkit.pcapng', 'sctp_reassembly'),
+        'tls': ModuleDescriptor('pcapkit.toolkit.pcapng', 'tls_reassembly'),
     }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
     #: Flow tracing adapters, each called as ``adapter(block, nanosecond=flag)`` on

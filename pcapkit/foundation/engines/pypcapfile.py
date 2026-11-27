@@ -136,6 +136,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
     __reassembly__ = {
         'ipv4': ModuleDescriptor('pcapkit.toolkit.pypcapfile', 'ipv4_reassembly'),
         'tcp': ModuleDescriptor('pcapkit.toolkit.pypcapfile', 'tcp_reassembly'),
+        'tls': ModuleDescriptor('pcapkit.toolkit.pypcapfile', 'tls_reassembly'),
     }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
     #: Flow tracing adapters, each called as

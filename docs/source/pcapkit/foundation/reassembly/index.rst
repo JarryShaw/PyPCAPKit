@@ -5,9 +5,9 @@ Packets Reassembly
 .. module:: pcapkit.foundation.reassembly
 
 :mod:`pcapkit.foundation.reassembly` implements datagram reassembly
-of IP packets, TCP segments, DTLS handshake messages and SCTP user messages,
-based on the algorithms described in :rfc:`791`, :rfc:`815`, :rfc:`6347`,
-:rfc:`9260` and :rfc:`8260`.
+of IP packets, TCP segments, DTLS handshake messages, SCTP user messages and TLS
+records, based on the algorithms described in :rfc:`791`, :rfc:`815`, :rfc:`6347`,
+:rfc:`9260`, :rfc:`8260` and :rfc:`9846`.
 
 .. seealso::
 
@@ -21,6 +21,7 @@ based on the algorithms described in :rfc:`791`, :rfc:`815`, :rfc:`6347`,
    tcp
    dtls
    sctp
+   tls
 
 Every reassembly class subclasses
 :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`, reassembling
@@ -31,7 +32,7 @@ extracted fragments into whole datagrams:
    flowchart TD
        A{{ReassemblyMeta}} -.->|metaclass| B(ReassemblyBase)
 
-       B --> IP & TCP & DTLS & SCTP
+       B --> IP & TCP & DTLS & SCTP & TLS
        IP --> IPv4 & IPv6
 
        B --> C(Reassembly)
@@ -49,6 +50,7 @@ extracted fragments into whole datagrams:
        click TCP "tcp.html#pcapkit.foundation.reassembly.tcp.reassembly.TCP"
        click DTLS "dtls.html#pcapkit.foundation.reassembly.dtls.reassembly.DTLS"
        click SCTP "sctp.html#pcapkit.foundation.reassembly.sctp.reassembly.SCTP"
+       click TLS "tls.html#pcapkit.foundation.reassembly.tls.reassembly.TLS"
 
 Auxiliary Data
 ==============
@@ -83,7 +85,7 @@ What submits a buffer, and how its holes at that point pick the
    flowchart TD
        subgraph trig ["What submits a buffer"]
            direction TB
-           T1["IP: every octet received<br/>TCP: a FIN and every octet below it"]
+           T1["IP: every octet received<br/>TCP, TLS: a FIN and every octet below it"]
            T2["a session torn down: a TCP RST,<br/>a TCP SYN on a buffered 4-tuple,<br/>an unfragmented IPv4 datagram reusing the BUFID"]
            T3["a TCP segment farther than TCP\_GAP\_LIMIT<br/>from its buffer: the stream splits"]
            T4["a DTLS fragment whose length or type disagrees<br/>with the message held under its message\_seq"]
@@ -92,7 +94,7 @@ What submits a buffer, and how its holes at that point pick the
            T7[".datagram or fetch() read outside a callback<br/>while buffers are outstanding"]
            T1 ~~~ T2 ~~~ T3 ~~~ T4 ~~~ T5 ~~~ T6 ~~~ T7
        end
-       T1D["DTLS, SCTP: a message whole"]
+       T1D["DTLS, SCTP: a message whole<br/>TLS: a record whole at the boundary"]
        SUB["submit(buffer)"]
        Q1{"overlap?"}
        Q2{"no holes left?"}

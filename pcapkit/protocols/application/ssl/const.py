@@ -17,6 +17,14 @@ _TLS_VERSION_MAJOR = 0x03
 #: DTLS encodes its legacy version as the one's complement of TLS's).
 _DTLS_VERSION_MAJOR = 0xFE
 
+#: The longest fragment a legacy record header may declare, that of a TLSCiphertext
+#: of SSLv3 to TLS 1.2 (:rfc:`6101#section-5.2.3`, :rfc:`5246#section-6.2.3`), which
+#: DTLS 1.0 and 1.2 keep (:rfc:`4347#section-4`, :rfc:`6347#section-4`). TLS 1.3's
+#: ``2 ** 14 + 256`` (:rfc:`9846#section-5.2`) and every plaintext's ``2 ** 14`` are
+#: within it, and the header does not tell the versions apart. A peer that
+#: receives a longer record sends ``record_overflow``.
+_RECORD_MAX_LENGTH = 2 ** 14 + 2048
+
 #: The content types a genuine record may carry. An allowlist rather than
 #: every :class:`~pcapkit.const.tls.content_type.ContentType` member: 0 is
 #: never assigned, a value :rfc:`9846#section-5.1` rejects outright, and the

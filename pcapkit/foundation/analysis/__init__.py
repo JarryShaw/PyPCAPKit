@@ -21,10 +21,13 @@ from pcapkit.foundation.analysis.ip import ip_datagram
 from pcapkit.foundation.analysis.sctp import sctp_message
 # Analysis of TCP datagrams
 from pcapkit.foundation.analysis.tcp import tcp_datagram
+# Analysis of TLS records
+from pcapkit.foundation.analysis.tls import tls_record
 
 __all__ = [
     'ip_datagram',                          # IP Analysis
     'tcp_datagram',                         # TCP Analysis
     'dtls_handshake',                       # DTLS Analysis
     'sctp_message',                         # SCTP Analysis
+    'tls_record',                           # TLS Analysis
 ]

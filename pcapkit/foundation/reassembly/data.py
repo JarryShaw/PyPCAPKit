@@ -26,17 +26,19 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.apptype import TCP as AppType_TCP
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
+    from pcapkit.const.tls.content_type import ContentType
     from pcapkit.const.tls.handshake_type import HandshakeType
     from pcapkit.foundation.reassembly.dtls.data import Datagram as DTLS_Datagram
     from pcapkit.foundation.reassembly.ip.data import Datagram as IP_Datagram
     from pcapkit.foundation.reassembly.sctp.data import Datagram as SCTP_Datagram
     from pcapkit.foundation.reassembly.tcp.data import Datagram as TCP_Datagram
+    from pcapkit.foundation.reassembly.tls.data import Datagram as TLS_Datagram
     from pcapkit.protocols.application.dtls.data import DTLSHandshake
     from pcapkit.protocols.protocol import ProtocolBase
 
 # registry key an analyser dispatches a reassembled payload on; see ``Deferred``
 _KT = TypeVar('_KT', 'TransType', 'tuple[AppType_TCP, AppType_TCP]', 'tuple[HandshakeType, int, int]',
-               'Optional[PayloadProtocolIdentifier]')
+               'Optional[PayloadProtocolIdentifier]', 'tuple[ContentType, int]')
 
 
 class Completion(EnumLookup, StrEnum):
@@ -201,6 +203,14 @@ class Deferred(ReduceAsProtocol2, Generic[_KT]):
       :func:`~pcapkit.foundation.analysis.sctp.sctp_message` runs,
       :meth:`SCTP.analyze <pcapkit.protocols.transport.sctp.protocol.SCTP.analyze>`,
       which looks the next layer up by that identifier.
+    * :meth:`TLS._make_datagram
+      <pcapkit.foundation.reassembly.tls.reassembly.TLS._make_datagram>` builds a
+      ``Deferred[tuple[ContentType, int]]`` for a complete record. It passes the
+      record's ``(type, legacy_record_version)`` (:rfc:`9846#section-5.1`) to the
+      decoder :func:`~pcapkit.foundation.analysis.tls.tls_record` runs,
+      :meth:`TLS.analyze_record
+      <pcapkit.protocols.application.tls.protocol.TLS.analyze_record>`, which reads
+      the fragment by its :class:`~pcapkit.const.tls.content_type.ContentType`.
 
     Those are the cases the type parameter is constrained to. IP's and TCP's are
     *named registry values* rather than one named value and one pair of bare
@@ -240,10 +250,11 @@ class Deferred(ReduceAsProtocol2, Generic[_KT]):
             ``analyze`` it calls, to the stops and context the extraction's
             engine parses its frames with (:issue:`2933`), and for IP to the
             datagram's addresses (:issue:`2945`); that protocol's
-            ``analyze_handshake`` for DTLS.
+            ``analyze_handshake`` for DTLS, and ``analyze_record`` for TLS.
         proto: What the analyser dispatches the payload on -- the payload
             protocol type for IP, the port pair for TCP, the handshake header
-            for DTLS, the payload protocol identifier for SCTP, as above.
+            for DTLS, the payload protocol identifier for SCTP, the record's type and
+            version for TLS, as above.
         payload: Reassembled payload to parse.
 
     .. versionadded:: 1.5.0
@@ -263,7 +274,8 @@ class Deferred(ReduceAsProtocol2, Generic[_KT]):
     .. versionchanged:: 1.9.0
 
        Also constrained to the payload protocol identifier SCTP reassembly
-       dispatches on (:issue:`2935`).
+       dispatches on (:issue:`2935`), and to the TLS record header
+       (:issue:`2938`).
 
     """
 
@@ -340,12 +352,17 @@ class ReassemblyData(Info):
     #:
     #: .. versionadded:: 1.9.0
     sctp: 'tuple[SCTP_Datagram, ...]'
+    #: TLS reassembled records.
+    #:
+    #: .. versionadded:: 1.9.0
+    tls: 'tuple[TLS_Datagram, ...]'
 
     def __init__(self, ipv4: 'Optional[tuple[IP_Datagram, ...]]' = None,  # pylint: disable=super-init-not-called
                  ipv6: 'Optional[tuple[IP_Datagram, ...]]' = None,
                  tcp: 'Optional[tuple[TCP_Datagram, ...]]' = None,
                  dtls: 'Optional[tuple[DTLS_Datagram, ...]]' = None,
                  sctp: 'Optional[tuple[SCTP_Datagram, ...]]' = None,
+                 tls: 'Optional[tuple[TLS_Datagram, ...]]' = None,
                  **kwargs: 'Optional[tuple[Any, ...]]') -> 'None':
-        self.__update__(ipv4=ipv4, ipv6=ipv6, tcp=tcp, dtls=dtls, sctp=sctp, **kwargs)
+        self.__update__(ipv4=ipv4, ipv6=ipv6, tcp=tcp, dtls=dtls, sctp=sctp, tls=tls, **kwargs)
         self.__post_init__()

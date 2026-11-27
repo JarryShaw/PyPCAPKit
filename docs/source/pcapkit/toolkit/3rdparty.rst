@@ -28,6 +28,8 @@ Scapy Tools
 
 .. autofunction:: pcapkit.toolkit.scapy.tcp_reassembly
 
+.. autofunction:: pcapkit.toolkit.scapy.tls_reassembly
+
 .. autofunction:: pcapkit.toolkit.scapy.tcp_traceflow
 
 Auxiliary Functions
@@ -69,6 +71,8 @@ DPKT Tools
 .. autofunction:: pcapkit.toolkit.dpkt.ipv6_reassembly
 
 .. autofunction:: pcapkit.toolkit.dpkt.tcp_reassembly
+
+.. autofunction:: pcapkit.toolkit.dpkt.tls_reassembly
 
 .. autofunction:: pcapkit.toolkit.dpkt.tcp_traceflow
 
@@ -218,7 +222,8 @@ PyPCAPFile Tools
    IPv6 fragment".
 
    TCP over IPv6 is therefore left out of
-   :func:`~pcapkit.toolkit.pypcapfile.tcp_reassembly` and
+   :func:`~pcapkit.toolkit.pypcapfile.tcp_reassembly`,
+   :func:`~pcapkit.toolkit.pypcapfile.tls_reassembly` and
    :func:`~pcapkit.toolkit.pypcapfile.tcp_traceflow`, with an
    :class:`~pcapkit.utilities.warnings.AttributeWarning` once per capture when
    the IPv6 packet is straight over Ethernet. `PyPCAPFile`_ decodes no link
@@ -232,6 +237,8 @@ PyPCAPFile Tools
 .. autofunction:: pcapkit.toolkit.pypcapfile.ipv6_reassembly
 
 .. autofunction:: pcapkit.toolkit.pypcapfile.tcp_reassembly
+
+.. autofunction:: pcapkit.toolkit.pypcapfile.tls_reassembly
 
 .. autofunction:: pcapkit.toolkit.pypcapfile.tcp_traceflow
 

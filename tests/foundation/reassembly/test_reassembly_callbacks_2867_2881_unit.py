@@ -135,6 +135,14 @@ class ReassemblerCases:
                        chunk=Chunk.Payload_Data, tsn=tsn, stream_id=0, unordered=False,
                        beginning=not tail, ending=tail, ssn=0, mid=None, fsn=None,
                        ppid=PayloadProtocolIdentifier(0), payload=payload, timestamp=ts)]
+    def build_tls(self, num: int, ident: int, tail: bool, ts: float) -> 'list[Any]':
+        from pcapkit.foundation.reassembly.tcp.data import Packet
+
+        bufid = (ip_address('192.0.2.1'), ident, ip_address('198.51.100.2'), 443)
+        record = b'\x17\x03\x03\x00\x08' + bytes([ident]) * 8  # an 8-octet application_data record
+        dsn, payload = (1000 * ident + 9, record[9:]) if tail else (1000 * ident, record[:9])
+        return [Packet(bufid, dsn, 500, num, False, False, False, len(payload), dsn,
+                       dsn + len(payload) - 1, b'tcp-header', bytearray(payload), ts)]
 
     # harness
 
