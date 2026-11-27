@@ -2812,10 +2812,13 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         # as the structural claim, so a module that legitimately gains a crypto gate
         # is added here rather than the assertion being loosened. #2411's module is
         # the second: one AEAD-tag case needs `cryptography`, the rest reach the same
-        # read paths through an ENCR_NULL SA on hmac and hashlib alone.
+        # read paths through an ENCR_NULL SA on hmac and hashlib alone. #2939's module
+        # is the third: its signature class needs `cryptography`, while its HMAC, KEYMAT
+        # and status cases run on hmac and hashlib alone.
         self.assertEqual({gate.module for gate in gap.gates},
                          {'tests/protocols/internet/test_esp_unit.py',
-                          'tests/protocols/internet/test_esp_message_prefix_2411_unit.py'})
+                          'tests/protocols/internet/test_esp_message_prefix_2411_unit.py',
+                          'tests/protocols/internet/test_hip_auth_2939_unit.py'})
 
         message = _dependency_gates.describe_gap(gap)
         self.assertIn("the 'test' job", message)
@@ -2823,6 +2826,7 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         self.assertIn('crypto', message)
         self.assertIn('test_esp_unit.py', message)
         self.assertIn('test_esp_message_prefix_2411_unit.py', message)
+        self.assertIn('test_hip_auth_2939_unit.py', message)
 
         self.assertNotIn(
             'HAS_CRYPTO', _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS,

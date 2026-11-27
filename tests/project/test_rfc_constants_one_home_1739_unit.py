@@ -467,11 +467,14 @@ UNRELATED = {
                                          "for (#2886), and AH's length estimate, its 12-octet "
                                          'fixed part plus a minimal ICV, not the fixed part itself'),
     'pcapkit/protocols/internet/esp/protocol.py': ((12, 16, 20, 24, 32), 'ESP ICV and key sizes'),
-    'pcapkit/protocols/internet/hip/protocol.py': ((6, 12, 16, 20, 32, 40, 65535),
+    'pcapkit/protocols/internet/hip/const.py': ((16, 32), 'HIP cipher key and ECDSA and EdDSA '
+                                                'key lengths (#2939)'),
+    'pcapkit/protocols/internet/hip/protocol.py': ((6, 12, 16, 20, 24, 32, 40, 65535),
                                           'HIP parameter fields and sizes; 65535 bounds the '
                                           'two-octet TLV Length a TRANSACTION_ID or OVERLAY_ID '
                                           'may declare (#2271), as it does in the schema module, '
-                                          'and is not an IP total length'),
+                                          'and is not an IP total length; 24 is the offset of '
+                                          'the Receiver\'s HIT HIP_SIGNATURE_2 zeroes (#2939)'),
     'pcapkit/protocols/internet/hip/schema.py': ((12, 16, 20, 65535),
                                                 'HIP parameter fields, sizes and bit-fields'),
     'pcapkit/protocols/internet/hopopt/protocol.py': ((6, 16, 32), 'HOPOPT option fields, widths and sizes'),

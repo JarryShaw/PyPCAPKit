@@ -32,6 +32,7 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.corekit.checksum.internet import ChecksumStatus
     from pcapkit.corekit.infoclass import OrderedMultiInfo
+    from pcapkit.protocols.internet.hip.protocol import HIPAuthStatus
 
 __all__ = [
     'HIP', 'Control',
@@ -915,29 +916,55 @@ class HIPTransportModeParameter(Parameter):
 
 @info_final
 class HIPMACParameter(Parameter):
-    """Data model for HIP ``HIP_MAC`` parameter."""
+    """Data model for HIP ``HIP_MAC`` parameter.
+
+    .. versionchanged:: 1.9.0
+
+       New optional field ``hmac_status`` (:issue:`2939`).
+
+    """
 
     #: HMAC value.
     hmac: 'bytes'
 
     if TYPE_CHECKING:
+        #: Outcome of verifying :attr:`hmac`, present only when a
+        #: :class:`~pcapkit.protocols.internet.hip.protocol.HIPContext` was supplied.
+        hmac_status: 'HIPAuthStatus'
+
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
 class HIPMAC2Parameter(Parameter):
-    """Data model for HIP ``HIP_MAC_2`` parameter."""
+    """Data model for HIP ``HIP_MAC_2`` parameter.
+
+    .. versionchanged:: 1.9.0
+
+       New optional field ``hmac_status`` (:issue:`2939`).
+
+    """
 
     #: HMAC value.
     hmac: 'bytes'
 
     if TYPE_CHECKING:
+        #: Outcome of verifying :attr:`hmac`, present only when a
+        #: :class:`~pcapkit.protocols.internet.hip.protocol.HIPContext` was supplied.
+        hmac_status: 'HIPAuthStatus'
+
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
 class HIPSignature2Parameter(Parameter):
-    """Data model for HIP ``HIP_SIGNATURE_2`` parameter."""
+    """Data model for HIP ``HIP_SIGNATURE_2`` parameter.
+
+    .. versionchanged:: 1.9.0
+
+       New optional field ``signature_status`` (:issue:`2939`).
+
+    """
 
     #: Signature algorithm.
     algorithm: 'HIAlgorithm'
@@ -945,12 +972,22 @@ class HIPSignature2Parameter(Parameter):
     signature: 'bytes'
 
     if TYPE_CHECKING:
+        #: Outcome of verifying :attr:`signature`, present only when a
+        #: :class:`~pcapkit.protocols.internet.hip.protocol.HIPContext` was supplied.
+        signature_status: 'HIPAuthStatus'
+
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', algorithm: 'HIAlgorithm', signature: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
 class HIPSignatureParameter(Parameter):
-    """Data model for HIP ``HIP_SIGNATURE`` parameter."""
+    """Data model for HIP ``HIP_SIGNATURE`` parameter.
+
+    .. versionchanged:: 1.9.0
+
+       New optional field ``signature_status`` (:issue:`2939`).
+
+    """
 
     #: Signature algorithm.
     algorithm: 'HIAlgorithm'
@@ -958,6 +995,10 @@ class HIPSignatureParameter(Parameter):
     signature: 'bytes'
 
     if TYPE_CHECKING:
+        #: Outcome of verifying :attr:`signature`, present only when a
+        #: :class:`~pcapkit.protocols.internet.hip.protocol.HIPContext` was supplied.
+        signature_status: 'HIPAuthStatus'
+
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', algorithm: 'HIAlgorithm', signature: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
