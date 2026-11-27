@@ -30,8 +30,8 @@ Protocol [*]_, whose structure is:
 
 The Length/Type field is an EtherType from ``0x0600`` up. Up to ``0x05DC`` it is
 the length of an IEEE 802.2 :class:`~pcapkit.protocols.link.llc.protocol.LLC`
-PDU, and the octets past it are kept as ``ethernet.trailer`` (IEEE Std
-802.3-2022 §3.2.6).
+PDU, and the octets past it are kept as ``ethernet.trailer``
+(:ieee:`802.3-2022` §3.2.6).
 
 .. autoclass:: pcapkit.protocols.link.ethernet.protocol.Ethernet
    :no-members:

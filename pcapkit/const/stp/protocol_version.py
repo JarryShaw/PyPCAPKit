@@ -24,18 +24,18 @@ __all__ = ['ProtocolVersion']
 
 
 class ProtocolVersion(EnumRegistry, IntEnum):
-    """[ProtocolVersion] STP Protocol Version Identifiers [IEEE 802.1D-2004; IEEE 802.1Q-2022]"""
+    """[ProtocolVersion] STP Protocol Version Identifiers [:ieee:`802.1D-2004`; :ieee:`802.1Q-2022`]"""
 
-    #: Spanning Tree Protocol: Configuration and TCN BPDUs [IEEE 802.1D-2004]
+    #: Spanning Tree Protocol: Configuration and TCN BPDUs [:ieee:`802.1D-2004`]
     STP = 0x00
 
-    #: Rapid Spanning Tree Protocol: RST BPDUs [IEEE 802.1D-2004]
+    #: Rapid Spanning Tree Protocol: RST BPDUs [:ieee:`802.1D-2004`]
     RSTP = 0x02
 
-    #: Multiple Spanning Tree Protocol: MST BPDUs [IEEE 802.1Q-2022]
+    #: Multiple Spanning Tree Protocol: MST BPDUs [:ieee:`802.1Q-2022`]
     MSTP = 0x03
 
-    #: Shortest Path Tree: SPT BPDUs [IEEE 802.1Q-2022]
+    #: Shortest Path Tree: SPT BPDUs [:ieee:`802.1Q-2022`]
     SPT = 0x04
 
     @classmethod

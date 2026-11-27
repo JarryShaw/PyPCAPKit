@@ -24,7 +24,7 @@ __all__ = ['ManagementSubtype']
 
 
 class ManagementSubtype(EnumRegistry, IntEnum):
-    """[ManagementSubtype] IEEE 802.11 Management Frame Subtypes [IEEE Std 802.11-2020, Table 9-1]"""
+    """[ManagementSubtype] IEEE 802.11 Management Frame Subtypes [:ieee:`802.11-2020`, Table 9-1]"""
 
     #: Association Request
     Association_Request = 0

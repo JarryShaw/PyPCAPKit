@@ -21,7 +21,7 @@ __all__ = ['BridgeID', 'PortID', 'Flags']
 
 @info_final
 class BridgeID(Data):
-    """Data model for a Bridge Identifier, eight octets (IEEE 802.1D-2004 clause 9)."""
+    """Data model for a Bridge Identifier, eight octets (:ieee:`802.1D-2004` clause 9)."""
 
     #: Bridge Priority, the four most significant bits, a multiple of 4096.
     priority: 'int'
@@ -37,7 +37,7 @@ class BridgeID(Data):
 
 @info_final
 class PortID(Data):
-    """Data model for a Port Identifier, two octets (IEEE 802.1D-2004 clause 9)."""
+    """Data model for a Port Identifier, two octets (:ieee:`802.1D-2004` clause 9)."""
 
     #: Port Priority, the four most significant bits, a multiple of 16.
     priority: 'int'
@@ -61,7 +61,7 @@ class Flags(Data):
     #: Proposal flag, bit 2.
     proposal: 'bool'
     #: Port Role, bits 3 and 4; its ``0``, a Master Port in the MSTI Flags, is
-    #: Unknown here (IEEE 802.1D-2004).
+    #: Unknown here (:ieee:`802.1D-2004`).
     role: 'PortRole'
     #: Learning flag, bit 5.
     learning: 'bool'

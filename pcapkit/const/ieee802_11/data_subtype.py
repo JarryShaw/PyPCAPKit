@@ -24,7 +24,7 @@ __all__ = ['DataSubtype']
 
 
 class DataSubtype(EnumRegistry, IntEnum):
-    """[DataSubtype] IEEE 802.11 Data Frame Subtypes [IEEE Std 802.11-2020, Table 9-1]"""
+    """[DataSubtype] IEEE 802.11 Data Frame Subtypes [:ieee:`802.11-2020`, Table 9-1]"""
 
     #: Data
     Data = 0

@@ -431,10 +431,21 @@ class Vendor(metaclass=VendorMeta):
         * ``RFC`` followed by whitespace and a number loses the whitespace,
           which is the spelling the crawlers render as an :rst:role:`rfc` role.
           ``RFC Errata 5748`` and draft names such as
-          ``RFC-ietf-tcpm-accurate-ecn-34`` are left as they are.
+          ``RFC-ietf-tcpm-accurate-ecn-34`` are left as they are;
+        * an IEEE standard a citation names by a dated designation, as
+          ``IEEE Std 802.1Q-2014`` or ``IEEE 802.1D-2004``, becomes the
+          :rst:role:`ieee` role ``:ieee:`802.1Q-2014```, which a crawler
+          brackets as it brackets a citation it leaves as text; what follows
+          the designation, such as a clause, follows the role. An undated one,
+          such as ``IEEE Std 802.3``, names no edition and is left as it is.
 
         Any other segment, including text outside the brackets, is returned
         verbatim and in order, as :func:`re.split` on the brackets alone gives it.
+
+        .. versionchanged:: 1.9.0
+
+           Renders a dated IEEE designation as an :rst:role:`ieee` role
+           (:issue:`3168`).
 
         Args:
             text: Raw reference cell.
@@ -446,7 +457,9 @@ class Vendor(metaclass=VendorMeta):
         refs = []  # type: list[str]
         for ref in re.split(r'\[|\]', text):
             if re.fullmatch(r'[\s;]*', ref) is None:
-                refs.append(re.sub(r'\A(\s*)RFC\s+(?=\d)', r'\1RFC', ref))
+                ref = re.sub(r'\A(\s*)RFC\s+(?=\d)', r'\1RFC', ref)
+                refs.append(re.sub(r'(?<![\w:])IEEE(?:\s+Std)?\s+(\d+(?:\.\d+)*[A-Za-z]*-\d{4})(?![\w-])',
+                                   r':ieee:`\1`', ref))
         return refs
 
     def safe_name(self, name: 'str') -> 'str':

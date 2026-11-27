@@ -470,7 +470,7 @@ class EtherType(EnumRegistry, IntEnum):
     #: IEEE Std 802.1AE - Media Access Control Security [IEEE]
     IEEE_Std_802_1AE_Media_Access_Control_Security = 0x88E5
 
-    #: Provider Backbone Bridging Instance tag [IEEE Std 802.1Q-2014]
+    #: Provider Backbone Bridging Instance tag [:ieee:`802.1Q-2014`]
     Provider_Backbone_Bridging_Instance_tag = 0x88E7
 
     #: IEEE Std 802.1Q  - Multiple VLAN Registration Protocol (MVRP) [IEEE]

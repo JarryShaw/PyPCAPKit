@@ -77,7 +77,7 @@ class LLC(Link[Data_LLC, Schema_LLC],
     registered in the :attr:`self.__proto__ <pcapkit.protocols.link.llc.protocol.LLC.__proto__>`
     attribute. A DSAP :attr:`self.__paired__ <pcapkit.protocols.link.llc.protocol.LLC.__paired__>`
     flags is dispatched only when the SSAP, less its C/R bit, is the same
-    address, as :rfc:`1042` sets both to the SNAP SAP and IEEE 802.1D-2004
+    address, as :rfc:`1042` sets both to the SNAP SAP and :ieee:`802.1D-2004`
     both to the Bridge Spanning Tree Protocol SAP:
 
     .. list-table::

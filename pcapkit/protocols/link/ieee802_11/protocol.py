@@ -53,7 +53,7 @@ A frame of any protocol version but 0 is refused: version 1 is the PV1 frame
 format of §9.8, whose Frame Control field is laid out differently, and
 versions 2 and 3 are reserved.
 
-.. [*] IEEE Std 802.11-2020, clause 9, *Frame formats*. The clause numbers
+.. [*] :ieee:`802.11-2020`, clause 9, *Frame formats*. The clause numbers
    above are its own, checked against Wireshark's ``packet-ieee80211.c`` where
    it cites one: §9.2.4.1.10, §9.2.4.6, §9.2.4.7 and §9.8.
 
@@ -153,8 +153,8 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
     def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_IEEE802_11':  # pylint: disable=unused-argument
         """Read IEEE 802.11 MAC header.
 
-        Structure of the MAC header with every field present (IEEE Std
-        802.11-2020 §9.2.3, *General frame format*), in octets:
+        Structure of the MAC header with every field present
+        (:ieee:`802.11-2020` §9.2.3, *General frame format*), in octets:
 
         .. code-block:: text
 
@@ -380,7 +380,7 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
         }
 
     def _read_frame_control(self, value: 'int') -> 'Data_FrameControl':
-        """Read the Frame Control field (IEEE Std 802.11-2020 §9.2.4.1).
+        """Read the Frame Control field (:ieee:`802.11-2020` §9.2.4.1).
 
         In a Control Frame Extension frame, B8-B11 are the Control Frame
         Extension subfield rather than To DS, From DS, More Fragments and
@@ -424,7 +424,7 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
                             power_management: 'Optional[bool]', more_data: 'Optional[bool]',
                             protected: 'Optional[bool]', order: 'Optional[bool]',
                             s1g_beacon_flags: 'Optional[int]') -> 'int':
-        """Make the Frame Control field (IEEE Std 802.11-2020 §9.2.4.1).
+        """Make the Frame Control field (:ieee:`802.11-2020` §9.2.4.1).
 
         Args:
             version: Protocol Version.
@@ -492,7 +492,7 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
         return version | type << 2 | subtype << 4 | low << 8 | high << 12
 
     def _read_seq_ctrl(self, value: 'int') -> 'Data_SequenceControl':
-        """Read the Sequence Control field (IEEE Std 802.11-2020 §9.2.4.4).
+        """Read the Sequence Control field (:ieee:`802.11-2020` §9.2.4.4).
 
         Args:
             value: Sequence Control field, as a little-endian integer.
@@ -507,7 +507,7 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
         )
 
     def _make_seq_ctrl(self, seq_ctrl: 'Optional[Data_SequenceControl | Mapping[str, int]]') -> 'int':
-        """Make the Sequence Control field (IEEE Std 802.11-2020 §9.2.4.4).
+        """Make the Sequence Control field (:ieee:`802.11-2020` §9.2.4.4).
 
         Args:
             seq_ctrl: Sequence Control field; :obj:`None` makes zeros.
@@ -526,7 +526,7 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
         return fragment_number | sequence_number << 4
 
     def _read_qos_control(self, value: 'int') -> 'Data_QoSControl':
-        """Read the QoS Control field (IEEE Std 802.11-2020 §9.2.4.5).
+        """Read the QoS Control field (:ieee:`802.11-2020` §9.2.4.5).
 
         Args:
             value: QoS Control field, as a little-endian integer.
@@ -544,7 +544,7 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
         )
 
     def _make_qos_control(self, qos_control: 'Optional[Data_QoSControl | Mapping[str, Any]]') -> 'int':
-        """Make the QoS Control field (IEEE Std 802.11-2020 §9.2.4.5).
+        """Make the QoS Control field (:ieee:`802.11-2020` §9.2.4.5).
 
         Args:
             qos_control: QoS Control field; :obj:`None` makes zeros.
@@ -565,7 +565,7 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
                 | self._make_uint(qos_control['bits_8_15'], bits=8, name='bits_8_15') << 8)
 
     def _read_ht_control(self, value: 'int') -> 'Data_HTControl':
-        """Read the HT Control field (IEEE Std 802.11-2020 §9.2.4.6).
+        """Read the HT Control field (:ieee:`802.11-2020` §9.2.4.6).
 
         Args:
             value: HT Control field, as a little-endian integer.
@@ -583,7 +583,7 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
         return Data_HTControl(variant=variant, value=value)
 
     def _make_ht_control(self, value: 'Optional[int]') -> 'int':
-        """Make the HT Control field (IEEE Std 802.11-2020 §9.2.4.6).
+        """Make the HT Control field (:ieee:`802.11-2020` §9.2.4.6).
 
         Args:
             value: HT Control field, as an integer; :obj:`None` makes zeros.

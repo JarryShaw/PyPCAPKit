@@ -191,8 +191,8 @@ The member a call through a versioned base gives, as a decision:
    * - :class:`~pcapkit.protocols.application.stp.protocol.STP`
      - ``0``, ``2``, ``3``
      - :meth:`~pcapkit.protocols.application.stp.protocol.STP._classify`: the
-       BPDU Type, the Protocol Version Identifier and the length, as IEEE
-       802.1Q-2022 clause 14.4 validates a BPDU
+       BPDU Type, the Protocol Version Identifier and the length, as
+       :ieee:`802.1Q-2022` clause 14.4 validates a BPDU
      - the data model; a :obj:`dict` is refused
 
 HTTP octets carry their version, but the HTTP data models have no top-level
@@ -417,7 +417,7 @@ canonical name and the family's own name are the same string -- the same shape
 :meth:`ICMP.id() <pcapkit.protocols.internet.icmp.protocol.ICMP.id>` takes, ``('ICMP', 'ICMPv6')``.
 
 **STP takes IGMP's shape**, an application of it rather than a ruling of its own
-(:issue:`3115`). IEEE 802.1D-2004 names the version 0 protocol plain ``STP``, so
+(:issue:`3115`). :ieee:`802.1D-2004` names the version 0 protocol plain ``STP``, so
 :meth:`STPv0.id() <pcapkit.protocols.application.stpv0.protocol.STPv0.id>` is
 ``('STP',)``, while RSTP and MSTP keep their own names, and
 :meth:`STP.id() <pcapkit.protocols.application.stp.protocol.STP.id>` is

@@ -10,9 +10,9 @@ which is automatically generating :class:`pcapkit.const.stp.port_role.PortRole`.
 The crawler reads :data:`DATA` rather than a URL, for the reason
 :mod:`pcapkit.vendor.stp` gives. A value is the two-bit Port Role of the flags
 of an RST or MST BPDU, or of an MSTI Configuration Message, bits 3 and 4 of
-the octet. IEEE Std 802.1Q-2022 encodes ``0`` as a Master Port, a role an MSTI
+the octet. :ieee:`802.1Q-2022` encodes ``0`` as a Master Port, a role an MSTI
 alone takes, so in the MSTI Flags it is Master; in the CIST Flags of an RST or
-MST BPDU it is Unknown, as IEEE Std 802.1D-2004 names it.
+MST BPDU it is Unknown, as :ieee:`802.1D-2004` names it.
 
 """
 
@@ -27,21 +27,21 @@ if TYPE_CHECKING:
 
 __all__ = ['PortRole']
 
-#: Port Role encodings of IEEE Std 802.1Q-2022 clause 14.
+#: Port Role encodings of :ieee:`802.1Q-2022` clause 14.
 #:
 #: Maps a role to the enumeration name it takes and the comment rendered
 #: above it.
 DATA = {
-    0x00: ('Master', 'Master Port in the MSTI Flags; Unknown in the CIST Flags, as IEEE '
-                     '802.1D-2004 names it [IEEE 802.1Q-2022]'),
-    0x01: ('Alternate_or_Backup', 'Alternate or Backup Port [IEEE 802.1Q-2022]'),
-    0x02: ('Root', 'Root Port [IEEE 802.1Q-2022]'),
-    0x03: ('Designated', 'Designated Port [IEEE 802.1Q-2022]'),
+    0x00: ('Master', 'Master Port in the MSTI Flags; Unknown in the CIST Flags, as '
+                     ':ieee:`802.1D-2004` names it [:ieee:`802.1Q-2022`]'),
+    0x01: ('Alternate_or_Backup', 'Alternate or Backup Port [:ieee:`802.1Q-2022`]'),
+    0x02: ('Root', 'Root Port [:ieee:`802.1Q-2022`]'),
+    0x03: ('Designated', 'Designated Port [:ieee:`802.1Q-2022`]'),
 }  # type: dict[int, tuple[str, str]]
 
 
 class PortRole(Vendor):
-    """STP Port Roles [IEEE 802.1Q-2022]"""
+    """STP Port Roles [:ieee:`802.1Q-2022`]"""
 
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0x00 <= value <= 0x03'

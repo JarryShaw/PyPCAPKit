@@ -19,22 +19,22 @@ own:
      - BPDUs
    * - 0
      - :class:`~pcapkit.protocols.application.stpv0.protocol.STPv0`
-     - IEEE 802.1D-2004 clause 9
+     - :ieee:`802.1D-2004` clause 9
      - Configuration, 35 octets, and Topology Change Notification (TCN), 4 octets
    * - 2
      - :class:`~pcapkit.protocols.application.rstp.protocol.RSTP`
-     - IEEE 802.1Q-2022 clause 14
+     - :ieee:`802.1Q-2022` clause 14
      - RST, 36 octets
    * - 3
      - :class:`~pcapkit.protocols.application.mstp.protocol.MSTP`
-     - IEEE 802.1Q-2022 clause 14
+     - :ieee:`802.1Q-2022` clause 14
      - MST, 102 octets and an MSTI Configuration Message of 16 for each MSTI
 
 The members share the first four octets alone, the Protocol Identifier, the Protocol
 Version Identifier and the BPDU Type, so the base parses no BPDU. LLC address
 ``0x42`` is the family's, as DSAP and SSAP both, so
 :attr:`LLC.__proto__ <pcapkit.protocols.link.llc.protocol.LLC.__proto__>` binds this
-base, paired, and it picks the member as IEEE 802.1Q-2022 clause 14.4 validates a
+base, paired, and it picks the member as :ieee:`802.1Q-2022` clause 14.4 validates a
 BPDU, by :meth:`_classify`. A BPDU that clause discards is left
 :class:`~pcapkit.protocols.misc.raw.protocol.Raw` behind LLC, and a direct parse of it
 raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`; so is an SPT BPDU, of
@@ -101,11 +101,11 @@ class STP(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
     """This class implements all protocols in the Spanning Tree Protocol family.
 
     - Spanning Tree Protocol
-      (:class:`~pcapkit.protocols.application.stpv0.protocol.STPv0`) [IEEE 802.1D-2004]
+      (:class:`~pcapkit.protocols.application.stpv0.protocol.STPv0`) [:ieee:`802.1D-2004`]
     - Rapid Spanning Tree Protocol
-      (:class:`~pcapkit.protocols.application.rstp.protocol.RSTP`) [IEEE 802.1Q-2022]
+      (:class:`~pcapkit.protocols.application.rstp.protocol.RSTP`) [:ieee:`802.1Q-2022`]
     - Multiple Spanning Tree Protocol
-      (:class:`~pcapkit.protocols.application.mstp.protocol.MSTP`) [IEEE 802.1Q-2022]
+      (:class:`~pcapkit.protocols.application.mstp.protocol.MSTP`) [:ieee:`802.1Q-2022`]
 
     It is abstract, as :class:`~pcapkit.protocols.application.ospf.protocol.OSPF` is,
     and dispatches on both paths, never giving an instance of this class
@@ -163,7 +163,7 @@ class STP(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
     def id(cls) -> 'tuple[Literal["STP"], Literal["RSTP"], Literal["MSTP"]]':
         """Index ID of the protocol.
 
-        IEEE 802.1D-2004 names the version 0 protocol ``STP``, without a version,
+        :ieee:`802.1D-2004` names the version 0 protocol ``STP``, without a version,
         so the family's own name doubles as its canonical name, the shape
         :meth:`IGMP.id <pcapkit.protocols.internet.igmp.protocol.IGMP.id>` takes.
 
@@ -301,7 +301,7 @@ class STP(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         Raises:
             TypeError: If ``file`` is :obj:`None`, on this class.
             ProtocolError: On this class, if ``version`` names no member; if,
-                without it, the octets are a BPDU IEEE 802.1Q-2022 clause 14.4
+                without it, the octets are a BPDU :ieee:`802.1Q-2022` clause 14.4
                 discards; or if fields come without it.
 
         """
@@ -356,7 +356,7 @@ class STP(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
 
     @classmethod
     def _classify(cls, data: 'bytes') -> 'Literal[-1, 0, 2, 3]':
-        """Validate a received BPDU as IEEE 802.1Q-2022 clause 14.4 does.
+        """Validate a received BPDU as :ieee:`802.1Q-2022` clause 14.4 does.
 
         With a Protocol Identifier of zero, a BPDU Type of ``0x00`` and 35 octets
         or more is a Configuration BPDU, and one of ``0x80`` and 4 octets or more
@@ -398,7 +398,7 @@ class STP(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
 
         It holds 102 octets or more, a Version 1 Length of zero, and a Version 3
         Length counting 0 to 64 MSTI Configuration Messages of 16 octets each after
-        the 64 octets every MST BPDU has there (IEEE 802.1Q-2022 clause 14.4).
+        the 64 octets every MST BPDU has there (:ieee:`802.1Q-2022` clause 14.4).
 
         Args:
             data: The BPDU, its octets alone.
@@ -645,7 +645,7 @@ class STP(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
 
     @staticmethod
     def _read_timer(value: 'int') -> 'float':
-        """Read a timer, in units of 1/256 of a second (IEEE 802.1D-2004 clause 9).
+        """Read a timer, in units of 1/256 of a second (:ieee:`802.1D-2004` clause 9).
 
         Args:
             value: Its two octets, as an integer.

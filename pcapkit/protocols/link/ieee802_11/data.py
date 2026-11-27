@@ -25,7 +25,7 @@ __all__ = [
 
 @info_final
 class FrameControl(Data):
-    """Data model for the Frame Control field (IEEE Std 802.11-2020 §9.2.4.1).
+    """Data model for the Frame Control field (:ieee:`802.11-2020` §9.2.4.1).
 
     Two frames lay out B8-B15 differently, and the flags they replace are
     :obj:`None` there: a Control Frame Extension frame carries
@@ -76,7 +76,7 @@ class FrameControl(Data):
 
 @info_final
 class SequenceControl(Data):
-    """Data model for the Sequence Control field (IEEE Std 802.11-2020 §9.2.4.4)."""
+    """Data model for the Sequence Control field (:ieee:`802.11-2020` §9.2.4.4)."""
 
     #: Fragment Number.
     fragment_number: 'int'
@@ -89,7 +89,7 @@ class SequenceControl(Data):
 
 @info_final
 class QoSControl(Data):
-    """Data model for the QoS Control field (IEEE Std 802.11-2020 §9.2.4.5).
+    """Data model for the QoS Control field (:ieee:`802.11-2020` §9.2.4.5).
 
     Only the subfields every QoS Data subtype places alike are decoded. What
     bits 8-15 carry depends on the subtype and on the kind of station that
@@ -118,7 +118,7 @@ class QoSControl(Data):
 
 @info_final
 class HTControl(Data):
-    """Data model for the HT Control field (IEEE Std 802.11-2020 §9.2.4.6).
+    """Data model for the HT Control field (:ieee:`802.11-2020` §9.2.4.6).
 
     Its first bits name the variant the rest of the field takes; the
     variants' own subfields are not decoded.
@@ -126,7 +126,7 @@ class HTControl(Data):
     """
 
     #: The variant, ``'HT'`` when bit 0 is clear, ``'VHT'`` when bit 0 is set
-    #: and bit 1 clear, and ``'HE'`` when both are set (IEEE Std 802.11ax-2021).
+    #: and bit 1 clear, and ``'HE'`` when both are set (:ieee:`802.11ax-2021`).
     variant: 'Literal["HT", "VHT", "HE"]'
     #: The whole field, as the little-endian integer read off the wire.
     value: 'int'
@@ -137,7 +137,7 @@ class HTControl(Data):
 
 @info_final
 class IEEE802_11(Protocol):
-    """Data model for an IEEE 802.11 MAC header (IEEE Std 802.11-2020 §9.2).
+    """Data model for an IEEE 802.11 MAC header (:ieee:`802.11-2020` §9.2).
 
     A field the header does not carry is :obj:`None`; see
     :func:`~pcapkit.protocols.link.ieee802_11.schema.layout`.

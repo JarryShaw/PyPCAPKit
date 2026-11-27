@@ -19,22 +19,22 @@ own:
      - BPDUs
    * - 0
      - :class:`~pcapkit.protocols.application.stpv0.protocol.STPv0`
-     - IEEE 802.1D-2004 clause 9
+     - :ieee:`802.1D-2004` clause 9
      - Configuration, 35 octets, and Topology Change Notification (TCN), 4 octets
    * - 2
      - :class:`~pcapkit.protocols.application.rstp.protocol.RSTP`
-     - IEEE 802.1Q-2022 clause 14
+     - :ieee:`802.1Q-2022` clause 14
      - RST, 36 octets
    * - 3
      - :class:`~pcapkit.protocols.application.mstp.protocol.MSTP`
-     - IEEE 802.1Q-2022 clause 14
+     - :ieee:`802.1Q-2022` clause 14
      - MST, 102 octets and an MSTI Configuration Message of 16 for each MSTI
 
 The members share the first four octets alone, the Protocol Identifier, the Protocol
 Version Identifier and the BPDU Type, so the base parses no BPDU. LLC address
 ``0x42`` is the family's, as DSAP and SSAP both, so
 :attr:`LLC.__proto__ <pcapkit.protocols.link.llc.protocol.LLC.__proto__>` binds this
-base, paired, and it picks the member as IEEE 802.1Q-2022 clause 14.4 validates a
+base, paired, and it picks the member as :ieee:`802.1Q-2022` clause 14.4 validates a
 BPDU, by :meth:`_classify`. A BPDU that clause discards is left
 :class:`~pcapkit.protocols.misc.raw.protocol.Raw` behind LLC, and a direct parse of it
 raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`; so is an SPT BPDU, of

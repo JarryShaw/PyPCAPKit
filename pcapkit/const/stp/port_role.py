@@ -24,19 +24,19 @@ __all__ = ['PortRole']
 
 
 class PortRole(EnumRegistry, IntEnum):
-    """[PortRole] STP Port Roles [IEEE 802.1Q-2022]"""
+    """[PortRole] STP Port Roles [:ieee:`802.1Q-2022`]"""
 
-    #: Master Port in the MSTI Flags; Unknown in the CIST Flags, as IEEE
-    #: 802.1D-2004 names it [IEEE 802.1Q-2022]
+    #: Master Port in the MSTI Flags; Unknown in the CIST Flags, as
+    #: :ieee:`802.1D-2004` names it [:ieee:`802.1Q-2022`]
     Master = 0x00
 
-    #: Alternate or Backup Port [IEEE 802.1Q-2022]
+    #: Alternate or Backup Port [:ieee:`802.1Q-2022`]
     Alternate_or_Backup = 0x01
 
-    #: Root Port [IEEE 802.1Q-2022]
+    #: Root Port [:ieee:`802.1Q-2022`]
     Root = 0x02
 
-    #: Designated Port [IEEE 802.1Q-2022]
+    #: Designated Port [:ieee:`802.1Q-2022`]
     Designated = 0x03
 
     @classmethod

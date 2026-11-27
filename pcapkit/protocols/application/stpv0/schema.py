@@ -35,7 +35,7 @@ def stp_config_body(packet: 'dict[str, Any]') -> 'bool':
 @schema_final
 class STPv0(Schema):
     """Header schema for a Configuration BPDU, 35 octets, or a TCN BPDU, 4 octets
-    (IEEE 802.1D-2004 clause 9).
+    (:ieee:`802.1D-2004` clause 9).
 
     .. versionadded:: 1.9.0
 

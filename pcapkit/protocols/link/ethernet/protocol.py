@@ -57,8 +57,8 @@ class Ethernet(Link[Data_Ethernet, Schema_Ethernet],
     length of the MAC client data, an IEEE 802.2
     :class:`~pcapkit.protocols.link.llc.protocol.LLC` PDU, and the octets past
     it, the pad among them, are kept as
-    :attr:`~pcapkit.protocols.link.ethernet.schema.Ethernet.trailer` (IEEE Std
-    802.3-2022 §3.2.6). A value between the two is neither, and its payload is
+    :attr:`~pcapkit.protocols.link.ethernet.schema.Ethernet.trailer`
+    (:ieee:`802.3-2022` §3.2.6). A value between the two is neither, and its payload is
     kept as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
 
     .. versionchanged:: 1.9.0

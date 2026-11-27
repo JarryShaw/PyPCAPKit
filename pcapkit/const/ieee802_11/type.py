@@ -24,7 +24,7 @@ __all__ = ['Type']
 
 
 class Type(EnumRegistry, IntEnum):
-    """[Type] IEEE 802.11 Frame Types [IEEE Std 802.11-2020, Table 9-1]"""
+    """[Type] IEEE 802.11 Frame Types [:ieee:`802.11-2020`, Table 9-1]"""
 
     #: Management
     Management = 0

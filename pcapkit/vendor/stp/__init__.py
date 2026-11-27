@@ -20,9 +20,9 @@ Available vendor crawlers include:
 
 None of these crawlers crawls, so each reads a ``DATA`` literal instead of
 fetching a URL, the shape :mod:`pcapkit.vendor.linux.arphrd` takes
-(:ref:`const-vendor-pairing`). The values are fixed by the text of IEEE Std
-802.1D-2004 clause 9 and IEEE Std 802.1Q-2022 clause 14, which no registry
-publishes and which are paywalled. They are transcribed from Wireshark's
+(:ref:`const-vendor-pairing`). The values are fixed by the text of
+:ieee:`802.1D-2004` clause 9 and :ieee:`802.1Q-2022` clause 14, which no
+registry publishes and which are paywalled. They are transcribed from Wireshark's
 ``packet-bpdu.c``, and agree with tcpdump's ``print-stp.c`` and with mstpd's
 ``mstp.h``, whose ``port_encoded_role_t`` gives the Master Port its ``0``.
 

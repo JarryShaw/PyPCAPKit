@@ -10,7 +10,7 @@ which is automatically generating :class:`pcapkit.const.stp.bpdu_type.BPDUType`.
 The crawler reads :data:`DATA` rather than a URL, for the reason
 :mod:`pcapkit.vendor.stp` gives. A value is the fourth octet of a BPDU, its
 BPDU Type. The RST, MST and SPT BPDUs share type ``0x02`` and are told apart
-by the Protocol Version Identifier, as IEEE Std 802.1Q-2022 clause 14.4
+by the Protocol Version Identifier, as :ieee:`802.1Q-2022` clause 14.4
 validates them.
 
 """
@@ -26,20 +26,20 @@ if TYPE_CHECKING:
 
 __all__ = ['BPDUType']
 
-#: BPDU Types of IEEE Std 802.1D-2004 clause 9 and IEEE Std 802.1Q-2022
+#: BPDU Types of :ieee:`802.1D-2004` clause 9 and :ieee:`802.1Q-2022`
 #: clause 14.
 #:
 #: Maps a type to the enumeration name it takes and the comment rendered
 #: above it.
 DATA = {
-    0x00: ('Configuration', 'Configuration BPDU [IEEE 802.1D-2004]'),
-    0x02: ('RST', 'RST BPDU, and the MST and SPT BPDUs [IEEE 802.1D-2004; IEEE 802.1Q-2022]'),
-    0x80: ('TCN', 'Topology Change Notification BPDU [IEEE 802.1D-2004]'),
+    0x00: ('Configuration', 'Configuration BPDU [:ieee:`802.1D-2004`]'),
+    0x02: ('RST', 'RST BPDU, and the MST and SPT BPDUs [:ieee:`802.1D-2004`; :ieee:`802.1Q-2022`]'),
+    0x80: ('TCN', 'Topology Change Notification BPDU [:ieee:`802.1D-2004`]'),
 }  # type: dict[int, tuple[str, str]]
 
 
 class BPDUType(Vendor):
-    """STP BPDU Types [IEEE 802.1D-2004; IEEE 802.1Q-2022]"""
+    """STP BPDU Types [:ieee:`802.1D-2004`; :ieee:`802.1Q-2022`]"""
 
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0x00 <= value <= 0xFF'

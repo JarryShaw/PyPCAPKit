@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
 __all__ = ['Type']
 
-#: IEEE 802.11 Type subfield values (IEEE Std 802.11-2020, Table 9-1).
+#: IEEE 802.11 Type subfield values (:ieee:`802.11-2020`, Table 9-1).
 #:
 #: Maps a Type value to its *Type description*. Names go through
 #: :meth:`~Vendor.rename`, so the generated member is the
@@ -39,7 +39,7 @@ DATA = {
 
 
 class Type(Vendor):
-    """IEEE 802.11 Frame Types [IEEE Std 802.11-2020, Table 9-1]"""
+    """IEEE 802.11 Frame Types [:ieee:`802.11-2020`, Table 9-1]"""
 
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0b00 <= value <= 0b11'

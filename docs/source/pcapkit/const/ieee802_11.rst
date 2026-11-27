@@ -4,7 +4,7 @@
 
 .. module:: pcapkit.const.ieee802_11
 
-From IEEE Std 802.11-2020, Table 9-1, *Valid type and subtype combinations*.
+From :ieee:`802.11-2020`, Table 9-1, *Valid type and subtype combinations*.
 
 .. list-table::
 

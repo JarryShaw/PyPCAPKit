@@ -23,8 +23,8 @@ if TYPE_CHECKING:
 
 __all__ = ['ControlSubtype']
 
-#: Control frame (Type ``0b01``) Subtype values (IEEE Std 802.11-2020,
-#: Table 9-1, with ``Trigger`` from IEEE Std 802.11ax-2021).
+#: Control frame (Type ``0b01``) Subtype values (:ieee:`802.11-2020`,
+#: Table 9-1, with ``Trigger`` from :ieee:`802.11ax-2021`).
 #:
 #: Maps a Subtype value to its *Subtype description*.
 DATA = {
@@ -50,7 +50,7 @@ RESERVED = ((0b0000, 0b0001),)  # type: tuple[tuple[int, int], ...]
 
 
 class ControlSubtype(Vendor):
-    """IEEE 802.11 Control Frame Subtypes [IEEE Std 802.11-2020, Table 9-1]"""
+    """IEEE 802.11 Control Frame Subtypes [:ieee:`802.11-2020`, Table 9-1]"""
 
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0b0000 <= value <= 0b1111'

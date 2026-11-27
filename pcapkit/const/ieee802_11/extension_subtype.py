@@ -24,7 +24,7 @@ __all__ = ['ExtensionSubtype']
 
 
 class ExtensionSubtype(EnumRegistry, IntEnum):
-    """[ExtensionSubtype] IEEE 802.11 Extension Frame Subtypes [IEEE Std 802.11-2020, Table 9-1]"""
+    """[ExtensionSubtype] IEEE 802.11 Extension Frame Subtypes [:ieee:`802.11-2020`, Table 9-1]"""
 
     #: DMG Beacon
     DMG_Beacon = 0

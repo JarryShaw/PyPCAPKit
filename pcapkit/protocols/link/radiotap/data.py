@@ -319,7 +319,7 @@ class MCS(RadiotapField):
     known: 'MCSKnown'
     #: Bandwidth, guard interval, HT format, FEC type, STBC and Ness.
     flags: 'MCSFlags'
-    #: MCS rate index, as in IEEE Std 802.11n-2009.
+    #: MCS rate index, as in :ieee:`802.11n-2009`.
     mcs: 'int'
 
     if TYPE_CHECKING:

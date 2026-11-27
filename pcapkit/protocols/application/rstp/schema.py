@@ -27,7 +27,7 @@ def rstp_version_1_length(packet: 'dict[str, Any]') -> 'bool':
 
     Returns:
         Whether its version is 2; else, on packing, whether it is given, and on
-        unpacking, whether octets are left, as IEEE 802.1Q-2022 clause 14.4
+        unpacking, whether octets are left, as :ieee:`802.1Q-2022` clause 14.4
         decodes a BPDU of version 3 or more and 35 octets as an RST BPDU.
 
     """
@@ -40,7 +40,7 @@ def rstp_version_1_length(packet: 'dict[str, Any]') -> 'bool':
 
 @schema_final
 class RSTP(Schema):
-    """Header schema for an RST BPDU, 36 octets (IEEE 802.1Q-2022 clause 14).
+    """Header schema for an RST BPDU, 36 octets (:ieee:`802.1Q-2022` clause 14).
 
     .. versionadded:: 1.9.0
 

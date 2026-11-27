@@ -17,7 +17,7 @@
 
    These crawlers do not crawl, so each reads a ``DATA`` literal and defines
    no ``LINK`` (:ref:`const-vendor-pairing`). The values are fixed by the text
-   of IEEE Std 802.1D-2004 clause 9 and IEEE Std 802.1Q-2022 clause 14, which no
+   of :ieee:`802.1D-2004` clause 9 and :ieee:`802.1Q-2022` clause 14, which no
    registry publishes; they agree with Wireshark's ``packet-bpdu.c``, tcpdump's
    ``print-stp.c`` and mstpd's ``mstp.h``.
 
