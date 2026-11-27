@@ -42,8 +42,12 @@ S1G Beacon lay out B8-B15 of Frame Control differently; see
 Scope
 -----
 
-* **The frame body** (§9.2.4.7) is kept as
-  :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, protected or not.
+* **The frame body** (§9.2.4.7) of a data frame of a subtype carrying one,
+  unprotected and holding an MSDU rather than an A-MSDU, is an IEEE 802.2
+  :class:`~pcapkit.protocols.link.llc.protocol.LLC` PDU; any other is kept as
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. A mesh STA's Mesh Control
+  field ahead of the MSDU is not read: bit 8 of QoS Control announces it only
+  in a mesh BSS, which the header does not tell.
 * **The FCS** (§9.2.4.8), where one was captured, stays at the end of the
   body: this class does not decide whether a capture carries one, which
   behind radiotap is a Flags bit
@@ -89,6 +93,7 @@ Scope
    .. automethod:: _read_ht_control
    .. automethod:: _make_ht_control
    .. automethod:: _make_mac_addr
+   .. automethod:: _import_next_layer
 
 Header Schemas
 --------------
@@ -141,6 +146,9 @@ Constants
    :no-value:
 
 .. autodata:: pcapkit.protocols.link.ieee802_11.const.CONTROL_WITH_ADDR2
+   :no-value:
+
+.. autodata:: pcapkit.protocols.link.ieee802_11.const.DATA_WITH_BODY
    :no-value:
 
 .. rubric:: Footnotes

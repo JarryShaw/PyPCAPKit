@@ -42,6 +42,7 @@ APP_TCP = 'pcapkit.const.reg.apptype.tcp.TCP'
 APP_UDP = 'pcapkit.const.reg.apptype.udp.UDP'
 APP_SCTP = 'pcapkit.const.reg.apptype.sctp.SCTP'
 ARPHRD = 'pcapkit.const.linux.arphrd.ARPHRD'
+LSAP = 'pcapkit.const.llc.lsap.LSAP'
 
 #: The AppType registries, whose member a class's index gives as its port.
 APPTYPES = (APP_TCP, APP_UDP, APP_SCTP)
@@ -93,6 +94,7 @@ EXPECTED = {
     'pcapkit.protocols.link.l2tpv2.protocol.L2TPv2': (APP_UDP, 1701),
     'pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1': (LINKTYPE, 113),
     'pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2': (LINKTYPE, 276),
+    'pcapkit.protocols.link.llc.protocol.LLC': (LINKTYPE, 100),
     'pcapkit.protocols.link.loopback.protocol.Loopback': (LINKTYPE, 0),
     'pcapkit.protocols.link.ppp.protocol.PPP': (LINKTYPE, 9),
     'pcapkit.protocols.link.pppoe.protocol.PPPoE': (LINKTYPE, 51),
@@ -106,8 +108,10 @@ EXPECTED = {
 
 #: Classes that keep another registry's code, in the same form. Netlink keeps
 #: ARPHRD_NETLINK, as LINKTYPE_NETLINK (253) names the SLL-framed form (#2627).
+#: SNAP keeps its LSAP, as none of the four registries names it (#2936).
 EXCEPTIONS = {
     'pcapkit.protocols.link.netlink.protocol.Netlink': (ARPHRD, 824),
+    'pcapkit.protocols.link.snap.protocol.SNAP': (LSAP, 0xAA),
 }
 
 

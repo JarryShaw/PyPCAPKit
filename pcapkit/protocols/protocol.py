@@ -676,11 +676,13 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         'LINUXSLL': ModuleDescriptor('pcapkit.protocols.link.linux_sll.protocol', 'LinuxSLL'),
         'LINUXSLL1': ModuleDescriptor('pcapkit.protocols.link.linux_sll1.protocol', 'LinuxSLL1'),
         'LINUXSLL2': ModuleDescriptor('pcapkit.protocols.link.linux_sll2.protocol', 'LinuxSLL2'),
+        'LLC': ModuleDescriptor('pcapkit.protocols.link.llc.protocol', 'LLC'),
         'LOOPBACK': ModuleDescriptor('pcapkit.protocols.link.loopback.protocol', 'Loopback'),
         'NETLINK': ModuleDescriptor('pcapkit.protocols.link.netlink.protocol', 'Netlink'),
         'PPP': ModuleDescriptor('pcapkit.protocols.link.ppp.protocol', 'PPP'),
         'PPPOE': ModuleDescriptor('pcapkit.protocols.link.pppoe.protocol', 'PPPoE'),
         'RADIOTAP': ModuleDescriptor('pcapkit.protocols.link.radiotap.protocol', 'Radiotap'),
+        'SNAP': ModuleDescriptor('pcapkit.protocols.link.snap.protocol', 'SNAP'),
         'S_TAG': ModuleDescriptor('pcapkit.protocols.link.s_tag.protocol', 'S_Tag'),
         'VLAN': ModuleDescriptor('pcapkit.protocols.link.vlan.protocol', 'VLAN'),
         # Internet Layer

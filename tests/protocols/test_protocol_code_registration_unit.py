@@ -592,6 +592,7 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
         """
         from pcapkit.const.ipx.packet import Packet
         from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.const.llc.lsap import LSAP
         from pcapkit.const.ppp.protocol import Protocol as PPP_Protocol
         from pcapkit.const.reg.apptype import AppType
         from pcapkit.const.reg.ethertype import EtherType
@@ -603,6 +604,7 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
         from pcapkit.protocols.internet.ipx.protocol import IPX
         from pcapkit.protocols.link.link import Link
         from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+        from pcapkit.protocols.link.llc.protocol import LLC
         from pcapkit.protocols.link.ppp.protocol import PPP
         from pcapkit.protocols.link.radiotap.protocol import Radiotap
         from pcapkit.protocols.misc.pcap.frame.protocol import Frame
@@ -623,6 +625,9 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
             # 0x0021 is the PPP protocol number of IPv4, where PPP ships IPv4; the
             # EtherType naming PPP itself keys Link's registry instead (#2817).
             PPP: (PPP_Protocol, False, EtherType.Point_to_Point_Protocol, 0x0021),
+            # 0xAA is LSAP.SNAP, where LLC ships SNAP, and TransType(0xAA)
+            # compares equal to it (#2936).
+            LLC: (LSAP, False, TransType(0xAA), 0xAA),
             # 105 is LinkType.IEEE802_11, where Radiotap ships IEEE802_11, and
             # TransType(105) compares equal to it (#2575).
             Radiotap: (LinkType, False, TransType(105), 105),
@@ -782,6 +787,8 @@ class ProtoDestDeclarationTests(unittest.TestCase):
          (('pcapkit.protocols.link.linux_sll.protocol', 'LinuxSLL'),)),
         ('pcapkit.const.ppp.protocol', 'Protocol',
          (('pcapkit.protocols.link.ppp.protocol', 'PPP'),)),
+        ('pcapkit.const.llc.lsap', 'LSAP',
+         (('pcapkit.protocols.link.llc.protocol', 'LLC'),)),
     )
 
     def test_each_registry_declares_the_destinations_it_keys(self) -> None:

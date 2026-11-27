@@ -65,6 +65,7 @@ EXPECTED = {
                                                          'SCTP'),),
     'pcapkit.vendor.linux.arphrd': (('pcapkit.protocols.link.linux_sll.protocol', 'LinuxSLL'),),
     'pcapkit.vendor.ppp.protocol': (('pcapkit.protocols.link.ppp.protocol', 'PPP'),),
+    'pcapkit.vendor.llc.lsap': (('pcapkit.protocols.link.llc.protocol', 'LLC'),),
 }
 
 

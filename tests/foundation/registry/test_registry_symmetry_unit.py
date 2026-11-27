@@ -80,6 +80,7 @@ DISPATCH = {
     'LinuxSLL': 'pcapkit.protocols.link.linux_sll.protocol:LinuxSLL',
     'FRAD': 'pcapkit.protocols.link.frad.protocol:FRAD',
     'PPP': 'pcapkit.protocols.link.ppp.protocol:PPP',
+    'LLC': 'pcapkit.protocols.link.llc.protocol:LLC',
     'Radiotap': 'pcapkit.protocols.link.radiotap.protocol:Radiotap',
     'Internet': 'pcapkit.protocols.internet.internet:Internet',
     'TCP': 'pcapkit.protocols.transport.tcp.protocol:TCP',
@@ -202,6 +203,8 @@ MODULE_REGISTRARS = (
     ModuleRegistrar('register_arphrd', 'pcapkit.const.linux.arphrd:ARPHRD.FRAD', 'LinuxSLL',
                     'pcapkit.protocols.link.link:Link'),
     ModuleRegistrar('register_frad', 0xCC, 'FRAD', 'pcapkit.protocols.internet.internet:Internet'),
+    ModuleRegistrar('register_lsap', 'pcapkit.const.llc.lsap:LSAP.SNAP', 'LLC',
+                    'pcapkit.protocols.link.link:Link'),
     ModuleRegistrar('register_ppp', 'pcapkit.const.ppp.protocol:Protocol.Internet_Protocol_version_4', 'PPP',
                     'pcapkit.protocols.internet.internet:Internet'),
     ModuleRegistrar('register_radiotap', 'pcapkit.const.reg.linktype:LinkType.IEEE802_11', 'Radiotap',
@@ -264,6 +267,8 @@ def _tables() -> 'dict[str, dict[Any, Any]]':
                 tables[f'{schema.__name__}.registry[{namespace}]'] = table
         else:
             tables[f'{schema.__module__}.{schema.__name__}.__enum__'] = schema.__enum__
+    # LLC's paired flags are written with its __proto__ entries (#2936).
+    tables['LLC.__paired__'] = resolve(DISPATCH['LLC']).__paired__
     tables['Extractor.__engine__'] = Extractor.__engine__
     tables['Extractor.__reassembly__'] = Extractor.__reassembly__
     tables['Extractor.__traceflow__'] = Extractor.__traceflow__

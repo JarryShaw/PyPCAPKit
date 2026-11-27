@@ -130,9 +130,10 @@ class TestIEEE802_11(unittest.TestCase):
                 self.assertIsNone(info.qos_control)
                 self.assertIsNone(info.ht_control)
                 self.assertEqual(parsed.length, 30 if addr4 else 24)
-                self.assertEqual(type(parsed.payload).__name__, 'Raw')
+                # The body is an MSDU, so LLC and SNAP carry it (#2936).
+                self.assertEqual(type(parsed.payload).__name__, 'LLC')
                 self.assertEqual(parsed.payload.data, body)
-                self.assertEqual(parsed.protochain.chain, '802.11:Raw')
+                self.assertEqual(parsed.protochain.chain, '802.11:LLC:SNAP')
 
     def test_frame_control_flags(self) -> None:
         """Every flag of §9.2.4.1 lands on its own bit."""

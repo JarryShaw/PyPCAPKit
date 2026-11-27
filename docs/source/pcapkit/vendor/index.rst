@@ -43,6 +43,7 @@ Link Layer
    ieee802_11
    l2tp
    linux
+   llc
    ppp
    pppoe
    radiotap

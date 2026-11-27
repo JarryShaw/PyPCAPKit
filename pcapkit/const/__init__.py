@@ -41,6 +41,7 @@ if TYPE_CHECKING:
     from pcapkit.const.ipx import *
     from pcapkit.const.l2tp import *
     from pcapkit.const.linux import *
+    from pcapkit.const.llc import *
     from pcapkit.const.mh import *
     from pcapkit.const.ngap import *
     from pcapkit.const.ospf import *
@@ -98,6 +99,8 @@ __all__ = [
     'L2TP_Type',
     # Linux
     'Linux_ARPHRD',
+    # LLC
+    'LLC_LSAP', 'LLC_SupervisoryFunction', 'LLC_ModifierFunction',
     # MH
     'MH_Packet', 'MH_Option', 'MH_DNSStatusCode', 'MH_ACKStatusCode',
     'MH_MNIDSubtype', 'MH_StatusCode', 'MH_EnumeratingAlgorithm',
@@ -152,6 +155,6 @@ __all__ = [
 # type checkers star-import above.
 __getattr__, __dir__ = lazy_exports(__name__, globals(), packages=(
     'reg', 'pcapng', 'arp', 'dccp', 'dns', 'esp', 'ftp', 'hip', 'http', 'icmp', 'icmpv6',
-    'ieee802_11', 'igmp', 'ipv4', 'ipv6', 'ipx', 'l2tp', 'linux', 'mh', 'ngap', 'ospf',
+    'ieee802_11', 'igmp', 'ipv4', 'ipv6', 'ipx', 'l2tp', 'linux', 'llc', 'mh', 'ngap', 'ospf',
     'ospfv1', 'ppp', 'pppoe', 'radiotap', 'sctp', 'sslv2', 'tcp', 'tls', 'vlan',
 ))

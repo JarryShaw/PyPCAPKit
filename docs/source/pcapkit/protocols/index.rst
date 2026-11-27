@@ -68,7 +68,7 @@ parsing a packet from its octets or building one from field values:
        end
 
        subgraph link [Link Layer]
-           Link --> Ethernet & FRAD & GRE & IEEE802_11 & L2TP & LinuxSLL & Loopback & Netlink & PPP & PPPoE & Radiotap & VLAN & ARP
+           Link --> Ethernet & FRAD & GRE & IEEE802_11 & L2TP & LinuxSLL & LLC & Loopback & Netlink & PPP & PPPoE & Radiotap & SNAP & VLAN & ARP
 
            subgraph arp [ARP Family]
                ARP --> InARP
@@ -140,11 +140,13 @@ parsing a packet from its octets or building one from field values:
        click LinuxSLL "link/linux_sll.html#pcapkit.protocols.link.linux_sll.protocol.LinuxSLL"
        click LinuxSLL1 "link/linux_sll1.html#pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1"
        click LinuxSLL2 "link/linux_sll2.html#pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2"
+       click LLC "link/llc.html#pcapkit.protocols.link.llc.protocol.LLC"
        click Loopback "link/loopback.html#pcapkit.protocols.link.loopback.protocol.Loopback"
        click Netlink "link/netlink.html#pcapkit.protocols.link.netlink.protocol.Netlink"
        click PPP "link/ppp.html#pcapkit.protocols.link.ppp.protocol.PPP"
        click PPPoE "link/pppoe.html#pcapkit.protocols.link.pppoe.protocol.PPPoE"
        click Radiotap "link/radiotap.html#pcapkit.protocols.link.radiotap.protocol.Radiotap"
+       click SNAP "link/snap.html#pcapkit.protocols.link.snap.protocol.SNAP"
        click VLAN "link/vlan.html#pcapkit.protocols.link.vlan.protocol.VLAN"
        click C_Tag "link/c_tag.html#pcapkit.protocols.link.c_tag.protocol.C_Tag"
        click S_Tag "link/s_tag.html#pcapkit.protocols.link.s_tag.protocol.S_Tag"

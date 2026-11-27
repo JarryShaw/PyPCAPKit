@@ -8,6 +8,7 @@ from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import EnumField
 from pcapkit.corekit.fields.strings import BytesField
+from pcapkit.protocols.link.ethernet.const import LENGTH_MAX
 from pcapkit.protocols.schema import Schema, schema_final
 
 __all__ = ['Ethernet']
@@ -26,7 +27,9 @@ def callback_payload(self: 'PayloadField', packet: 'dict[str, Any]') -> 'None':
         packet: Packet data, whose ``type`` names the next layer.
 
     Returns:
-        :obj:`None`; the resolved class is assigned to ``self.protocol``.
+        :obj:`None`; the resolved class is assigned to ``self.protocol``:
+        :class:`~pcapkit.protocols.link.llc.protocol.LLC` where ``type`` is a
+        length, and the class registered for it otherwise.
 
     Important:
         The lookup goes through :meth:`Protocol._lookup_next_layer
@@ -44,11 +47,34 @@ def callback_payload(self: 'PayloadField', packet: 'dict[str, Any]') -> 'None':
         class back, so the registry is left as registered (:issue:`1559`).
 
     """
+    if packet['type'] <= LENGTH_MAX:
+        from pcapkit.protocols.link.llc.protocol import \
+            LLC  # pylint: disable=import-outside-toplevel
+        self.protocol = LLC
+        return
+
     from pcapkit.protocols.link.ethernet.protocol import \
         Ethernet  # pylint: disable=import-outside-toplevel
 
     self.protocol = Ethernet._lookup_next_layer(  # pylint: disable=protected-access
         Ethernet.__proto__, packet['type'])
+
+
+def ethernet_payload_length(pkt: 'dict[str, Any]') -> 'int':
+    """Length of the :attr:`Ethernet.payload` field.
+
+    Args:
+        pkt: Packet data.
+
+    Returns:
+        The Length/Type field where it is a length (IEEE Std 802.3-2022
+        §3.2.6), so that the pad after the MAC client data is
+        :attr:`Ethernet.trailer`; the rest of the frame otherwise.
+
+    """
+    if pkt['type'] <= LENGTH_MAX:
+        return pkt['type']
+    return pkt['__length__']
 
 
 @schema_final
@@ -59,14 +85,17 @@ class Ethernet(Schema):
     dst: 'bytes' = BytesField(length=6)
     #: Source MAC address.
     src: 'bytes' = BytesField(length=6)
-    #: Protocol (internet layer).
+    #: Length/Type, an EtherType or the length of the payload.
     type: 'Enum_EtherType' = EnumField(length=2, namespace=Enum_EtherType)
     #: Payload.
     payload: 'bytes' = PayloadField(
-        length=lambda pkt: pkt['__length__'],
+        length=ethernet_payload_length,
         callback=callback_payload,
     )
+    #: Octets captured past the length a Length/Type field gives, the pad
+    #: among them.
+    trailer: 'bytes' = PayloadField(default=b'')
 
     if TYPE_CHECKING:
         def __init__(self, dst: 'bytes', src: 'bytes', type: 'Enum_EtherType',
-                     payload: 'bytes | ProtocolBase | Schema') -> 'None': ...
+                     payload: 'bytes | ProtocolBase | Schema', trailer: 'bytes' = b'') -> 'None': ...
