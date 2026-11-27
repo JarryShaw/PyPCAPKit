@@ -453,9 +453,11 @@ After every merge the sweep runs, in order:
    the sweep. One that is only behind is left alone: the ``main`` and ``develop``
    rulesets both require branches to be up to date, so every push to either branch
    puts the open pull requests that target it behind, and the owner merges through
-   the bypass. Sync Develop's pull request is neither rebased nor updated: its head,
-   ``sync/main``, is a mirror of ``main`` that each run overwrites, so a conflict is
-   resolved in a pull request into ``develop`` (:pr:`3075`, :doc:`workflows`).
+   the bypass. Sync Develop pushes ``main`` into ``develop`` itself and opens a pull
+   request only when that merge conflicts (:issue:`3102`). That pull request is
+   neither rebased nor updated: its head, ``sync/main``, is a mirror of ``main`` that
+   each run overwrites, so the conflict is resolved in a pull request into
+   ``develop`` (:pr:`3075`, :doc:`workflows`).
 #. **The changelog fold**: the merged pull request's entry is written into the
    release's central changelog pull request (:ref:`release-lines`).
 #. **Worktrees and branch**: the merged pull request's worktrees become prunable, and

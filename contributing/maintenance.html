@@ -1058,9 +1058,11 @@ merge wave supersedes that branch’s runs before they finish.</p></li>
 the sweep. One that is only behind is left alone: the <code class="docutils literal notranslate"><span class="pre">main</span></code> and <code class="docutils literal notranslate"><span class="pre">develop</span></code>
 rulesets both require branches to be up to date, so every push to either branch
 puts the open pull requests that target it behind, and the owner merges through
-the bypass. Sync Develop’s pull request is neither rebased nor updated: its head,
-<code class="docutils literal notranslate"><span class="pre">sync/main</span></code>, is a mirror of <code class="docutils literal notranslate"><span class="pre">main</span></code> that each run overwrites, so a conflict is
-resolved in a pull request into <code class="docutils literal notranslate"><span class="pre">develop</span></code> (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/3075">#3075</a>, <a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a>).</p></li>
+the bypass. Sync Develop pushes <code class="docutils literal notranslate"><span class="pre">main</span></code> into <code class="docutils literal notranslate"><span class="pre">develop</span></code> itself and opens a pull
+request only when that merge conflicts (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3102">#3102</a>). That pull request is
+neither rebased nor updated: its head, <code class="docutils literal notranslate"><span class="pre">sync/main</span></code>, is a mirror of <code class="docutils literal notranslate"><span class="pre">main</span></code> that
+each run overwrites, so the conflict is resolved in a pull request into
+<code class="docutils literal notranslate"><span class="pre">develop</span></code> (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/3075">#3075</a>, <a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a>).</p></li>
 <li><p><strong>The changelog fold</strong>: the merged pull request’s entry is written into the
 release’s central changelog pull request (<a class="reference internal" href="releasing.html#release-lines"><span class="std std-ref">Release Lines</span></a>).</p></li>
 <li><p><strong>Worktrees and branch</strong>: the merged pull request’s worktrees become prunable, and

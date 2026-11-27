@@ -616,9 +616,10 @@ between releases is a <code class="docutils literal notranslate"><span class="pr
 milestone, its scope issue and its <em>Release X.Y</em> view on the project board, set up as
 <a class="reference internal" href="conventions/process.html#process-release-scope"><span class="std std-ref">a new line opens</span></a>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">main</span></code> <strong>is the released line, and</strong> <code class="docutils literal notranslate"><span class="pre">develop</span></code> <strong>carries the next minor’s work</strong>
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2942">#2942</a>). A patch fix merges to <code class="docutils literal notranslate"><span class="pre">main</span></code>, which then merges back into
-<code class="docutils literal notranslate"><span class="pre">develop</span></code> through the pull request Sync Develop opens (<a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a>), with a
-merge commit rather than a squash.</p>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2942">#2942</a>). A patch fix merges to <code class="docutils literal notranslate"><span class="pre">main</span></code>, and Sync Develop then merges
+<code class="docutils literal notranslate"><span class="pre">main</span></code> into <code class="docutils literal notranslate"><span class="pre">develop</span></code> with a merge commit and pushes it, with no pull request
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3102">#3102</a>, <a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a>). Only a merge that conflicts opens one, which a
+person resolves and merges with a merge commit rather than a squash.</p>
 <p><strong>A major release,</strong> <code class="docutils literal notranslate"><span class="pre">X.0.0</span></code>, <strong>isolates one change to the core model</strong> and carries
 nothing else. The roadmap work that can or should be done ships first, a batch per
 minor, so the major lands on a mostly closed-out roadmap. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2805">#2805</a>; which

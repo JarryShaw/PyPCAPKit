@@ -2890,19 +2890,28 @@ the old pull request and opens a new one.</p>
 fix merged to the released line reaches the next minor, as the owner asked in review of
 <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/3056">#3056</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2942">#2942</a>). On each push to <code class="docutils literal notranslate"><span class="pre">main</span></code>, and
 on dispatch, its <code class="docutils literal notranslate"><span class="pre">check</span></code> job compares the two with a read-only token. Where
-<code class="docutils literal notranslate"><span class="pre">develop</span></code> lacks commits of <code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">pr</span></code> force-updates <code class="docutils literal notranslate"><span class="pre">sync/main</span></code> to <code class="docutils literal notranslate"><span class="pre">main</span></code>’s
-head, then opens the pull request from <code class="docutils literal notranslate"><span class="pre">sync/main</span></code> into <code class="docutils literal notranslate"><span class="pre">develop</span></code>,
-<code class="docutils literal notranslate"><span class="pre">chore:</span> <span class="pre">merge</span> <span class="pre">main</span> <span class="pre">into</span> <span class="pre">develop</span></code>, or updates the open one, never a second. <code class="docutils literal notranslate"><span class="pre">pr</span></code>
-runs in <code class="docutils literal notranslate"><span class="pre">release-app</span></code> and does both with the release App’s token, as the Python
-Versions and Issue and PR Kinds <code class="docutils literal notranslate"><span class="pre">pr</span></code> jobs do, so the pull request’s checks run. Its
-token holds contents and pull requests write, and workflows write, without which the
-mirror could not move past a change <code class="docutils literal notranslate"><span class="pre">main</span></code> made to a workflow.</p>
+<code class="docutils literal notranslate"><span class="pre">develop</span></code> lacks commits of <code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">merge</span></code> merges <code class="docutils literal notranslate"><span class="pre">main</span></code> into a checkout of
+<code class="docutils literal notranslate"><span class="pre">develop</span></code> with a merge commit, <code class="docutils literal notranslate"><span class="pre">chore:</span> <span class="pre">merge</span> <span class="pre">main</span> <span class="pre">into</span> <span class="pre">develop</span></code>, and pushes
+<code class="docutils literal notranslate"><span class="pre">develop</span></code>: <strong>no pull request opens</strong>, as the owner ruled in session, recorded on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3102">#3102</a>. It pushes through the maintenance deploy key, a bypass actor of
+<code class="docutils literal notranslate"><span class="pre">develop</span></code>’s ruleset, as Create Release’s <code class="docutils literal notranslate"><span class="pre">tag</span></code> job does; the release App is not
+one. A push refused because <code class="docutils literal notranslate"><span class="pre">develop</span></code> moved is merged afresh and retried once; a
+second refusal, or one while <code class="docutils literal notranslate"><span class="pre">develop</span></code> stayed put, fails the job, and the next push
+to <code class="docutils literal notranslate"><span class="pre">main</span></code> merges again. Its step summary says which path ran.</p>
+<p><strong>Only a merge that conflicts opens a pull request.</strong> <code class="docutils literal notranslate"><span class="pre">merge</span></code> aborts it and hands
+it to <code class="docutils literal notranslate"><span class="pre">pr</span></code>, which force-updates <code class="docutils literal notranslate"><span class="pre">sync/main</span></code> to <code class="docutils literal notranslate"><span class="pre">main</span></code>’s head, then opens the pull
+request from <code class="docutils literal notranslate"><span class="pre">sync/main</span></code> into <code class="docutils literal notranslate"><span class="pre">develop</span></code>, or updates the open one, never a second,
+for a person to resolve. <code class="docutils literal notranslate"><span class="pre">pr</span></code> runs in <code class="docutils literal notranslate"><span class="pre">release-app</span></code> and does both with the release
+App’s token, as the Python Versions and Issue and PR Kinds <code class="docutils literal notranslate"><span class="pre">pr</span></code> jobs do, so the pull
+request’s checks run. Its token holds contents and pull requests write, and workflows
+write, without which the mirror could not move past a change <code class="docutils literal notranslate"><span class="pre">main</span></code> made to a
+workflow.</p>
 <p>The head is a mirror rather than <code class="docutils literal notranslate"><span class="pre">main</span></code>, as the owner ruled on <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/3075">#3075</a>, which no
 issue holds: “Update branch” merges a pull request’s base into its head, so on this
 pull request it writes <code class="docutils literal notranslate"><span class="pre">develop</span></code> into <code class="docutils literal notranslate"><span class="pre">sync/main</span></code>, which the next run overwrites,
 and never into <code class="docutils literal notranslate"><span class="pre">main</span></code>. A pull request a run finds open from <code class="docutils literal notranslate"><span class="pre">main</span></code> itself is
-closed with a comment naming its replacement, since a head cannot be changed. Nothing
-here merges, no ref but <code class="docutils literal notranslate"><span class="pre">sync/main</span></code> is written, the body asks for a merge commit
+closed with a comment naming its replacement, since a head cannot be changed. <code class="docutils literal notranslate"><span class="pre">pr</span></code>
+merges nothing and writes no ref but <code class="docutils literal notranslate"><span class="pre">sync/main</span></code>, its body asks for a merge commit
 rather than a squash, and a <code class="docutils literal notranslate"><span class="pre">develop</span></code> that does not exist yet is a notice.
 <code class="file docutils literal notranslate"><span class="pre">util/sync_develop.py</span></code> holds the rule, and
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_sync_develop_2942.py</span></code> pins it.</p>
@@ -2959,7 +2968,9 @@ it, so the scheduled jobs reading them name it too
 <li><p>Vendor Update’s <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">conda-tag</span></code></p></li>
 </ul>
 <p>A manual run names neither, except Conda Update’s with <code class="docutils literal notranslate"><span class="pre">publish</span></code>, whose jobs
-name them as the schedule’s do (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>).</p>
+name them as the schedule’s do (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>). Sync Develop’s <code class="docutils literal notranslate"><span class="pre">merge</span></code> names
+<code class="docutils literal notranslate"><span class="pre">conda-tag</span></code> on every run, for the deploy key it pushes <code class="docutils literal notranslate"><span class="pre">develop</span></code> with
+(<a class="reference internal" href="#sync-develop-2942">Sync Develop (#2942)</a>).</p>
 <p>Both <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> and the release <code class="docutils literal notranslate"><span class="pre">conda</span></code> job have a <code class="docutils literal notranslate"><span class="pre">windows-latest</span></code> leg,
 which builds, smoke-tests and publishes the <code class="docutils literal notranslate"><span class="pre">win-64</span></code> package (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>).
 It blocks as the other legs do: no step continues on error. Its one step that
@@ -2968,9 +2979,9 @@ Intel leg’s anaconda-client call (<a class="extlink-issue reference external" 
 build-only manual run as every upload does.
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_conda_windows_leg_2060.py</span></code> pins the leg.</p>
 <p>A required reviewer on <code class="docutils literal notranslate"><span class="pre">conda-tag</span></code> or <code class="docutils literal notranslate"><span class="pre">anaconda</span></code> would therefore hold every
-scheduled bump for an approval, besides the release-graph reason
-<a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a> gives for keeping them without one. Each run of these jobs
-also records a deployment to its environment.
+scheduled bump, and every merge Sync Develop pushes, for an approval, besides the
+release-graph reason <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a> gives for keeping them without one. Each run
+of these jobs also records a deployment to its environment.
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_secret_environments_1968.py</span></code> checks that every job
 reading one of these secrets names the environment holding it.</p>
 <p>No other workflow in scope here declares one – including
