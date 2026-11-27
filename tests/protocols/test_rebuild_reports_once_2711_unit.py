@@ -9,13 +9,15 @@ twice, where IPv4 alone logged it once. The payload's parse is quiet, warnings a
 the errors a next-layer fallback absorbs alike, since the outer layer's own parse
 reports them.
 
-Ethernet frames carrying an IGMPv3 Report over IPv4 and over IPv6 are cut at every
-offset, read from their octets and from a PCAP savefile, and every layer is rebuilt
-from its data model and its dict: it must give the octets parsed and report nothing
-beyond what the parse reported, on the :mod:`warnings` channel or the ``pcapkit``
-logger. A zero-fill ceiling low enough that the Report's in-frame parse raises gives
-the errors. The controls are a wrong checksum, reported once on rebuild as on parse,
-and a problem the parse never had, which the rebuild reports once.
+Ethernet frames carrying an IGMPv3 Report over IPv4 and over IPv6 are cut, read from
+their octets and from a PCAP savefile, and every layer is rebuilt from its data model
+and its dict: it must give the octets parsed and report nothing beyond what the parse
+reported, on the :mod:`warnings` channel or the ``pcapkit`` logger. A zero-fill
+ceiling low enough that the Report's in-frame parse raises gives the errors. The cuts
+here are hand-picked, and :mod:`tests.protocols.test_rebuild_reports_every_cut_2711_unit`
+makes the same checks at every offset. The controls are a wrong checksum, reported
+once on rebuild as on parse, and a problem the parse never had, which the rebuild
+reports once.
 
 The octets and captures are built here; this module is unit-tier and reads no capture file.
 
@@ -23,22 +25,21 @@ The octets and captures are built here; this module is unit-tier and reads no ca
 from __future__ import annotations
 
 import collections
-import contextlib
 import io
-import logging
 import struct
 import unittest
-import warnings
 from typing import TYPE_CHECKING
 from unittest import mock
 
 from tests._support import reimport_once_per_class
 from tests.foundation import _roundtrip as wire
+from tests.protocols._rebuild import levelled, reported
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Iterator
 
-#: Test tier (#1958): hand-picked parse -> rebuild round trips.
+#: Test tier (#1958): hand-picked parse -> rebuild round trips; the sweep of every
+#: cut is ``LATEST``, as the tier rule has it (#1732, #1958).
 __tier__ = 'ALL'
 
 #: A group record of type MODE_IS_INCLUDE for 239.1.1.1 with one source, 10.0.0.1.
@@ -66,30 +67,19 @@ def pcap(packet: bytes, original: int) -> bytes:
             + struct.pack('<IIII', 1, 0, len(packet), original) + packet)
 
 
-class _Logged(logging.Handler):
-    """Collect what the ``pcapkit`` logger reports, with its level."""
+def picked(whole: bytes) -> 'tuple[int, ...]':
+    """Hand-picked cuts of ``whole``, in octets off its end.
 
-    def __init__(self) -> None:
-        super().__init__(logging.DEBUG)
-        self.messages = []  # type: list[str]
+    None; the Report's last record cut inside its source, before it and inside its
+    first word, and the record gone; the Report cut to its header and inside it; one
+    octet of it left, and none; the IP header cut to six octets, where IPv6 keeps its
+    Payload Length but zero-fills its Next Header as a Hop-by-Hop header to walk, and
+    to four; the IP header gone; and the Ethernet header cut in its type, then in its
+    addresses.
 
-    def emit(self, record: 'logging.LogRecord') -> None:
-        self.messages.append(f'{record.levelname}: {record.getMessage()}')
-
-
-@contextlib.contextmanager
-def _reported() -> 'Iterator[list[str]]':
-    """Collect what the block reports, on the :mod:`warnings` channel and the logger."""
-    handler = _Logged()
-    logger = logging.getLogger('pcapkit')
-    logger.addHandler(handler)
-    try:
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter('always')
-            yield handler.messages
-    finally:
-        logger.removeHandler(handler)
-    handler.messages.extend(f'warned: {item.message}' for item in caught)
+    """
+    return (0, 2, 4, 10, 12, 24, 30, 31, 32, len(whole) - 20, len(whole) - 18,
+            len(whole) - 14, len(whole) - 13, len(whole) - 7)
 
 
 def _layers(frame: 'Any') -> 'Iterator[Any]':
@@ -100,11 +90,20 @@ def _layers(frame: 'Any') -> 'Iterator[Any]':
         layer = layer.payload
 
 
-class RebuildReportsOnceTests(unittest.TestCase):
-    """A rebuild reports what its octets carry once, and nothing the parse did not."""
+class CutFrameMixin:
+    """The checks on each frame cut, at its :func:`picked` cuts or at every offset.
+
+    A plain class, so only the test case each tier's module builds on it is
+    collected: :class:`RebuildReportsOnceTests` here, and the ``LATEST`` sweep's,
+    which sets :attr:`sweep`.
+
+    """
+
+    #: Whether to cut each frame at every offset rather than at its picked cuts.
+    sweep = False
 
     def setUp(self) -> None:
-        reimport_once_per_class(self)
+        reimport_once_per_class(self)  # type: ignore[arg-type]
         import pcapkit
         from pcapkit.protocols.link.ethernet.protocol import Ethernet
         from pcapkit.utilities import config
@@ -114,18 +113,18 @@ class RebuildReportsOnceTests(unittest.TestCase):
         self.config = config
         patch = mock.patch.object(config, 'CHECKSUM_VERIFY', True)
         patch.start()
-        self.addCleanup(patch.stop)
+        self.addCleanup(patch.stop)  # type: ignore[attr-defined]
 
     def parse(self, build: 'Callable[[], Any]') -> 'tuple[Any, list[str]]':
         """What ``build`` returns, and what it reported."""
-        with _reported() as messages:
+        with reported(levelled) as messages:
             layer = build()
         return layer, messages
 
     def cuts(self) -> 'Iterator[tuple[str, str, Any, list[str]]]':
-        """Every frame cut at every offset, read from its octets and from a savefile."""
+        """Each frame cut, read from its octets and from a savefile."""
         for label, whole in FRAMES.items():
-            for cut in range(len(whole)):
+            for cut in range(len(whole)) if self.sweep else picked(whole):
                 data = whole[:len(whole) - cut]
                 frame, messages = self.parse(lambda: self.Ethernet(data, len(data)))  # pylint: disable=cell-var-from-loop
                 yield label, f'octets, cut {cut}', frame, messages
@@ -137,15 +136,15 @@ class RebuildReportsOnceTests(unittest.TestCase):
         """Every layer of ``frame`` rebuilds its octets, reporting nothing ``parsed`` lacks."""
         for layer in _layers(frame):
             for path, data in (('model', layer.info), ('dict', layer.info.to_dict())):
-                with self.subTest(layer=type(layer).__name__, path=path):
+                with self.subTest(layer=type(layer).__name__, path=path):  # type: ignore[attr-defined]
                     rebuilt, messages = self.parse(lambda: type(layer).from_data(data))  # pylint: disable=cell-var-from-loop
-                    self.assertEqual(rebuilt.data, layer.data)
+                    self.assertEqual(rebuilt.data, layer.data)  # type: ignore[attr-defined]
                     beyond = collections.Counter(messages) - collections.Counter(parsed)
-                    self.assertEqual(sorted(beyond.elements()), [])
+                    self.assertEqual(sorted(beyond.elements()), [])  # type: ignore[attr-defined]
 
     def test_a_cut_frame_rebuilds_within_its_parse(self) -> None:
         for label, how, frame, parsed in self.cuts():
-            with self.subTest(frame=label, read=how):
+            with self.subTest(frame=label, read=how):  # type: ignore[attr-defined]
                 self.assertRebuildsWithin(frame, parsed)
 
     def test_errors_a_fallback_absorbs_are_reported_once(self) -> None:
@@ -154,10 +153,14 @@ class RebuildReportsOnceTests(unittest.TestCase):
         with mock.patch.object(self.config, 'MAX_ZERO_PAD_LENGTH', 8):
             seen = 0
             for label, how, frame, parsed in self.cuts():
-                with self.subTest(frame=label, read=how):
+                with self.subTest(frame=label, read=how):  # type: ignore[attr-defined]
                     self.assertRebuildsWithin(frame, parsed)
                 seen += any(line.startswith('CRITICAL: FieldValueError') for line in parsed)
-            self.assertTrue(seen)
+            self.assertTrue(seen)  # type: ignore[attr-defined]
+
+
+class RebuildReportsOnceTests(CutFrameMixin, unittest.TestCase):
+    """A rebuild reports what its octets carry once, and nothing the parse did not."""
 
     def test_a_wrong_checksum_is_reported_once_on_rebuild(self) -> None:
         bad = REPORT[:2] + (int.from_bytes(REPORT[2:4], 'big') ^ 0x0101).to_bytes(2, 'big') + REPORT[4:]
