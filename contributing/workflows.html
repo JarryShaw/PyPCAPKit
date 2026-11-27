@@ -3126,10 +3126,11 @@ the Docs reader stays there</p></td>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">link_release_docs</span></code> links each changelog entry to its release’s build as the page is
 read – after the entry’s link on the index, and under its own page’s title – so no
-<code class="docutils literal notranslate"><span class="pre">.rst</span></code> source names a URL. <code class="docutils literal notranslate"><span class="pre">UNBUILT_RELEASES</span></code> lists the releases Read the Docs holds
-no build of, which get none: a release whose tag build fails joins it, and leaves once a
-rebuild succeeds. On the tags that predate the switch, Read the Docs’ flyout, which it
-injects only into the pages it serves, switches versions.</p>
+<code class="docutils literal notranslate"><span class="pre">.rst</span></code> source names a URL. A release whose tag is in <code class="docutils literal notranslate"><span class="pre">UNBUILT</span></code> gets none:
+<code class="file docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code> reads that set from <code class="file docutils literal notranslate"><span class="pre">util/pages_versions.py</span></code>, so the
+links and the redirects leave out the same releases, and a rebuild that succeeds is one
+edit there (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3144">#3144</a>). On the tags that predate the switch, Read the Docs’ flyout,
+which it injects only into the pages it serves, switches versions.</p>
 <pre  class="mermaid">
         flowchart TD
     B[&quot;A build carrying the switch:&lt;br/&gt;GitHub Pages, or Read the Docs'&lt;br/&gt;stable, latest or a tag&quot;]

@@ -591,7 +591,8 @@ Branch moves to ``main``'s head on each push there, ``latest`` from ``develop``,
 the release's tag as a version of its own, from the :file:`.readthedocs.yaml` in its
 tree. Until that build is done, the release's changelog entry and ``stable``'s version
 switch link a page Read the Docs does not have yet (:issue:`3134`); a tag build that
-fails is listed in ``UNBUILT_RELEASES`` (:ref:`documentation-hosting`).
+fails is listed in ``UNBUILT`` in :file:`util/pages_versions.py`
+(:ref:`documentation-hosting`).
 
 Precautions
 -----------
