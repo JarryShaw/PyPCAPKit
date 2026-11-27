@@ -125,6 +125,17 @@ class ReassemblerCases:
                        fragment_offset=offset, fragment_length=len(payload), payload=payload,
                        timestamp=ts)]
 
+    def build_sctp(self, num: int, ident: int, tail: bool, ts: float) -> 'list[Any]':
+        from pcapkit.const.sctp.chunk import Chunk
+        from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
+        from pcapkit.foundation.reassembly.sctp.data import Packet
+
+        tsn, payload = (11, b'z' * 4) if tail else (10, bytes([ident]) * 4)
+        return [Packet(bufid=(2905, 2905, ident), src=f'10.0.0.{ident}', dst='10.0.1.1', num=num,
+                       chunk=Chunk.Payload_Data, tsn=tsn, stream_id=0, unordered=False,
+                       beginning=not tail, ending=tail, ssn=0, mid=None, fsn=None,
+                       ppid=PayloadProtocolIdentifier(0), payload=payload, timestamp=ts)]
+
     # harness
 
     def shipped(self) -> 'dict[str, type]':

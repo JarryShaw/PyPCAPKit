@@ -272,11 +272,12 @@ class DeferredPacketDumpTests(DumpTestCase):
                         self.assertEqual(block['packet'], self.block(writer, {'packet': packet})['packet'])
 
     def test_the_dump_resolves_a_deferred_packet_once(self) -> None:
-        """Every model with a deferred ``packet``, IP, TCP and DTLS reassembly's and a traced flow's."""
+        """Every model with a deferred ``packet``, IP, TCP, DTLS and SCTP reassembly's and a traced flow's."""
         from pcapkit.foundation.reassembly.data import Completion
         from pcapkit.foundation.reassembly.data import Deferred as ReassemblyDeferred
         from pcapkit.foundation.reassembly.dtls.data import Datagram as DTLS_Datagram
         from pcapkit.foundation.reassembly.ip.data import Datagram as IP_Datagram
+        from pcapkit.foundation.reassembly.sctp.data import Datagram as SCTP_Datagram
         from pcapkit.foundation.reassembly.tcp.data import Datagram as TCP_Datagram
         from pcapkit.foundation.traceflow.data import Deferred as TraceFlowDeferred
         from pcapkit.foundation.traceflow.tcp.data import Index
@@ -291,6 +292,10 @@ class DeferredPacketDumpTests(DumpTestCase):
             'dtls': lambda counting: DTLS_Datagram(
                 completed=Completion.COMPLETE, id=None, index=(1,), message_seq=0, msg_type=None, length=7,
                 body=b'payload', packet=ReassemblyDeferred(counting, 'proto', b'payload')),
+            'sctp': lambda counting: SCTP_Datagram(
+                completed=Completion.COMPLETE, id=None, index=(1,), chunk=None, stream_id=0, unordered=False,
+                ssn=0, mid=None, tsn=(1,), ppid=None, payload=b'payload',
+                packet=ReassemblyDeferred(counting, 'proto', b'payload')),
             'trace': lambda counting: Index(fpout=None, index=(1,), label='label', forward=(1,), reverse=(),
                                             packet=TraceFlowDeferred(counting)),  # type: ignore[arg-type]
         }

@@ -14,8 +14,9 @@ PCAP Tools
 :mod:`pcapkit.toolkit.pcap` contains the adapters for the PCAP format. The TCP
 adapters here and in
 :mod:`pcapkit.toolkit.pcapng` read the segment with
-:func:`~pcapkit.toolkit.pcap.tcp_segment`, and the DTLS ones the record with
-:func:`~pcapkit.toolkit.pcap._dtls_fragments`.
+:func:`~pcapkit.toolkit.pcap.tcp_segment`, the DTLS ones the record with
+:func:`~pcapkit.toolkit.pcap._dtls_fragments`, and the SCTP ones the packet with
+:func:`~pcapkit.toolkit.pcap._sctp_fragments`.
 
 .. autofunction:: pcapkit.toolkit.pcap.ipv4_reassembly
 
@@ -24,6 +25,8 @@ adapters here and in
 .. autofunction:: pcapkit.toolkit.pcap.tcp_reassembly
 
 .. autofunction:: pcapkit.toolkit.pcap.dtls_reassembly
+
+.. autofunction:: pcapkit.toolkit.pcap.sctp_reassembly
 
 .. autofunction:: pcapkit.toolkit.pcap.tcp_traceflow
 
@@ -35,6 +38,8 @@ Auxiliary Functions
 .. autofunction:: pcapkit.toolkit.pcap._fragment
 
 .. autofunction:: pcapkit.toolkit.pcap._dtls_fragments
+
+.. autofunction:: pcapkit.toolkit.pcap._sctp_fragments
 
 .. autoclass:: pcapkit.toolkit.pcap.TCPSegment
    :members:
@@ -54,6 +59,8 @@ PCAP-NG Tools
 .. autofunction:: pcapkit.toolkit.pcapng.tcp_reassembly
 
 .. autofunction:: pcapkit.toolkit.pcapng.dtls_reassembly
+
+.. autofunction:: pcapkit.toolkit.pcapng.sctp_reassembly
 
 .. autofunction:: pcapkit.toolkit.pcapng.tcp_traceflow
 

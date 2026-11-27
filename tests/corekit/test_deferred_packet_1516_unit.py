@@ -32,6 +32,7 @@ MODELS = (
     ('pcapkit.foundation.reassembly.ip.data', 'Datagram', 'pcapkit.foundation.reassembly.data'),
     ('pcapkit.foundation.reassembly.tcp.data', 'Datagram', 'pcapkit.foundation.reassembly.data'),
     ('pcapkit.foundation.reassembly.dtls.data', 'Datagram', 'pcapkit.foundation.reassembly.data'),
+    ('pcapkit.foundation.reassembly.sctp.data', 'Datagram', 'pcapkit.foundation.reassembly.data'),
     ('pcapkit.foundation.traceflow.tcp.data', 'Index', 'pcapkit.foundation.traceflow.data'),
 )
 
@@ -233,6 +234,7 @@ class WiringTests(unittest.TestCase):
         from pcapkit.foundation.reassembly.data import Deferred as ReassemblyDeferred
         from pcapkit.foundation.reassembly.dtls.data import Datagram as DTLS_Datagram
         from pcapkit.foundation.reassembly.ip.data import Datagram as IP_Datagram
+        from pcapkit.foundation.reassembly.sctp.data import Datagram as SCTP_Datagram
         from pcapkit.foundation.reassembly.tcp.data import Datagram as TCP_Datagram
         from pcapkit.foundation.traceflow.data import Deferred as TraceFlowDeferred
         from pcapkit.foundation.traceflow.tcp.data import Index
@@ -254,12 +256,18 @@ class WiringTests(unittest.TestCase):
             return DTLS_Datagram(completed=Completion.COMPLETE, id=None, index=(1,), message_seq=0,
                                  msg_type=None, length=7, body=b'payload', packet=packet)
 
+        def user_message(packet: 'object') -> 'DeferredPacket':
+            return SCTP_Datagram(completed=Completion.COMPLETE, id=None, index=(1,), chunk=None, stream_id=0,
+                                 unordered=False, ssn=0, mid=None, tsn=(1,), ppid=None, payload=b'payload',
+                                 packet=packet)
+
         cases = (
             ('ip', lambda packet: datagram(IP_Datagram, packet), reassembly, traceflow,
              ('parsed', 'proto', b'payload')),
             ('tcp', lambda packet: datagram(TCP_Datagram, packet), reassembly, traceflow,
              ('parsed', 'proto', b'payload')),
             ('dtls', message, reassembly, traceflow, ('parsed', 'proto', b'payload')),
+            ('sctp', user_message, reassembly, traceflow, ('parsed', 'proto', b'payload')),
             ('trace', index, traceflow, reassembly, ('reassembled',)),
         )
         for (label, build, own, other, expected) in cases:
