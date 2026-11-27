@@ -35,15 +35,17 @@ from tests.project.test_resource_monitor_1740 import DEFAULT, EXPERIMENTAL, HEAP
 from util import pytest_shards
 
 #: GraalPy's shards, in the order they run; the rest of the tier runs last. #2713 split the
-#: shards that lost workers in job 125639681253 by their JUnit seconds there, and #2739
-#: split the two that ran 11-14 minutes in job 125752017215 by its.
+#: shards that lost workers in job 125639681253 by their JUnit seconds there, #2739
+#: split the two that ran 11-14 minutes in job 125752017215 by its, and #3146 split
+#: ``tests/protocols`` and ``tests/protocols/application`` by job 140372705752's.
 SHARDS = ('tests/const tests/corekit/test_fields_n* tests/corekit/test_[a-h]* tests/corekit/test_i* tests/corekit '
           'tests/foundation/reassembly tests/foundation/test_* tests/foundation '
           'tests/protocols/internet/test_ipv4* tests/protocols/internet/test_ipv6* tests/protocols/internet/test_igmp* '
-          'tests/protocols/internet tests/protocols/application/test_tls* tests/protocols/application '
-          'tests/protocols/link tests/protocols/misc/test_pcapng* tests/protocols/misc '
-          'tests/protocols/transport/test_tcp* tests/protocols/transport tests/protocols/test_t* tests/protocols '
-          'tests/toolkit')
+          'tests/protocols/internet tests/protocols/application/test_[o-s]* tests/protocols/application/test_tls* '
+          'tests/protocols/application tests/protocols/link tests/protocols/misc/test_pcapng* tests/protocols/misc '
+          'tests/protocols/transport/test_tcp* tests/protocols/transport '
+          'tests/protocols/test_[a-o]* tests/protocols/test_protocol_[a-m]* tests/protocols/test_p* '
+          'tests/protocols/test_q* tests/protocols/test_t* tests/protocols tests/toolkit')
 SCRIPT = ROOT / 'util' / 'pytest_shards.py'
 #: The lines that build the command the step's caps run, in order.
 PYTEST = 'set -- python -m pytest "$@"\n'
@@ -106,7 +108,9 @@ class TestTheStep(unittest.TestCase):
 
     def test_the_docs_say_it(self) -> None:
         page = prose(ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst')
-        for phrase in ('#1963', ':file:`util/pytest_shards.py`', '``SHARDS``', '``junit-tests-protocols.xml``'):
+        for phrase in ('#1963', ':file:`util/pytest_shards.py`', '``SHARDS``', '``junit-tests-protocols.xml``',
+                       # #3146: the split that cut tests/protocols' own files by name range.
+                       ':issue:`3146`', '``test_protocol_[a-m]*``'):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, page)
 
