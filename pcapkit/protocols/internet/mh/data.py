@@ -69,6 +69,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.internet.mh.protocol import (FastBindingAcknowledgmentStatus,
                                                         IPv6AddressPrefixCode, LMAAddressCode,
                                                         LocalizedRoutingStatus)
+    from pcapkit.protocols.protocol import ProtocolBase
 
 __all__ = [
     'MH',
@@ -1725,19 +1726,29 @@ class BIDReferenceSuboption(FlowIdentificationSuboption):
 
 @info_final
 class TrafficSelectorSuboption(FlowIdentificationSuboption):
-    """Data model for MH Flow Identification Traffic Selector sub-option."""
+    """Data model for MH Flow Identification Traffic Selector sub-option.
+
+    .. versionchanged:: 1.9.0
+
+       ``selector`` is parsed as the protocol class
+       :attr:`MH.__selector__ <pcapkit.protocols.internet.mh.protocol.MH.__selector__>`
+       holds for ``ts_format``, rather than kept as :obj:`bytes` (:issue:`2937`).
+
+    """
 
     #: Traffic selector format.
     ts_format: 'Enum_TrafficSelector'
     #: The reserved octet, as captured.
     reserved: 'bytes'
-    #: Traffic selector. Its interior is :rfc:`6088` territory and belongs to the
-    #: separate traffic selector format registry, so it is kept opaque.
-    selector: 'bytes'
+    #: Traffic selector, in the :rfc:`6088` format ``ts_format`` names, parsed as
+    #: :attr:`MH.__selector__ <pcapkit.protocols.internet.mh.protocol.MH.__selector__>`
+    #: says: :class:`~pcapkit.protocols.misc.raw.protocol.Raw` where no dissector is
+    #: registered.
+    selector: 'ProtocolBase'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_FlowIDSuboption', length: 'int',
-                     ts_format: 'Enum_TrafficSelector', reserved: 'bytes', selector: 'bytes') -> 'None': ...
+                     ts_format: 'Enum_TrafficSelector', reserved: 'bytes', selector: 'ProtocolBase') -> 'None': ...
 
 
 @info_final
@@ -2025,7 +2036,15 @@ class IPv4TrafficOffloadSelectorOption(Option):
 
 @info_final
 class DynamicIPMulticastSelectorOption(Option):
-    """Data model for MH Dynamic IP Multicast Selector option."""
+    """Data model for MH Dynamic IP Multicast Selector option.
+
+    .. versionchanged:: 1.9.0
+
+       ``data`` is parsed as the protocol class
+       :attr:`MH.__multicast__ <pcapkit.protocols.internet.mh.protocol.MH.__multicast__>`
+       holds for ``protocol``, rather than kept as :obj:`bytes` (:issue:`2937`).
+
+    """
 
     #: MLD or IGMP protocol number identifying the record format.
     protocol: 'int'
@@ -2036,14 +2055,15 @@ class DynamicIPMulticastSelectorOption(Option):
     reserved: 'int'
     #: Number of multicast address records carried in :attr:`data`.
     records: 'int'
-    #: Multicast address records. These are MLD or IGMP structures belonging to
-    #: those protocols rather than to the Mobility Header, so they are kept
-    #: opaque.
-    data: 'bytes'
+    #: Multicast address records, MLD or IGMP structures parsed as
+    #: :attr:`MH.__multicast__ <pcapkit.protocols.internet.mh.protocol.MH.__multicast__>`
+    #: says: :class:`~pcapkit.protocols.misc.raw.protocol.Raw` where no dissector is
+    #: registered.
+    data: 'ProtocolBase'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', protocol: 'int', mode: 'bool', reserved: 'int',
-                     records: 'int', data: 'bytes') -> 'None': ...
+                     records: 'int', data: 'ProtocolBase') -> 'None': ...
 
 
 @info_final
@@ -2067,30 +2087,50 @@ class DelegatedMNPOption(Option):
 
 @info_final
 class ActiveMulticastSubscriptionIPv4Option(Option):
-    """Data model for MH Active Multicast Subscription IPv4 option."""
+    """Data model for MH Active Multicast Subscription IPv4 option.
+
+    .. versionchanged:: 1.9.0
+
+       ``context`` is parsed as the protocol class
+       :attr:`MH.__multicast__ <pcapkit.protocols.internet.mh.protocol.MH.__multicast__>`
+       holds for ``igmp_type``, rather than kept as :obj:`bytes` (:issue:`2937`).
+
+    """
 
     #: IGMP message type identifying the context format.
     igmp_type: 'int'
-    #: Multicast membership context, an IGMP structure kept opaque.
-    context: 'bytes'
+    #: Multicast membership context, an IGMP structure parsed as
+    #: :attr:`MH.__multicast__ <pcapkit.protocols.internet.mh.protocol.MH.__multicast__>`
+    #: says.
+    context: 'ProtocolBase'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', igmp_type: 'int',
-                     context: 'bytes') -> 'None': ...
+                     context: 'ProtocolBase') -> 'None': ...
 
 
 @info_final
 class ActiveMulticastSubscriptionIPv6Option(Option):
-    """Data model for MH Active Multicast Subscription IPv6 option."""
+    """Data model for MH Active Multicast Subscription IPv6 option.
+
+    .. versionchanged:: 1.9.0
+
+       ``context`` is parsed as the protocol class
+       :attr:`MH.__multicast__ <pcapkit.protocols.internet.mh.protocol.MH.__multicast__>`
+       holds for ``mld_type``, rather than kept as :obj:`bytes` (:issue:`2937`).
+
+    """
 
     #: MLD message type identifying the context format.
     mld_type: 'int'
-    #: Multicast membership context, an MLD structure kept opaque.
-    context: 'bytes'
+    #: Multicast membership context, an MLD structure parsed as
+    #: :attr:`MH.__multicast__ <pcapkit.protocols.internet.mh.protocol.MH.__multicast__>`
+    #: says.
+    context: 'ProtocolBase'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', mld_type: 'int',
-                     context: 'bytes') -> 'None': ...
+                     context: 'ProtocolBase') -> 'None': ...
 
 
 class QoSAttribute(Data):
@@ -2165,19 +2205,25 @@ class AllocationRetentionPriorityAttribute(QoSAttribute):
 
 @info_final
 class QoSTrafficSelectorAttribute(QoSAttribute):
-    """Data model for the MH QoS-Traffic-Selector attribute."""
+    """Data model for the MH QoS-Traffic-Selector attribute.
+
+    .. versionchanged:: 1.9.0
+
+       ``selector`` is parsed as for :class:`TrafficSelectorSuboption`, rather
+       than kept as :obj:`bytes` (:issue:`2937`).
+
+    """
 
     #: The reserved octet, as captured.
     reserved: 'bytes'
     #: Traffic selector format.
     ts_format: 'Enum_TrafficSelector'
-    #: Traffic selector, kept opaque as for
-    #: :class:`TrafficSelectorSuboption`.
-    selector: 'bytes'
+    #: Traffic selector, parsed as for :class:`TrafficSelectorSuboption`.
+    selector: 'ProtocolBase'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_QoSAttribute', length: 'int',
-                     reserved: 'bytes', ts_format: 'Enum_TrafficSelector', selector: 'bytes') -> 'None': ...
+                     reserved: 'bytes', ts_format: 'Enum_TrafficSelector', selector: 'ProtocolBase') -> 'None': ...
 
 
 @info_final
@@ -2248,36 +2294,56 @@ class LMAUserPlaneAddressOption(Option):
 
 @info_final
 class MulticastMobilityOption(Option):
-    """Data model for MH Multicast Mobility option."""
+    """Data model for MH Multicast Mobility option.
+
+    .. versionchanged:: 1.9.0
+
+       ``data`` is parsed as the protocol class
+       :attr:`MH.__multicast__ <pcapkit.protocols.internet.mh.protocol.MH.__multicast__>`
+       holds for ``code``, rather than kept as :obj:`bytes` (:issue:`2937`).
+
+    """
 
     #: Option code -- ``1`` IGMPv3, ``2`` MLDv2, ``3`` IGMPv3 in IGMPv2
     #: compatibility mode, ``4`` MLDv2 in MLDv1 compatibility mode.
     code: 'int'
     #: The reserved octet, as captured.
     reserved: 'bytes'
-    #: MLD or IGMP report payload, kept opaque.
-    data: 'bytes'
+    #: MLD or IGMP report payload, parsed as
+    #: :attr:`MH.__multicast__ <pcapkit.protocols.internet.mh.protocol.MH.__multicast__>`
+    #: says.
+    data: 'ProtocolBase'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', code: 'int',
-                     reserved: 'bytes', data: 'bytes') -> 'None': ...
+                     reserved: 'bytes', data: 'ProtocolBase') -> 'None': ...
 
 
 @info_final
 class MulticastAcknowledgementOption(Option):
-    """Data model for MH Multicast Acknowledgement option."""
+    """Data model for MH Multicast Acknowledgement option.
+
+    .. versionchanged:: 1.9.0
+
+       ``data`` is parsed as the protocol class
+       :attr:`MH.__multicast__ <pcapkit.protocols.internet.mh.protocol.MH.__multicast__>`
+       holds for ``code``, rather than kept as :obj:`bytes` (:issue:`2937`).
+
+    """
 
     #: Option code; always ``0``.
     code: 'int'
     #: Status -- ``1`` report payload type unsupported, ``2`` requested group
     #: service unsupported, ``3`` administratively prohibited.
     status: 'int'
-    #: MLD or IGMP unsupported report payload, kept opaque.
-    data: 'bytes'
+    #: MLD or IGMP unsupported report payload, parsed as
+    #: :attr:`MH.__multicast__ <pcapkit.protocols.internet.mh.protocol.MH.__multicast__>`
+    #: says.
+    data: 'ProtocolBase'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', code: 'int', status: 'int',
-                     data: 'bytes') -> 'None': ...
+                     data: 'ProtocolBase') -> 'None': ...
 
 
 class LMAControlledMAGSuboption(Data):

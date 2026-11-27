@@ -2740,7 +2740,7 @@ class MHUnitTests(unittest.TestCase):
 
         data = proto._read_opt_mcast(schema, options=None)  # type: ignore[arg-type]
         self.assertEqual(data.length, 16)                  # the true octet count
-        self.assertEqual(data.data, payload)
+        self.assertEqual(data.data.data, payload)          # parsed as Raw (#2937)
 
         # a payload that is not a whole number of words cannot be described at all
         with self.assertRaises(ProtocolError):

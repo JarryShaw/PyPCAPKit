@@ -167,6 +167,10 @@ Internet Layer Registries
 
 .. autofunction:: pcapkit.foundation.registry.protocols.internet.register_mh_extension
 
+.. autofunction:: pcapkit.foundation.registry.protocols.internet.register_mh_selector
+
+.. autofunction:: pcapkit.foundation.registry.protocols.internet.register_mh_multicast
+
 Transport Layer Registries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
