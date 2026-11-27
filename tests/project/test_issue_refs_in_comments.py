@@ -15,18 +15,17 @@ imports nothing it scans.
 """
 from __future__ import annotations
 
-import io
 import re
 import shutil
 import subprocess  # nosec: B404
-import tokenize
 import unittest
 from typing import TYPE_CHECKING
 
+from tests import _sources
 from tests._tiers import ROOT
 
 if TYPE_CHECKING:
-    from typing import Iterator
+    from typing import Iterable, Iterator
 
 #: A Sphinx issue or pull request role, cited or merely named.
 ROLE = re.compile(r':(?:issue|pr):`')
@@ -55,19 +54,22 @@ def tracked() -> 'list[str]':
     return sorted(name for name in result.stdout.decode('utf-8').split('\0') if name)
 
 
+def _role_comments(comments: 'Iterable[_sources.Comment]') -> 'Iterator[tuple[int, str]]':
+    for comment in comments:
+        if not comment.string.startswith('#:') and ROLE.search(comment.string):
+            yield comment.line, comment.string
+
+
 def role_comments(source: 'bytes') -> 'Iterator[tuple[int, str]]':
     """The line and text of each plain comment in ``source`` that holds a role."""
-    for token in tokenize.tokenize(io.BytesIO(source).readline):
-        if token.type == tokenize.COMMENT and not token.string.startswith('#:') \
-                and ROLE.search(token.string):
-            yield token.start[0], token.string
+    return _role_comments(_sources.comments_in(source))
 
 
 def repository_role_comments() -> 'list[tuple[str, int, str]]':
     """Every plain comment holding a role in a tracked ``.py`` file."""
     return [(path, line, text)
             for path in tracked()
-            for line, text in role_comments((ROOT / path).read_bytes())]
+            for line, text in _role_comments(_sources.comments(path))]
 
 
 class ScannerTests(unittest.TestCase):

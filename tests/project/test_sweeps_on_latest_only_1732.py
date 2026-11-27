@@ -22,8 +22,10 @@ part, and ``pypcap-parity``, none of whose legs is ``latest``, asks for it on ea
 :class:`TestTheStepSelectsByLeg` runs the step's script on each leg the tier file
 gives each job, with a ``python`` on ``PATH`` that records its arguments, so what is
 checked is the selection bash builds, not what the text appears to say.
-:class:`TestTheIgnoresAreTheLatestTier` asks pytest itself what those ignores leave
-out. :class:`TestEveryXdistRunCountsLogicalCPUs` holds every xdist run in the
+:mod:`tests.project.test_latest_ignores_by_pytest_1732` asks pytest itself what those
+ignores leave out, in a module of its own: its child pytest imports :mod:`pcapkit`,
+and this module imports nothing that does, so it is a project pin (#1954).
+:class:`TestEveryXdistRunCountsLogicalCPUs` holds every xdist run in the
 workflows but GraalPy's to ``-n logical`` (#2573).
 
 The owner's second ruling on #1732, option 2: nothing waits on the experimental
@@ -101,9 +103,6 @@ STUB = ('#!/bin/sh\ncase "$1" in -c|util/pytest_shards.py) exec "$REAL_PYTHON" "
         'printf \'%s\\n\' "$@" \'<end>\' >> "$ARGS_FILE"\n')
 #: The line :data:`STUB` writes after each run's arguments.
 END = '<end>'
-#: A directory holding sweeps, hand-picked round trips, and modules that only import
-#: the sweeps' harnesses' packet builders, for :class:`TestTheIgnoresAreTheLatestTier`.
-PROBE = 'tests/protocols/internet'
 #: ``$RUNNER_TEMP``, which only names the JUnit file here, so one value for every leg.
 RUNNER_TEMP = '/home/runner/work/_temp'
 
@@ -305,7 +304,20 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
         # #2751: each half of the LATEST tier, on `latest`, by the same step.
         cls.halves = {leg['half']: (leg, unsharded(leg, run_step_each(leg, LATEST_TIER))) for leg in legs(*LATEST_TIER)}
 
-    def test_only_latest_runs_the_latest_tier(self) -> None:
+    #: The checks :meth:`test_each_leg_selects_by_tier` runs, each a subtest named
+    #: after the test it was.
+    CHECKS = ('only_latest_runs_the_latest_tier', 'latest_keeps_the_unit_tier_less_the_pins_under_coverage',
+              'every_other_leg_runs_the_rest', 'every_test_leg_runs_a_worker_per_logical_cpu',
+              'a_step_that_ignores_the_pins_alone_off_latest_is_caught')
+
+    def test_each_leg_selects_by_tier(self) -> None:
+        """Every check, in one test: under ``--dist load`` each test of a class may run
+        on a worker of its own, and each such worker runs :meth:`setUpClass`'s steps again."""
+        for name in self.CHECKS:
+            with self.subTest(f'test_{name}'):
+                getattr(self, f'check_{name}')()
+
+    def check_only_latest_runs_the_latest_tier(self) -> None:
         """Every leg of ``test``, ``latest``'s too, and of ``experimental`` ignores each ``LATEST`` module.
 
         #2751: ``test-latest-tier``'s cells, on ``latest``, run the tier less the project pins, a half each, by name.
@@ -327,7 +339,7 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
                 self.assertEqual(ignored(argv), [])
                 self.assertEqual(selected(argv), list(_tiers.latest_tier_half(int(half))))
 
-    def test_latest_keeps_the_unit_tier_less_the_pins_under_coverage(self) -> None:
+    def check_latest_keeps_the_unit_tier_less_the_pins_under_coverage(self) -> None:
         """Coverage is measured over the whole unit tier, less the project pins, which
         import no pcapkit and run in ``project-tests`` (#1954): #2751, ``test``'s ``latest`` leg over
         the ``ALL`` tier and each half of ``test-latest-tier`` over its part of the ``LATEST`` one."""
@@ -347,7 +359,7 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
         self.assertEqual(len(ran), len(set(ran)))
         self.assertEqual(sorted(ran), sorted(module for module in unit if module not in pins))
 
-    def test_every_other_leg_runs_the_rest(self) -> None:
+    def check_every_other_leg_runs_the_rest(self) -> None:
         """The same selection as ``latest``, the ``LATEST`` tier ignored, and no coverage."""
         expected = pytest_args(self.runs[self.latest][1])
         for version, (leg, argv) in self.runs.items():
@@ -364,7 +376,7 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
                 self.assertEqual(argv[:2], ['-m', 'pytest'])
                 self.assertEqual(pytest_args(argv), want)
 
-    def test_every_test_leg_runs_a_worker_per_logical_cpu(self) -> None:
+    def check_every_test_leg_runs_a_worker_per_logical_cpu(self) -> None:
         """#2571: ``-n logical``, as ``auto`` counts physical cores wherever psutil is installed.
 
         PyPy's legs share the flag, and with no psutil there resolve it as ``auto`` would.
@@ -378,7 +390,7 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
                 args = pytest_args(argv)
                 self.assertEqual(args[args.index('-n') + 1], 'logical')
 
-    def test_a_step_that_ignores_the_pins_alone_off_latest_is_caught(self) -> None:
+    def check_a_step_that_ignores_the_pins_alone_off_latest_is_caught(self) -> None:
         """The check above fails when a leg off ``latest`` leaves out the pins rather than the tier."""
         script = step(JOB)['run']
         latest = _tiers.LATEST_TIER_SELECTOR.split('"', 1)[1]
@@ -386,62 +398,6 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
         doctored = script.replace(latest, _tiers.PROJECT_PINS_SELECTOR.split('"', 1)[1])
         leg = next(leg for leg in legs(*JOB) if leg['python-version'] != self.latest and not shards(leg))
         self.assertNotEqual(ignored(run_step(leg, JOB, doctored)), list(_tiers.latest_tier_paths()))
-
-
-class TestTheIgnoresAreTheLatestTier(unittest.TestCase):
-    """What the ``LATEST`` ignores leave out, by pytest's own collection."""
-
-    def collect(self, *extra: 'str') -> 'set[str]':
-        result = subprocess.run([sys.executable, '-m', 'pytest', '--collect-only', '-q', '-p', 'no:cacheprovider',
-                                 PROBE, *extra], cwd=ROOT, capture_output=True, text=True,  # nosec B603
-                                check=False, timeout=300)
-        self.assertEqual(result.returncode, 0, result.stdout[-2000:] + result.stderr[-2000:])
-        return {line.split('::', 1)[0] for line in result.stdout.splitlines() if '::' in line}
-
-    def test_pytest_leaves_out_exactly_the_latest_modules(self) -> None:
-        """Run from the root, as CI runs it: the modules the ignores drop are the ``LATEST`` ones."""
-        everything = self.collect()
-        rest = self.collect(*(f'--ignore={module}' for module in _tiers.latest_tier_paths()))
-        latest = {module for module in everything if _tiers.module_tier(module) == _tiers.TIER_LATEST}
-        self.assertTrue(latest)
-        self.assertEqual(everything - rest, latest)
-        # A hand-picked round trip stays, and so does a module that imports a sweep's harness.
-        self.assertTrue([module for module in rest if 'roundtrip' in module])
-        builders = [module for module in rest if 'tests.foundation import _roundtrip'
-                    in (ROOT / module).read_text(encoding='utf-8')]
-        self.assertTrue(builders, f'no module under {PROBE} imports the harness without being LATEST')
-
-    def test_the_tier_is_no_name_rule(self) -> None:
-        """#1958: a name says nothing about the tier; ``LATEST`` sweeps go by other names too."""
-        modules = _tiers.suite_modules()
-        named = [module for module in modules if 'roundtrip' in module.rsplit('/', 1)[1]]
-        latest = set(_tiers.latest_tier_paths())
-        self.assertTrue([module for module in named if module not in latest])
-        self.assertTrue([module for module in named if module in latest])
-        self.assertTrue([module for module in latest if module not in named and 'tests/project/' not in module])
-
-    @staticmethod
-    def harness_users(harness: 'str') -> 'list[str]':
-        """The unit-tier modules that import a table type from ``harness``."""
-        return [module for module in _tiers.suite_modules() if _tiers.is_unit_tier(module) and re.search(
-            rf'^from {re.escape(harness[:-3].replace("/", "."))} import .*\b(?:Case|KnownFailureTable)\b',
-            (ROOT / module).read_text(encoding='utf-8'), re.M)]
-
-    def test_every_module_on_the_corekit_harness_is_latest(self) -> None:
-        """The corekit tables build a case for every class they enumerate, so their users are sweeps."""
-        users = self.harness_users('tests/corekit/_roundtrip.py')
-        self.assertTrue(users)
-        self.assertEqual([module for module in users if _tiers.module_tier(module) != _tiers.TIER_LATEST], [])
-
-    def test_the_edge_case_tables_run_on_every_leg(self) -> None:
-        """#1958: the #1202 edge-case tables are written out by hand, so they run on every leg."""
-        deadline = 'tests/protocols/test_edge_roundtrip_deadline_1736_unit.py'
-        users = self.harness_users('tests/protocols/_edge_roundtrip.py')
-        self.assertIn(deadline, users)
-        tables = [module for module in users if module != deadline]
-        self.assertTrue(tables)
-        self.assertEqual([module for module in tables if _tiers.module_tier(module) != _tiers.TIER_ALL], [])
-        self.assertEqual(_tiers.module_tier(deadline), _tiers.TIER_LATEST)
 
 
 @unittest.skipIf(shutil.which('bash') is None, 'the step is a bash script')

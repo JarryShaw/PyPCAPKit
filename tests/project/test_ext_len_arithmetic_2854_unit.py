@@ -38,6 +38,7 @@ import ast
 import unittest
 from typing import TYPE_CHECKING
 
+from tests import _sources
 from tests._tiers import ROOT
 
 if TYPE_CHECKING:
@@ -119,11 +120,18 @@ def conversions(source: 'str') -> 'Iterator[tuple[int, str, str]]':
         The line number, the shape matched and the source text of each match.
 
     """
-    for node in ast.walk(ast.parse(source)):
+    yield from _conversions_in(ast.parse(source), source)
+
+
+def _conversions_in(tree: 'ast.Module', source: 'str') -> 'tuple[tuple[int, str, str], ...]':
+    """:func:`conversions` of ``source``, parsed as ``tree``, for :func:`tests._sources.parsed`."""
+    found = []  # type: list[tuple[int, str, str]]
+    for node in ast.walk(tree):
         if isinstance(node, ast.BinOp):
             shape = _shape(node)
             if shape is not None:
-                yield node.lineno, shape, ast.get_source_segment(source, node) or ''
+                found.append((node.lineno, shape, ast.get_source_segment(source, node) or ''))
+    return tuple(found)
 
 
 def _linear(node: 'ast.expr',
@@ -357,7 +365,7 @@ class TreeTests(unittest.TestCase):
             if path == HELPER:
                 continue
             rel = path.relative_to(ROOT).as_posix()
-            for lineno, shape, text in conversions(path.read_text(encoding='utf-8')):
+            for lineno, shape, text in _sources.parsed(path, _conversions_in):
                 found.append((rel, lineno, shape, text))
         return found
 

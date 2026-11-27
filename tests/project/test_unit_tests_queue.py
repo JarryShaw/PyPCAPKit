@@ -48,6 +48,7 @@ import textwrap
 import unittest
 from typing import TYPE_CHECKING
 
+from tests import _sources
 from tests._support import bash_argv
 from tests.project.test_python_versions_1660 import live_outputs
 
@@ -708,6 +709,19 @@ class TestAptRetry(_Scratch):
 _DOC_PATH = re.compile(r'^(?:docs(?:/\S*)?|\S*\.md)$')
 
 
+def _names_a_doc_path(tree: 'ast.Module', _source: 'str') -> 'bool':
+    """Whether a module parsed as ``tree`` names a ``docs/`` or Markdown path in code."""
+    docstrings = set()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
+            if node.body and isinstance(node.body[0], ast.Expr) \
+                    and isinstance(node.body[0].value, ast.Constant):
+                docstrings.add(id(node.body[0].value))
+    return any(isinstance(node, ast.Constant) and isinstance(node.value, str)
+               and id(node) not in docstrings and _DOC_PATH.match(node.value)
+               for node in ast.walk(tree))
+
+
 def docs_readers() -> 'set[str]':
     """Dotted names of test modules outside tests/project and tests/ itself that
     name a ``docs/`` or Markdown path in code (docstrings excluded)."""
@@ -716,16 +730,7 @@ def docs_readers() -> 'set[str]':
         relative = path.relative_to(ROOT / 'tests')
         if len(relative.parts) < 2 or relative.parts[0] == 'project':
             continue
-        tree = ast.parse(path.read_text(encoding='utf-8'))
-        docstrings = set()
-        for node in ast.walk(tree):
-            if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
-                if node.body and isinstance(node.body[0], ast.Expr) \
-                        and isinstance(node.body[0].value, ast.Constant):
-                    docstrings.add(id(node.body[0].value))
-        if any(isinstance(node, ast.Constant) and isinstance(node.value, str)
-               and id(node) not in docstrings and _DOC_PATH.match(node.value)
-               for node in ast.walk(tree)):
+        if _sources.parsed(path, _names_a_doc_path):
             found.add('.'.join(('tests',) + relative.with_suffix('').parts))
     return found
 
