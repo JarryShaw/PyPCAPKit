@@ -516,7 +516,7 @@ class ExtractionTests(_Case):
 
         extractor = _extract(self, _pcap(_hello_frames(999)), reassembly=['tcp'])
         self.assertIsNone(extractor.reassembly.tls)
-        self.assertEqual(list(ReassemblyData())[-1], 'tls')
+        self.assertIsNone(ReassemblyData().tls)
 
     def test_reassemble_makes_it_by_name_and_by_protocol(self) -> None:
         from pcapkit.foundation.reassembly.tls.reassembly import TLS
