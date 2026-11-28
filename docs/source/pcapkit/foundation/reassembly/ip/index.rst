@@ -117,7 +117,10 @@ Departures from the procedure above:
   fragment carries a multiple of 8 octets, so one ending mid-block was cut or
   is malformed, and setting its last block would complete the datagram with
   octets nobody sent (:issue:`1567`).
-* A datagram longer than the data buffer is never complete (:issue:`1566`).
+* Reassembly resources are not allocated whole: the data buffer and ``RCVBT``
+  grow with the fragments a buffer holds (:issue:`2957`).
+* A datagram longer than the data buffer's largest length, 65,535 octets, is
+  never complete (:issue:`1566`).
 * Nor is a datagram longer than its length field can declare: 65,535 octets
   with its header, all of which IPv4's Total Length counts and all but the
   fixed 40 octets of which IPv6's Payload Length counts. Linux rejects such a

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """An IP datagram longer than its length field can declare is never complete.
 
-GitHub issue #1585. The data buffer holds 65,535 octets of data, but IPv4's
+GitHub issue #1585. The data buffer holds at most 65,535 octets of data, but IPv4's
 Total Length counts the header as well, so fragments whose data covers octets
 0-65,522 behind a 20-octet header make a 65,543-octet datagram, which must not
 read ``COMPLETE``. Linux's ``ip_frag_reasm`` rejects it. The bound counts the
@@ -121,7 +121,7 @@ class TestIPReassemblyLengthLimit(unittest.TestCase):
 
     def test_a_tso_datagram_is_not_bounded(self) -> None:
         # Total Length 0 declares nothing, as Linux's BIG TCP leaves a datagram
-        # over 65,535 octets: 65,523 octets of data fit the preallocated buffer
+        # over 65,535 octets: 65,523 octets of data fit the data buffer
         # but not with the header, so the buffer still grows past the bound.
         from pcapkit.foundation.reassembly.data import Completion
         from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
