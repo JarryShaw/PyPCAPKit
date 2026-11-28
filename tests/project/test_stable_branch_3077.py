@@ -14,8 +14,9 @@ than from the newest release tag. :file:`.github/workflows/stable-branch.yml` ru
   ``stable`` created, moved or left alone, ``main`` read afresh rather than from the
   run, no other ref written, and a failed read or write.
 
-:mod:`tests.project.test_release_app_environment_2648` pins the job's environment
-and key check, and :mod:`tests.project.test_sync_develop_2942` the helpers it shares.
+:mod:`tests.project.test_release_app_environment_2648` pins the job's environment,
+key check and mint step, and :mod:`tests.project.test_sync_develop_2942` the helpers
+it shares.
 The ruleset on ``stable`` is a repository setting, which no test here can read.
 
 """
@@ -43,8 +44,6 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKFLOW = 'stable-branch.yml'
 REPO = 'o/r'
 MAIN = 'a' * 40
-#: The token minting step, as Create Release's ``github`` job runs it.
-MINT = "Mint the release App's token"
 STEP = 'Mirror main to stable'
 #: The refs the script reads and writes, and the paths that name them.
 STABLE_REF = 'refs/heads/stable'
@@ -79,14 +78,6 @@ def problems(spec: 'dict[str, Any]') -> 'list[str]':
                       (STABLE_REF, False), ('refs/tags/v1.8.0', False)):
         if evaluate_condition(job.get('if', 'true'), {'github': {'ref': ref}}) is not runs:
             found.append(f"mirror {'skips' if runs else 'runs'} on {ref}")
-    release = step(_workflows.load('create-release.yml')['jobs']['github'], MINT) or {}
-    mint = step(job, MINT) or {}
-    if (mint.get('uses'), *(mint.get('with', {}).get(key) for key in ('client-id', 'private-key'))) != \
-            (release.get('uses'), *(release.get('with', {}).get(key) for key in ('client-id', 'private-key'))):
-        found.append("mirror does not mint the release App's token as Create Release does")
-    scopes = {key: value for key, value in mint.get('with', {}).items() if key.startswith('permission-')}
-    if scopes != {'permission-contents': 'write', 'permission-workflows': 'write'}:
-        found.append(f"the App's token holds {scopes}, not contents and workflows write")
     move = step(job, STEP) or {}
     if move.get('env') != {'GH_TOKEN': '${{ steps.app.outputs.token }}'}:
         found.append(f"the mirror step spends {move.get('env')!r}, not the App's token alone")
@@ -148,9 +139,6 @@ class TestTheWorkflow(unittest.TestCase):
             'mirror on every ref': setting('jobs', 'mirror', 'if', value=None),
             'mirror on develop': setting('jobs', 'mirror', 'if', value="${{ github.ref == 'refs/heads/develop' }}"),
             'a second job': setting('jobs', 'probe', value={'runs-on': 'ubuntu-latest', 'steps': [{'run': 'true'}]}),
-            'no minting': in_step(MINT, 'uses', value='actions/create-github-app-token@0000000'),
-            'pull requests write too': in_step(MINT, 'with', 'permission-pull-requests', value='write'),
-            'no workflows write': in_step(MINT, 'with', 'permission-workflows', value=None),
             'the write on GITHUB_TOKEN': in_step(STEP, 'env', 'GH_TOKEN', value='${{ github.token }}'),
             'the write on secrets.GITHUB_TOKEN': in_step(STEP, 'env', 'GH_TOKEN',
                                                          value='${{ secrets.GITHUB_TOKEN }}'),

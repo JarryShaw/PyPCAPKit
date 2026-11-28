@@ -22,7 +22,10 @@ on it would silently block one.
 runs the real step script against both shapes to show the two outputs disagree.
 
 * :class:`TestGetVersionComputesDevRelease`: the ``Get Version`` step's script,
-  and the job's declared ``outputs:``, by text and by running the script.
+  run, and the job's declared ``outputs:``. That the script reads
+  ``is_devrelease`` is checked over every workflow by
+  :mod:`tests.project.test_release_gates`'s
+  ``test_every_dev_release_flag_reads_is_devrelease_not_is_prerelease``.
 * :class:`TestTheGateIsAToplevelConjunct`: ``conda-tag`` and ``conda-dist``
   each read ``PCAPKIT_DEV_RELEASE`` exactly once, as a top-level ``&&``
   conjunct, and ``conda-build`` inside its publishing branch only, so a
@@ -94,17 +97,6 @@ class TestGetVersionComputesDevRelease(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.step = _step('conda-update', 'Get Version')
-
-    def test_the_script_reads_is_devrelease_not_is_prerelease(self) -> None:
-        script = self.step['run']
-        assert isinstance(script, str)
-        self.assertIn('PCAPKIT_DEV_RELEASE=$(python -c ', script)
-        dev_release_line = next(line for line in script.splitlines()
-                                if 'PCAPKIT_DEV_RELEASE=$(python -c' in line)
-        self.assertIn('Version(pcapkit.__version__).is_devrelease', dev_release_line)
-        # PCAPKIT_CONDA_LABEL (pre-existing) legitimately reads is_prerelease a
-        # few lines away; this narrows to the one line that must not.
-        self.assertNotIn('is_prerelease', dev_release_line)
 
     def test_conda_update_declares_the_output(self) -> None:
         outputs = _workflows.job(CONDA, 'conda-update')['outputs']

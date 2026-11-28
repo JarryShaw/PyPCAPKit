@@ -2294,6 +2294,29 @@ class TestNothingPublishesWithoutTheGate(WorkflowMixin, unittest.TestCase):
 #: ``version_check``'s PyPI and Anaconda evidence checks (#1967).
 EVIDENCE_SCRIPT = 'util/release_published.py'
 
+#: A shell assignment of ``PCAPKIT_DEV_RELEASE``, and the jobs of each workflow
+#: making one: Create Release's and Conda Update's own (#2452, #2458).
+DEV_RELEASE_SET = re.compile(r'\bPCAPKIT_DEV_RELEASE=')
+DEV_RELEASE_JOBS = {'create-release.yml': ['version_check'], 'cron-conda.yml': ['conda-update']}
+
+
+def dev_release_violations(texts: 'dict[str, str]') -> 'list[str]':
+    """Where ``texts``, each workflow's text by name, sets ``PCAPKIT_DEV_RELEASE``
+    from anything but ``is_devrelease``, or in other jobs; empty where it holds."""
+    found, setters = [], {}  # type: list[str], dict[str, list[str]]
+    for name, text in sorted(texts.items()):
+        for job, block in sorted(job_blocks(strip_comments(text), WORKFLOW.parent / name).items()):
+            for line in block.splitlines():
+                if DEV_RELEASE_SET.search(line) is None:
+                    continue
+                setters.setdefault(name, []).append(job)
+                if ('PCAPKIT_DEV_RELEASE=$(python -c ' not in line or 'is_prerelease' in line
+                        or 'Version(pcapkit.__version__).is_devrelease' not in line):
+                    found.append(f'{name}\'s {job} sets {line.strip()!r}, not from is_devrelease')
+    if setters != DEV_RELEASE_JOBS:
+        found.append(f'PCAPKIT_DEV_RELEASE is set in {setters}, not {DEV_RELEASE_JOBS}')
+    return found
+
 
 class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
     """#888: ``tag``, ``pypi`` and ``conda`` read their own evidence,
@@ -2524,26 +2547,27 @@ class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
             with self.subTest(output=output):
                 self.assertIn(f'{output}:', block)
 
-    def test_dev_release_evidence_reads_is_devrelease_not_is_prerelease(self) -> None:
+    def test_every_dev_release_flag_reads_is_devrelease_not_is_prerelease(self) -> None:
         """Owner ruling, 2026-10-30: ``PCAPKIT_DEV_RELEASE`` has to come from
-        ``Version(...).is_devrelease``, never ``.is_prerelease``.
+        ``Version(...).is_devrelease``, never ``.is_prerelease``, in every workflow.
 
         The two differ exactly on a deliberately-tagged alpha/beta/rc, which
         this project has shipped for real (e.g. ``1.5.0b14``): ``is_prerelease``
         is ``True`` for it too, so gating on that would silently block a
         legitimate release. ``is_devrelease`` is ``True`` only for a PEP 440
-        dev release (``X.Y.Z.devN``).
+        dev release (``X.Y.Z.devN``). Each assignment line is read alone, since
+        ``PCAPKIT_PRERELEASE`` and ``PCAPKIT_CONDA_LABEL`` read ``is_prerelease``
+        beside it.
 
         """
-        block = self.jobs['version_check']
-        self.assertIn('PCAPKIT_DEV_RELEASE=$(python -c ', block)
-        self.assertIn('Version(pcapkit.__version__).is_devrelease', block)
-        # The literal assignment line must not itself read .is_prerelease --
-        # PCAPKIT_PRERELEASE (a separate, pre-existing output) legitimately
-        # does, a few lines away, so this narrows to the one line that matters.
-        dev_release_line = next(
-            line for line in block.splitlines() if 'PCAPKIT_DEV_RELEASE=$(python -c' in line)
-        self.assertNotIn('is_prerelease', dev_release_line)
+        texts = {path.name: path.read_text(encoding='utf-8') for path in sorted(WORKFLOW.parent.glob('*.yml'))}
+        self.assertEqual(dev_release_violations(texts), [])
+        for name, (job,) in sorted(DEV_RELEASE_JOBS.items()):
+            for label, old, new in (('reads is_prerelease', '.is_devrelease)', '.is_prerelease)'),
+                                    ('is set in no job', 'PCAPKIT_DEV_RELEASE=$(', 'PCAPKIT_DEV=$(')):
+                with self.subTest(workflow=name, job=job, mutation=label):
+                    self.assertEqual(texts[name].count(old), 1)
+                    self.assertTrue(dev_release_violations({**texts, name: texts[name].replace(old, new)}))
 
     def test_all_four_publishers_gate_on_dev_release(self) -> None:
         """Owner ruling, 2026-10-30: a scheduled Vendor Update is enough to
@@ -2629,7 +2653,7 @@ class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
         ``true`` for a deliberately-tagged alpha/beta/rc this project has
         shipped for real (e.g. ``1.5.0b14``) as well as for a dev release, so
         gating on it would block a legitimate release -- the owner ruling
-        :meth:`test_dev_release_evidence_reads_is_devrelease_not_is_prerelease`
+        :meth:`test_every_dev_release_flag_reads_is_devrelease_not_is_prerelease`
         already pins at the source. This checks the *consumer* side: every job
         that gates on the dev-release output names ``PCAPKIT_DEV_RELEASE``, not
         ``PCAPKIT_PRERELEASE``, which reads identically to a careless search
