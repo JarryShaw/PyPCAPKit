@@ -1443,10 +1443,10 @@ class DependencyRequirementTests(unittest.TestCase):
         """Spot checks on the extras the rest of this suite reasons about."""
         declared = _dependency_gates.declared_requirements()
 
-        # A second line caps PyPy below 3.11 (#2040).
+        # A second line caps PyPy below 3.11 (#2040), and neither holds on PyPy 3.12 (#3201).
         self.assertEqual(
             [requirement.text for requirement in declared['crypto']],
-            ["cryptography>=3.4; platform_python_implementation != 'PyPy' or python_version >= '3.11'",
+            ["cryptography>=3.4; platform_python_implementation != 'PyPy' or python_version == '3.11'",
              "cryptography>=3.4,<46; platform_python_implementation == 'PyPy' and python_version < '3.11'"])
         self.assertTrue(_dependency_gates.provided_by(declared['NGAP'], 'pycrate'))
         self.assertTrue(_dependency_gates.provided_by(declared['cli'], 'emoji'))
@@ -2255,6 +2255,25 @@ class DependencyGateCoverageTests(unittest.TestCase):
                     f"{flag}'s exclusion no longer matches the gap it describes"
                 )
 
+    def test_each_pypy_exclusion_names_the_modules_dark_on_pypy(self) -> None:
+        """#3201: a gate PyPy's install cannot satisfy is in a ``LATEST`` module, or recorded.
+
+        :func:`~tests._dependency_gates.dependency_gate_gaps` credits the ``test``
+        job's ``crypto`` with ``cryptography`` on every leg, PyPy 3.12's included.
+        No PyPy leg runs a ``LATEST`` module, so a gate there cannot skip on one; a
+        gate in an ``ALL``-tier module does, so its entry names the module.
+
+        """
+        derived = _dependency_gates.pypy_dark_modules()
+        for name, exclusion in sorted(_dependency_gates.PYPY_EXCLUSIONS.items()):
+            with self.subTest(distribution=name):
+                self.assertEqual(
+                    exclusion.modules, derived[name],
+                    f'these ALL-tier modules gate on {name}, which PyPy goes without '
+                    f'({exclusion.reason}), so their gated tests skip on a PyPy leg: keep '
+                    f'those tests in a LATEST module, or list the module in '
+                    f"PYPY_EXCLUSIONS[{name!r}].modules")
+
     def test_each_exclusion_gives_a_reason_worth_reading(self) -> None:
         """A one-word reason is how a skip list is born."""
         for flag, exclusion in sorted(_dependency_gates.DEPENDENCY_GATE_EXCLUSIONS.items()):
@@ -2480,6 +2499,19 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
             'HAS_CRYPTO', _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS,
             'the exclusion list would swallow the gap this test relies on'
         )
+
+    def test_moving_a_crypto_gate_to_the_all_tier_is_caught(self) -> None:
+        """#3201: the ESP module in the ``ALL`` tier would skip its crypto tests on PyPy 3.12."""
+        moved = 'tests/protocols/internet/test_esp_unit.py'
+        module_tier = _tiers.module_tier
+
+        def tier(path: 'pathlib.Path | str') -> 'str':
+            return _tiers.TIER_ALL if str(path) == moved else module_tier(path)
+
+        with unittest.mock.patch.object(_tiers, 'module_tier', tier):
+            derived = _dependency_gates.pypy_dark_modules()
+        self.assertIn(moved, derived['cryptography'])
+        self.assertNotIn(moved, _dependency_gates.PYPY_EXCLUSIONS['cryptography'].modules)
 
     def test_dropping_isort_from_the_test_extra_is_caught(self) -> None:
         """#766's own prediction, measured: the gap the install line closes is real.

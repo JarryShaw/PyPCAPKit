@@ -1222,11 +1222,17 @@ see `Test Tiers`_). A
 supported PyPy leg blocks through ``Required checks passed``, which needs its job,
 so it adds no context to either ruleset. No ``Compat``, ``engine-tests`` or
 ``pypcap-parity`` leg runs PyPy. On PyPy 8.0, which setup-python's ``pypy3.11``
-is, PyPI has no Linux wheel of |cryptography|_, so the install step builds it
-with the image's Rust and ``libssl-dev``, and none of ``lxml``, so the ``test``
-extra carries ``lxml`` on CPython only. On ``pypy3.10`` the ``crypto`` and ``all``
+and ``pypy3.12`` both run, PyPI has no Linux wheel of |cryptography|_ or of
+``lxml``, so the ``test`` extra carries ``lxml`` on CPython only. On ``pypy3.11``
+the install step builds |cryptography|_ with the image's Rust and ``libssl-dev``,
+and it imports. On ``pypy3.10`` the ``crypto`` and ``all``
 extras cap |cryptography|_ below 46, as 45.0.7 is the newest release with a Linux
 ``pp310`` wheel and the newest release's sdist does not build there (:issue:`2040`).
+On ``pypy3.12`` they carry no |cryptography|_ at all, as the build there does not
+import (:issue:`3201`).
+``PYPY_EXCLUSIONS`` in :file:`tests/_dependency_gates.py` records both gaps, with the
+``ALL``-tier modules gated on each, whose gated tests skip on those PyPy legs;
+:file:`tests/test_tier_guard.py` fails on a module it lacks.
 
 On PyPy an xdist worker's RSS grows with every test it runs, rather than in a few
 heavy modules, so a PyPy leg's ``Run unit tests`` hands its pytest command to
