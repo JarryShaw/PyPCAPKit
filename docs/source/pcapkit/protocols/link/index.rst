@@ -43,7 +43,8 @@ Link Layer
 
 .. todo::
 
-   Implement DSL, EAPOL, FDDI, ISDN.
+   Implement EAPOL, FDDI, Geneve, VXLAN; :doc:`/contributing/pep` gives each its
+   issue.
 
 Protocol Registry
 -----------------

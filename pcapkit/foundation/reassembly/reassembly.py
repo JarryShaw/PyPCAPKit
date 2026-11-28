@@ -8,7 +8,8 @@
 :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` only,
 which is an abstract base class for all reassembly classes,
 based on algorithms described in :rfc:`791` and :rfc:`815`,
-that implement datagram reassembly of IP and TCP packets.
+that implement datagram reassembly of IP packets, TCP segments, DTLS
+handshake messages, SCTP user messages and TLS records.
 
 """
 import abc
