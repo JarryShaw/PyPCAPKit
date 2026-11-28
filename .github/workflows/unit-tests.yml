@@ -130,12 +130,13 @@ jobs:
           cache: pip
 
       # DPKT (#729), crypto and NGAP (#738) are here so the unit-tier tests
-      # gated on them run instead of skipping; each installs cleanly. On
-      # PyPy 8.0 PyPI has no Linux wheel of cryptography, so pip builds it with
-      # the image's Rust and libssl-dev (#1958). `cli` (emoji) is not here: its
-      # only gated tests are in tests/integration, which this job ignores.
-      # PyPCAPFile is not here either: #751's `engine-tests` and
-      # `pypcap-parity` jobs cover its gated methods.
+      # gated on them run instead of skipping. PyPI has no Linux cryptography
+      # wheel for PyPy 8.0.1, which pypy3.11 and pypy3.12 both run. On pypy3.11
+      # pip builds it from the sdist with the image's Rust and libssl-dev, and
+      # it imports (#1958); on pypy3.12 the build fails to import, so `crypto`
+      # leaves it out (#3201). `cli` (emoji) is not here: its only gated tests
+      # are in tests/integration, which this job ignores. PyPCAPFile is not
+      # here: #751's `engine-tests` and `pypcap-parity` cover its gated methods.
       #
       # #1633: a KTLO leg that cannot install fails fast and once:
       # util/pip_install.py writes one annotation naming pip's last ERROR

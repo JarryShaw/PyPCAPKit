@@ -168,7 +168,8 @@ The optional engines and addons install as extras:
    pip install pypcapkit[PyPCAP]
    # for pcap-ct only -- pure Python, works on 3.12+; never alongside PyPCAP
    pip install pypcapkit[PCAP_CT]
-   # for ESP decryption and HIP signature verification
+   # for ESP decryption and HIP signature verification; on PyPy 3.12+ neither
+   # this nor all installs cryptography, as no release of it imports there
    pip install pypcapkit[crypto]
    # every core addon -- CLI display, ESP decryption, HIP signatures and
    # NGAP decoding; no engine above is included

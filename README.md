@@ -36,9 +36,9 @@ The extraction engines and plug-ins are optional extras:
 
 ```shell
 pip install pypcapkit[DPKT]         # or Scapy, PyShark, PyPCAPFile, PyPCAP, PCAP_CT
-pip install pypcapkit[crypto]       # ESP decryption, HIP signature verification
+pip install pypcapkit[crypto]       # ESP decryption, HIP signature verification; not on PyPy 3.12+
 pip install pypcapkit[cli]          # command line interface
-pip install pypcapkit[all]          # core addons only: cli + crypto + NGAP (pycrate)
+pip install pypcapkit[all]          # core addons only: cli + crypto + NGAP (pycrate); no crypto on PyPy 3.12+
 ```
 
 Some engines need more than `pip install` -- a `tshark` binary, a C compiler, `libpcap` headers, or

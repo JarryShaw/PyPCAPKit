@@ -99,15 +99,13 @@ cli = [ "emoji" ]
 # for ESP payload decryption and HIP signature verification, c.f.
 # pcapkit.protocols.internet.esp.protocol and pcapkit.protocols.internet.hip.protocol
 #
-# Capped below 46 on PyPy older than 3.11 (#2040), and nowhere else, which the
-# complementary marker on the first line keeps. 45.0.7 is the newest release
-# with a manylinux ``pp310`` wheel: 46.0.0 through 46.0.3 ship ``pp310`` wheels
-# for macOS x86_64 and Windows only, and 46.0.4 onwards none at all. Without the
-# cap, pip on a Linux PyPy 3.10 builds the newest release's sdist, and that
-# build stops at PyO3's minimum supported version, 3.11. ``all`` below repeats
-# both lines.
+# Capped below 46 on PyPy older than 3.11 (#2040): 45.0.7 is the newest release
+# with a manylinux ``pp310`` wheel, and the newest release's sdist build stops at
+# PyO3's minimum, 3.11. Left out on PyPy 3.12 onwards (#3201): no release ships a
+# ``pp312`` wheel, and one built from the sdist fails to import on missing
+# ``PyPy*`` symbols. ``all`` below repeats both lines.
 crypto = [
-    "cryptography>=3.4; platform_python_implementation != 'PyPy' or python_version >= '3.11'",
+    "cryptography>=3.4; platform_python_implementation != 'PyPy' or python_version == '3.11'",
     "cryptography>=3.4,<46; platform_python_implementation == 'PyPy' and python_version < '3.11'",
 ]
 # for NGAP decoding, c.f. pcapkit.protocols.application.ngap.protocol. Counted among
@@ -243,10 +241,11 @@ vendor = [ "requests[socks]", "beautifulsoup4[html5lib]", "pycrate" ]
 # beta they did not ask for. Install either explicitly: ``pip install
 # pypcapkit[PyPCAP]`` or ``pip install pypcapkit[PCAP_CT]``.
 #
-# The two ``cryptography`` lines are the ``crypto`` extra's, cap included (#2040).
+# The two ``cryptography`` lines are the ``crypto`` extra's, with its PyPy cap
+# (#2040) and its PyPy 3.12 exclusion (#3201).
 all = [
     "emoji",
-    "cryptography>=3.4; platform_python_implementation != 'PyPy' or python_version >= '3.11'",
+    "cryptography>=3.4; platform_python_implementation != 'PyPy' or python_version == '3.11'",
     "cryptography>=3.4,<46; platform_python_implementation == 'PyPy' and python_version < '3.11'",
     "pycrate",
 ]

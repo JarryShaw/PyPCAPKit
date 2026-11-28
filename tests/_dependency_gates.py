@@ -49,7 +49,10 @@ python_version < '3.12'" ]`` resolves to nothing on every leg from 3.12 up,
 so an install line carrying that extra would satisfy this module while only the
 legs below 3.12 ran the tests. :func:`requirement_key`
 strips the marker and :func:`provided_by` ignores it; the marker text is kept
-on :class:`Requirement` so a diagnostic can say so.
+on :class:`Requirement` so a diagnostic can say so. A marker that leaves a
+distribution out on PyPy alone is recorded instead, in :data:`PYPY_EXCLUSIONS`
+(#3201): a PyPy leg runs the ``ALL`` tier only (#1958), so
+:func:`pypy_dark_modules` names the ``ALL``-tier modules gated on it.
 
 **Which of two distributions owns a shared import name is modelled, not
 tripwired**, and #762 is the history of why that distinction matters. ``pcap``
@@ -104,13 +107,14 @@ if TYPE_CHECKING:
 __all__ = [
     'WORKFLOW', 'PYPROJECT', 'LATEST_LEG_CONDITION', 'EDITABLE_INSTALL', 'CORE', 'MODULE_PROVIDERS',
     'NON_DISTRIBUTION_FLAGS', 'MUTUALLY_EXCLUSIVE_IMPORTS', 'DEPENDENCY_GATE_EXCLUSIONS',
-    'Requirement', 'Gate', 'Job', 'Gap', 'Exclusion', 'AmbiguousProvider',
+    'PYPY_EXCLUSIONS',
+    'Requirement', 'Gate', 'Job', 'Gap', 'Exclusion', 'PyPyExclusion', 'AmbiguousProvider',
     'requirement_key', 'provided_by', 'declared_requirements', 'extras_providing',
     'module_providers', 'contested_imports',
     'gated_scopes', 'module_gates', 'flag_requirements', 'module_flag_requirements',
     'flag_exclusions', 'module_flag_exclusions',
     'pytest_jobs', 'job_sections',
-    'job_reaches', 'dependency_gate_gaps', 'describe_gap',
+    'job_reaches', 'dependency_gate_gaps', 'describe_gap', 'pypy_dark_modules',
     'ambiguous_satisfactions', 'describe_ambiguous_satisfaction',
 ]
 
@@ -223,6 +227,7 @@ MODULE_PROVIDERS = {
     'bs4': ('beautifulsoup4',),
     'html5lib': ('beautifulsoup4[html5lib]', 'html5lib'),
     'requests': ('requests',),
+    # Not on PyPy 3.12 onwards: :data:`PYPY_EXCLUSIONS` (#3201).
     'cryptography': ('cryptography',),
     'dpkt': ('dpkt',),
     'emoji': ('emoji',),
@@ -267,11 +272,9 @@ MODULE_PROVIDERS = {
     # falls back to a laxer parser. The ``test`` extra carries it with a
     # ``platform_python_implementation == 'CPython'`` marker, because PyPI has
     # no wheel for GraalPy or PyPy 8.0, so the gate skips on experimental.yml's
-    # GraalPy leg and on unit-tests.yml's PyPy legs (#1958). That is no
-    # :data:`DEPENDENCY_GATE_EXCLUSIONS` entry: this module does not model
-    # markers, every module gated on it is ``LATEST``, which no PyPy leg runs,
-    # and this module does not read experimental.yml, so every job it reads
-    # satisfies the gate, and an entry would describe a gap that is not there.
+    # GraalPy leg and on unit-tests.yml's PyPy legs (#1958). The PyPy half is a
+    # :data:`PYPY_EXCLUSIONS` entry; the GraalPy half needs none, as this module
+    # does not read experimental.yml.
     'lxml': ('lxml',),
 }
 
@@ -481,6 +484,39 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'honest wherever pylint is importable, a developer checkout included, and skips '
             'visibly elsewhere.'
         ),
+    ),
+}
+
+
+class PyPyExclusion(NamedTuple):
+    """A distribution :file:`pyproject.toml`'s markers leave out on PyPy, and CPython keeps."""
+
+    #: The Python version PyPy goes without it from, or :data:`None` on every one.
+    since: 'Optional[str]'
+    #: The ``ALL``-tier modules with a gate needing it, which skip on those PyPy legs.
+    #: Checked for exact equality against :func:`pypy_dark_modules`.
+    modules: 'tuple[str, ...]'
+    #: Why the markers leave it out. Prose, for the next reader.
+    reason: 'str'
+
+
+#: What PyPy goes without, which :func:`dependency_gate_gaps` credits every leg
+#: with, since it evaluates no marker.
+#: :file:`tests/project/test_pypy312_cryptography_excluded_3201.py` derives the keys
+#: and ``since`` from :file:`pyproject.toml`, and
+#: :meth:`~tests.test_tier_guard.DependencyGateCoverageTests.test_each_pypy_exclusion_names_the_modules_dark_on_pypy`
+#: the ``modules``.
+PYPY_EXCLUSIONS = {
+    'cryptography': PyPyExclusion(
+        since='3.12', modules=(),
+        reason=(
+            'No release ships a pp312 wheel, and one built from the sdist fails to import, '
+            'missing PyPy* C-API symbols (#3201). Lift it once a release imports there.'
+        ),
+    ),
+    'lxml': PyPyExclusion(
+        since=None, modules=(),
+        reason='PyPI has no PyPy wheel of it, so the test extra carries it on CPython only (#1958).',
     ),
 }
 
@@ -1503,6 +1539,27 @@ def describe_gap(gap: 'Gap') -> 'str':
         f'line, or record the gap in tests._dependency_gates.'
         f'DEPENDENCY_GATE_EXCLUSIONS with a reason.\n{where}'
     )
+
+
+def pypy_dark_modules() -> 'dict[str, tuple[str, ...]]':
+    """Each :data:`PYPY_EXCLUSIONS` distribution -> the ``ALL``-tier modules gated on it, sorted.
+
+    A gate needs it when a module its flag probes has no other provider. A PyPy leg
+    runs the ``ALL`` tier alone (#1958), so these are the modules whose gates skip
+    there; a ``LATEST`` module runs on ``latest``, CPython, alone.
+
+    """
+    requirements = flag_requirements()
+    found = {name: set() for name in PYPY_EXCLUSIONS}  # type: dict[str, set[str]]
+    for gate in gated_scopes():
+        if gate.flag in NON_DISTRIBUTION_FLAGS or _tiers.module_tier(gate.module) != _tiers.TIER_ALL:
+            continue
+        for module in requirements.get((gate.module, gate.flag), ()):
+            providers = {requirement_key(provider).name for provider in module_providers(module)}
+            if providers <= set(PYPY_EXCLUSIONS):
+                for name in providers:
+                    found[name].add(gate.module)
+    return {name: tuple(sorted(modules)) for name, modules in found.items()}
 
 
 def _disqualified_providers(excluded_modules: 'frozenset[str]') -> 'frozenset[str]':
