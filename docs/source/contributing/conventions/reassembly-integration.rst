@@ -169,7 +169,9 @@ segment, which each engine's ``tls_reassembly`` keeps for a stream on a port TCP
 is registered under in :attr:`Extractor.__traceflow__
 <pcapkit.foundation.extraction.Extractor.__traceflow__>`, through
 :meth:`Extractor.make_traceflow <pcapkit.foundation.extraction.Extractor.make_traceflow>`,
-and finished at the end of the capture. Each engine's :attr:`EngineBase.__traceflow__
+advanced to every frame's timestamp before the frame is fed, so a flow idle for the
+tracer's timeout is finalised (:issue:`2956`), and finished at the end of the capture.
+Each engine's :attr:`EngineBase.__traceflow__
 <pcapkit.foundation.engines.engine.EngineBase.__traceflow__>` maps every flow tracer it
 supports to its toolkit adapter, written by :meth:`EngineBase.register_traceflow
 <pcapkit.foundation.engines.engine.EngineBase.register_traceflow>`. An enabled tracer

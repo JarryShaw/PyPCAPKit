@@ -96,7 +96,7 @@ RESTORED = {
     'pcapkit.dumpkit.pcap.PCAPIO': '(fname, *, protocol, byteorder=sys.byteorder, nanosecond=False, **kwargs)',
     'pcapkit.foundation.reassembly.ipv4.reassembly.IPv4': '(*, strict=True, store=True, timeout=None)',
     'pcapkit.foundation.traceflow.tcp.traceflow.TCP': ("(*, fout='./tmp', format='pcap', byteorder=sys.byteorder, "
-                                             'nanosecond=False, bidirectional=True, analyze=False)'),
+                                             'nanosecond=False, bidirectional=True, analyze=False, timeout=None)'),
     'pcapkit.corekit.infoclass.Info': '(dict_=None, **kwargs)',
     'pcapkit.corekit.infoclass.MultiInfo': '(mapping=None)',
     'pcapkit.interface.misc.Stream': '(filename, packets, conversations)',

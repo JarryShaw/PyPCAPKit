@@ -459,6 +459,8 @@ class DPKT(EngineBase['DPKTPacket']):
     #: its capture timestamp, its link type and its frame number.
     __traceflow__ = {
         'tcp': ModuleDescriptor('pcapkit.toolkit.dpkt', 'tcp_traceflow'),
+        'udp': ModuleDescriptor('pcapkit.toolkit.dpkt', 'udp_traceflow'),
+        'ip': ModuleDescriptor('pcapkit.toolkit.dpkt', 'ip_traceflow'),
     }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
     ##########################################################################
@@ -605,7 +607,7 @@ class DPKT(EngineBase['DPKTPacket']):
 
         # trace flows
         if ext._flag_t:
-            self._traceflow(packet, timestamp, data_link=linktype, count=ext._frnum)
+            self._traceflow(_capture_time(timestamp), packet, timestamp, data_link=linktype, count=ext._frnum)
 
         # record frames
         if ext._flag_d:

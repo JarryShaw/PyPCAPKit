@@ -147,6 +147,7 @@ class TraceFlowKeywordTests(unittest.TestCase):
         self.assertEqual(_shape(TraceFlowBase.__init__), [
             ('fout', kwonly, './tmp'), ('format', kwonly, 'pcap'), ('byteorder', kwonly, sys.byteorder),
             ('nanosecond', kwonly, False), ('bidirectional', kwonly, True), ('analyze', kwonly, False),
+            ('timeout', kwonly, None),
         ])
         self.assertEqual(_shape(TraceFlowOptions, skip=0)[1:], _shape(TraceFlowBase.__init__))
 

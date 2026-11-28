@@ -9,7 +9,7 @@ macros, which wrap the classes of :mod:`pcapkit.foundation`.
 
 """
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.protocols.protocol import ProtocolBase
@@ -202,11 +202,40 @@ def reassemble(protocol: 'str | Type[ProtocolBase]', *, strict: 'bool' = True, s
     return Extractor.make_reassembly(protocol, strict=strict, store=store, timeout=timeout)
 
 
+def _traceflow_name(protocol: 'Type[ProtocolBase]') -> 'str':
+    """Name the flow tracer :func:`trace` makes for a protocol class.
+
+    Args:
+        protocol: protocol class
+
+    Returns:
+        The first of its :meth:`~pcapkit.protocols.protocol.ProtocolBase.id` if a
+        flow tracer is registered under it; otherwise the name of the first
+        registered flow tracer whose protocol the class derives from, as
+        :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` and
+        :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` derive from the
+        ``ip`` tracer's :class:`~pcapkit.protocols.internet.ip.protocol.IP`; and
+        failing both, that first id, which :meth:`Extractor.make_traceflow
+        <pcapkit.foundation.extraction.Extractor.make_traceflow>` refuses.
+
+    .. versionadded:: 1.10.0
+
+    """
+    name = protocol.id()[0]
+    if name.lower() in Extractor.__traceflow__:
+        return name
+    for key in list(Extractor.__traceflow__):
+        tracer = Extractor._traceflow_class(key)  # pylint: disable=protected-access
+        if issubclass(protocol, cast('Type[ProtocolBase]', tracer.protocol)):
+            return key
+    return name
+
+
 def trace(protocol: 'str | Type[ProtocolBase]', *, fout: 'str' = './tmp',
           format: 'str' = 'pcap',  # pylint: disable=redefined-builtin
           byteorder: 'Literal["little", "big"]' = sys.byteorder,
           nanosecond: 'bool' = False, bidirectional: 'bool' = True,
-          analyze: 'bool' = False) -> 'TraceFlowBase':
+          analyze: 'bool' = False, timeout: 'Optional[float]' = None) -> 'TraceFlowBase':
     """Trace flows.
 
     Arguments:
@@ -214,7 +243,9 @@ def trace(protocol: 'str | Type[ProtocolBase]', *, fout: 'str' = './tmp',
             :attr:`TraceFlow.registry
             <pcapkit.foundation.traceflow.traceflow.TraceFlow.registry>`,
             matched lower-cased, or a protocol class, by the first of its
-            :meth:`~pcapkit.protocols.protocol.ProtocolBase.id`
+            :meth:`~pcapkit.protocols.protocol.ProtocolBase.id`, or else by the
+            protocol of a registered tracer it derives from (see
+            :func:`_traceflow_name`)
         fout: output root path
         format: output format
         byteorder: output file byte order
@@ -222,6 +253,8 @@ def trace(protocol: 'str | Type[ProtocolBase]', *, fout: 'str' = './tmp',
         bidirectional: whether both halves of a conversation are traced as one
             flow, which is the default
         analyze: whether each traced flow reassembles its application layer
+        timeout: idle timeout in seconds, on the capture's clock; :data:`None`
+            keeps every flow until :meth:`~pcapkit.foundation.traceflow.traceflow.TraceFlow.finish`
 
     Returns:
         A :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` object.
@@ -229,6 +262,8 @@ def trace(protocol: 'str | Type[ProtocolBase]', *, fout: 'str' = './tmp',
     Raises:
         FormatError: If no flow tracer is registered under ``protocol``.
         RegistryError: If the protocol name is not a :obj:`str`.
+        FieldValueError: If ``timeout`` is negative, NaN, or no real number of
+            seconds.
 
     .. versionchanged:: 1.5.0
 
@@ -247,10 +282,18 @@ def trace(protocol: 'str | Type[ProtocolBase]', *, fout: 'str' = './tmp',
        <pcapkit.foundation.extraction.Extractor.make_traceflow>`, as the
        extractor does (:issue:`2843`).
 
+    .. versionchanged:: 1.10.0
+
+       Takes ``timeout``, as the flow tracing classes do, and a protocol class
+       whose first id names no tracer makes the tracer of a protocol it derives
+       from, so :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` makes the
+       ``ip`` one (:issue:`2956`).
+
     """
     if isinstance(protocol, type) and issubclass(protocol, ProtocolBase):
-        protocol = protocol.id()[0]
+        protocol = _traceflow_name(protocol)
     if not isinstance(protocol, str):
         raise RegistryError(f'traceflow name must be a str, not {protocol!r}')
     return Extractor.make_traceflow(protocol, fout=fout, format=format, byteorder=byteorder,
-                                    nanosecond=nanosecond, bidirectional=bidirectional, analyze=analyze)
+                                    nanosecond=nanosecond, bidirectional=bidirectional, analyze=analyze,
+                                    timeout=timeout)

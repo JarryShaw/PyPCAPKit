@@ -99,15 +99,16 @@ offers says so rather than quietly doing less, unless its row says otherwise:
 |                                                                 | reassembly and flow tracing, with an                          |
 |                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning` once    |
 |                                                                 | per capture, and TCP behind a VLAN tag, in a tunnel or behind |
-|                                                                 | an extension header (an IPv6 one, or AH in IPv4) without one; |
-|                                                                 | PCAP savefiles only, otherwise                                |
+|                                                                 | an extension header (an IPv6 one, or AH in IPv4) without one, |
+|                                                                 | as IPv6 is out of UDP and IP flow tracing; PCAP savefiles     |
+|                                                                 | only, otherwise                                               |
 |                                                                 | :exc:`~pcapkit.utilities.exceptions.FormatError`              |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
-| :class:`~pcapkit.foundation.engines.dpkt.DPKT`                  | TCP in an IP-in-IP tunnel, or behind an AH or IPv6 extension  |
-|                                                                 | header carried in IPv4, is left out of TCP reassembly and     |
-|                                                                 | flow tracing, and IPv4 carried in IPv6, or IPv6 in IPv4, out  |
-|                                                                 | of IP reassembly, all without a warning; a frame `DPKT`_      |
-|                                                                 | cannot decode is kept raw, with a                             |
+| :class:`~pcapkit.foundation.engines.dpkt.DPKT`                  | TCP or UDP in an IP-in-IP tunnel, or behind an AH or IPv6     |
+|                                                                 | extension header carried in IPv4, is left out of TCP          |
+|                                                                 | reassembly and TCP or UDP flow tracing, and IPv4 carried in   |
+|                                                                 | IPv6, or IPv6 in IPv4, out of IP reassembly, all without a    |
+|                                                                 | warning; a frame `DPKT`_ cannot decode is kept raw, with a    |
 |                                                                 | :class:`~pcapkit.utilities.warnings.DPKTWarning`, and is      |
 |                                                                 | neither reassembled nor traced                                |
 +-----------------------------------------------------------------+---------------------------------------------------------------+

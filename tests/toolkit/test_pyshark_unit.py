@@ -678,7 +678,7 @@ class PySharkTraceFieldTests(unittest.TestCase):
         stream = iter([journal, first, second])
         extractor = types.SimpleNamespace(
             _frnum=0, _vfunc=lambda e, f: None, _flag_q=True, _flag_d=False, _flag_r=False, _flag_t=True,
-            _trace=TraceFlowManager(tcp=lambda data: traced.append(data.index)))
+            _trace=TraceFlowManager(tcp=mock.Mock(side_effect=lambda data: traced.append(data.index))))
         engine = PyShark.__new__(PyShark)  # skip __init__, which imports pyshark
         engine._extractor = extractor
         engine._extmp = types.SimpleNamespace(next=lambda: next(stream))

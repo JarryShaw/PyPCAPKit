@@ -437,21 +437,30 @@ class EngineBase(Generic[_T], metaclass=EngineMeta):
         if len(unsupported) == len(held):
             ext._flag_t = False
 
-    def _traceflow(self, *args: 'Any', **kwargs: 'Any') -> 'None':
+    def _traceflow(self, timestamp: 'float', *args: 'Any', **kwargs: 'Any') -> 'None':
         """Feed a frame to every enabled flow tracer.
 
         Arguments:
+            timestamp: capture timestamp of the frame, in seconds since the Unix
+                epoch
             *args: the frame, as this engine's adapters take it
             **kwargs: as this engine's adapters take them
 
-        Each flow tracer is fed its adapter's record, or each of a tuple of
-        them.
+        Each flow tracer's clock is first advanced to ``timestamp``, so a flow
+        times out once the capture passes its idle timeout whether or not the
+        frame is its protocol's. The adapter's record, or each of a tuple of
+        them, is then fed in.
+
+        .. versionchanged:: 1.10.0
+
+           Takes ``timestamp`` first, as :meth:`_reassemble` does (:issue:`2956`).
 
         """
         adapters = self.__traceflow__
         for (name, tracer) in self._extractor._trace.items():
             if tracer is None:
                 continue
+            tracer.advance(timestamp)
 
             adapter = adapters[name]
             if isinstance(adapter, ModuleDescriptor):

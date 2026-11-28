@@ -39,7 +39,9 @@ from pcapkit.foundation.engines.scapy import Scapy
 from pcapkit.foundation.reassembly.ip.data import Packet as IP_Packet
 from pcapkit.foundation.reassembly.tcp.data import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data import FrameRecord
+from pcapkit.foundation.traceflow.ip.data import Packet as TF_IP_Packet
 from pcapkit.foundation.traceflow.tcp.data import Packet as TF_TCP_Packet
+from pcapkit.foundation.traceflow.udp.data import Packet as TF_UDP_Packet
 from pcapkit.protocols.misc.pcap.frame.data import FrameInfo as Data_FrameInfo
 from pcapkit.toolkit.pcap import _tls_segment
 from pcapkit.toolkit.pypcapfile import (IP_TUNNELS, IPV4_EXTENSION_HEADERS, _default_accepts,
@@ -66,13 +68,14 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
     from typing import Any
 
-    from scapy.layers.inet import IP, TCP
+    from scapy.layers.inet import IP, TCP, UDP
     from scapy.layers.inet6 import IPv6, IPv6ExtHdrFragment
     from scapy.packet import Packet
 
 __all__ = [
     'attach_linktype', 'attach_resolution', 'packet2chain', 'packet2dict', 'packet2frame',
-    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tls_reassembly', 'tcp_traceflow'
+    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tls_reassembly', 'tcp_traceflow',
+    'udp_traceflow', 'ip_traceflow',
 ]
 
 
@@ -726,6 +729,37 @@ def tls_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
     return _tls_segment(tcp_reassembly(packet, count=count))
 
 
+def _linktype(packet: 'Packet') -> 'Enum_LinkType':
+    """Read the data link type of a Scapy packet, for a flow tracing record.
+
+    Args:
+        packet: Scapy packet.
+
+    Returns:
+        The link type :func:`attach_linktype` attached, not one inferred from
+        the first layer, which raw IPv4 shares with no link type (:issue:`1517`);
+        for a packet built by hand, which carries none, the link type its first
+        layer's name looks up.
+
+    Raises:
+        MissingKeyError: If that name is no link type's. It is looked up with no
+            default rather than substituting a DLT (:issue:`775`), since ``NULL``
+            and ``RAW`` are real DLTs; ``'IP'`` misses, but ``'IPV6'`` silently
+            resolves to ``LinkType.IPV6``.
+
+    .. versionadded:: 1.10.0
+
+    """
+    linktype = getattr(packet, LINKTYPE_ATTR, None)
+    if linktype is not None:
+        return Enum_LinkType.get(linktype)
+    name = packet.name.upper()
+    try:
+        return Enum_LinkType.get(name)
+    except KeyError:
+        raise MissingKeyError(name) from None
+
+
 def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | None':
     """Trace packet flow for TCP.
 
@@ -747,24 +781,8 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
     if (found := _tcp_carrier(packet)) is not None:
         ip, tcp, header, payload = found
 
-        # NOTE: the link type ``attach_linktype`` attached, not one inferred from
-        # the first layer, which raw IPv4 shares with no link type (#1517).
-        linktype = getattr(packet, LINKTYPE_ATTR, None)
-        if linktype is not None:
-            protocol = Enum_LinkType.get(linktype)
-        else:
-            # A packet built by hand carries none, so its first layer's name is
-            # looked up with no default, raising ``MissingKeyError`` rather than
-            # substituting a DLT (#775), since ``NULL`` and ``RAW`` are real DLTs.
-            # ``'IP'`` misses, but ``'IPV6'`` silently resolves to ``LinkType.IPV6``.
-            name = packet.name.upper()
-            try:
-                protocol = Enum_LinkType.get(name)
-            except KeyError:
-                raise MissingKeyError(name) from None
-
         data = TF_TCP_Packet(  # type: ignore[type-var]
-            protocol=protocol,                                   # data link type
+            protocol=_linktype(packet),                          # data link type
             index=count,                                         # frame number
             frame=packet2frame(packet),                          # extracted packet
             syn=bool(tcp.flags.S),                               # TCP synchronise (SYN) flag
@@ -784,3 +802,128 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
         )
         return data
     return None
+
+
+def _udp_carrier(packet: 'Packet') -> 'tuple[IP | IPv6, UDP] | None':
+    """Fetch the UDP layer of a Scapy packet, and the IP layer that carries it.
+
+    Args:
+        packet: Scapy packet.
+
+    Returns:
+        The nearest :class:`~scapy.layers.inet.IP` or
+        :class:`~scapy.layers.inet6.IPv6` layer above the packet's first
+        :class:`~scapy.layers.inet.UDP` layer, and that layer; or :data:`None` if
+        there is no such IP layer, an IPv4 layer above it is a later fragment
+        (:rfc:`791#section-3.2`), or the UDP layer is in the datagram an ICMP
+        error quotes, which `Scapy`_ dissects as its own ``*error`` layers.
+
+    Note:
+        The nearest is the innermost IP layer of an IP-in-IP tunnel, as for
+        :func:`_tcp_carrier`, which, unlike this, also reads a segment behind an
+        AH or IPv6 extension header carried in IPv4.
+
+    .. versionadded:: 1.10.0
+
+    """
+    from scapy.layers.inet import IP, UDP, IPerror, UDPerror
+    from scapy.layers.inet6 import IPerror6, IPv6
+    from scapy.packet import NoPayload
+
+    carrier = None  # type: IP | IPv6 | None
+    layer = packet  # type: Packet
+    while not isinstance(layer, (NoPayload, IPerror, IPerror6, UDPerror)):
+        if isinstance(layer, UDP):
+            return None if carrier is None else (carrier, layer)
+        if isinstance(layer, IP):
+            if layer.frag:
+                return None
+            carrier = layer
+        elif isinstance(layer, IPv6):
+            carrier = layer
+        layer = layer.payload
+    return None
+
+
+def udp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_UDP_Packet | None':
+    """Trace packet flow for UDP.
+
+    A packet can be traced if it contains a UDP layer (:class:`scapy.layers.inet.UDP`)
+    with an IP layer above it (see :func:`_udp_carrier`).
+
+    Args:
+        packet: Scapy packet.
+        count: Packet index. If not provided, defaults to ``-1``.
+
+    Returns:
+        Data for UDP flow tracing (:term:`trace.udp.packet`) if the ``packet`` can be
+        traced; otherwise :data:`None`.
+
+    Raises:
+        MissingKeyError: If the packet's link type cannot be read (see
+            :func:`_linktype`).
+
+    See Also:
+        :class:`pcapkit.foundation.traceflow.udp.traceflow.UDP`
+
+    .. versionadded:: 1.10.0
+
+    """
+    if (found := _udp_carrier(packet)) is None:
+        return None
+    ip, udp = found
+    return TF_UDP_Packet(
+        protocol=_linktype(packet),                          # data link type
+        index=count,                                         # frame number
+        frame=packet2frame(packet),                          # extracted packet
+        src=ipaddress.ip_address(ip.src),                    # source IP
+        dst=ipaddress.ip_address(ip.dst),                    # destination IP
+        srcport=udp.sport,                                   # UDP source port
+        dstport=udp.dport,                                   # UDP destination port
+        timestamp=float(packet.time),                        # capture timestamp
+        payload=_within_datagrams(udp.payload),              # raw bytes type payload
+    )
+
+
+def ip_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_IP_Packet | None':
+    """Trace packet flow for IP conversations.
+
+    A packet can be traced if it contains an :class:`~scapy.layers.inet.IP` or
+    :class:`~scapy.layers.inet6.IPv6` layer, and belongs to the conversation of
+    its outermost one, the tunnel's in an IP-in-IP tunnel.
+
+    Args:
+        packet: Scapy packet.
+        count: Packet index. If not provided, defaults to ``-1``.
+
+    Returns:
+        Data for IP flow tracing (:term:`trace.ip.packet`) if the ``packet`` can be
+        traced; otherwise :data:`None`.
+
+    Raises:
+        MissingKeyError: If the packet's link type cannot be read (see
+            :func:`_linktype`).
+
+    See Also:
+        :class:`pcapkit.foundation.traceflow.ip.traceflow.IP`
+
+    .. versionadded:: 1.10.0
+
+    """
+    from scapy.layers.inet import IP
+    from scapy.layers.inet6 import IPv6
+    from scapy.packet import NoPayload
+
+    layer = packet  # type: Packet
+    while not isinstance(layer, (NoPayload, IP, IPv6)):
+        layer = layer.payload
+    if isinstance(layer, NoPayload):
+        return None
+    return TF_IP_Packet(
+        protocol=_linktype(packet),                          # data link type
+        index=count,                                         # frame number
+        frame=packet2frame(packet),                          # extracted packet
+        src=ipaddress.ip_address(layer.src),                 # source IP
+        dst=ipaddress.ip_address(layer.dst),                 # destination IP
+        timestamp=float(packet.time),                        # capture timestamp
+    )

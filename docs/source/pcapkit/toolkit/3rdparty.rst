@@ -32,6 +32,10 @@ Scapy Tools
 
 .. autofunction:: pcapkit.toolkit.scapy.tcp_traceflow
 
+.. autofunction:: pcapkit.toolkit.scapy.udp_traceflow
+
+.. autofunction:: pcapkit.toolkit.scapy.ip_traceflow
+
 Auxiliary Functions
 -------------------
 
@@ -59,6 +63,10 @@ Auxiliary Functions
 
 .. autofunction:: pcapkit.toolkit.scapy._tcp_behind_extension_headers
 
+.. autofunction:: pcapkit.toolkit.scapy._udp_carrier
+
+.. autofunction:: pcapkit.toolkit.scapy._linktype
+
 DPKT Tools
 ==========
 
@@ -75,6 +83,10 @@ DPKT Tools
 .. autofunction:: pcapkit.toolkit.dpkt.tls_reassembly
 
 .. autofunction:: pcapkit.toolkit.dpkt.tcp_traceflow
+
+.. autofunction:: pcapkit.toolkit.dpkt.udp_traceflow
+
+.. autofunction:: pcapkit.toolkit.dpkt.ip_traceflow
 
 Auxiliary Functions
 -------------------
@@ -126,6 +138,10 @@ PyShark Tools
 
 .. autofunction:: pcapkit.toolkit.pyshark.tcp_traceflow
 
+.. autofunction:: pcapkit.toolkit.pyshark.udp_traceflow
+
+.. autofunction:: pcapkit.toolkit.pyshark.ip_traceflow
+
 .. autodata:: pcapkit.toolkit.pyshark.ENCAP_TYPE_TO_LINKTYPE
    :no-value:
 
@@ -144,6 +160,8 @@ Auxiliary Functions
 .. autofunction:: pcapkit.toolkit.pyshark._has_fixed_header
 
 .. autofunction:: pcapkit.toolkit.pyshark._has_addresses
+
+.. autofunction:: pcapkit.toolkit.pyshark._linktype
 
 PyPCAP Tools
 ============
@@ -241,6 +259,10 @@ PyPCAPFile Tools
 .. autofunction:: pcapkit.toolkit.pypcapfile.tls_reassembly
 
 .. autofunction:: pcapkit.toolkit.pypcapfile.tcp_traceflow
+
+.. autofunction:: pcapkit.toolkit.pypcapfile.udp_traceflow
+
+.. autofunction:: pcapkit.toolkit.pypcapfile.ip_traceflow
 
 Auxiliary Functions
 -------------------

@@ -153,6 +153,11 @@ class TraceFlowOptions(Info):
             buffers every traced payload -- a cost tracing does not otherwise
             pay. Unavailable on the ``pyshark`` engine, which reports dissected
             fields rather than the octets behind them
+        timeout: idle timeout in seconds, measured on the capture's own clock:
+            a flow none of whose packets is more recent is finalised, as
+            :meth:`TraceFlow.advance
+            <pcapkit.foundation.traceflow.traceflow.TraceFlow.advance>` does;
+            :data:`None` keeps every flow until the end of the capture
 
     An :class:`~pcapkit.foundation.extraction.Extractor` given no names turns
     the feature off, as :data:`None` does, and warns that it does.
@@ -161,6 +166,10 @@ class TraceFlowOptions(Info):
         RegistryError: If ``protocols`` is not a list of names.
 
     .. versionadded:: 1.7.0
+
+    .. versionchanged:: 1.10.0
+
+       Takes ``timeout`` (:issue:`2956`).
 
     """
 
@@ -178,14 +187,19 @@ class TraceFlowOptions(Info):
     bidirectional: 'bool'
     #: Whether each traced flow reassembles its application layer.
     analyze: 'bool'
+    #: Idle timeout in seconds, on the capture's clock, or :data:`None`.
+    #:
+    #: .. versionadded:: 1.10.0
+    timeout: 'Optional[float]'
 
     def __init__(self, *, protocols: 'Iterable[str]', fout: 'str' = './tmp',  # pylint: disable=super-init-not-called
                  format: 'str' = 'pcap',  # pylint: disable=redefined-builtin
                  byteorder: 'Literal["big", "little"]' = sys.byteorder, nanosecond: 'bool' = False,
-                 bidirectional: 'bool' = True, analyze: 'bool' = False) -> 'None':
+                 bidirectional: 'bool' = True, analyze: 'bool' = False,
+                 timeout: 'Optional[float]' = None) -> 'None':
         self.__update__(protocols=_names('TraceFlowOptions', protocols), fout=fout,
                         format=format, byteorder=byteorder, nanosecond=nanosecond,
-                        bidirectional=bidirectional, analyze=analyze)
+                        bidirectional=bidirectional, analyze=analyze, timeout=timeout)
         self.__post_init__()
 
 

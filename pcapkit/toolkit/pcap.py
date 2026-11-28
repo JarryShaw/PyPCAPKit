@@ -9,7 +9,8 @@ The reassembly and flow tracing adapters return the data their
 :mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
 cannot be used for it. The TCP adapters here and in
 :mod:`pcapkit.toolkit.pcapng` read the segment with
-:func:`~pcapkit.toolkit.pcap.tcp_segment`, the DTLS ones the record with
+:func:`~pcapkit.toolkit.pcap.tcp_segment`, the UDP flow tracing ones the
+datagram with :func:`~pcapkit.toolkit.pcap._carrier`, the DTLS ones the record with
 :func:`~pcapkit.toolkit.pcap._dtls_fragments`, and the SCTP ones the packet with
 :func:`~pcapkit.toolkit.pcap._sctp_fragments`. The TLS adapters of every engine
 keep the TCP ones' records of a TLS stream with
@@ -26,7 +27,9 @@ from pcapkit.foundation.reassembly.dtls.data import Packet as DTLS_Packet
 from pcapkit.foundation.reassembly.ip.data import Packet as IP_Packet
 from pcapkit.foundation.reassembly.sctp.data import Packet as SCTP_Packet
 from pcapkit.foundation.reassembly.tcp.data import Packet as TCP_Packet
+from pcapkit.foundation.traceflow.ip.data import Packet as TF_IP_Packet
 from pcapkit.foundation.traceflow.tcp.data import Packet as TF_TCP_Packet
+from pcapkit.foundation.traceflow.udp.data import Packet as TF_UDP_Packet
 from pcapkit.protocols.application.dtls.data import DTLS as Data_DTLS
 from pcapkit.protocols.application.dtls.data import DTLSHandshake as Data_DTLSHandshake
 from pcapkit.protocols.application.dtls.protocol import DTLS
@@ -54,7 +57,8 @@ if TYPE_CHECKING:
     from pcapkit.protocols.misc.pcap import Frame
 
 __all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly',
-           'sctp_reassembly', 'tls_reassembly', 'tcp_traceflow', 'tcp_segment', 'TCPSegment']
+           'sctp_reassembly', 'tls_reassembly', 'tcp_traceflow', 'udp_traceflow', 'ip_traceflow',
+           'tcp_segment', 'TCPSegment']
 
 
 class TCPSegment(NamedTuple):
@@ -86,36 +90,44 @@ class TCPSegment(NamedTuple):
     payload: 'bytes'
 
 
-def _carrier(frame: 'ProtocolBase') -> 'tuple[Optional[IPv4 | IPv6], Optional[TCP]]':
-    """Fetch the TCP layer of a frame and the IP layer that carries it.
+def _carrier(frame: 'ProtocolBase', transport: 'type[TCP | UDP]' = TCP) -> 'tuple[Optional[IPv4 | IPv6], Optional[TCP | UDP]]':  # pylint: disable=line-too-long
+    """Fetch the TCP or UDP layer of a frame and the IP layer that carries it.
 
     Args:
         frame: PCAP frame or PCAP-NG block.
+        transport: :class:`~pcapkit.protocols.transport.tcp.protocol.TCP`, the
+            default, or :class:`~pcapkit.protocols.transport.udp.protocol.UDP`,
+            the layer to fetch.
 
     Returns:
-        The IPv4 or IPv6 layer nearest above the frame's TCP layer, and that TCP
-        layer; with no TCP layer, the last IPv4 or IPv6 layer of the frame and
-        :data:`None`. With no IP layer, neither.
+        The IPv4 or IPv6 layer nearest above the frame's ``transport`` layer, and
+        that layer; with no such layer, the last IPv4 or IPv6 layer of the frame
+        and :data:`None`. With no IP layer, neither.
 
     Note:
         The nearest IP layer is the innermost one of an IP-in-IP tunnel
-        (:rfc:`2003`, :rfc:`2473`, :rfc:`4213`), whose addresses are the TCP
-        endpoints', as in Wireshark's TCP conversations; the outermost, which
+        (:rfc:`2003`, :rfc:`2473`, :rfc:`4213`), whose addresses are the TCP or
+        UDP endpoints', as in Wireshark's conversations; the outermost, which
         ``frame['IP']`` finds, is the tunnel's (:issue:`1581`). It is found by
         walking down from the outermost, so the headers between them do not
         intervene: IPv6 dissects its own extension headers, and an AH or other
         header inside IPv4 is a layer of its own but not an IP layer.
+
+    .. versionchanged:: 1.10.0
+
+       Takes ``transport`` (:issue:`2956`).
 
     """
     if 'IP' not in frame:
         return None, None
     ip = cast('IPv4 | IPv6', frame['IP'])
     layer = ip.payload
-    while isinstance(layer, ProtocolBase) and not isinstance(layer, (NoPayload, TCP)):
+    while isinstance(layer, ProtocolBase) and not isinstance(layer, (NoPayload, transport)):
         if isinstance(layer, Protocol_IP):
             ip = cast('IPv4 | IPv6', layer)
         layer = layer.payload
-    return ip, (cast('TCP', frame['TCP']) if 'TCP' in frame else None)
+    name = transport.__name__
+    return ip, (cast('TCP | UDP', frame[name]) if name in frame else None)
 
 
 def tcp_segment(frame: 'ProtocolBase') -> 'Optional[TCPSegment]':
@@ -150,7 +162,7 @@ def tcp_segment(frame: 'ProtocolBase') -> 'Optional[TCPSegment]':
         segment, as it does without one.
 
     """
-    ip, tcp = _carrier(frame)
+    ip, tcp = cast('tuple[Optional[IPv4 | IPv6], Optional[TCP]]', _carrier(frame))
     if ip is None:
         return None
     if tcp is not None:
@@ -659,3 +671,77 @@ def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_TCP_Packet | 
         )
         return data
     return None
+
+
+def udp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_UDP_Packet | None':
+    """Trace packet flow for UDP.
+
+    A frame can be traced if it contains a UDP layer
+    (:class:`~pcapkit.protocols.transport.udp.protocol.UDP`), whose endpoints are
+    those of the IP layer nearest above it (see :func:`_carrier`). A later
+    fragment of an IP datagram carries no UDP header, so is not traced.
+
+    Args:
+        frame: PCAP frame.
+        data_link: Data link layer protocol (from global header).
+
+    Returns:
+        Data for UDP flow tracing (:term:`trace.udp.packet`) if the ``frame`` can be
+        traced; otherwise :data:`None`.
+
+    See Also:
+        :class:`pcapkit.foundation.traceflow.udp.traceflow.UDP`
+
+    .. versionadded:: 1.10.0
+
+    """
+    ip, udp = _carrier(frame, UDP)
+    if ip is None or udp is None:
+        return None
+    ip_info, udp_info = ip.info, udp.info
+    return TF_UDP_Packet(
+        protocol=data_link,                      # data link type from global header
+        index=frame.info.number,                 # frame number
+        frame=frame.info,                        # extracted frame info
+        src=ip_info.src,                         # source IP
+        dst=ip_info.dst,                         # destination IP
+        srcport=udp_info.srcport.port,           # UDP source port
+        dstport=udp_info.dstport.port,           # UDP destination port
+        timestamp=float(frame.info.time_epoch),  # frame timestamp
+        payload=bytes(udp.packet.payload),       # raw bytes type payload
+    )
+
+
+def ip_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_IP_Packet | None':
+    """Trace packet flow for IP conversations.
+
+    A frame can be traced if it contains an IPv4 or IPv6 layer
+    (:class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`,
+    :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`), and belongs to the
+    conversation of its outermost one, the tunnel's in an IP-in-IP tunnel.
+
+    Args:
+        frame: PCAP frame.
+        data_link: Data link layer protocol (from global header).
+
+    Returns:
+        Data for IP flow tracing (:term:`trace.ip.packet`) if the ``frame`` can be
+        traced; otherwise :data:`None`.
+
+    See Also:
+        :class:`pcapkit.foundation.traceflow.ip.traceflow.IP`
+
+    .. versionadded:: 1.10.0
+
+    """
+    if 'IP' not in frame:
+        return None
+    ip_info = cast('Data_IPv4 | Data_IPv6', frame['IP'].info)
+    return TF_IP_Packet(
+        protocol=data_link,                      # data link type from global header
+        index=frame.info.number,                 # frame number
+        frame=frame.info,                        # extracted frame info
+        src=ip_info.src,                         # source IP
+        dst=ip_info.dst,                         # destination IP
+        timestamp=float(frame.info.time_epoch),  # frame timestamp
+    )

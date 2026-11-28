@@ -526,9 +526,10 @@ The engines and the file formats they read:
    capability it cannot provide rather than silently producing an empty result.
    The exceptions pass without a warning: `PyPCAPFile`_ and `DPKT`_ leave TCP
    behind some tags, tunnels and extension headers out of TCP reassembly and
-   flow tracing, `DPKT`_ also leaves IPv4 in IPv6, and IPv6 in IPv4, out of IP
-   reassembly, and the `Scapy`_ engine reads IPv6 only as far as `Scapy`_
-   dissects it. See
+   flow tracing, and UDP there out of UDP flow tracing, `PyPCAPFile`_ leaves
+   IPv6 out of UDP and IP flow tracing, `DPKT`_ also leaves IPv4 in IPv6, and
+   IPv6 in IPv4, out of IP reassembly, and the `Scapy`_ engine reads IPv6 only as
+   far as `Scapy`_ dissects it. See
    :doc:`pcapkit/foundation/engines/index` for the full table, which names each
    case.
 
@@ -546,6 +547,14 @@ Samples
 A sketch of a new engine on :mod:`scapy`, modelled on
 :class:`~pcapkit.foundation.engines.scapy.Scapy`, whose full implementation is
 :mod:`pcapkit.foundation.engines.scapy`:
+
+.. versionchanged:: 1.10.0
+
+   :meth:`EngineBase._traceflow <pcapkit.foundation.engines.engine.EngineBase._traceflow>`
+   takes the frame's timestamp first, as :meth:`EngineBase._reassemble
+   <pcapkit.foundation.engines.engine.EngineBase._reassemble>` does, so an engine
+   calling ``self._traceflow(packet, ...)`` must pass the timestamp before the packet
+   (:issue:`2956`).
 
 .. code-block:: python
 
@@ -644,10 +653,10 @@ A sketch of a new engine on :mod:`scapy`, modelled on
            if ext._flag_r:
                self._reassemble(float(packet.time), packet, count=ext._frnum)
 
-           # NOTE: Feed every enabled flow tracer what its ``__traceflow__`` adapter
-           # makes of the packet, if anything.
+           # NOTE: Likewise advance every enabled flow tracer, then feed it what its
+           # ``__traceflow__`` adapter makes of the packet, if anything.
            if ext._flag_t:
-               self._traceflow(packet, count=ext._frnum)
+               self._traceflow(float(packet.time), packet, count=ext._frnum)
 
            # NOTE: Store the frame when storing is on (``ext._flag_d``).
            if ext._flag_d:
@@ -759,11 +768,13 @@ The reassembly and flow tracing classes, per protocol:
 +------------------------------------------------------------+-------------------------------------------------------------+---------------------------------------------------------+
 | Protocol                                                   | Reassembly Class                                            | Flow Tracing Class                                      |
 +============================================================+=============================================================+=========================================================+
-| :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`    | :class:`pcapkit.foundation.reassembly.ipv4.reassembly.IPv4` |                                                         |
+| :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`    | :class:`pcapkit.foundation.reassembly.ipv4.reassembly.IPv4` | :class:`pcapkit.foundation.traceflow.ip.traceflow.IP`   |
 +------------------------------------------------------------+-------------------------------------------------------------+---------------------------------------------------------+
-| :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`    | :class:`pcapkit.foundation.reassembly.ipv6.reassembly.IPv6` |                                                         |
+| :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`    | :class:`pcapkit.foundation.reassembly.ipv6.reassembly.IPv6` | :class:`pcapkit.foundation.traceflow.ip.traceflow.IP`   |
 +------------------------------------------------------------+-------------------------------------------------------------+---------------------------------------------------------+
 | :class:`~pcapkit.protocols.transport.tcp.protocol.TCP`     | :class:`pcapkit.foundation.reassembly.tcp.reassembly.TCP`   | :class:`pcapkit.foundation.traceflow.tcp.traceflow.TCP` |
++------------------------------------------------------------+-------------------------------------------------------------+---------------------------------------------------------+
+| :class:`~pcapkit.protocols.transport.udp.protocol.UDP`     |                                                             | :class:`pcapkit.foundation.traceflow.udp.traceflow.UDP` |
 +------------------------------------------------------------+-------------------------------------------------------------+---------------------------------------------------------+
 | :class:`~pcapkit.protocols.application.dtls.protocol.DTLS` | :class:`pcapkit.foundation.reassembly.dtls.reassembly.DTLS` |                                                         |
 +------------------------------------------------------------+-------------------------------------------------------------+---------------------------------------------------------+

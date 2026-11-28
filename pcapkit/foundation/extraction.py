@@ -406,6 +406,8 @@ class Extractor(Generic[_P]):
     #: :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclasses.
     __traceflow__ = {
         'tcp': ModuleDescriptor('pcapkit.foundation.traceflow.tcp.traceflow', 'TCP'),
+        'udp': ModuleDescriptor('pcapkit.foundation.traceflow.udp.traceflow', 'UDP'),
+        'ip': ModuleDescriptor('pcapkit.foundation.traceflow.ip.traceflow', 'IP'),
     }  # type: dict[str, ModuleDescriptor[TraceFlowBase] | Type[TraceFlowBase]]
 
     # Read-only copies of the registries as shipped. A public registrar
@@ -513,8 +515,10 @@ class Extractor(Generic[_P]):
         """Index table for traced flow.
 
         * ``tcp`` -- tuple of TCP flows (:term:`trace.tcp.index`)
+        * ``udp`` -- tuple of UDP flows (:term:`trace.udp.index`)
+        * ``ip`` -- tuple of IP conversations (:term:`trace.ip.index`)
 
-        It is :data:`None` when TCP flow tracing is disabled, and every other
+        Each is :data:`None` when its flow tracing is disabled, and every other
         enabled flow tracer adds the tuple of its flows, under the name it is
         registered by.
 
@@ -858,7 +862,7 @@ class Extractor(Generic[_P]):
                        format: 'str' = 'pcap',  # pylint: disable=redefined-builtin
                        byteorder: 'Literal["little", "big"]' = sys.byteorder,
                        nanosecond: 'bool' = False, bidirectional: 'bool' = True,
-                       analyze: 'bool' = False) -> 'TraceFlowBase':
+                       analyze: 'bool' = False, timeout: 'Optional[float]' = None) -> 'TraceFlowBase':
         """Make the flow tracer registered under a protocol name.
 
         Every caller reaches a flow tracer through this:
@@ -876,6 +880,8 @@ class Extractor(Generic[_P]):
             bidirectional: whether both halves of a conversation are traced as
                 one flow
             analyze: whether each traced flow reassembles its application layer
+            timeout: idle timeout in seconds, on the capture's clock; :data:`None`
+                keeps every flow until the end of the capture
 
         Returns:
             The flow tracer instance.
@@ -883,13 +889,19 @@ class Extractor(Generic[_P]):
         Raises:
             FormatError: If no flow tracer is registered under ``protocol``.
             RegistryError: If ``protocol`` is not a :obj:`str`.
+            FieldValueError: If ``timeout`` is negative, NaN, or no real number of
+                seconds.
 
         .. versionadded:: 1.7.0
+
+        .. versionchanged:: 1.10.0
+
+           Takes ``timeout`` (:issue:`2956`).
 
         """
         trace_cls = cls._traceflow_class(protocol)
         return trace_cls(fout=fout, format=format, byteorder=byteorder, nanosecond=nanosecond,
-                         bidirectional=bidirectional, analyze=analyze)
+                         bidirectional=bidirectional, analyze=analyze, timeout=timeout)
 
     def run(self) -> 'None':  # pylint: disable=inconsistent-return-statements
         """Start extraction.
@@ -1365,7 +1377,7 @@ class Extractor(Generic[_P]):
                                                        byteorder=trace_opts.byteorder,
                                                        nanosecond=trace_opts.nanosecond,
                                                        bidirectional=trace_opts.bidirectional,
-                                                       analyze=trace_analyze)
+                                                       analyze=trace_analyze, timeout=trace_opts.timeout)
         self._trace = TraceFlowManager(trace_objs)
 
         if self._flag_s:

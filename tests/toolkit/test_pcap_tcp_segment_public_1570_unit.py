@@ -90,7 +90,8 @@ class TestPublicSurface(_Base):
 
         # the default engine feeds every shipped reassembler, each through an adapter here
         self.assertEqual(pcap.__all__, [*(f'{name}_reassembly' for name in builtins()),
-                                        'tcp_traceflow', 'tcp_segment', 'TCPSegment'])
+                                        'tcp_traceflow', 'udp_traceflow', 'ip_traceflow',
+                                        'tcp_segment', 'TCPSegment'])
 
     def test_callers_share_the_public_helper(self) -> None:
         from pcapkit.toolkit import pcap, pcapng

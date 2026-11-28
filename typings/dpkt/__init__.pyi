@@ -17,5 +17,6 @@ from . import loopback as loopback
 from . import pcap as pcap
 from . import pcapng as pcapng
 from . import tcp as tcp
+from . import udp as udp
 
 __version__: str

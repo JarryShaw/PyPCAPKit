@@ -43,7 +43,11 @@ __tier__ = 'ALL'
 #: pair has one, named ``<tracer>_traceflow`` in the engine's toolkit module.
 UNSUPPORTED = {
     ('PyPCAP', 'tcp'): 'PyPCAP dissects nothing, so there is no TCP layer to read',
+    ('PyPCAP', 'udp'): 'PyPCAP dissects nothing, so there is no UDP layer to read',
+    ('PyPCAP', 'ip'): 'PyPCAP dissects nothing, so there is no IP layer to read',
     ('PCAP_CT', 'tcp'): 'pcap-ct dissects nothing, so there is no TCP layer to read',
+    ('PCAP_CT', 'udp'): 'pcap-ct dissects nothing, so there is no UDP layer to read',
+    ('PCAP_CT', 'ip'): 'pcap-ct dissects nothing, so there is no IP layer to read',
 }
 
 #: How each engine calls a flow tracing adapter: the positional arguments it passes,
@@ -223,7 +227,7 @@ class SetupAndFeedTests(TraceflowAdapterTestCase):
                 self._setup_traceflow()
 
             def read_frame(self) -> None:
-                self._traceflow('frame', count=1)
+                self._traceflow(TIMES[0], 'frame', count=1)
 
         return Bare
 

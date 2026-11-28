@@ -134,7 +134,8 @@ class EndToEndTests(TracerCase):
         self.assertEqual(extractor.traceflow.counter,
                          ('frame 1 on ETHERNET', 'frame 2 on ETHERNET', 'frame 3 on ETHERNET'))
         self.assertEqual([flow.index for flow in extractor.traceflow.tcp], [(1, 2, 3)])
-        self.assertEqual(list(extractor.traceflow), ['tcp', 'counter'])
+        # the built-ins lead, each None when off (#2956)
+        self.assertEqual(list(extractor.traceflow), ['tcp', 'udp', 'ip', 'counter'])
         # the end of the capture finished it, as it finished TCP's
         self.assertEqual(self.Counter.finished, [extractor._trace['counter']])
 
@@ -171,7 +172,7 @@ class EndToEndTests(TracerCase):
         self.assertIn("'Extractor(engine=default)' object does not support Counter flow tracing; "
                       "so 'counter' will be ignored", messages)
         self.assertEqual(list(extractor._trace), ['tcp'])
-        self.assertEqual(list(extractor.traceflow), ['tcp'])
+        self.assertEqual(list(extractor.traceflow), ['tcp', 'udp', 'ip'])
         self.assertEqual(self.Counter.finished, [])
 
     def test_tracing_off_holds_no_tracer(self) -> None:
@@ -252,7 +253,7 @@ class MakeTraceflowTests(TracerCase):
         from pcapkit.protocols.transport.tcp.protocol import TCP as TCP_Protocol
 
         options = {'fout': os.path.join(self.root, 'traced'), 'format': 'json', 'byteorder': 'big',
-                   'nanosecond': True, 'bidirectional': False, 'analyze': True}
+                   'nanosecond': True, 'bidirectional': False, 'analyze': True, 'timeout': 30.0}
         for (protocol, name, kind) in (('Counter', 'Counter', self.Counter), (TCP_Protocol, 'TCP', TCP)):
             with self.subTest(name=name):
                 with mock.patch.object(Extractor, 'make_traceflow', wraps=Extractor.make_traceflow) as make:
@@ -260,7 +261,8 @@ class MakeTraceflowTests(TracerCase):
                 make.assert_called_once_with(name, **options)
                 self.assertIsInstance(tracer, kind)
                 self.assertEqual((tracer._fproot, tracer._fdpext, tracer._endian, tracer._nnsecd, tracer._bidir,
-                                  tracer._analyze), (options['fout'], '.json', 'big', True, False, True))
+                                  tracer._analyze, tracer.timeout),
+                                 (options['fout'], '.json', 'big', True, False, True, 30.0))
 
 
 class CleanupTests(TracerCase):
@@ -319,7 +321,7 @@ class CleanupTests(TracerCase):
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class TraceFlowDataTests(unittest.TestCase):
-    """``TraceFlowData`` keeps ``tcp`` first, then a field per other tracer as given."""
+    """``TraceFlowData`` keeps the built-ins first, then a field per other tracer as given."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -330,7 +332,8 @@ class TraceFlowDataTests(unittest.TestCase):
         for extra in ({}, {'late': (), 'early': ('e',)}, {'early': ('e',), 'late': ()}):
             with self.subTest(list(extra)):
                 data = TraceFlowData(**extra)
-                self.assertEqual(list(data.items()), [('tcp', None), *extra.items()])
+                self.assertEqual(list(data.items()), [('tcp', None), ('udp', None), ('ip', None),
+                                                      *extra.items()])
         self.assertEqual(TraceFlowData(('t',)).tcp, ('t',))
 
     def test_round_trips(self) -> None:
@@ -341,7 +344,8 @@ class TraceFlowDataTests(unittest.TestCase):
                       pickle.loads(pickle.dumps(data))):
             with self.subTest(clone=type(clone).__name__):
                 self.assertIs(type(clone), TraceFlowData)
-                self.assertEqual(list(clone.items()), [('tcp', ('t',)), ('counter', ('c',))])
+                self.assertEqual(list(clone.items()), [('tcp', ('t',)), ('udp', None), ('ip', None),
+                                                       ('counter', ('c',))])
 
 
 if __name__ == '__main__':

@@ -14,7 +14,8 @@ PCAP Tools
 :mod:`pcapkit.toolkit.pcap` contains the adapters for the PCAP format. The TCP
 adapters here and in
 :mod:`pcapkit.toolkit.pcapng` read the segment with
-:func:`~pcapkit.toolkit.pcap.tcp_segment`, the DTLS ones the record with
+:func:`~pcapkit.toolkit.pcap.tcp_segment`, the UDP flow tracing ones the datagram
+with :func:`~pcapkit.toolkit.pcap._carrier`, the DTLS ones the record with
 :func:`~pcapkit.toolkit.pcap._dtls_fragments`, and the SCTP ones the packet with
 :func:`~pcapkit.toolkit.pcap._sctp_fragments`. The TLS adapters of every engine keep
 the TCP ones' records of a TLS stream with :func:`~pcapkit.toolkit.pcap._tls_segment`.
@@ -33,10 +34,16 @@ the TCP ones' records of a TLS stream with :func:`~pcapkit.toolkit.pcap._tls_seg
 
 .. autofunction:: pcapkit.toolkit.pcap.tcp_traceflow
 
+.. autofunction:: pcapkit.toolkit.pcap.udp_traceflow
+
+.. autofunction:: pcapkit.toolkit.pcap.ip_traceflow
+
 Auxiliary Functions
 -------------------
 
 .. autofunction:: pcapkit.toolkit.pcap.tcp_segment
+
+.. autofunction:: pcapkit.toolkit.pcap._carrier
 
 .. autofunction:: pcapkit.toolkit.pcap._fragment
 
@@ -70,6 +77,10 @@ PCAP-NG Tools
 .. autofunction:: pcapkit.toolkit.pcapng.tls_reassembly
 
 .. autofunction:: pcapkit.toolkit.pcapng.tcp_traceflow
+
+.. autofunction:: pcapkit.toolkit.pcapng.udp_traceflow
+
+.. autofunction:: pcapkit.toolkit.pcapng.ip_traceflow
 
 Auxiliary Functions
 -------------------

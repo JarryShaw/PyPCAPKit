@@ -18,7 +18,8 @@ cannot be used for it.
    from "this frame carries no IPv6 fragment".
 
    For the same reason :func:`tcp_reassembly` and :func:`tcp_traceflow` see TCP
-   over IPv4 only, and decline a frame carrying TCP over IPv6. When the IPv6
+   over IPv4 only, and decline a frame carrying TCP over IPv6, and
+   :func:`udp_traceflow` and :func:`ip_traceflow` see IPv4 only. When the IPv6
    packet is straight over Ethernet (below), that loss is reported with one
    :exc:`~pcapkit.utilities.warnings.AttributeWarning` per capture, on its first
    such frame, rather than one per frame.
@@ -54,7 +55,9 @@ from pcapkit.corekit.const.capture import RESOLUTION
 from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
 from pcapkit.foundation.reassembly.ip.data import Packet as IP_Packet
 from pcapkit.foundation.reassembly.tcp.data import Packet as TCP_Packet
+from pcapkit.foundation.traceflow.ip.data import Packet as TF_IP_Packet
 from pcapkit.foundation.traceflow.tcp.data import Packet as TF_TCP_Packet
+from pcapkit.foundation.traceflow.udp.data import Packet as TF_UDP_Packet
 from pcapkit.protocols.internet.ipv4.protocol import IPv4 as Protocol_IPv4
 from pcapkit.protocols.transport.tcp.protocol import TCP as Protocol_TCP
 from pcapkit.toolkit.pcap import _tls_segment
@@ -76,6 +79,7 @@ if TYPE_CHECKING:
 __all__ = [
     'packet2timestamp', 'ipv4_header', 'packet2chain', 'packet2dict',
     'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tls_reassembly', 'tcp_traceflow',
+    'udp_traceflow', 'ip_traceflow',
 ]
 
 #: Message prefix shared by every message below, read off
@@ -938,4 +942,100 @@ def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
         ack=tcp.acknum,                                     # TCP acknowledgement number
         header=segment[:hdr_len],                           # raw bytes type header
         payload=bytearray(segment[hdr_len:]),               # raw bytearray type payload
+    )
+
+
+def udp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
+                  count: 'int' = -1) -> 'TF_UDP_Packet | None':
+    """Trace packet flow for UDP.
+
+    A packet can be traced if it contains an IPv4 layer carrying a whole UDP header:
+    of protocol UDP, not a later fragment, whose payload holds the header's 8
+    octets (:rfc:`768`). The datagram is cut at the IPv4 Total Length, as for
+    :func:`_transport`, and its payload at the UDP Length where that is shorter.
+
+    Args:
+        packet: PyPCAPFile packet.
+        data_link: Data link layer protocol (from the savefile header).
+        count: Packet index. If not provided, defaults to ``-1``.
+
+    Returns:
+        Data for UDP flow tracing (:term:`trace.udp.packet`) if the ``packet`` can be
+        traced; otherwise :data:`None`.
+
+    Raises:
+        ProtocolError: If ``ipv4.src`` or ``ipv4.dst`` cannot be parsed as an
+            IPv4 address.
+
+    See Also:
+        :class:`pcapkit.foundation.traceflow.udp.traceflow.UDP`
+
+    .. versionadded:: 1.10.0
+
+    """
+    ipv4 = _network(packet)
+    if ipv4 is None or ipv4.p != Enum_TransType.UDP or ipv4.off or not _is_raw(ipv4.payload):
+        return None
+
+    # NOTE: imported only once there is something to decode, so that declining a
+    # frame does not require ``pcapfile`` to be installed.
+    from pcapfile.protocols.transport.udp import UDP  # isort:skip
+
+    datagram = _maybe_unhex(bytes(ipv4.payload))
+    if ipv4.len:
+        datagram = datagram[:max(ipv4.len - ipv4.hl * 4, 0)]
+    if len(datagram) < UDP.udp_header_size:
+        return None
+
+    udp = UDP(datagram)
+    end = udp.len if UDP.udp_header_size <= udp.len < len(datagram) else len(datagram)
+    return TF_UDP_Packet(
+        protocol=data_link,                                 # data link type from savefile header
+        index=count,                                        # frame number
+        frame=packet2dict(packet, data_link=data_link),     # extracted packet
+        src=_parse_ipv4_address(ipv4.src),                  # source IP
+        dst=_parse_ipv4_address(ipv4.dst),                  # destination IP
+        srcport=udp.src_port,                               # UDP source port
+        dstport=udp.dst_port,                               # UDP destination port
+        timestamp=packet2timestamp(packet),                 # timestamp
+        payload=datagram[UDP.udp_header_size:end],          # raw bytes type payload
+    )
+
+
+def ip_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
+                 count: 'int' = -1) -> 'TF_IP_Packet | None':
+    """Trace packet flow for IP conversations.
+
+    A packet can be traced if it contains an IPv4 layer (see :func:`_network`); IPv6
+    cannot be, as `PyPCAPFile`_ has no IPv6 decoder.
+
+    Args:
+        packet: PyPCAPFile packet.
+        data_link: Data link layer protocol (from the savefile header).
+        count: Packet index. If not provided, defaults to ``-1``.
+
+    Returns:
+        Data for IP flow tracing (:term:`trace.ip.packet`) if the ``packet`` can be
+        traced; otherwise :data:`None`.
+
+    Raises:
+        ProtocolError: If ``ipv4.src`` or ``ipv4.dst`` cannot be parsed as an
+            IPv4 address.
+
+    See Also:
+        :class:`pcapkit.foundation.traceflow.ip.traceflow.IP`
+
+    .. versionadded:: 1.10.0
+
+    """
+    ipv4 = _network(packet)
+    if ipv4 is None:
+        return None
+    return TF_IP_Packet(
+        protocol=data_link,                                 # data link type from savefile header
+        index=count,                                        # frame number
+        frame=packet2dict(packet, data_link=data_link),     # extracted packet
+        src=_parse_ipv4_address(ipv4.src),                  # source IP
+        dst=_parse_ipv4_address(ipv4.dst),                  # destination IP
+        timestamp=packet2timestamp(packet),                 # timestamp
     )

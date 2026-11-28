@@ -7,7 +7,7 @@ Flow Tracing Base Class
 :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`, the abstract base
 class of a custom flow tracing class, and
 :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`, which it and the
-built-in TCP flow tracing class derive from.
+built-in flow tracing classes derive from.
 
 .. autoclass:: pcapkit.foundation.traceflow.traceflow.TraceFlow
    :no-members:
@@ -76,6 +76,10 @@ built-in TCP flow tracing class derive from.
       :no-value:
    .. autoattribute:: _parse_keywords
       :no-value:
+   .. autoattribute:: _timeout
+      :no-value:
+   .. autoattribute:: _seen
+      :no-value:
 
    .. rubric:: Defaults
 
@@ -85,16 +89,19 @@ built-in TCP flow tracing class derive from.
    .. rubric:: Properties
 
    .. autoproperty:: index
+   .. autoproperty:: timeout
 
    .. rubric:: Methods
 
    .. automethod:: register_dumper
    .. automethod:: register_callback
    .. automethod:: make_fout
+   .. automethod:: make_bufid
 
    .. automethod:: dump
    .. automethod:: trace
    .. automethod:: submit
+   .. automethod:: advance
    .. automethod:: finish
    .. automethod:: close
 
@@ -106,6 +113,16 @@ built-in TCP flow tracing class derive from.
    .. rubric:: Utilities
 
    .. automethod:: _write
+   .. automethod:: _release
+   .. automethod:: _endpoints
+   .. automethod:: _make_label
+   .. automethod:: _unique_label
+   .. automethod:: _make_fpout
+   .. automethod:: _output_path
+   .. automethod:: _append
+   .. automethod:: _touch
+   .. automethod:: _make_index
+   .. automethod:: _finalise
 
 Internal Definitions
 --------------------
