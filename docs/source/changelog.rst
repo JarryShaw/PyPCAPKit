@@ -36,6 +36,12 @@ All notable changes to PyPCAPKit are recorded here.
 Releases are listed newest first. :file:`CHANGELOG.md` at the repository root
 carries only the version being released.
 
+* **1.9.0** (unreleased) -- Neighbor Discovery decoded in ICMPv6, dissectors for
+  802.2 LLC and SNAP and the Spanning Tree Protocol family, SCTP user messages and
+  TLS records split across TCP segments reassembled, HIP's HMACs and signatures
+  verified, and :mod:`pcapkit.corekit`'s multi-word module names separated by
+  underscores. :doc:`Full changelog <changelog/1.9.0>`.
+
 * **1.8.1** (2026-11-27) -- A bug-fix release: OSPF split into a versioned family,
   with OSPFv3 read with its own 16-octet header and OSPFv1 with the registries of
   :rfc:`1131`, and Sync Develop pushing ``main`` into ``develop`` directly.
@@ -194,6 +200,7 @@ carries only the version being released.
    :hidden:
    :maxdepth: 1
 
+   changelog/1.9.0
    changelog/1.8.1
    changelog/1.8.0
    changelog/1.7.0
