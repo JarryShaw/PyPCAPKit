@@ -2,9 +2,10 @@
 """ICMPv6 decodes Neighbor Discovery (RFC 4861) and its options. C.f. #2934.
 
 Types 133 to 137 parse into their own data models, their options into theirs, and
-both rebuild byte for byte through ``from_data``, whole or cut by the capture. Each
-message and option is built here against its RFC layout; this module is unit-tier
-and reads no capture.
+both rebuild byte for byte through ``from_data``, whole or cut by the capture. The
+cuts here are hand-picked, and :mod:`tests.protocols.internet.test_icmpv6_nd_every_cut_2934_unit`
+makes the same checks at every octet. Each message and option is built here against
+its RFC layout; this module is unit-tier and reads no capture.
 
 """
 
@@ -12,10 +13,15 @@ import io
 import ipaddress
 import unittest
 import warnings
+from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
 
-#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+if TYPE_CHECKING:
+    from typing import Iterable
+
+#: Test tier (#1958): hand-picked parse -> rebuild round trips; the sweep of every
+#: cut is ``LATEST``, as the tier rule has it (#1732, #1958).
 __tier__ = 'ALL'
 
 #: The addresses the messages name, as on the wire.
@@ -76,6 +82,11 @@ MESSAGES = {'rs': RS, 'ra': RA, 'ns': NS, 'na': NA, 'redirect': REDIRECT}
 #: The data model each message parses into.
 MODELS = {'rs': 'RouterSolicitation', 'ra': 'RouterAdvertisement', 'ns': 'NeighborSolicitation',
           'na': 'NeighborAdvertisement', 'redirect': 'Redirect'}
+
+#: Hand-picked cuts of each message of :data:`MESSAGES`, in octets kept: inside the
+#: fixed fields, an option cut before or just past its Length, a DNSSL name cut, and
+#: a cut that leaves no option. Traced to reach every line and branch the sweep does.
+PICKED_CUTS = {'rs': (4, 9), 'ra': (81, 82, 129, 242), 'ns': (34,), 'na': (24, 25), 'redirect': (50,)}
 
 
 def ipv6(payload: bytes, length: int) -> bytes:
@@ -334,11 +345,24 @@ class NDParseTests(unittest.TestCase):
         self.assertIsInstance(layer, Raw)
 
 
-class NDRoundTripTests(unittest.TestCase):
-    """Each message rebuilds byte for byte, whole or cut."""
+class NDCutMixin:
+    """The checks on each message cut, at its :data:`PICKED_CUTS` or at every octet.
+
+    A plain class, so only the test case each tier's module builds on it is
+    collected: :class:`NDRoundTripTests` here, and the ``LATEST`` sweep's,
+    which sets :attr:`sweep`.
+
+    """
+
+    #: Whether to cut each message at every octet rather than at its picked cuts.
+    sweep = False
 
     def setUp(self) -> None:
-        reimport_once_per_class(self)
+        reimport_once_per_class(self)  # type: ignore[arg-type]
+
+    def cuts(self, name: str) -> 'Iterable[int]':
+        """The octets of message ``name`` of :data:`MESSAGES` to keep."""
+        return range(4, len(MESSAGES[name])) if self.sweep else PICKED_CUTS[name]
 
     def assert_rebuilds(self, parsed: 'object', captured: bytes) -> None:
         from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
@@ -347,35 +371,28 @@ class NDRoundTripTests(unittest.TestCase):
             warnings.simplefilter('ignore')
             rebuilt = ICMPv6.from_data(parsed.info)
             redict = ICMPv6.from_data(parsed.info.to_dict())
-        self.assertEqual(rebuilt.data.hex(), captured.hex())
-        self.assertEqual(rebuilt.info, parsed.info)
-        self.assertEqual(redict.data.hex(), captured.hex())
-
-    def test_whole_messages(self) -> None:
-        for name, packet in MESSAGES.items():
-            with self.subTest(message=name):
-                parsed = parse(packet)
-                self.assertEqual(type(parsed.info).__name__, MODELS[name])
-                self.assert_rebuilds(parsed, packet)
+        self.assertEqual(rebuilt.data.hex(), captured.hex())  # type: ignore[attr-defined]
+        self.assertEqual(rebuilt.info, parsed.info)  # type: ignore[attr-defined]
+        self.assertEqual(redict.data.hex(), captured.hex())  # type: ignore[attr-defined]
 
     def test_cuts_behind_ipv6(self) -> None:
-        """Cut at every octet behind an IPv6 header declaring the whole message."""
+        """Cut behind an IPv6 header declaring the whole message."""
         from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
         from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         for name, packet in MESSAGES.items():
             model = MODELS[name]
-            for cut in range(4, len(packet)):
-                with self.subTest(message=name, cut=cut), warnings.catch_warnings():
+            for cut in self.cuts(name):
+                with self.subTest(message=name, cut=cut), warnings.catch_warnings():  # type: ignore[attr-defined]
                     warnings.simplefilter('ignore')
                     frame = ipv6(packet[:cut], len(packet))
                     layer = IPv6(io.BytesIO(frame), len(frame)).payload
-                    self.assertIsInstance(layer, ICMPv6)
-                    self.assertEqual(type(layer.info).__name__, model)
+                    self.assertIsInstance(layer, ICMPv6)  # type: ignore[attr-defined]
+                    self.assertEqual(type(layer.info).__name__, model)  # type: ignore[attr-defined]
                     self.assert_rebuilds(layer, packet[:cut])
 
     def test_cuts_on_their_own(self) -> None:
-        """Cut at every octet and parsed with no enclosing length, quietly.
+        """Cut and parsed with no enclosing length, quietly.
 
         A cut between two options leaves a whole message with fewer of them, and
         records nothing.
@@ -385,15 +402,27 @@ class NDRoundTripTests(unittest.TestCase):
 
         for name, packet in MESSAGES.items():
             model = MODELS[name]
-            for cut in range(4, len(packet)):
+            for cut in self.cuts(name):
                 part = packet[:cut]
-                with self.subTest(message=name, cut=cut), warnings.catch_warnings(record=True) as caught:
+                with self.subTest(message=name, cut=cut), warnings.catch_warnings(record=True) as caught:  # type: ignore[attr-defined]
                     warnings.simplefilter('always')
                     parsed = parse(part)
-                    self.assertEqual(type(parsed.info).__name__, model)
+                    self.assertEqual(type(parsed.info).__name__, model)  # type: ignore[attr-defined]
                     if cut >= 8:
-                        self.assertFalse([item for item in caught if issubclass(item.category, SchemaWarning)])
+                        self.assertFalse([item for item in caught  # type: ignore[attr-defined]
+                                          if issubclass(item.category, SchemaWarning)])
                     self.assert_rebuilds(parsed, part)
+
+
+class NDRoundTripTests(NDCutMixin, unittest.TestCase):
+    """Each message rebuilds byte for byte, whole or cut."""
+
+    def test_whole_messages(self) -> None:
+        for name, packet in MESSAGES.items():
+            with self.subTest(message=name):
+                parsed = parse(packet)
+                self.assertEqual(type(parsed.info).__name__, MODELS[name])
+                self.assert_rebuilds(parsed, packet)
 
     def test_an_option_cut_before_its_length_reads_undecoded(self) -> None:
         from pcapkit.const.icmpv6.nd_option import NDOption
