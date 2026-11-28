@@ -1529,6 +1529,12 @@ jobs:
   # past half this step's 18-minute cap. Between them the cells run each pin,
   # each tests/project module and each other docs reader once;
   # tests/project/test_unittest_ordering_shards.py pins that.
+  #
+  # #3148: PROJECT_BOUNDARY stays at `test_pypy_w`. With
+  # test_graalpy_shards_1963.py collecting its parts side by side, a cut at
+  # `test_r` or `test_python` measured no better: runs 46096974826 (develop),
+  # 46101745663 (`test_pypy_w`), 46102772281 (`test_r`) and 46103485903
+  # (`test_python`).
   project-tests:
     name: Project tests (${{ matrix.half && 'half' || 'part' }} ${{ matrix.half || matrix.part }})
     needs: [changes]
