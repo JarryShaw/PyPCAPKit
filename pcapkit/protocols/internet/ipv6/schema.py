@@ -10,14 +10,14 @@
 .. versionremoved:: 1.7.0
 
    ``pcapkit.protocols.internet.ipv6.schema.IP_MAX_LENGTH``, now
-   :data:`pcapkit.corekit.const.ipheader.IP_MAX_LENGTH` (:issue:`2883`).
+   :data:`pcapkit.corekit.const.ip_header.IP_MAX_LENGTH` (:issue:`2883`).
 
 """
 
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.const.ipheader import IP_MAX_LENGTH
+from pcapkit.corekit.const.ip_header import IP_MAX_LENGTH
 from pcapkit.corekit.fields.ipaddress import IPv6AddressField
 from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field

@@ -57,7 +57,7 @@ from typing import TYPE_CHECKING, Generic, cast, overload
 from pcapkit.const.llc.lsap import LSAP as Enum_LSAP
 from pcapkit.const.stp.port_role import PortRole as Enum_PortRole
 from pcapkit.corekit.module import ModuleDescriptor
-from pcapkit.corekit.schema.shortread import cut_on_its_own
+from pcapkit.corekit.schema.short_read import cut_on_its_own
 from pcapkit.corekit.sentinels import NO_VALUE, NoValueType
 from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.application.stp.data import BridgeID as Data_BridgeID

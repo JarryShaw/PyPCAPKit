@@ -89,7 +89,7 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
-from pcapkit.corekit.schema.extlen import ext_len_to_octets, octets_to_ext_len
+from pcapkit.corekit.schema.ext_len import ext_len_to_octets, octets_to_ext_len
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
@@ -1902,7 +1902,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             :class:`~pcapkit.utilities.warnings.ProtocolWarning` says so.
 
             Appending is necessary rather than optional: ``length`` is
-            :func:`~pcapkit.corekit.schema.extlen.octets_to_ext_len` of
+            :func:`~pcapkit.corekit.schema.ext_len.octets_to_ext_len` of
             ``len(data) + 6``, which floors, so leaving an opaque body
             short would emit 10, 12 or 14 octets while declaring 8, and a parser reads
             8 and misinterprets the remainder. Since the caller asked for a packet

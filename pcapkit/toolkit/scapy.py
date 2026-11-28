@@ -32,8 +32,8 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.const.capture import RESOLUTION, RESOLUTION_PLACES
-from pcapkit.corekit.const.ipheader import IPV4_HEADER_LEN, IPV6_HEADER_LEN
-from pcapkit.corekit.const.tcpheader import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
+from pcapkit.corekit.const.ip_header import IPV4_HEADER_LEN, IPV6_HEADER_LEN
+from pcapkit.corekit.const.tcp_header import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
 from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
 from pcapkit.foundation.engines.scapy import Scapy
 from pcapkit.foundation.reassembly.ip.data import Packet as IP_Packet
@@ -353,7 +353,7 @@ def _tcp_behind_extension_headers(segment: 'bytes') -> 'tuple[bytes, bytes] | No
     Returns:
         The header, as many octets as the Data Offset counts, and the payload
         after it; or :data:`None` if there are fewer than
-        :data:`TCP_MIN_HEADER_LEN <pcapkit.corekit.const.tcpheader.TCP_MIN_HEADER_LEN>`
+        :data:`TCP_MIN_HEADER_LEN <pcapkit.corekit.const.tcp_header.TCP_MIN_HEADER_LEN>`
         octets, the Data Offset counts fewer or more than were captured, or
         pcapkit's own TCP parser rejects the options (see
         :func:`~pcapkit.toolkit.pypcapfile._default_accepts`).

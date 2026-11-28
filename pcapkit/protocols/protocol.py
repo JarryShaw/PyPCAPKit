@@ -1098,7 +1098,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             a cut inside it is the short read it records, with no
             ``packet length < 0`` warning per field and no length resolved below
             zero (:issue:`2880`). A check :meth:`read` makes of a value the cut
-            left asks :func:`~pcapkit.corekit.schema.shortread.cut_on_its_own`
+            left asks :func:`~pcapkit.corekit.schema.short_read.cut_on_its_own`
             whether to leave it to the short read.
 
         Raises:

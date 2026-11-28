@@ -69,10 +69,10 @@ CONST = ROOT / 'pcapkit' / 'corekit' / 'const'
 CAPTURE_HOME = 'pcapkit.corekit.const.capture'
 
 #: The IPv4, IPv6 and AH header constants' home.
-IPHEADER_HOME = 'pcapkit.corekit.const.ipheader'
+IPHEADER_HOME = 'pcapkit.corekit.const.ip_header'
 
 #: The TCP header constants' home.
-TCPHEADER_HOME = 'pcapkit.corekit.const.tcpheader'
+TCPHEADER_HOME = 'pcapkit.corekit.const.tcp_header'
 
 #: The domain name constants' home.
 DOMAIN_NAME_HOME = 'pcapkit.corekit.const.domain_name'

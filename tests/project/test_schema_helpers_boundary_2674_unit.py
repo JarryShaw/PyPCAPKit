@@ -264,7 +264,7 @@ class SchemaHelpersBoundaryTests(unittest.TestCase):
         self.assertIn('pad_length', shared['pcapkit.corekit.schema.padding'][0])
         self.assertEqual(shared['pcapkit.corekit.schema.byteorder'][0],
                          {'byteorder_callback', 'family_byteorder', 'packet_byteorder'})
-        self.assertIn('keep_short_read', shared['pcapkit.corekit.schema.shortread'][0])
+        self.assertIn('keep_short_read', shared['pcapkit.corekit.schema.short_read'][0])
         # No copy is left behind in a module the ruling checks.
         defined = {name for functions, _ in shared.values() for name in functions}
         for home, (functions, _) in helpers(GENERIC + PROTOCOL).items():
@@ -273,8 +273,8 @@ class SchemaHelpersBoundaryTests(unittest.TestCase):
         # And calling one is no call the ruling checks.
         source = '\n'.join([
             'from pcapkit.corekit.schema.padding import pad_length',
-            'from pcapkit.corekit.schema import shortread',
-            'shortread.keep_short_read(None)',
+            'from pcapkit.corekit.schema import short_read',
+            'short_read.keep_short_read(None)',
         ])
         self.assertEqual(calls(source, 'pcapkit.protocols.internet.hip.protocol', helpers(GENERIC + PROTOCOL)), [])
 

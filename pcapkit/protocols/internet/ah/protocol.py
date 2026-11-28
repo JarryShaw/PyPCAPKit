@@ -27,8 +27,8 @@ Octets      Bits        Name                    Description
 from typing import TYPE_CHECKING, overload
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.const.ipheader import AH_HEADER_LEN
-from pcapkit.corekit.schema.shortread import cut_on_its_own
+from pcapkit.corekit.const.ip_header import AH_HEADER_LEN
+from pcapkit.corekit.schema.short_read import cut_on_its_own
 from pcapkit.protocols.internet.ah.data import AH as Data_AH
 from pcapkit.protocols.internet.ah.schema import AH as Schema_AH
 from pcapkit.protocols.internet.ipsec.protocol import IPsec

@@ -56,12 +56,12 @@ from pcapkit.const.ipv4.tos_rel import ToSReliability as Enum_ToSReliability
 from pcapkit.const.ipv4.tos_thr import ToSThroughput as Enum_ToSThroughput
 from pcapkit.const.ipv4.ts_flag import TSFlag as Enum_TSFlag
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.const.ipheader import IPV4_HEADER_LEN
+from pcapkit.corekit.const.ip_header import IPV4_HEADER_LEN
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.schema.padding import pad_length
-from pcapkit.corekit.schema.shortread import cut_on_its_own, ends_inside_option, fill_short_options
+from pcapkit.corekit.schema.short_read import cut_on_its_own, ends_inside_option, fill_short_options
 from pcapkit.protocols.internet.ip.protocol import IP
 from pcapkit.protocols.internet.ipv4.data import EOOLOption as Data_EOOLOption
 from pcapkit.protocols.internet.ipv4.data import ESECOption as Data_ESECOption

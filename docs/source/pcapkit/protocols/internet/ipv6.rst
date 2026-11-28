@@ -15,8 +15,8 @@ IPv6 - Internet Protocol Version 6
 
    ``pcapkit.protocols.internet.ipv6.protocol.IPV6_HEADER_LEN`` and
    ``pcapkit.protocols.internet.ipv6.protocol.IPV6_NEXT_HEADER_OFFSET``, now
-   :data:`pcapkit.corekit.const.ipheader.IPV6_HEADER_LEN` and
-   :data:`pcapkit.corekit.const.ipheader.IPV6_NEXT_HEADER_OFFSET` (:issue:`2883`).
+   :data:`pcapkit.corekit.const.ip_header.IPV6_HEADER_LEN` and
+   :data:`pcapkit.corekit.const.ip_header.IPV6_NEXT_HEADER_OFFSET` (:issue:`2883`).
 
 :mod:`pcapkit.protocols.internet.ipv6.protocol` contains
 :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`,
@@ -86,7 +86,7 @@ Header Schemas
 .. versionremoved:: 1.7.0
 
    ``pcapkit.protocols.internet.ipv6.schema.IP_MAX_LENGTH``, now
-   :data:`pcapkit.corekit.const.ipheader.IP_MAX_LENGTH` (:issue:`2883`).
+   :data:`pcapkit.corekit.const.ip_header.IP_MAX_LENGTH` (:issue:`2883`).
 
 .. autoclass:: pcapkit.protocols.internet.ipv6.schema.IPv6
    :members:

@@ -54,7 +54,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.stp.bpdu_type import BPDUType as Enum_BPDUType
 from pcapkit.const.stp.protocol_version import ProtocolVersion as Enum_ProtocolVersion
-from pcapkit.corekit.schema.shortread import cut_on_its_own
+from pcapkit.corekit.schema.short_read import cut_on_its_own
 from pcapkit.protocols.application.rstp.data import RSTP as Data_RSTP
 from pcapkit.protocols.application.rstp.schema import RSTP as Schema_RSTP
 from pcapkit.protocols.application.stp.protocol import STP

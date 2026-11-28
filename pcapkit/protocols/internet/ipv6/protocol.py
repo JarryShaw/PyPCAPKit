@@ -29,8 +29,8 @@ Octets      Bits        Name                    Description
 
    ``pcapkit.protocols.internet.ipv6.protocol.IPV6_HEADER_LEN`` and
    ``pcapkit.protocols.internet.ipv6.protocol.IPV6_NEXT_HEADER_OFFSET``, now
-   :data:`pcapkit.corekit.const.ipheader.IPV6_HEADER_LEN` and
-   :data:`pcapkit.corekit.const.ipheader.IPV6_NEXT_HEADER_OFFSET` (:issue:`2883`).
+   :data:`pcapkit.corekit.const.ip_header.IPV6_HEADER_LEN` and
+   :data:`pcapkit.corekit.const.ip_header.IPV6_NEXT_HEADER_OFFSET` (:issue:`2883`).
 
 """
 import contextlib
@@ -39,13 +39,13 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.const.ipheader import IP_MAX_LENGTH, IPV6_HEADER_LEN
+from pcapkit.corekit.const.ip_header import IP_MAX_LENGTH, IPV6_HEADER_LEN
 from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
-from pcapkit.corekit.schema.shortread import cut_on_its_own
+from pcapkit.corekit.schema.short_read import cut_on_its_own
 from pcapkit.protocols.internet.ip.protocol import IP
 from pcapkit.protocols.internet.ipv6.data import IPv6 as Data_IPv6
 from pcapkit.protocols.internet.ipv6.schema import IPv6 as Schema_IPv6

@@ -73,7 +73,7 @@ from typing import TYPE_CHECKING
 from pcapkit.const.stp.bpdu_type import BPDUType as Enum_BPDUType
 from pcapkit.const.stp.port_role import PortRole as Enum_PortRole
 from pcapkit.const.stp.protocol_version import ProtocolVersion as Enum_ProtocolVersion
-from pcapkit.corekit.schema.shortread import cut_on_its_own
+from pcapkit.corekit.schema.short_read import cut_on_its_own
 from pcapkit.protocols.application.mstp.data import MSTP as Data_MSTP
 from pcapkit.protocols.application.mstp.data import ConfigID as Data_ConfigID
 from pcapkit.protocols.application.mstp.data import MSTIFlags as Data_MSTIFlags

@@ -19,8 +19,8 @@ from it load no other group: import each helper from its own module.
 
    byteorder
    domain_name
-   extlen
+   ext_len
    ipaddress
    jumbogram
    padding
-   shortread
+   short_read

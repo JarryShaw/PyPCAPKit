@@ -12,7 +12,7 @@ from pcapkit.corekit.fields.ipaddress import IPv6AddressField
 from pcapkit.corekit.fields.misc import PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
-from pcapkit.corekit.schema.extlen import ext_len_to_octets
+from pcapkit.corekit.schema.ext_len import ext_len_to_octets
 from pcapkit.protocols.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
@@ -74,12 +74,12 @@ def ipv6_route_header_length(hdr_ext_len: 'int') -> 'int':
     """Total length, in octets, of the on-the-wire IPv6-Route header for a given ``Hdr Ext Len``.
 
     The fixed 4 octets and the type-specific data of :func:`ipv6_route_data_length`
-    together, which :func:`~pcapkit.corekit.schema.extlen.ext_len_to_octets` gives.
+    together, which :func:`~pcapkit.corekit.schema.ext_len.ext_len_to_octets` gives.
     Each ``_read_data_type_*`` in :mod:`pcapkit.protocols.internet.ipv6_route.protocol`
     reports it as the parsed route data's ``.length``, which
     :meth:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route.read`
     subtracts from the outer packet length to find the next layer's.
-    :func:`~pcapkit.corekit.schema.extlen.octets_to_ext_len` is its inverse, which
+    :func:`~pcapkit.corekit.schema.ext_len.octets_to_ext_len` is its inverse, which
     :meth:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._make_data`
     passes back as ``hdr_ext_len``.
 

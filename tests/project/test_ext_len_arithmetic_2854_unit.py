@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""The 8-octet-unit header length converts only through :mod:`pcapkit.corekit.schema.extlen`.
+"""The 8-octet-unit header length converts only through :mod:`pcapkit.corekit.schema.ext_len`.
 
 GitHub issue #2854 found ``(Hdr Ext Len + 1) * 8``, the length of an
 IPv6-extension-style header [RFC 6564, section 4], written out inline across the
 extension headers, MH, HIP, the jumbogram lookup and IPv6 reassembly, and its
 inverse spelled ``length // 8 - 1`` and ``(length - 8) // 8``. Both directions
-now go through :func:`~pcapkit.corekit.schema.extlen.ext_len_to_octets` and
-:func:`~pcapkit.corekit.schema.extlen.octets_to_ext_len`, as
+now go through :func:`~pcapkit.corekit.schema.ext_len.ext_len_to_octets` and
+:func:`~pcapkit.corekit.schema.ext_len.octets_to_ext_len`, as
 :file:`docs/source/contributing/conventions/utilities-or-corekit.rst` records.
 
 This scans every module of the package, the helper module aside, for the
@@ -52,7 +52,7 @@ __tier__ = 'LATEST'
 PACKAGE = ROOT / 'pcapkit'
 
 #: The helper module, the one place the arithmetic is written out.
-HELPER = PACKAGE / 'corekit' / 'schema' / 'extlen.py'
+HELPER = PACKAGE / 'corekit' / 'schema' / 'ext_len.py'
 
 #: ``(path, text)`` of each match that counts records rather than converting a
 #: length field, with the reason.
@@ -345,7 +345,7 @@ class ShapeTests(unittest.TestCase):
             'def data(h):\n    if h:\n        return 0\n    return 4 + h * 8\nlength = 4 + data(h)\n',
             'def data(h, k):\n    return 4 + h * 8\nlength = 4 + data(h, 0)\n',
             'def data(h):\n    return 4 + h * 8\nlength = 4 + other.data(h)\n',
-            'from pcapkit.corekit.schema.extlen import ext_len_to_octets\nlength = ext_len_to_octets(h)\n',
+            'from pcapkit.corekit.schema.ext_len import ext_len_to_octets\nlength = ext_len_to_octets(h)\n',
         ):
             with self.subTest(source=source):
                 self.assertEqual(self._split(source), [])
@@ -372,7 +372,7 @@ class TreeTests(unittest.TestCase):
     def test_no_conversion_outside_the_helper(self) -> None:
         found = [f'{rel}:{lineno}: {shape}: {text}' for rel, lineno, shape, text in self._matches()
                  if (rel, text) not in EXEMPT]
-        self.assertEqual(found, [], 'convert through pcapkit.corekit.schema.extlen instead (#2854):\n'
+        self.assertEqual(found, [], 'convert through pcapkit.corekit.schema.ext_len instead (#2854):\n'
                          + '\n'.join(found))
 
     def test_exemptions_name_real_matches(self) -> None:
@@ -384,7 +384,7 @@ class TreeTests(unittest.TestCase):
         table = linear_helpers([module for _, module in parsed])
         found = [f'{path.relative_to(ROOT).as_posix()}:{lineno}: {text}'
                  for path, module in parsed for lineno, text in split_conversions(module, table)]
-        self.assertEqual(found, [], 'convert through pcapkit.corekit.schema.extlen instead (#2854):\n'
+        self.assertEqual(found, [], 'convert through pcapkit.corekit.schema.ext_len instead (#2854):\n'
                          + '\n'.join(found))
 
 

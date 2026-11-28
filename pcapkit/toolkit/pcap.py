@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING, NamedTuple, cast
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
-from pcapkit.corekit.const.tcpheader import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
+from pcapkit.corekit.const.tcp_header import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
 from pcapkit.foundation.reassembly.dtls.data import Packet as DTLS_Packet
 from pcapkit.foundation.reassembly.ip.data import Packet as IP_Packet
 from pcapkit.foundation.reassembly.sctp.data import Packet as SCTP_Packet

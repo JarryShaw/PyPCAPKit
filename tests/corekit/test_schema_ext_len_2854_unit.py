@@ -3,7 +3,7 @@
 
 GitHub issue #2854 gathered ``(Hdr Ext Len + 1) * 8`` and its inverse, written
 out across the IPv6 extension headers, MH, HIP, the jumbogram lookup and IPv6
-reassembly, into :mod:`pcapkit.corekit.schema.extlen`.
+reassembly, into :mod:`pcapkit.corekit.schema.ext_len`.
 
 The expected values never use the helpers' arithmetic: :func:`spec_octets` and
 :func:`spec_ext_len` count 8-octet units one at a time, as RFC 6564, section 4
@@ -47,7 +47,7 @@ class ExtLenTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-        from pcapkit.corekit.schema.extlen import ext_len_to_octets, octets_to_ext_len
+        from pcapkit.corekit.schema.ext_len import ext_len_to_octets, octets_to_ext_len
 
         self.to_octets = ext_len_to_octets
         self.to_ext_len = octets_to_ext_len

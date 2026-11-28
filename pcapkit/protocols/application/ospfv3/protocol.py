@@ -38,7 +38,7 @@ OSPFv2's AuType and Authentication:
 from typing import TYPE_CHECKING
 
 from pcapkit.const.ospf.packet import Packet as Enum_Packet
-from pcapkit.corekit.schema.shortread import cut_on_its_own
+from pcapkit.corekit.schema.short_read import cut_on_its_own
 from pcapkit.protocols.application.ospf.protocol import OSPF
 from pcapkit.protocols.application.ospfv3.data import OSPFv3 as Data_OSPFv3
 from pcapkit.protocols.application.ospfv3.schema import OSPFv3 as Schema_OSPFv3

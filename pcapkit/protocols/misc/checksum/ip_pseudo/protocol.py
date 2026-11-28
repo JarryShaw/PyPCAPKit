@@ -62,7 +62,7 @@ from pcapkit.const.ipv4.option_number import OptionNumber as Enum_IPv4Option
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.ipv6.option import Option as Enum_Option
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.const.ipheader import IP_MAX_LENGTH, IPV6_HEADER_LEN
+from pcapkit.corekit.const.ip_header import IP_MAX_LENGTH, IPV6_HEADER_LEN
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.corekit.schema.ipaddress import parse_ip_address

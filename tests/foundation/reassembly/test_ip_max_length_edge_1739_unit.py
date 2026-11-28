@@ -2,7 +2,7 @@
 """IP reassembly reads :data:`IP_MAX_LENGTH` as a strict bound at its edge. C.f. #1739.
 
 :class:`pcapkit.foundation.reassembly.ip.reassembly.IP` reads
-:data:`~pcapkit.corekit.const.ipheader.IP_MAX_LENGTH` from its home. A
+:data:`~pcapkit.corekit.const.ip_header.IP_MAX_LENGTH` from its home. A
 fragment with Total Length 0 declares no length (#1555), and grows the buffer
 past the bound only when its datagram, header included, is *longer* than
 65,535 octets, since growing the buffer is what lifts the bound (#1585). One of

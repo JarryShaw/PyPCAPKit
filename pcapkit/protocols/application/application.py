@@ -21,7 +21,7 @@ of the application layer protocols.
 from typing import TYPE_CHECKING, Generic, overload
 
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.corekit.schema.shortread import keep_short_read, replay_short_read
+from pcapkit.corekit.schema.short_read import keep_short_read, replay_short_read
 from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
 from pcapkit.utilities.exceptions import IntError, UnsupportedCall
