@@ -1595,7 +1595,7 @@ class TestTheWorkflowCommands(unittest.TestCase):
 
 
 class TestTheWorkflow(unittest.TestCase):
-    """``detect`` holds no secret; ``pr`` mints the narrow token from ``release-app``."""
+    """``detect`` holds no secret; ``pr`` runs in ``release-app`` and pushes with the App's token."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -1676,24 +1676,6 @@ class TestTheWorkflow(unittest.TestCase):
         self.assertIn(f'--name {upload["with"]["name"]}', ' '.join(download['run'].split()))
         self.assertEqual(download['env'], {'GH_TOKEN': '${{ github.token }}'})
 
-    def test_pr_mints_contents_and_pull_requests_write_from_release_app(self) -> None:
-        """test_release_app_environment_2648.py pins the key check, the other step reading a secret."""
-        job = self.jobs['pr']
-        self.assertEqual(job['environment'], 'release-app')
-        self.assertEqual(job['needs'], 'detect')
-        mint = self.step('pr', "Mint the release App's token")
-        self.assertTrue(_workflows.pinned(mint['uses'], 'actions/create-github-app-token'), mint['uses'])
-        self.assertEqual({version.split('.')[0]
-                          for version in _workflows.versions(WORKFLOW, 'actions/create-github-app-token')}, {'v3'})
-        self.assertEqual(mint['with'], {
-            'client-id': '${{ vars.RELEASE_APP_CLIENT_ID }}',
-            'private-key': '${{ secrets.RELEASE_APP_PRIVATE_KEY }}',
-            'permission-contents': 'write',
-            'permission-pull-requests': 'write',
-        })
-        check = self.step('pr', "Check for the release App's key")
-        self.assertEqual([step for step in job['steps'] if 'secrets.' in json.dumps(step)], [check, mint])
-
     def test_pr_runs_only_with_something_to_propose_the_app_and_main(self) -> None:
         condition = self.jobs['pr']['if']
         for publish, client, ref, expected in (('true', 'Iv23example', 'refs/heads/main', True),
@@ -1706,8 +1688,13 @@ class TestTheWorkflow(unittest.TestCase):
                 self.assertIs(evaluate_condition(condition, state), expected)
 
     def test_pr_pushes_through_publish_only(self) -> None:
-        """No ``git push`` of its own; :class:`TestPublishing` shows ``publish`` moves only its branch."""
+        """No ``git push`` of its own; :class:`TestPublishing` shows ``publish`` moves only its branch.
+
+        test_release_app_environment_2648.py pins the key check and the mint step, the steps reading a secret.
+        """
         job = self.jobs['pr']
+        self.assertEqual(job['environment'], 'release-app')
+        self.assertEqual(job['needs'], 'detect')
         checkout = next(step for step in job['steps'] if str(step.get('uses', '')).startswith('actions/checkout@'))
         self.assertEqual(checkout['with'], {'ref': '${{ github.sha }}', 'fetch-depth': 0,
                                             'token': '${{ steps.app.outputs.token }}'})

@@ -40,9 +40,10 @@ Asserted over :file:`.github/workflows/create-release.yml`:
 * every step handed ``PCAPKIT_RUN_SHA`` gets ``github.sha``, and no expression
   names ``workflow_run.head_sha``; the scratch-repository tests inject their own
   values, so this is what ties them to the job;
-* ``github`` creates the release with a release-App token, minted with Contents
-  and Workflows write from a ``github-release`` environment secret only that job
-  reads, and uses ``GITHUB_TOKEN`` while no App is set up; ``version_check``
+* ``github`` creates the release with a release-App token, minted straight
+  before it, and uses ``GITHUB_TOKEN`` while no App is set up;
+  :mod:`tests.project.test_release_app_environment_2648` pins the mint step and
+  the ``github-release`` secret it reads; ``version_check``
   skips the tag-push run the App's tag starts, and ``release_status`` reports
   that skip quietly, as the owner chose on #1634.
 
@@ -69,8 +70,8 @@ from typing import TYPE_CHECKING
 from tests import _workflows
 from tests._support import bash_argv, scale_timeout
 from tests.project import test_release_gates as gates
-from tests.project.test_release_gates import (declared_environment, declared_if, evaluate_condition,
-                                              evaluate_expression, job_blocks, strip_comments)
+from tests.project.test_release_gates import (declared_if, evaluate_condition, evaluate_expression, job_blocks,
+                                              strip_comments)
 from util import release_published
 
 if TYPE_CHECKING:
@@ -98,24 +99,16 @@ VERSION_OUTPUT = '${{ needs.version_check.outputs.PCAPKIT_VERSION }}'
 #: The step ``github``, ``pypi`` and ``conda`` each run before publishing.
 CHECK_STEP = "Check the release tags name this run's commit"
 
-#: ``github``'s step minting the release App's token, and its inputs, exactly.
+#: ``github``'s step minting the release App's token, and its inputs, which
+#: :mod:`tests.project.test_release_app_environment_2648` pins.
 MINT_STEP = "Mint the release App's token"
-MINT_ACTION = 'actions/create-github-app-token'
-MINT_WITH = {
-    'client-id': '${{ vars.RELEASE_APP_CLIENT_ID }}',
-    'private-key': '${{ secrets.RELEASE_APP_PRIVATE_KEY }}',
-    'permission-contents': 'write',
-    'permission-workflows': 'write',
-}
+MINT_INPUTS = ('client-id', 'private-key', 'permission-contents', 'permission-workflows')
 
 #: Create Release's ``token``: the App's where it was minted, else ``GITHUB_TOKEN``.
 RELEASE_TOKEN = '${{ steps.app_token.outputs.token || secrets.GITHUB_TOKEN }}'
 
 #: The step explaining a refused Create Release.
 EXPLAIN_STEP = 'Explain a refused release tag'
-
-#: A read of the App's private key, as ``secrets.X`` or ``secrets['X']``.
-SECRET = re.compile(r"""secrets\s*(?:\.\s*|\[\s*['"])RELEASE_APP_PRIVATE_KEY\b""")
 
 #: The step ``pypi`` and ``conda`` attach their files to the GitHub Release with.
 UPLOAD_STEP = 'Upload package to GitHub Release'
@@ -382,18 +375,12 @@ class TestTheReleaseAppToken(WorkflowMixin, unittest.TestCase):
     (README.md's ``repositories`` and "How it works" sections). Without a
     ``permission-*`` input "the token inherits all of the installation's
     permissions" (its ``permission-<permission name>`` section), so both are
-    named and nothing else is.
+    named and nothing else is, as :mod:`tests.project.test_release_app_environment_2648`
+    pins for every reader of the key.
     """
 
     def create_release(self) -> 'dict[str, Any]':
         return next(step for step in self.steps['github'] if step.get('id') == 'create_release')
-
-    def test_github_mints_with_contents_and_workflows_write_only(self) -> None:
-        step = self.step('github', MINT_STEP)
-        self.assertTrue(_workflows.pinned(step.get('uses'), MINT_ACTION), step.get('uses'))
-        self.assertEqual({version.split('.')[0] for version in _workflows.versions(WORKFLOW, MINT_ACTION)}, {'v3'})
-        self.assertEqual(step.get('id'), 'app_token')
-        self.assertEqual(step.get('with'), MINT_WITH)
 
     def test_it_is_minted_straight_before_create_release(self) -> None:
         """Nothing runs between minting and spending the token, which lasts an hour."""
@@ -429,33 +416,6 @@ class TestTheReleaseAppToken(WorkflowMixin, unittest.TestCase):
                 self.assertEqual(evaluate_expression(token, context), 'the run token')
         minted = {'steps': {'app_token': {'outputs': {'token': 'the App token'}}}, 'secrets': secrets}
         self.assertEqual(evaluate_expression(token, minted), 'the App token')
-
-    def test_the_private_key_is_read_only_in_github_behind_its_environment(self) -> None:
-        """An environment secret: "If the environment requires approval, a job cannot
-        access environment secrets until one of the required reviewers approves it".
-
-        #1660's Python Versions, #2561's Issue and PR Kinds and #2942's Sync Develop
-        ``pr`` jobs, and #3077's Stable Branch ``mirror``, are the other readers,
-        minting their tokens from the same key in ``release-app``, which has no
-        reviewer (#2648).
-        """
-        readers_by_workflow = {WORKFLOW.name: ['github'], 'cron-python-versions.yml': ['pr'],
-                               'cron-issue-pr-kinds.yml': ['pr'], 'stable-branch.yml': ['mirror'],
-                               'sync-develop.yml': ['pr']}
-        for path in sorted(WORKFLOW.parent.glob('*.yml')):
-            text = strip_comments(path.read_text(encoding='utf-8'))
-            blocks = job_blocks(text, path)
-            readers = sorted(job for job, block in blocks.items() if SECRET.search(block))
-            with self.subTest(workflow=path.name):
-                self.assertEqual(readers, readers_by_workflow.get(path.name, []))
-                self.assertNotRegex(text, r'(?i)toJSON\(\s*secrets\s*\)', 'every secret, this one included')
-                for job in readers:
-                    self.assertEqual(declared_environment(blocks[job]),
-                                     'github-release' if path == WORKFLOW else 'release-app')
-        uses = [label(step) for step in self.steps['github'] if SECRET.search(repr(step))]
-        self.assertEqual(uses, [MINT_STEP])
-        self.assertEqual(declared_environment(job_blocks(WORKFLOW.read_text(encoding='utf-8'))['github']),
-                         'github-release')
 
 
 class TestTheAppsTagPushReleasesNothing(WorkflowMixin, unittest.TestCase):
@@ -1904,7 +1864,7 @@ class TestYAMLAgreesWithTheScanner(WorkflowMixin, unittest.TestCase):
                 for mine, theirs in zip(scanned, expected):
                     for key in ('uses', 'id', 'if', 'run'):
                         self.assertEqual(mine.get(key), theirs.get(key), f'{label(theirs)}: {key}')
-                    for key in ('ref', 'target_commitish', 'commit', 'token', *MINT_WITH):
+                    for key in ('ref', 'target_commitish', 'commit', 'token', *MINT_INPUTS):
                         self.assertEqual(mine.get('with', {}).get(key), theirs.get('with', {}).get(key),
                                          f'{label(theirs)}: with.{key}')
                     self.assertEqual(mine.get('env', {}), {k: str(v) for k, v in theirs.get('env', {}).items()},

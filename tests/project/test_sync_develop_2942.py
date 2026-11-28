@@ -22,7 +22,8 @@ never writes to ``main`` (#3075).
   alone, an open pull request it updates rather than duplicating, one from ``main``
   itself it closes, and a failed read or write.
 
-:mod:`tests.project.test_release_app_environment_2648` pins ``pr``'s key check.
+:mod:`tests.project.test_release_app_environment_2648` pins ``pr``'s key check and
+mint step.
 
 """
 
@@ -51,8 +52,6 @@ if TYPE_CHECKING:
 WORKFLOW = 'sync-develop.yml'
 REPO = 'o/r'
 SHA = 'a' * 40
-#: The token minting step, as Create Release's ``github`` job runs it.
-MINT = "Mint the release App's token"
 PROPOSE = 'Mirror main to sync/main and open or update its pull request into develop'
 #: The mirror, and the ref path its writes name.
 MIRROR = 'sync/main'
@@ -151,16 +150,8 @@ class TestTheWorkflow(unittest.TestCase):
                       step(self.jobs['merge'], WARN)['run'])
 
     def test_the_pull_request_is_opened_with_the_release_apps_token(self) -> None:
-        """Create Release's action and inputs; contents and workflows write move the mirror past a
-        workflow change of ``main``'s, and pull requests write opens its pull request."""
-        release = step(_workflows.load('create-release.yml')['jobs']['github'], MINT)
-        mint = step(self.jobs['pr'], MINT)
-        self.assertEqual(mint['uses'], release['uses'])
-        self.assertEqual({key: mint['with'][key] for key in ('client-id', 'private-key')},
-                         {key: release['with'][key] for key in ('client-id', 'private-key')})
-        self.assertEqual({key: value for key, value in mint['with'].items() if key.startswith('permission-')},
-                         {'permission-contents': 'write', 'permission-pull-requests': 'write',
-                          'permission-workflows': 'write'})
+        """test_release_app_environment_2648.py pins the mint step: contents and workflows write move
+        the mirror past a workflow change of ``main``'s, and pull requests write opens its pull request."""
         self.assertEqual(step(self.jobs['pr'], PROPOSE)['env']['GH_TOKEN'], '${{ steps.app.outputs.token }}')
         self.assertEqual(step(self.jobs['pr'], PROPOSE)['run'],
                          'python3 util/sync_develop.py --propose --run-url "$RUN_URL"')
