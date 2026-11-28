@@ -35,7 +35,7 @@ class ConfigFlags(Data):
 
 @info_final
 class STPv0(Protocol):
-    """Data model for a Configuration or TCN BPDU (IEEE 802.1D-2004 clause 9).
+    """Data model for a Configuration or TCN BPDU (:ieee:`802.1D-2004` clause 9).
 
     .. versionadded:: 1.9.0
 

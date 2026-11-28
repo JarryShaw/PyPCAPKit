@@ -28,7 +28,7 @@ def mstp_msti_length(packet: 'dict[str, Any]') -> 'int':
 
     Returns:
         Its Version 3 Length past the 64 octets every MST BPDU has there, in whole
-        messages of 16 octets and at most 64 of them, as IEEE 802.1Q-2022 clause
+        messages of 16 octets and at most 64 of them, as :ieee:`802.1Q-2022` clause
         14.4 bounds it; zero for a length below 64.
 
     """
@@ -38,7 +38,7 @@ def mstp_msti_length(packet: 'dict[str, Any]') -> 'int':
 
 @schema_final
 class MSTIMessage(Schema):
-    """Header schema for an MSTI Configuration Message, 16 octets (IEEE 802.1Q-2022 clause 14).
+    """Header schema for an MSTI Configuration Message, 16 octets (:ieee:`802.1Q-2022` clause 14).
 
     .. versionadded:: 1.9.0
 
@@ -65,7 +65,7 @@ class MSTIMessage(Schema):
 @schema_final
 class MSTP(Schema):
     """Header schema for an MST BPDU, 102 octets and its MSTI Configuration Messages
-    (IEEE 802.1Q-2022 clause 14).
+    (:ieee:`802.1Q-2022` clause 14).
 
     .. versionadded:: 1.9.0
 

@@ -23,6 +23,7 @@ only, the base class of every vendor crawler.
    .. rubric:: Processors
 
    .. automethod:: wrap_comment
+   .. automethod:: split_references
    .. automethod:: safe_name
    .. automethod:: rename
    .. automethod:: process

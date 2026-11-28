@@ -21,12 +21,13 @@ from typing import TYPE_CHECKING
 
 from docutils import nodes
 from sphinx import addnodes
-from sphinx.errors import NoUri
+from sphinx.errors import ConfigError, NoUri, SphinxError
 from sphinx.ext.autodoc.preserve_defaults import DefaultValue, update_default_value
 from sphinx.ext.napoleon.docstring import GoogleDocstring
 from sphinx.locale import _ as translate
 from sphinx.transforms.post_transforms import SphinxPostTransform
 from sphinx.util import logging as sphinx_logging
+from sphinx.util.docutils import ReferenceRole
 from sphinx.util.inspect import safe_getattr, stringify_signature
 
 # NB: private modules of ``sphinx-autodoc-typehints``, used deliberately -- see
@@ -159,6 +160,29 @@ extlinks = {
     'wikipedia': ('https://en.wikipedia.org/wiki/%s', '%s'),
     'iana': ('https://www.iana.org/assignments/%s', '%s'),
 }
+
+#: The IEEE SA page of each standard the ``:ieee:`` role links, keyed by designation:
+#: the number, amendment letters included, and the edition's year (:issue:`3168`). A
+#: URL carries a product id of its own, so no ``extlinks`` template can build it. Each
+#: was opened and found to be that edition's page, since the site serves a page by the
+#: id alone, whatever designation the path spells, and a wrong id opens another
+#: standard. Unlike an ``extlinks`` template, the table is checked as the build starts,
+#: by :func:`check_ieee_standards`, and :class:`IEEEStandard` stops the build on a
+#: designation it lacks.
+IEEE_STANDARDS = {
+    '802.1D-2004': 'https://standards.ieee.org/ieee/802.1D/3387/',
+    '802.1Q-2011': 'https://standards.ieee.org/ieee/802.1Q/4410/',
+    '802.1Q-2014': 'https://standards.ieee.org/ieee/802.1Q/5801/',
+    '802.1Q-2018': 'https://standards.ieee.org/ieee/802.1Q/6844/',
+    '802.1Q-2022': 'https://standards.ieee.org/ieee/802.1Q/10323/',
+    '802.3-2022': 'https://standards.ieee.org/ieee/802.3/10422/',
+    '802.11-2020': 'https://standards.ieee.org/ieee/802.11/7028/',
+    '802.11ax-2021': 'https://standards.ieee.org/ieee/802.11ax/7180/',
+    '802.11n-2009': 'https://standards.ieee.org/ieee/802.11n/3952/',
+}
+
+#: A designation as :data:`IEEE_STANDARDS` keys one: the number, then the year.
+IEEE_DESIGNATION = re.compile(r'(?P<number>\d+(?:\.\d+)*[A-Za-z]*)-(?P<year>\d{4})')
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
@@ -1395,6 +1419,80 @@ def link_release_docs(app: 'Sphinx', doctree: 'document') -> None:
     section.insert(1, nodes.paragraph('', '', link))
 
 
+def check_ieee_standards(app: 'Sphinx', config: 'Config') -> None:  # pylint: disable=unused-argument
+    """Stop the build on an entry of :data:`IEEE_STANDARDS` of the wrong shape.
+
+    A key is a designation :data:`IEEE_DESIGNATION` matches in full, and its URL is
+    ``https://standards.ieee.org/ieee/<number>/<id>/``, the number being the key's.
+    No two entries share an id, since an id opens one edition's page. A mistyped id
+    of that shape is not caught here, and opens whichever standard holds it
+    (:issue:`3168`).
+
+    Args:
+        app: Sphinx application.
+        config: Sphinx configuration.
+
+    Raises:
+        ConfigError: Naming every entry of the wrong shape.
+
+    """
+    errors = []  # type: List[str]
+    owners = {}  # type: Dict[str, str]
+    for designation, url in IEEE_STANDARDS.items():
+        match = IEEE_DESIGNATION.fullmatch(designation)
+        page = None if match is None else re.fullmatch(
+            rf"https://standards\.ieee\.org/ieee/{re.escape(match['number'])}/(?P<id>\d+)/", url)
+        if page is None:
+            errors.append(f'{designation!r} is no designation, or {url!r} is not its IEEE SA page')
+        elif page['id'] in owners:
+            errors.append(f'{designation!r} and {owners[page["id"]]!r} share the page {url!r}')
+        else:
+            owners[page['id']] = designation
+    if errors:
+        raise ConfigError('IEEE_STANDARDS in docs/source/conf.py: ' + '; '.join(errors))
+
+
+class IEEEStandard(ReferenceRole):
+    """The ``:ieee:`` role, which links an IEEE standard as :rst:role:`rfc` links an RFC.
+
+    ``:ieee:`802.1Q-2022``` renders as **IEEE Std 802.1Q-2022**, linked to the page
+    :data:`IEEE_STANDARDS` holds for that designation and indexed under *IEEE Std*,
+    as :rst:role:`rfc` renders and indexes an RFC (:issue:`3168`). An explicit title,
+    ``:ieee:`Bridges and Bridged Networks <802.1Q-2022>```, replaces the rendered
+    text, as it does for :rst:role:`rfc` and the ``extlinks`` roles. There is no
+    clause anchor, since the page holds none of the standard's text, so a clause
+    follows the role: ``:ieee:`802.1Q-2022` clause 14.4``.
+
+    A designation :data:`IEEE_STANDARDS` lacks raises
+    :exc:`~sphinx.errors.SphinxError`, which stops the build. A reported error
+    would not, since the builds do not pass ``-W``, and the link would be dead.
+
+    """
+
+    def run(self) -> 'tuple[List[nodes.Node], List[nodes.system_message]]':
+        """Render the role.
+
+        Returns:
+            The index entry, its target and the link.
+
+        Raises:
+            SphinxError: If :data:`IEEE_STANDARDS` has no page for the designation.
+
+        """
+        url = IEEE_STANDARDS.get(self.target)
+        if url is None:
+            raise SphinxError(f'{self.get_location()}: {self.rawtext} names no designation of '
+                              'IEEE_STANDARDS in docs/source/conf.py; add its IEEE SA page there')
+        target_id = f"index-{self.env.new_serialno('index')}"
+        index = addnodes.index(entries=[('single', f'IEEE Std; {self.target}', target_id, '', None)])
+        target = nodes.target('', '', ids=[target_id])
+        self.inliner.document.note_explicit_target(target)
+        title = self.title if self.has_explicit_title else f'IEEE Std {self.target}'
+        reference = nodes.reference('', '', internal=False, refuri=url, classes=['ieee'])
+        reference += nodes.strong(title, title)
+        return [index, target, reference], []
+
+
 def follow_builtins_alias(app: 'Sphinx', modname: 'Optional[str]',  # pylint: disable=unused-argument
                           attribute: str) -> 'Optional[str]':
     """Keep viewcode on the module that binds a name whose object reports :mod:`builtins`.
@@ -1484,6 +1582,8 @@ def setup(app: 'Sphinx') -> None:
     app.connect('doctree-read', resolve_builtins_exactly)
     app.connect('doctree-read', qualify_type_parameters)
     app.connect('doctree-read', link_release_docs)
+    app.connect('config-inited', check_ieee_standards)
+    app.add_role('ieee', IEEEStandard())
     # NB: either side of napoleon's ``autodoc-process-docstring`` handler, which
     # connects at the default 500.
     app.connect('autodoc-process-docstring', save_enum_member_docstring, priority=400)

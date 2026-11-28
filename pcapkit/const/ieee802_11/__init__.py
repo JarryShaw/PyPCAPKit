@@ -7,7 +7,7 @@
 
 This module contains all constant enumerations of
 :class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11` implementations, each
-from IEEE Std 802.11-2020, Table 9-1, *Valid type and subtype combinations*.
+from :ieee:`802.11-2020`, Table 9-1, *Valid type and subtype combinations*.
 Available enumerations include:
 
 .. list-table::

@@ -6,7 +6,7 @@ RSTP - Rapid Spanning Tree Protocol
 
 :mod:`pcapkit.protocols.application.rstp.protocol` holds
 :class:`~pcapkit.protocols.application.rstp.protocol.RSTP`, the extractor for the
-RST BPDU of the Rapid Spanning Tree Protocol (RSTP) [IEEE 802.1Q-2022 clause 14],
+RST BPDU of the Rapid Spanning Tree Protocol (RSTP) [:ieee:`802.1Q-2022` clause 14],
 laid out as the Configuration BPDU with a Version 1 Length after it:
 
 .. table::
@@ -41,7 +41,7 @@ laid out as the Configuration BPDU with a Version 1 Length after it:
    35       280 ``stp.version_1_length``  Version 1 Length, zero
    ====== ===== ========================= ===================================
 
-IEEE 802.1Q-2022 clause 14.4 decodes a BPDU of BPDU Type ``0x02`` and version 2 as
+:ieee:`802.1Q-2022` clause 14.4 decodes a BPDU of BPDU Type ``0x02`` and version 2 as
 an RST BPDU, and one of version 3 or more too, where it does not hold what an MST
 BPDU does; such a BPDU of 35 octets ends before its Version 1 Length. Its
 flags carry the Port Role and the Proposal, Learning, Forwarding and Agreement

@@ -67,7 +67,7 @@ def ethernet_payload_length(pkt: 'dict[str, Any]') -> 'int':
         pkt: Packet data.
 
     Returns:
-        The Length/Type field where it is a length (IEEE Std 802.3-2022
+        The Length/Type field where it is a length (:ieee:`802.3-2022`
         §3.2.6), so that the pad after the MAC client data is
         :attr:`Ethernet.trailer`; the rest of the frame otherwise.
 

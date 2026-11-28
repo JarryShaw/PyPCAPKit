@@ -26,21 +26,21 @@ if TYPE_CHECKING:
 
 __all__ = ['ProtocolVersion']
 
-#: Protocol Version Identifiers of IEEE Std 802.1D-2004 clause 9 and IEEE
-#: Std 802.1Q-2022 clause 14.
+#: Protocol Version Identifiers of :ieee:`802.1D-2004` clause 9 and
+#: :ieee:`802.1Q-2022` clause 14.
 #:
 #: Maps a version to the enumeration name it takes and the comment rendered
 #: above it.
 DATA = {
-    0x00: ('STP', 'Spanning Tree Protocol: Configuration and TCN BPDUs [IEEE 802.1D-2004]'),
-    0x02: ('RSTP', 'Rapid Spanning Tree Protocol: RST BPDUs [IEEE 802.1D-2004]'),
-    0x03: ('MSTP', 'Multiple Spanning Tree Protocol: MST BPDUs [IEEE 802.1Q-2022]'),
-    0x04: ('SPT', 'Shortest Path Tree: SPT BPDUs [IEEE 802.1Q-2022]'),
+    0x00: ('STP', 'Spanning Tree Protocol: Configuration and TCN BPDUs [:ieee:`802.1D-2004`]'),
+    0x02: ('RSTP', 'Rapid Spanning Tree Protocol: RST BPDUs [:ieee:`802.1D-2004`]'),
+    0x03: ('MSTP', 'Multiple Spanning Tree Protocol: MST BPDUs [:ieee:`802.1Q-2022`]'),
+    0x04: ('SPT', 'Shortest Path Tree: SPT BPDUs [:ieee:`802.1Q-2022`]'),
 }  # type: dict[int, tuple[str, str]]
 
 
 class ProtocolVersion(Vendor):
-    """STP Protocol Version Identifiers [IEEE 802.1D-2004; IEEE 802.1Q-2022]"""
+    """STP Protocol Version Identifiers [:ieee:`802.1D-2004`; :ieee:`802.1Q-2022`]"""
 
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0x00 <= value <= 0xFF'

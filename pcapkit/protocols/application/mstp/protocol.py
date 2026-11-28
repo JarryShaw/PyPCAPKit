@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.protocols.application.mstp.protocol` holds
 :class:`~pcapkit.protocols.application.mstp.protocol.MSTP`, the extractor for the
-MST BPDU of the Multiple Spanning Tree Protocol (MSTP) [IEEE 802.1Q-2022 clause 14],
+MST BPDU of the Multiple Spanning Tree Protocol (MSTP) [:ieee:`802.1Q-2022` clause 14],
 an RST BPDU of the Common and Internal Spanning Tree (CIST) extended by the MST
 Configuration Identifier, the CIST's regional fields and an MSTI Configuration
 Message for each Multiple Spanning Tree Instance (MSTI):
@@ -55,7 +55,7 @@ Message for each Multiple Spanning Tree Instance (MSTI):
    102      816 ``stp.msti``                         MSTI Configuration Messages
    ====== ===== ==================================== ===================================
 
-IEEE 802.1Q-2022 clause 14.4 decodes a BPDU of BPDU Type ``0x02`` and version 3 or
+:ieee:`802.1Q-2022` clause 14.4 decodes a BPDU of BPDU Type ``0x02`` and version 3 or
 more as an MST BPDU where it holds 102 octets or more, a Version 1 Length of zero
 and a Version 3 Length counting 0 to 64 MSTI Configuration Messages after the 64
 octets every MST BPDU has there; anything else of that type is an RST BPDU. Only
@@ -141,7 +141,7 @@ class MSTP(STP[Data_MSTP, Schema_MSTP],
     def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_MSTP':  # pylint: disable=unused-argument
         """Read an MST BPDU.
 
-        Structure of an MST BPDU [IEEE 802.1Q-2022 clause 14], from its Version 1
+        Structure of an MST BPDU [:ieee:`802.1Q-2022` clause 14], from its Version 1
         Length on, the octets before it laid out as an RST BPDU's:
 
         .. code-block:: text

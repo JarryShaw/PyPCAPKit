@@ -22,7 +22,7 @@ Available vendor crawlers include:
    * - :class:`IEEE802_11_ExtensionSubtype <pcapkit.vendor.ieee802_11.extension_subtype.ExtensionSubtype>`
      - Extension Frame Subtypes
 
-None of these crawlers crawls. IEEE Std 802.11-2020 assigns the frame type
+None of these crawlers crawls. :ieee:`802.11-2020` assigns the frame type
 and subtype values in Table 9-1, *Valid type and subtype combinations*, of the
 standard's text, and neither IEEE nor IANA publishes them as a
 machine-readable registry. So each crawler reads a ``DATA`` literal instead of
@@ -31,7 +31,7 @@ fetching a URL, the shape :mod:`pcapkit.vendor.linux.arphrd` takes
 
 Each ``DATA`` is transcribed row for row from the table on Wikipedia's
 *802.11 frame types* page [*]_, revision 1369762968, which reproduces Table 9-1
-with the Trigger frame of IEEE Std 802.11ax-2021 and cites both. Its spelling
+with the Trigger frame of :ieee:`802.11ax-2021` and cites both. Its spelling
 is kept as written, less the footnote marker after ``Trigger``. The values
 agree with the Linux kernel's ``include/linux/ieee80211.h`` for every subtype
 both name.

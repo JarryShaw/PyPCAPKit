@@ -153,6 +153,6 @@ Constants
 
 .. rubric:: Footnotes
 
-.. [*] IEEE Std 802.11-2020, clause 9, *Frame formats*. The clause numbers
+.. [*] :ieee:`802.11-2020`, clause 9, *Frame formats*. The clause numbers
    above are its own, checked against Wireshark's ``packet-ieee80211.c`` where
    it cites one: §9.2.4.1.10, §9.2.4.6, §9.2.4.7 and §9.8.

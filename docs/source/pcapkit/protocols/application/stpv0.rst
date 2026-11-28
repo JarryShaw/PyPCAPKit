@@ -7,7 +7,7 @@ STPv0 - Spanning Tree Protocol
 :mod:`pcapkit.protocols.application.stpv0.protocol` holds
 :class:`~pcapkit.protocols.application.stpv0.protocol.STPv0`, the extractor for the
 Configuration and Topology Change Notification (TCN) BPDUs of the Spanning Tree
-Protocol (STP) [IEEE 802.1D-2004 clause 9], laid out as below. A TCN BPDU ends
+Protocol (STP) [:ieee:`802.1D-2004` clause 9], laid out as below. A TCN BPDU ends
 after its BPDU Type.
 
 .. table::
@@ -40,7 +40,7 @@ after its BPDU Type.
    33       264 ``stp.forward_delay``    Forward Delay
    ====== ===== ======================== ===========================
 
-IEEE 802.1Q-2022 clause 14.4 decodes either BPDU by its type, whatever its Protocol
+:ieee:`802.1Q-2022` clause 14.4 decodes either BPDU by its type, whatever its Protocol
 Version Identifier, so the version is kept as captured and checked against none.
 
 .. versionadded:: 1.9.0

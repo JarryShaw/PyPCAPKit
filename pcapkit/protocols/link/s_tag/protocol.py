@@ -37,7 +37,7 @@ class S_Tag(VLAN, schema=Schema_VLAN, data=Data_VLAN):
     """This class implements 802.1ad Service VLAN Tag Type.
 
     Note:
-        802.1ad was incorporated into IEEE 802.1Q-2011, so the service tag is
+        802.1ad was incorporated into :ieee:`802.1Q-2011`, so the service tag is
         specified by 802.1Q. The ``802.1ad`` name is kept because it is
         what the provider-bridging tag is universally called, and because it is
         the only thing distinguishing this class from

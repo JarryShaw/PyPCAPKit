@@ -24,15 +24,16 @@ __all__ = ['BPDUType']
 
 
 class BPDUType(EnumRegistry, IntEnum):
-    """[BPDUType] STP BPDU Types [IEEE 802.1D-2004; IEEE 802.1Q-2022]"""
+    """[BPDUType] STP BPDU Types [:ieee:`802.1D-2004`; :ieee:`802.1Q-2022`]"""
 
-    #: Configuration BPDU [IEEE 802.1D-2004]
+    #: Configuration BPDU [:ieee:`802.1D-2004`]
     Configuration = 0x00
 
-    #: RST BPDU, and the MST and SPT BPDUs [IEEE 802.1D-2004; IEEE 802.1Q-2022]
+    #: RST BPDU, and the MST and SPT BPDUs [:ieee:`802.1D-2004`;
+    #: :ieee:`802.1Q-2022`]
     RST = 0x02
 
-    #: Topology Change Notification BPDU [IEEE 802.1D-2004]
+    #: Topology Change Notification BPDU [:ieee:`802.1D-2004`]
     TCN = 0x80
 
     @classmethod

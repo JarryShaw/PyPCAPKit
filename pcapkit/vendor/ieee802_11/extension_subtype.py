@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 __all__ = ['ExtensionSubtype']
 
-#: Extension frame (Type ``0b11``) Subtype values (IEEE Std 802.11-2020,
+#: Extension frame (Type ``0b11``) Subtype values (:ieee:`802.11-2020`,
 #: Table 9-1).
 #:
 #: Maps a Subtype value to its *Subtype description*.
@@ -38,7 +38,7 @@ RESERVED = ((0b0010, 0b1111),)  # type: tuple[tuple[int, int], ...]
 
 
 class ExtensionSubtype(Vendor):
-    """IEEE 802.11 Extension Frame Subtypes [IEEE Std 802.11-2020, Table 9-1]"""
+    """IEEE 802.11 Extension Frame Subtypes [:ieee:`802.11-2020`, Table 9-1]"""
 
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0b0000 <= value <= 0b1111'

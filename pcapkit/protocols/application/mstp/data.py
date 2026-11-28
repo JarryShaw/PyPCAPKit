@@ -90,7 +90,7 @@ class MSTIMessage(Data):
 
 @info_final
 class MSTP(Protocol):
-    """Data model for an MST BPDU (IEEE 802.1Q-2022 clause 14).
+    """Data model for an MST BPDU (:ieee:`802.1Q-2022` clause 14).
 
     .. versionadded:: 1.9.0
 

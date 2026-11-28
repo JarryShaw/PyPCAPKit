@@ -5,8 +5,8 @@
 Which fields a MAC header carries is decided by its Frame Control field, so
 :func:`layout` reads that field once and every optional field of
 :class:`IEEE802_11` is a :class:`~pcapkit.corekit.fields.misc.ConditionalField`
-on its answer. Every multi-octet numeric field is little-endian, as IEEE Std
-802.11-2020 §9.2.2, *Conventions*, has it.
+on its answer. Every multi-octet numeric field is little-endian, as
+:ieee:`802.11-2020` §9.2.2, *Conventions*, has it.
 
 """
 
@@ -48,9 +48,9 @@ def layout(frame_control: 'int') -> 'Layout':
     """Decide which fields a protocol version 0 MAC header carries.
 
     * A Management frame carries Address 2, Address 3 and Sequence Control
-      whatever its subtype, and HT Control when +HTC/Order is set (IEEE Std
-      802.11-2020 §9.3.3, *Management frames*; §9.2.4.1.10, *+HTC/Order
-      subfield*).
+      whatever its subtype, and HT Control when +HTC/Order is set
+      (:ieee:`802.11-2020` §9.3.3, *Management frames*; §9.2.4.1.10,
+      *+HTC/Order subfield*).
     * A Data frame carries the same three, Address 4 when To DS and From DS are
       both set, QoS Control when the QoS bit (B7) of its subtype is set, and HT
       Control when that bit and +HTC/Order are both set (§9.3.2, *Data frames*).
@@ -94,7 +94,7 @@ def layout(frame_control: 'int') -> 'Layout':
 
 @schema_final
 class IEEE802_11(Schema):
-    """Header schema for an IEEE 802.11 MAC header (IEEE Std 802.11-2020 §9.2)."""
+    """Header schema for an IEEE 802.11 MAC header (:ieee:`802.11-2020` §9.2)."""
 
     #: Frame Control.
     frame_control: 'int' = UInt16Field(byteorder='little')

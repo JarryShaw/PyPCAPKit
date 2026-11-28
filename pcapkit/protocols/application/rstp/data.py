@@ -18,14 +18,14 @@ __all__ = ['RSTP']
 
 @info_final
 class RSTP(Protocol):
-    """Data model for an RST BPDU (IEEE 802.1Q-2022 clause 14).
+    """Data model for an RST BPDU (:ieee:`802.1Q-2022` clause 14).
 
     .. versionadded:: 1.9.0
 
     """
 
     #: Protocol Version Identifier as captured, 2, or 3 or more for a BPDU
-    #: that IEEE 802.1Q-2022 clause 14.4 decodes as an RST BPDU.
+    #: that :ieee:`802.1Q-2022` clause 14.4 decodes as an RST BPDU.
     protocol_version: 'ProtocolVersion'
     #: BPDU Type.
     type: 'BPDUType'

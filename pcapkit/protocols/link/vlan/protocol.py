@@ -142,7 +142,7 @@ class VLAN(Link[Data_VLAN, Schema_VLAN],  # pylint: disable=abstract-method
     def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_VLAN':  # pylint: disable=unused-argument
         """Read 802.1Q/802.1ad VLAN tag type.
 
-        Structure of 802.1Q/802.1ad VLAN tag type [`IEEE 802.1Q <https://standards.ieee.org/ieee/802.1Q/6844/>`__]:
+        Structure of 802.1Q/802.1ad VLAN tag type [:ieee:`802.1Q-2018`]:
 
         .. code-block:: text
 
