@@ -27,11 +27,11 @@ Octets      Bits        Name                    Description
   40        320   ``hip.parameters``        HIP Parameters
 ======= ========= ====================== ==================================
 
-``HIP_MAC``, ``HIP_MAC_2``, ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2`` are
-verified with keys the caller supplies through the protocol-keyed context
-channel of :mod:`pcapkit.corekit.context`, as :class:`HIPContext`; each records
-the outcome as its ``hmac_status`` or ``signature_status``, and nothing else
-of the parse changes:
+``HIP_MAC``, ``HIP_MAC_2``, ``RVS_HMAC``, ``RELAY_HMAC``, ``HIP_SIGNATURE`` and
+``HIP_SIGNATURE_2`` are verified with keys the caller supplies through the
+protocol-keyed context channel of :mod:`pcapkit.corekit.context`, as
+:class:`HIPContext`; each records the outcome as its ``hmac_status`` or
+``signature_status``, and nothing else of the parse changes:
 
 .. code-block:: python
 
@@ -91,7 +91,8 @@ from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.corekit.schema.short_read import cut_on_its_own
 from pcapkit.protocols.internet.hip.const import (CIPHER_KEY_LEN, ECDSA_CURVE_LEN, EDDSA_CURVE_LEN,
-                                                  HI_ALGORITHM_SUITE, HIT_SUITE_HASH, ORCHID_PREFIX)
+                                                  HI_ALGORITHM_SUITE, HIT_SUITE_HASH, ORCHID_PREFIX,
+                                                  REGISTRATION_HMAC)
 from pcapkit.protocols.internet.hip.data import HIP as Data_HIP
 from pcapkit.protocols.internet.hip.data import AckDataParameter as Data_AckDataParameter
 from pcapkit.protocols.internet.hip.data import ACKParameter as Data_ACKParameter
@@ -250,7 +251,7 @@ from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 if TYPE_CHECKING:
     from datetime import timedelta
     from ipaddress import IPv6Address
-    from typing import IO, Any, Callable, DefaultDict, Mapping, NoReturn, Optional
+    from typing import IO, Any, Callable, DefaultDict, Iterable, Mapping, NoReturn, Optional
 
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal, NotRequired
@@ -266,7 +267,7 @@ if TYPE_CHECKING:
     ParameterConstructor = Callable[[Enum_Parameter, DefaultArg(Optional[Data_Parameter]),
                                      NamedArg(int, 'version'), KwArg(Any)], Schema_Parameter]
 
-__all__ = ['HIP', 'HIPAuthStatus', 'HIPIdentity', 'HIPAssociation', 'HIPContext']
+__all__ = ['HIP', 'HIPAuthStatus', 'HIPIdentity', 'HIPAssociation', 'HIPRegistration', 'HIPContext']
 
 #: The pseudo-header a checksum is computed and verified over in :class:`HIP`,
 #: resolved there rather than imported, so its first import holds
@@ -305,8 +306,9 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
 class HIPAuthStatus(EnumLookup, enum.IntEnum):
     """Outcome of verifying a HIP HMAC or signature parameter.
 
-    Recorded as the ``hmac_status`` of a ``HIP_MAC`` or ``HIP_MAC_2``, and the
-    ``signature_status`` of a ``HIP_SIGNATURE`` or ``HIP_SIGNATURE_2``.
+    Recorded as the ``hmac_status`` of a ``HIP_MAC``, ``HIP_MAC_2``, ``RVS_HMAC``
+    or ``RELAY_HMAC``, and the ``signature_status`` of a ``HIP_SIGNATURE`` or
+    ``HIP_SIGNATURE_2``.
     ``get`` / ``get_all`` come from :class:`~pcapkit.corekit.enum.EnumLookup`;
     the class defines no ``_missing_``, so an unknown value raises
     :exc:`ValueError`.
@@ -320,8 +322,9 @@ class HIPAuthStatus(EnumLookup, enum.IntEnum):
     #: It does not, which warns with a
     #: :exc:`~pcapkit.utilities.warnings.ProtocolWarning`.
     INVALID = 1
-    #: The context holds no key for the packet's sender. This is the expected
-    #: state for a host the caller has no keys for, and is **not** an error.
+    #: The context holds no key for the packet's sender, or for an ``RVS_HMAC``
+    #: or ``RELAY_HMAC`` no registration the packet flows through. This is the
+    #: expected state for a host the caller has no keys for, and is **not** an error.
     NO_KEY = 2
     #: The key cannot be applied, as its algorithm is not implemented, the
     #: packet is not HIP version 2, or a signature needs the optional
@@ -927,22 +930,164 @@ class HIPAssociation:
         return okm[:length]
 
 
+class HIPRegistration:
+    """A requester's registration with a HIP registrar (:rfc:`8003`), as a rendezvous
+    client holds with its rendezvous server (:rfc:`8004#section-3.2`) or a relay client
+    with its relay (:rfc:`9028#section-4.1`).
+
+    Its association's integrity keys key the ``RVS_HMAC`` (:rfc:`8004#section-4.2.1`)
+    and ``RELAY_HMAC`` (:rfc:`9028#section-5.8`) of the packets the two exchange,
+    those the registrar relays to the requester included. Each host sends under its
+    own key, HIP-gl or HIP-lg (:rfc:`7401#section-6.5`), so what the registrar relays
+    is under the registrar's.
+
+    Args:
+        association: The association of the requester and the registrar.
+        registrar: The registrar's HIT, one of the association's, as an IPv6 address,
+            its text, an :class:`int` or 16 octets.
+        reg_type: The Registration Types the registrar granted, as members or
+            :class:`int` codes, as its ``REG_RESPONSE`` lists them; which of them key
+            which parameter is
+            :data:`~pcapkit.protocols.internet.hip.const.REGISTRATION_HMAC`.
+
+    Raises:
+        ProtocolError: If ``association`` is no :class:`HIPAssociation`, ``registrar``
+            is neither of its HITs, or ``reg_type`` holds a name, a :obj:`bool` or a
+            code that is no Registration Type.
+
+    .. versionadded:: 1.10.0
+
+    """
+
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    @property
+    def association(self) -> 'HIPAssociation':
+        """The association of the requester and the registrar."""
+        return self.__association__
+
+    @property
+    def requester(self) -> 'IPv6Address':
+        """The requester's HIT."""
+        return ipaddress.IPv6Address(self.__requester__)
+
+    @property
+    def registrar(self) -> 'IPv6Address':
+        """The registrar's HIT."""
+        return ipaddress.IPv6Address(self.__registrar__)
+
+    @property
+    def reg_type(self) -> 'tuple[Enum_Registration, ...]':
+        """The Registration Types granted."""
+        return self.__reg_type__
+
+    ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    def matches(self, sender: 'IPv6Address | str | int | bytes',
+                receiver: 'IPv6Address | str | int | bytes') -> 'bool':
+        """Whether a packet from ``sender`` to ``receiver`` flows through the registration.
+
+        Args:
+            sender: The packet's Sender's HIT.
+            receiver: Its Receiver's HIT.
+
+        Returns:
+            Whether the requester sends it, to the registrar or for the registrar to
+            relay, or receives it, from the registrar or relayed by it.
+
+        """
+        return self.__requester__ in (_hit_value(sender, 'sender'), _hit_value(receiver, 'receiver'))
+
+    def compute_hmac(self, sender: 'IPv6Address | str | int | bytes',
+                     receiver: 'IPv6Address | str | int | bytes', data: 'bytes') -> 'bytes':
+        """Compute the HMAC protecting a packet from ``sender`` to ``receiver``.
+
+        Args:
+            sender: The packet's Sender's HIT: if the requester's, it is under the
+                requester's key.
+            receiver: Its Receiver's HIT: if the requester's, the packet is under the
+                registrar's key, which sends or relays it.
+            data: The octets the HMAC covers.
+
+        Returns:
+            The HMAC, as :meth:`HIPAssociation.compute_hmac` computes it.
+
+        Raises:
+            ProtocolError: If the packet does not flow through the registration, see
+                :meth:`matches`.
+
+        """
+        sender_hit, receiver_hit = _hit_value(sender, 'sender'), _hit_value(receiver, 'receiver')
+        if sender_hit == self.__requester__:
+            return self.__association__.compute_hmac(self.__requester__, data)
+        if receiver_hit == self.__requester__:
+            return self.__association__.compute_hmac(self.__registrar__, data)
+        raise ProtocolError(f'HIP: a packet from {ipaddress.IPv6Address(sender_hit)} to '
+                            f'{ipaddress.IPv6Address(receiver_hit)} does not flow through {self!r}')
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, association: 'HIPAssociation', *,
+                 registrar: 'IPv6Address | str | int | bytes',
+                 reg_type: 'Iterable[Enum_Registration | int]') -> 'None':
+        if not isinstance(association, HIPAssociation):
+            raise ProtocolError(f'HIP: invalid association: {association!r} is no HIPAssociation')
+        self.__association__ = association
+
+        hits = (int(association.initiator), int(association.responder))
+        self.__registrar__ = _hit_value(registrar, 'registrar')
+        if self.__registrar__ not in hits:
+            raise ProtocolError(f'HIP: invalid registrar: {registrar!r} is neither HIT of '
+                                f'{association!r}')
+        self.__requester__ = hits[0] if hits[1] == self.__registrar__ else hits[1]
+
+        members = []  # type: list[Enum_Registration]
+        for value in reg_type:
+            member = None
+            if isinstance(value, int) and not isinstance(value, bool):
+                try:
+                    member = Enum_Registration.get(value)
+                except ValueError:
+                    pass
+            if member is None:
+                raise ProtocolError(f'HIP: invalid reg_type: {value!r} is no Registration Type')
+            members.append(member)
+        self.__reg_type__ = tuple(members)
+
+    def __repr__(self) -> 'str':
+        """Representation of the registration, free of any key material."""
+        return (f'<HIPRegistration requester={self.requester} registrar={self.registrar} '
+                f'reg_type={",".join(member.name for member in self.__reg_type__)}>')
+
+
 class HIPContext(ProtocolContext):
     """Caller supplied keys for verifying HIP's HMACs and signatures (:rfc:`7401#section-6.4`).
 
     Given one, :meth:`HIP.read` records the :class:`HIPAuthStatus` of each
-    ``HIP_MAC`` and ``HIP_MAC_2`` as its ``hmac_status``, and of each
-    ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2`` as its ``signature_status``, and
-    parses as it does without one.
+    ``HIP_MAC``, ``HIP_MAC_2``, ``RVS_HMAC`` and ``RELAY_HMAC`` as its
+    ``hmac_status``, and of each ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2`` as its
+    ``signature_status``, and parses as it does without one.
 
     Args:
-        *keys: :class:`HIPIdentity` and :class:`HIPAssociation` instances, the
-            first matching one used.
+        *keys: :class:`HIPIdentity`, :class:`HIPAssociation` and
+            :class:`HIPRegistration` instances: the first matching identity or
+            association is used, and each matching registration tried.
 
     Raises:
-        ProtocolError: If a key is neither.
+        ProtocolError: If a key is none of these.
 
     .. versionadded:: 1.9.0
+
+    .. versionchanged:: 1.10.0
+
+       Takes :class:`HIPRegistration` keys, for ``RVS_HMAC`` and ``RELAY_HMAC``
+       (:issue:`3187`).
 
     """
 
@@ -960,6 +1105,11 @@ class HIPContext(ProtocolContext):
         """Registered associations."""
         return tuple(self.__associations__)
 
+    @property
+    def registrations(self) -> 'tuple[HIPRegistration, ...]':
+        """Registered registrations with a rendezvous server or a relay."""
+        return tuple(self.__registrations__)
+
     ##########################################################################
     # Methods.
     ##########################################################################
@@ -969,20 +1119,22 @@ class HIPContext(ProtocolContext):
         """Index ID of the protocol this context applies to."""
         return ('HIP',)
 
-    def register(self, key: 'HIPIdentity | HIPAssociation') -> 'None':
+    def register(self, key: 'HIPIdentity | HIPAssociation | HIPRegistration') -> 'None':
         """Add a key to the context.
 
         Args:
-            key: A Host Identity or an association.
+            key: A Host Identity, an association or a registration.
 
         Raises:
-            ProtocolError: If ``key`` is neither.
+            ProtocolError: If ``key`` is none of these.
 
         """
         if isinstance(key, HIPIdentity):
             self.__identities__.append(key)
         elif isinstance(key, HIPAssociation):
             self.__associations__.append(key)
+        elif isinstance(key, HIPRegistration):
+            self.__registrations__.append(key)
         else:
             raise ProtocolError(f'HIP: not a HIP key: {key!r}')
 
@@ -1020,20 +1172,46 @@ class HIPContext(ProtocolContext):
                 return association
         return None
 
+    def match_registrations(self, sender: 'IPv6Address | str | int | bytes',
+                            receiver: 'IPv6Address | str | int | bytes', *,
+                            reg_type: 'Iterable[Enum_Registration | int]') -> 'tuple[HIPRegistration, ...]':  # pylint: disable=line-too-long
+        """Find every registration a packet may flow through.
+
+        A packet's HITs need not tell them apart: a registrar serving both its
+        Sender and its Receiver, or a requester holding several registrars, leaves
+        more than one.
+
+        Args:
+            sender: The packet's Sender's HIT.
+            receiver: Its Receiver's HIT.
+            reg_type: The Registration Types that may key it.
+
+        Returns:
+            Each registration granted one of ``reg_type`` that
+            :meth:`HIPRegistration.matches` the packet, in the order registered.
+
+        """
+        wanted = set(reg_type)
+        return tuple(registration for registration in self.__registrations__
+                     if wanted.intersection(registration.reg_type)
+                     and registration.matches(sender, receiver))
+
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __init__(self, *keys: 'HIPIdentity | HIPAssociation') -> 'None':
+    def __init__(self, *keys: 'HIPIdentity | HIPAssociation | HIPRegistration') -> 'None':
         self.__identities__ = []  # type: list[HIPIdentity]
         self.__associations__ = []  # type: list[HIPAssociation]
+        self.__registrations__ = []  # type: list[HIPRegistration]
         for key in keys:
             self.register(key)
 
     def __repr__(self) -> 'str':
         """Representation of the context, free of any key material."""
         return (f'<HIPContext identities={len(self.__identities__)} '
-                f'associations={len(self.__associations__)}>')
+                f'associations={len(self.__associations__)} '
+                f'registrations={len(self.__registrations__)}>')
 
 
 ##############################################################################
@@ -1262,6 +1440,12 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
        :class:`HIPAuthStatus`, as the parameter's ``hmac_status`` or
        ``signature_status`` (:issue:`2939`).
 
+    .. versionchanged:: 1.10.0
+
+       :meth:`read` also verifies ``RVS_HMAC`` (:rfc:`8004#section-4.2.1`) and
+       ``RELAY_HMAC`` (:rfc:`9028#section-5.8`), with the :class:`HIPRegistration`
+       keys of a :class:`HIPContext` (:issue:`3187`).
+
     """
 
     ##########################################################################
@@ -1428,8 +1612,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         Returns:
             Parsed packet data. Given a :class:`HIPContext`, each ``HIP_MAC``,
-            ``HIP_MAC_2``, ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2`` records its
-            :class:`HIPAuthStatus`, see :meth:`_verify_hip_param`.
+            ``HIP_MAC_2``, ``RVS_HMAC``, ``RELAY_HMAC``, ``HIP_SIGNATURE`` and
+            ``HIP_SIGNATURE_2`` records its :class:`HIPAuthStatus`, see
+            :meth:`_verify_hip_param`.
 
         Raises:
             ProtocolError: If the packet is malformed. Parsed on its own, a
@@ -1873,10 +2058,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                           context: 'HIPContext') -> 'None':
         """Verify the HMAC and signature parameters (:rfc:`7401#section-6.4`).
 
-        Each ``HIP_MAC`` and ``HIP_MAC_2`` records its :class:`HIPAuthStatus` as
-        ``hmac_status``, and each ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2`` as
-        ``signature_status``. An outcome other than :attr:`~HIPAuthStatus.VALID`
-        and :attr:`~HIPAuthStatus.NO_KEY` warns with a
+        Each ``HIP_MAC``, ``HIP_MAC_2``, ``RVS_HMAC`` and ``RELAY_HMAC`` records its
+        :class:`HIPAuthStatus` as ``hmac_status``, and each ``HIP_SIGNATURE`` and
+        ``HIP_SIGNATURE_2`` as ``signature_status``. An outcome other than
+        :attr:`~HIPAuthStatus.VALID` and :attr:`~HIPAuthStatus.NO_KEY` warns with a
         :exc:`~pcapkit.utilities.warnings.ProtocolWarning`.
 
         Args:
@@ -1897,7 +2082,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             if isinstance(param, Data_PuzzleParameter):
                 puzzle = start if puzzle is None else puzzle
                 continue
-            if isinstance(param, (Data_HIPMACParameter, Data_HIPMAC2Parameter)):
+            if isinstance(param, (Data_HIPMACParameter, Data_HIPMAC2Parameter,
+                                  Data_RVSHMACParameter, Data_RelayHMACParameter)):
                 field = 'hmac_status'
                 status, reason = unsupported or self._verify_hip_mac(hip, param, start, context)
             elif isinstance(param, (Data_HIPSignatureParameter, Data_HIPSignature2Parameter)):
@@ -6581,23 +6767,41 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         return id_len
 
     def _verify_hip_mac(self, hip: 'Data_HIP',
-                        param: 'Data_HIPMACParameter | Data_HIPMAC2Parameter', offset: 'int',
+                        param: 'Data_HIPMACParameter | Data_HIPMAC2Parameter | Data_RVSHMACParameter | Data_RelayHMACParameter',  # pylint: disable=line-too-long
+                        offset: 'int',
                         context: 'HIPContext') -> 'tuple[HIPAuthStatus, Optional[str]]':
-        """Verify a ``HIP_MAC`` or ``HIP_MAC_2`` parameter (:rfc:`7401#section-6.4.1`).
+        """Verify a ``HIP_MAC``, ``HIP_MAC_2``, ``RVS_HMAC`` or ``RELAY_HMAC`` parameter.
+
+        Each covers the header and the parameters before it, as :meth:`_auth_scope`
+        builds them, and ``HIP_MAC_2`` the Responder's ``HOST_ID`` after them
+        (:rfc:`7401#section-6.4.1`). ``RVS_HMAC`` (:rfc:`8004#section-4.2.1`) and
+        ``RELAY_HMAC`` (:rfc:`9028#section-5.8`) are ``HIP_MAC`` under another type
+        and key.
 
         Args:
             hip: Parsed header.
             param: The parameter.
             offset: Its offset in the header.
-            context: The keys to verify with: the association of the packet's HITs,
-                and for ``HIP_MAC_2`` the Host Identity of its sender, the Responder.
+            context: The keys to verify with: for ``RVS_HMAC`` and ``RELAY_HMAC`` each
+                registration the packet may flow through, of a Registration Type
+                :data:`~pcapkit.protocols.internet.hip.const.REGISTRATION_HMAC` lists;
+                otherwise the association of the packet's HITs, and for
+                ``HIP_MAC_2`` the Host Identity of its sender, the Responder.
 
         Returns:
-            The outcome, and why it warns, if it does.
+            The outcome, and why it warns, if it does: :attr:`~HIPAuthStatus.VALID`
+            if any of the keys verifies the HMAC, and :attr:`~HIPAuthStatus.INVALID`
+            if none does.
 
         """
-        association = context.match_association(hip.shit, hip.rhit)
-        if association is None:
+        if isinstance(param, (Data_RVSHMACParameter, Data_RelayHMACParameter)):
+            keys = context.match_registrations(
+                hip.shit, hip.rhit, reg_type=REGISTRATION_HMAC[param.type],
+            )  # type: tuple[HIPAssociation | HIPRegistration, ...]
+        else:
+            association = context.match_association(hip.shit, hip.rhit)
+            keys = () if association is None else (association,)
+        if not keys:
             return HIPAuthStatus.NO_KEY, None
 
         host_id = b''
@@ -6613,8 +6817,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         scope = self._auth_scope(offset, host_id)
         if scope is None:
             return HIPAuthStatus.INVALID, 'the Header Length cannot count what the HMAC covers'
-        if compare_digest(association.compute_hmac(hip.shit, scope), param.hmac):
-            return HIPAuthStatus.VALID, None
+        for key in keys:
+            if isinstance(key, HIPRegistration):
+                digest = key.compute_hmac(hip.shit, hip.rhit, scope)
+            else:
+                digest = key.compute_hmac(hip.shit, scope)
+            if compare_digest(digest, param.hmac):
+                return HIPAuthStatus.VALID, None
         return HIPAuthStatus.INVALID, 'the HMAC does not verify'
 
     def _verify_hip_signature(self, hip: 'Data_HIP',

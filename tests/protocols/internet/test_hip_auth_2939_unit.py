@@ -306,7 +306,7 @@ class ContextTests(AuthTestCase):
         self.assertIsNone(context.match_identity(int(HIT_I)))
         self.assertIs(context.match_association(HIT_I, HIT_R), association)
         self.assertIsNone(context.match_association(HIT_I, '2001:21::3'))
-        self.assertEqual(repr(context), '<HIPContext identities=1 associations=1>')
+        self.assertEqual(repr(context), '<HIPContext identities=1 associations=1 registrations=0>')
         self.assertEqual(repr(identity), '<HIPIdentity hit=2001:21::2 algorithm=RSA>')
         self.assertEqual(identity.hit, HIT_R)
         self.assertEqual(identity.host_id.algorithm, RSA)

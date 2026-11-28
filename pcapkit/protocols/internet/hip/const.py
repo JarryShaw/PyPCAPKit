@@ -10,11 +10,13 @@ from pcapkit.const.hip.ecdsa_curve import ECDSACurve as Enum_ECDSACurve
 from pcapkit.const.hip.eddsa_curve import EdDSACurve as Enum_EdDSACurve
 from pcapkit.const.hip.hi_algorithm import HIAlgorithm as Enum_HIAlgorithm
 from pcapkit.const.hip.hit_suite import HITSuite as Enum_HITSuite
+from pcapkit.const.hip.parameter import Parameter as Enum_Parameter
+from pcapkit.const.hip.registration import Registration as Enum_Registration
 
 __all__ = [
     'LOCATOR_SET_LEN',
     'ORCHID_PREFIX', 'HIT_SUITE_HASH', 'HI_ALGORITHM_SUITE', 'CIPHER_KEY_LEN',
-    'ECDSA_CURVE_LEN', 'EDDSA_CURVE_LEN',
+    'ECDSA_CURVE_LEN', 'EDDSA_CURVE_LEN', 'REGISTRATION_HMAC',
 ]
 
 #: Packet-context key under which
@@ -95,4 +97,16 @@ ECDSA_CURVE_LEN = {
 EDDSA_CURVE_LEN = {
     Enum_EdDSACurve.EdDSA25519: 32,
     Enum_EdDSACurve.EdDSA448: 57,
+}
+
+#: The Registration Types whose registration keys each server's HMAC parameter.
+#: ``RVS_HMAC`` is a rendezvous server's (:rfc:`8004#section-4.2.1`), and
+#: ``RELAY_HMAC`` a relay's (:rfc:`9028#section-5.8`), registered for either relay
+#: service (:rfc:`9028#section-4.1`), as a Data Relay Server relays control packets
+#: as a Control Relay Server does (:rfc:`9028#section-4.12.2`).
+#:
+#: .. versionadded:: 1.10.0
+REGISTRATION_HMAC = {
+    Enum_Parameter.RVS_HMAC: (Enum_Registration.RENDEZVOUS,),
+    Enum_Parameter.RELAY_HMAC: (Enum_Registration.RELAY_UDP_HIP, Enum_Registration.RELAY_UDP_ESP),
 }
