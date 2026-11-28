@@ -729,6 +729,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         'OSPFV3': ModuleDescriptor('pcapkit.protocols.application.ospfv3.protocol', 'OSPFv3'),
         'RARP': ModuleDescriptor('pcapkit.protocols.application.rarp.protocol', 'RARP'),
         'RSTP': ModuleDescriptor('pcapkit.protocols.application.rstp.protocol', 'RSTP'),
+        'SMTP': ModuleDescriptor('pcapkit.protocols.application.smtp.protocol', 'SMTP'),
         'SSL': ModuleDescriptor('pcapkit.protocols.application.ssl.protocol', 'SSL'),
         'SSLV2': ModuleDescriptor('pcapkit.protocols.application.sslv2.protocol', 'SSLv2'),
         'SSLV3': ModuleDescriptor('pcapkit.protocols.application.sslv3.protocol', 'SSLv3'),

@@ -831,6 +831,7 @@ EXCLUDED_FROM_INTENUM_CENSUS = frozenset({
     'pcapkit/const/reg/apptype/sctp.py',      # SCTP
     'pcapkit/const/reg/apptype/tcp.py',       # TCP
     'pcapkit/const/reg/apptype/udp.py',       # UDP
+    'pcapkit/const/smtp/command.py',          # Command
 
     # (b) int-valued and mixes in the base, but carries a custom __new__
     # plus its own _unregistered_member override, so it is not the

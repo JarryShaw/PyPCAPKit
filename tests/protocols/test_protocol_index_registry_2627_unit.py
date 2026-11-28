@@ -65,6 +65,7 @@ EXPECTED = {
     'pcapkit.protocols.application.ospfv2.protocol.OSPFv2': (TRANSTYPE, 89),
     'pcapkit.protocols.application.ospfv3.protocol.OSPFv3': (TRANSTYPE, 89),
     'pcapkit.protocols.application.rarp.protocol.RARP': (ETHERTYPE, 0x8035),
+    'pcapkit.protocols.application.smtp.protocol.SMTP': (APP_TCP, 25),
     'pcapkit.protocols.application.sslv3.protocol.SSLv3': (APP_TCP, 443),
     'pcapkit.protocols.application.tls.protocol.TLS': (APP_TCP, 443),
     'pcapkit.protocols.internet.ah.protocol.AH': (TRANSTYPE, 51),
@@ -171,6 +172,7 @@ def _instances() -> 'dict[str, Any]':
     from pcapkit.protocols.application.httpv1.protocol import HTTPv1
     from pcapkit.protocols.application.httpv2.protocol import HTTPv2
     from pcapkit.protocols.application.ngap.protocol import NGAP
+    from pcapkit.protocols.application.smtp.protocol import SMTP
     from pcapkit.protocols.application.sslv3.protocol import SSLv3
     from pcapkit.protocols.application.tls.protocol import TLS
     from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
@@ -191,6 +193,7 @@ def _instances() -> 'dict[str, Any]':
                                                               frame={'data': b'x'}),
         # unparsed, since decoding NGAP needs the optional pycrate
         'pcapkit.protocols.application.ngap.protocol.NGAP': object.__new__(NGAP),
+        'pcapkit.protocols.application.smtp.protocol.SMTP': SMTP(b'QUIT\r\n'),
         'pcapkit.protocols.application.sslv3.protocol.SSLv3': SSLv3(sslv3),
         'pcapkit.protocols.application.tls.protocol.TLS': TLS(tls),
         'pcapkit.protocols.link.l2tpv2.protocol.L2TPv2': L2TPv2.from_fields(version=2, tunnel_id=1, session_id=2),

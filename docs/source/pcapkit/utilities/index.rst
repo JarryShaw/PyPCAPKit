@@ -10,8 +10,9 @@ built with, and imports nothing from :mod:`pcapkit` outside itself (see
 
 * user-refined exceptions and warnings, and logging;
 * the tunable limits of :mod:`~pcapkit.utilities.config`;
-* a compatibility layer, timestamp conversion, sequence-number arithmetic and
-  pickle reductions;
+* a compatibility layer, timestamp conversion, sequence-number arithmetic,
+  the :mod:`lines <pcapkit.utilities.lines>` text protocols exchange, and pickle
+  reductions;
 * the :mod:`context variables <pcapkit.utilities.contextvars>` its modules
   share, :mod:`lazy imports <pcapkit.utilities.importlib>` for a package's
   exports, an :mod:`abstract-class check <pcapkit.utilities.inspect>` that
@@ -29,6 +30,7 @@ built with, and imports nothing from :mod:`pcapkit` outside itself (see
    chardet
    datetime
    seqnum
+   lines
    pickle
    contextvars
    importlib

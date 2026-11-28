@@ -131,6 +131,8 @@ The protocol classes :mod:`pcapkit` ships:
 +                                                                  + RARP Family    +-----------------------+--------------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.application.drarp.protocol.DRARP`                                |
 +                                                                  +----------------+-----------------------+--------------------------------------------------------------------+
+|                                                                  | :class:`pcapkit.protocols.application.smtp.protocol.SMTP`                                                   |
++                                                                  +----------------+-----------------------+--------------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.application.ssl.protocol.SSL`                                    |
 +                                                                  +                +-----------------------+--------------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.application.tls.protocol.TLS`                                    |
