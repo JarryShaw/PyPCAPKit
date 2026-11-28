@@ -24,6 +24,7 @@ protocol's layer is decided by function rather than encapsulation; see
    ospfv3
    rarp
    drarp
+   smtp
    ssl
    sslv2
    tls
@@ -38,7 +39,7 @@ protocol's layer is decided by function rather than encapsulation; see
 
    Implement BFD, BGP, DHCP, DHCPv6, IKE, IMAP, Kerberos, LACP, LDAP, LLDP,
    mDNS and LLMNR, MQTT, NetBIOS, NNTP, NTP, ONC/RPC, POP, RADIUS, RIP, RSVP,
-   RTP, SIP, SMB, SMTP, SNMP, SSDP, SSH, syslog, Telnet, VRRP and XMPP, and
+   RTP, SIP, SMB, SNMP, SSDP, SSH, syslog, Telnet, VRRP and XMPP, and
    decode OSPF's packet bodies; :doc:`/contributing/pep` gives each its issue.
 
 Protocol Registry

@@ -129,6 +129,7 @@ else:
     from pcapkit.vendor.pppoe import *
     from pcapkit.vendor.radiotap import *
     from pcapkit.vendor.sctp import *
+    from pcapkit.vendor.smtp import *
     from pcapkit.vendor.sslv2 import *
     from pcapkit.vendor.stp import *
     from pcapkit.vendor.tcp import *
@@ -221,6 +222,8 @@ __all__ = [
     # SCTP
     'SCTP_Chunk', 'SCTP_Parameter', 'SCTP_CauseCode',
     'SCTP_PayloadProtocolIdentifier',
+    # SMTP
+    'SMTP_Command', 'SMTP_ReplyCode',
     # SSLv2
     'SSLv2_HandshakeType', 'SSLv2_Version',
     # STP

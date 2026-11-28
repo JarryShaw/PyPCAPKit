@@ -191,12 +191,16 @@ class TCP(Transport[Data_TCP, Schema_TCP],
          - :class:`pcapkit.protocols.application.ftp_data.protocol.FTP_DATA`
        * - 21
          - :class:`pcapkit.protocols.application.ftp.protocol.FTP`
+       * - 25
+         - :class:`pcapkit.protocols.application.smtp.protocol.SMTP`
        * - 53
          - :class:`pcapkit.protocols.application.dns.protocol.DNS`
        * - 80
          - :class:`pcapkit.protocols.application.http.protocol.HTTP`
        * - 443
          - :class:`pcapkit.protocols.application.tls.protocol.TLS`
+       * - 587
+         - :class:`pcapkit.protocols.application.smtp.protocol.SMTP`
        * - 8080
          - :class:`pcapkit.protocols.application.http.protocol.HTTP`
 
@@ -398,6 +402,12 @@ class TCP(Transport[Data_TCP, Schema_TCP],
        :class:`~pcapkit.protocols.application.dns.protocol.DNS`
        (:issue:`2816`).
 
+    .. versionchanged:: 1.10.0
+
+       Ports 25 and 587 bind
+       :class:`~pcapkit.protocols.application.smtp.protocol.SMTP`
+       (:issue:`2960`).
+
     """
 
     ##########################################################################
@@ -417,9 +427,11 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             #
             #   20    ftp-data   File Transfer [Default Data]
             #   21    ftp        File Transfer Protocol [Control]
+            #   25    smtp       Simple Mail Transfer
             #   53    domain     Domain Name Server
             #   80    http       World Wide Web HTTP
             #   443   https      http protocol over TLS/SSL
+            #   587   submission Message Submission
             #   8080  http-alt   HTTP Alternate (see port 80)
             #
             # 8443 is deliberately absent: IANA registers it as ``pcsync-https``,
@@ -431,9 +443,11 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             # ``HTTP._dispatch_version`` (#2524). UDP's table does the same.
             20: ModuleDescriptor('pcapkit.protocols.application.ftp_data.protocol', 'FTP_DATA'),
             21: ModuleDescriptor('pcapkit.protocols.application.ftp.protocol', 'FTP'),
+            25: ModuleDescriptor('pcapkit.protocols.application.smtp.protocol', 'SMTP'),
             53: ModuleDescriptor('pcapkit.protocols.application.dns.protocol', 'DNS'),
             80: ModuleDescriptor('pcapkit.protocols.application.http.protocol', 'HTTP'),
             443: ModuleDescriptor('pcapkit.protocols.application.tls.protocol', 'TLS'),
+            587: ModuleDescriptor('pcapkit.protocols.application.smtp.protocol', 'SMTP'),
             8080: ModuleDescriptor('pcapkit.protocols.application.http.protocol', 'HTTP'),
         },
     )

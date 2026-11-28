@@ -53,6 +53,9 @@ OCTETS = {
     'pcapkit.protocols.application.ngap.protocol.NGAP': (
         bytes.fromhex('00150036000004001b00080002f839100001020052400d0500706361706b69742d676e62')
         + bytes.fromhex('0066000d00000000010002f839000000080015400140'),),
+    # a command, a reply and mail data
+    'pcapkit.protocols.application.smtp.protocol.SMTP': (b'EHLO a.example\r\n', b'250-a\r\n250 b\r\n',
+                                                          b'x\r\n.\r\n'),
     # Hop-by-Hop and Destination Options: Router Alert, then a PadN of eight
     'pcapkit.protocols.internet.hopopt.protocol.HOPOPT': (bytes([17, 1, 5, 2, 0, 0, 1, 8]) + bytes(8),),
     'pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts': (bytes([17, 1, 5, 2, 0, 0, 1, 8]) + bytes(8),),

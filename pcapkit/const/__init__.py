@@ -50,6 +50,7 @@ if TYPE_CHECKING:
     from pcapkit.const.pppoe import *
     from pcapkit.const.radiotap import *
     from pcapkit.const.sctp import *
+    from pcapkit.const.smtp import *
     from pcapkit.const.sslv2 import *
     from pcapkit.const.stp import *
     from pcapkit.const.tcp import *
@@ -136,6 +137,8 @@ __all__ = [
     'Radiotap_USIGCommonKnown', 'Radiotap_EHTKnown',
     # SCTP
     'SCTP_Chunk', 'SCTP_Parameter', 'SCTP_CauseCode', 'SCTP_PayloadProtocolIdentifier',
+    # SMTP
+    'SMTP_Command', 'SMTP_ReplyCode',
     # SSLv2
     'SSLv2_HandshakeType', 'SSLv2_Version',
     # STP
@@ -159,5 +162,5 @@ __all__ = [
 __getattr__, __dir__ = lazy_exports(__name__, globals(), packages=(
     'reg', 'pcapng', 'arp', 'dccp', 'dns', 'esp', 'ftp', 'hip', 'http', 'icmp', 'icmpv6',
     'ieee802_11', 'igmp', 'ipv4', 'ipv6', 'ipx', 'l2tp', 'linux', 'llc', 'mh', 'ngap', 'ospf',
-    'ospfv1', 'ppp', 'pppoe', 'radiotap', 'sctp', 'sslv2', 'stp', 'tcp', 'tls', 'vlan',
+    'ospfv1', 'ppp', 'pppoe', 'radiotap', 'sctp', 'smtp', 'sslv2', 'stp', 'tcp', 'tls', 'vlan',
 ))

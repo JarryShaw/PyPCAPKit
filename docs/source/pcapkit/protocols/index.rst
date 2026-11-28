@@ -43,7 +43,7 @@ parsing a packet from its octets or building one from field values:
        end
 
        subgraph application [Application Layer]
-           Application --> DNS & HTTP & FTP & FTP_DATA & NGAP & OSPF & RARP & SSL & STP
+           Application --> DNS & HTTP & FTP & FTP_DATA & NGAP & OSPF & RARP & SMTP & SSL & STP
 
            subgraph http [HTTP Family]
                HTTP --> h1["HTTP/1.*"] & h2["HTTP/2"]
@@ -201,6 +201,7 @@ parsing a packet from its octets or building one from field values:
        click OSPFv3 "application/ospfv3.html#pcapkit.protocols.application.ospfv3.protocol.OSPFv3"
        click RARP "application/rarp.html#pcapkit.protocols.application.rarp.protocol.RARP"
        click DRARP "application/drarp.html#pcapkit.protocols.application.drarp.protocol.DRARP"
+       click SMTP "application/smtp.html#pcapkit.protocols.application.smtp.protocol.SMTP"
        click SSL "application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL"
        click SSLv2 "application/sslv2.html#pcapkit.protocols.application.sslv2.protocol.SSLv2"
        click TLS "application/tls.html#pcapkit.protocols.application.tls.protocol.TLS"

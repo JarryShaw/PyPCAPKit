@@ -87,6 +87,7 @@ Application Layer
    ngap
    ospf
    ospfv1
+   smtp
    sslv2
    stp
    tls

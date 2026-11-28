@@ -279,7 +279,7 @@ class DispatchBindingTests(unittest.TestCase):
         from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.protocols.transport.udp.protocol import UDP
 
-        self.assertEqual(sorted(TCP.__proto__), [20, 21, 53, 80, 443, 8080])
+        self.assertEqual(sorted(TCP.__proto__), [20, 21, 25, 53, 80, 443, 587, 8080])
         self.assertEqual(sorted(UDP.__proto__), [53, 80, 1701, 5684, 8080])
 
     def test_port_8443_is_deliberately_not_bound(self) -> None:

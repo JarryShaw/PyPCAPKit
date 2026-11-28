@@ -79,6 +79,7 @@ __all__ = [
     'NGAP',
     'OSPF', 'OSPFv1', 'OSPFv2', 'OSPFv3',
     'RARP', 'DRARP',
+    'SMTP',
     'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS',
     'STP', 'STPv0', 'RSTP', 'MSTP',
 

@@ -39,9 +39,9 @@ from pcapkit.protocols.application.ftp.data import FTP as Data_FTP
 from pcapkit.protocols.application.ftp.data import Request as Data_Request
 from pcapkit.protocols.application.ftp.data import Response as Data_Response
 from pcapkit.protocols.application.ftp.schema import FTP as Schema_FTP
-from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import StrEnum, auto
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.lines import closes_reply, decode_text, split_lines
 
 if TYPE_CHECKING:
     from typing import Any, Iterable, NoReturn, Optional
@@ -123,20 +123,19 @@ class FTP(Application[Data_FTP, Schema_FTP],
         # NOTE: A multi-line reply (:rfc:`959#section-4`) may arrive in one segment; its
         # first line is parsed, the rest kept in ``lines``, and anything else refused.
         line, lines = data, ()  # type: bytes, tuple[bytes, ...]
-        if FTP_RESPONSE.match(data) is None and data.endswith(b'\r\n'):
-            first, _, rest = data.partition(b'\r\n')
-            if rest and (match := FTP_RESPONSE.match(first + b'\r\n')) is not None \
-                    and match.group('more'):
-                rest_lines = tuple(rest[:-2].split(b'\r\n'))
-                if self._test_lines(match.group('code'), rest_lines):
-                    line, lines = first + b'\r\n', rest_lines
+        if FTP_RESPONSE.match(data) is None and (split := split_lines(data)) is not None \
+                and len(split) > 1:
+            first, rest = split[0] + b'\r\n', split[1:]
+            if (match := FTP_RESPONSE.match(first)) is not None and match.group('more') \
+                    and closes_reply(match.group('code'), rest, marked=False):
+                line, lines = first, rest
 
         if (match := FTP_REQUEST.match(line)) is not None:
             raw_cmmd = match.group('cmmd')
             args = match.group('args')
 
             cmmd_val = Enum_Command.get(raw_cmmd.decode())
-            args_val, charset = self._decode_args(args)
+            args_val, charset = (None, None) if args is None else decode_text(args)
 
             ftp = Data_Request(
                 type=Type.REQUEST,
@@ -151,7 +150,7 @@ class FTP(Application[Data_FTP, Schema_FTP],
             args = match.group('text') if more else match.group('args')
 
             code_val = Enum_ReturnCode.get(code)
-            args_val, charset = self._decode_args(args)
+            args_val, charset = (None, None) if args is None else decode_text(args)
 
             ftp = Data_Response(
                 type=Type.RESPONSE,
@@ -238,7 +237,7 @@ class FTP(Application[Data_FTP, Schema_FTP],
             raise ProtocolError('FTP: invalid packet type')
 
         lines = tuple(lines)
-        if lines and not (mf and self._test_lines(prefix, lines)):
+        if lines and not (mf and closes_reply(prefix, lines, marked=False)):
             raise ProtocolError('FTP: lines must close a multi-line reply')
 
         # NOTE: bytes and a bytearray are written verbatim and only a ``str`` is encoded;
@@ -309,57 +308,6 @@ class FTP(Application[Data_FTP, Schema_FTP],
             'raw_cmmd': getattr(data, 'raw_cmmd', None),
             'lines': getattr(data, 'lines', ()),
         }
-
-    @staticmethod
-    def _test_lines(code: 'bytes', lines: 'tuple[bytes, ...]') -> 'bool':
-        """Whether ``lines`` are the rest of a multi-line reply with ``code``.
-
-        A multi-line reply ends at the first line that starts with its code
-        followed by SP (:rfc:`959#section-4`). The lines before that one are
-        free text, which may begin with digits -- the code with a hyphen
-        included -- but, as in any reply line, carry no LF.
-
-        Args:
-            code: Reply code of the first line.
-            lines: Lines after the first, CRLF excluded.
-
-        Returns:
-            Whether the last line, and only the last, is the closing line.
-
-        """
-        closing = code + b' '
-        if not lines or not all(isinstance(line, bytes) and b'\n' not in line for line in lines):
-            return False
-        return lines[-1].startswith(closing) and not any(line.startswith(closing) for line in lines[:-1])
-
-    def _decode_args(self, args: 'Optional[bytes]') -> 'tuple[Optional[str], Optional[str]]':
-        """Decode arguments, recording how to encode them back.
-
-        The arguments are decoded by :meth:`self.decode
-        <pcapkit.protocols.protocol.Protocol.decode>`. Where the result does
-        not encode back to ``args`` as UTF-8 -- which :meth:`make` uses by
-        default -- the detected charset is returned with it, or ``'latin-1'``
-        (decoding again) if that does not reproduce ``args`` either, so that the
-        original octets survive a rebuild.
-
-        Args:
-            args: Raw arguments, :obj:`None` if the line carries none.
-
-        Returns:
-            The decoded arguments and the charset to encode them with, the
-            latter :obj:`None` for UTF-8.
-
-        """
-        if args is None:
-            return None, None
-        value = self.decode(args)
-        for charset in (None, detect(args)):
-            try:
-                if value.encode(charset or 'utf-8') == args:
-                    return value, charset
-            except (LookupError, UnicodeError):
-                pass
-        return args.decode('latin-1'), 'latin-1'
 
     @staticmethod
     def _make_code(code: 'Enum_ReturnCode | int | str | bytes | bytearray') -> 'bytes':

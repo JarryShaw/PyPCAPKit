@@ -31,9 +31,11 @@ _DNS_MESSAGE = bytes.fromhex('0011' '0001 0100 0001 0000 0000 0000' '00 0001 000
 _PORT_PAYLOAD = {
     20: b'binary-file-contents',
     21: b'USER anonymous\r\n',
+    25: b'EHLO probe.invalid\r\n',
     53: _DNS_MESSAGE,
     80: b'GET / HTTP/1.1\r\nHost: probe.invalid\r\n\r\n',
     443: _TLS_RECORD,
+    587: b'EHLO probe.invalid\r\n',
     8080: b'GET / HTTP/1.1\r\nHost: probe.invalid\r\n\r\n',
 }
 
@@ -61,10 +63,12 @@ FAMILIES = (
 PINNED_TARGETS = {
     'tcp/20': ('pcapkit.protocols.application.ftp_data.protocol', 'FTP_DATA'),
     'tcp/21': ('pcapkit.protocols.application.ftp.protocol', 'FTP'),
+    'tcp/25': ('pcapkit.protocols.application.smtp.protocol', 'SMTP'),
     'tcp/53': ('pcapkit.protocols.application.dns.protocol', 'DNS'),
     # The version-identifying proxy (#682), as for ``udp/80`` and ``udp/8080``;
     # it dispatches to HTTPv1 or HTTPv2 (#2524).
     'tcp/80': ('pcapkit.protocols.application.http.protocol', 'HTTP'),
     'tcp/443': ('pcapkit.protocols.application.tls.protocol', 'TLS'),
+    'tcp/587': ('pcapkit.protocols.application.smtp.protocol', 'SMTP'),
     'tcp/8080': ('pcapkit.protocols.application.http.protocol', 'HTTP'),
 }

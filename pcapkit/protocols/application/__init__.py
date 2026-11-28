@@ -16,7 +16,7 @@
 
 """
 # TODO: Implements BGP, DHCP, DHCPv6, IMAP, LDAP, MQTT,
-#       NNTP, NTP, ONC:RPC, POP, RIP, RTP, SIP, SMTP, SNMP,
+#       NNTP, NTP, ONC:RPC, POP, RIP, RTP, SIP, SNMP,
 #       SSH, TELNET, XMPP.
 #
 # NB: NGAP's decoder, ``pycrate``, is an optional dependency imported only
@@ -44,6 +44,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.application.ospfv3 import OSPFv3
     from pcapkit.protocols.application.rarp import RARP
     from pcapkit.protocols.application.drarp import DRARP
+    from pcapkit.protocols.application.smtp import SMTP
     from pcapkit.protocols.application.sslv2 import SSLv2
     from pcapkit.protocols.application.tls import TLS
     from pcapkit.protocols.application.sslv3 import SSLv3
@@ -66,6 +67,7 @@ __all__ = [
     'NGAP',
     'OSPF', 'OSPFv1', 'OSPFv2', 'OSPFv3',
     'RARP', 'DRARP',
+    'SMTP',
     'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS',
     'STP', 'STPv0', 'RSTP', 'MSTP',
 ]
@@ -85,6 +87,7 @@ __getattr__, __dir__ = lazy_exports(__name__, globals(), {
     'OSPFv3': ('ospfv3', 'OSPFv3'),
     'RARP': ('rarp', 'RARP'),
     'DRARP': ('drarp', 'DRARP'),
+    'SMTP': ('smtp', 'SMTP'),
     'SSL': ('ssl', 'SSL'),
     'SSLv2': ('sslv2', 'SSLv2'),
     'SSLv3': ('sslv3', 'SSLv3'),
