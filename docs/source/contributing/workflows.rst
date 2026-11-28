@@ -2444,8 +2444,13 @@ as in ``github-release``. Where ``release-app`` has no key, each of those jobs w
 from its ``Check for the release App's key`` step and skips its other steps.
 :file:`tests/project/test_release_app_environment_2648.py` fails when a job other
 than Create Release's ``github`` names ``github-release``, when ``github`` does
-not name it, or when any other job reading the key, in Create Release or
-elsewhere, names anything but ``release-app``.
+not name it, when any other job reading the key, under its name in any case and
+in Create Release or elsewhere, names anything but ``release-app``, or when a
+workflow passes ``toJSON(secrets)``. It also fails when a reader's ``Mint the
+release App's token`` step stops running the one ``v3`` commit of
+``actions/create-github-app-token`` every reader pins, or changes the App's
+inputs, its step ``id`` or that reader's scopes, and when another step of a
+reader reads a secret, or, in ``github``, the key.
 
 ``ANACONDA_TOKEN`` is a secret of the ``anaconda`` environment, and the
 ``PYPCAPKIT`` token and ``PYPCAPKIT_ACTIONS_DEPLOY_KEY`` are secrets of
