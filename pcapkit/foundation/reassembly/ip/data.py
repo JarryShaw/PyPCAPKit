@@ -172,17 +172,28 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
 @info_final
 class Buffer(Info, Generic[_AT]):
     """Data model for :term:`IPv4 <reasm.ipv4.buffer>` and/or
-    :term:`IPv6 <reasm.ipv6.buffer>` reassembly buffer entry."""
+    :term:`IPv6 <reasm.ipv6.buffer>` reassembly buffer entry.
+
+    .. versionchanged:: 1.10.0
+
+       :attr:`datagram` and :attr:`RCVBT` grow with the fragments the buffer
+       holds, rather than being allocated at their largest (:issue:`2957`).
+
+    """
 
     #: Total data length.
     TDL: 'int'
-    #: Fragment received bit table.
+    #: Fragment received bit table, one entry per 8-octet block. It grows with
+    #: :attr:`datagram`, and a block past its end is not received.
     RCVBT: 'bytearray'
     #: Numbers of the packets merged into this buffer.
     index: 'list[int]'
     #: Header buffer.
     header: 'bytes'
-    #: Data buffer, holes set to ``b'\x00'``.
+    #: Data buffer, holes set to ``b'\x00'``. It grows to hold each fragment,
+    #: and the octets past its end are a hole too. It is longer than
+    #: :data:`~pcapkit.corekit.const.ip_header.IP_MAX_LENGTH` only once a
+    #: fragment with Total Length 0 has grown it past (:issue:`1555`).
     datagram: 'bytearray'
     #: Capture timestamp of the **first-arriving** fragment of this datagram, in
     #: seconds since the Unix epoch. This is the origin of the reassembly timer:

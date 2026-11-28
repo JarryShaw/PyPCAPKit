@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """An IP datagram longer than the data buffer is never complete.
 
-GitHub issue #1566. The data buffer holds 65,535 octets and ``RCVBT`` 8,192
-blocks. Guards against a completion check of ``all(RCVBT[0:(TDL + 7) // 8])``,
+GitHub issue #1566. The data buffer holds at most 65,535 octets and ``RCVBT``
+8,192 blocks. Guards against a completion check of ``all(RCVBT[0:(TDL + 7) // 8])``,
 whose slice stops silently at the table's end, so a final fragment declaring
 more data than fits completes its datagram short. A datagram completes only if its
 total data length fits the buffer. Both of those cases overlap a fragment, so on
@@ -26,7 +26,7 @@ from tests._support import reimport_once_per_class
 #: The largest Fragment Offset, 8191 eight-octet units, in octets.
 LAST = 65528
 
-#: The data buffer's length.
+#: The data buffer's largest length.
 BUFFER = 65535
 
 #: Datagram octets, with no zero octet in them, so a hole shows.
@@ -143,7 +143,7 @@ class TestIPReassemblyOversizedDatagram(unittest.TestCase):
 
     def test_a_tso_fragment_past_the_buffer_grows_it_rather_than_being_clipped(self) -> None:
         # Total Length 0 (#1555): 8 octets at the largest offset end one past
-        # the preallocated buffer, which grows to hold them, so their block is
+        # the buffer's largest length, so it grows to hold them, and their block is
         # received and every block reads received with the length still unknown.
         from pcapkit.foundation.reassembly.data import Completion
         from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4

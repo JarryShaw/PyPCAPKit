@@ -165,22 +165,20 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # the header of the fragment at offset zero is the reassembled datagram's
         header = b'' if FO else self._rectify_header(info.header, BUFID[3])
 
-        # initialise buffer with BUFID; ``RCVBT`` holds one entry per 8-octet
-        # block of the data buffer, its partial last block included -- 8191
-        # would cover octets 0 to 65527 only, so a fragment reaching octet 65528,
-        # e.g. at the largest Fragment Offset, would index past it (#1565)
+        # initialise buffer with BUFID; the data buffer and ``RCVBT`` start
+        # empty and grow with the fragments the buffer holds (#2957)
         buf: 'Buffer[_AT]'
         fresh = isolated or BUFID not in self._buffer
         if fresh:
             buf = Buffer(
-                TDL=-1,                              # Total Data Length
-                RCVBT=bytearray(8192),              # Fragment Received Bit Table
-                index=[],                           # index record
-                header=header,                      # header buffer
-                datagram=bytearray(IP_MAX_LENGTH),  # data buffer
-                timestamp=TS,                       # first-arriving fragment's clock reading
-                conflict=[],                        # conflicting octet ranges
-                extent=[],                          # merged fragments' extents
+                TDL=-1,                   # Total Data Length
+                RCVBT=bytearray(),        # Fragment Received Bit Table
+                index=[],                 # index record
+                header=header,            # header buffer
+                datagram=bytearray(),     # data buffer
+                timestamp=TS,             # first-arriving fragment's clock reading
+                conflict=[],              # conflicting octet ranges
+                extent=[],                # merged fragments' extents
             )
             if not isolated:
                 self._buffer[BUFID] = buf
@@ -193,8 +191,8 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # The fragment's data length is what its header declares, but only the
         # octets the capture actually holds can be written: a snaplen-truncated
         # fragment carries fewer, and anything past the declared length is not
-        # fragment data. The data buffer is preallocated, so the write is also
-        # clipped to it.
+        # fragment data. The write is also clipped to the data buffer's largest
+        # length, ``IP_MAX_LENGTH`` unless grown past it below.
         #
         # A Total Length of 0 declares nothing. It is what TCP segmentation
         # offload leaves in a capture taken on the sending host, and the
@@ -225,12 +223,20 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
                 buf.RCVBT.extend(bytes((size + 7) // 8 - len(buf.RCVBT)))
         else:
             length = TL - IHL
-        held = max(min(len(info.payload), length, len(buf.datagram) - FO), 0)
+        limit = max(len(buf.datagram), IP_MAX_LENGTH)
+        held = max(min(len(info.payload), length, limit - FO), 0)
         payload = info.payload[:held]
 
         # put data into data buffer
         start = FO
         stop = FO + held
+
+        # Grow the data buffer to hold this fragment, and ``RCVBT`` to one entry
+        # per 8-octet block of it, its partial last block included (#1565).
+        # Whatever either has not grown to is a hole.
+        if held:
+            buf.datagram.extend(bytes(max(stop - len(buf.datagram), 0)))
+            buf.RCVBT.extend(bytes(max((stop + 7) // 8 - len(buf.RCVBT), 0)))
 
         # Find where this fragment disagrees with what the buffer already
         # holds *before* writing it -- ``buf.RCVBT`` and ``buf.TDL`` still
@@ -277,8 +283,8 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # partial last block is left clear, as a hole --
         #
         # * a truncated fragment's, since the octets after the cut are missing.
-        #   That includes one clipped by the data buffer's end, whose octets
-        #   past it cannot be held, so it counts as cut there (#1566).
+        #   That includes one clipped at the data buffer's largest length, whose
+        #   octets past it cannot be held, so it counts as cut there (#1566).
         # * a non-final fragment's. :rfc:`791#section-3.2` and
         #   :rfc:`8200#section-4.5` make every fragment but the last carry a
         #   multiple of 8 octets, so one that ends mid-block was cut or is
@@ -292,8 +298,11 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
             stop = (FO + held + 7) // 8
         else:
             stop = (FO + held) // 8
-        stop = min(stop, len(buf.RCVBT))
+        stop = min(stop, (limit + 7) // 8)
         if stop > start:
+            # NOTE: ``RCVBT`` already reaches ``stop`` unless the fragment holds
+            # nothing and its offset is off the 8-octet grid.
+            buf.RCVBT.extend(bytes(max(stop - len(buf.RCVBT), 0)))
             buf.RCVBT[start:stop] = b'\x01' * (stop - start)
 
         # get total data length (header excludes); it stays ``-1`` until the
@@ -355,6 +364,14 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         header = buf.header
         datagram = buf.datagram
         conflict = tuple(buf.conflict)
+
+        # the data buffer stops at the furthest octet its fragments reach, so the
+        # hole after it, up to the total data length and as far as the buffer
+        # could grow, is zero-filled here -- in a copy, as ``fetch`` submits
+        # buffers still held
+        fill = min(TDL, IP_MAX_LENGTH) - len(datagram)
+        if fill > 0:
+            datagram = datagram + bytes(fill)
 
         flag = not overlap and (checked or self._is_complete(buf))
         ret = []  # type: list[Datagram[_AT]]
@@ -419,9 +436,9 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
                 # octets it did write are real and are reported here as they are.
                 stop = TDL
             else:
-                # The length is not known. Slicing ``datagram[:-1]`` here would
-                # hand back 65534 octets of the preallocated buffer, almost all of
-                # them zeros the sender never sent, and call the result complete.
+                # The length is not known, so the buffer's end is not the
+                # datagram's, and reporting the whole buffer would pass its
+                # zero-filled holes off as data.
                 #
                 # Reporting nothing at all would be the other extreme, and it
                 # discards data that really did arrive. So report the **contiguous
@@ -529,7 +546,8 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         a buffer it has grown past that bounds the datagram by its own length
         alone (:issue:`1555`). Checking ``RCVBT`` does not show either bound:
         slicing it past its end stops silently, so the blocks past the buffer
-        would read as received (:issue:`1566`).
+        would read as received (:issue:`1566`). ``RCVBT`` grows only to the last
+        block a fragment reached, so a block past its end is a hole.
 
         """
         TDL = buf.TDL
@@ -537,7 +555,8 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
             limit = len(buf.datagram)
         else:
             limit = IP_MAX_LENGTH - self._header_overhead(len(buf.header))
-        return 0 <= TDL <= limit and all(buf.RCVBT[:(TDL + 7) // 8])
+        blocks = (TDL + 7) // 8
+        return 0 <= TDL <= limit and len(buf.RCVBT) >= blocks and all(buf.RCVBT[:blocks])
 
     @staticmethod
     def _detect_conflicts(rcvbt: 'bytearray', tdl: 'int', datagram: 'bytearray', payload: 'bytearray',
