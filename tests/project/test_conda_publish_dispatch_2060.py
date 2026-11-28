@@ -59,7 +59,7 @@ __tier__ = 'LATEST'
 
 CONDA = 'cron-conda.yml'
 DISPATCH = 'workflow_dispatch'
-#: The ``bash`` the steps run under, by absolute path, as tests/test_tier_guard.py finds it (#2103).
+#: The ``bash`` the steps run under, by absolute path, as tests/_steps.py finds it (#2103).
 BASH = shutil.which('bash')
 #: Every step that publishes, by job, as the schedule runs them on some leg.
 PUBLISHERS = {

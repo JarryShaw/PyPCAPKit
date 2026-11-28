@@ -63,8 +63,8 @@ gives wall times only, no RSS -- but the largest of the three is still
 some 90x short of 29 GB, which is enough to place the OOM on running
 *everything* in one process rather than on any one directory.
 
-Every module :func:`root_modules` returns runs in *every* invocation, after the
-directory's own modules -- not before, and not interleaved. Issue #981's own
+Every module :func:`ordering_root_modules` returns runs in *every* invocation,
+after the directory's own modules -- not before, and not interleaved. Issue #981's own
 reproduction is a sibling module (``tests.protocols.application.test_http_unit``)
 *polluting* a root-level module (:mod:`tests.test_base_class_contract`) that
 runs after it in the same process; ``tests.test_base_class_contract`` first and
@@ -75,6 +75,13 @@ any purging module in that directory a chance to desync a root module that
 assumes its own import is current -- matching the reproduction exactly for
 ``protocols`` and ``const``, and giving the same opportunity to every other
 directory this script is pointed at.
+
+#3148 -- only a root module that can be desynced takes that place in every leg:
+one that imports :mod:`pcapkit` at its top level, names :data:`sys.modules`, or
+calls ``import_module`` or ``reload`` (:func:`reads_module_table`). The owner ruled
+there that the rest, whose run no earlier module changes, run once, after the first
+part of :data:`ROOT_LEG`, which ``unittest-ordering`` and ``project-tests``'
+docs-only cells both run.
 
 GitHub issue #1029 -- sharding a leg: ``directory`` may be a deeper path such as
 ``protocols/internet``, and ``--exclude SUBDIR`` (repeatable) drops a
@@ -99,7 +106,8 @@ with ``--part 1`` to ``--part 3`` cuts the rest of :mod:`tests.protocols` at its
 entry, the same ``--exclude`` on each.
 
 What this still does not catch: a defect running the *other* direction (a
-root module polluting a directory module), interference between two
+root module polluting a directory module), a root module the syntactic rule
+above misreads, interference between two
 directories neither of which is bundled with the other in the same leg, and
 anything that only manifests with the fixture-dependent tier
 (:data:`tests._tiers.FIXTURE_TIER_DIRS`) alongside it -- ``tests/integration/``
@@ -137,6 +145,7 @@ keeps 1 and 3, since it frees only what no test can reach.
 from __future__ import annotations
 
 import argparse
+import ast
 import faulthandler
 import gc
 import os
@@ -144,7 +153,7 @@ import pathlib
 import sys
 import time
 import unittest
-from typing import Sequence
+from typing import Iterator, Sequence
 
 #: Repository root -- resolved from this file's own location, not from the
 #: working directory or ``PYTHONPATH``, so this script runs the same way
@@ -158,10 +167,10 @@ if str(ROOT) not in sys.path:
 
 from tests._tiers import is_unit_tier  # noqa: E402  pylint: disable=wrong-import-position
 
-#: Root-level modules bundled, in this order, into *every* leg -- see the
-#: module docstring for why they run after the directory's own modules rather
-#: than before or interleaved. Discovered rather than hand-listed, so a new
-#: ``tests/test_*.py`` file is picked up without this script changing.
+#: Root-level modules no leg runs. The rest are discovered rather than
+#: hand-listed, so a new ``tests/test_*.py`` file is picked up without this script
+#: changing; see the module docstring for which run in every leg, and why after
+#: the directory's own modules rather than before or interleaved.
 #:
 #: ``tests.test_tier_guard_xdist`` is excluded on purpose: with
 #: ``pytest-xdist`` installed (the ``test`` extra pulls it in, and this
@@ -192,6 +201,15 @@ SHARD_BOUNDARIES = {
     'project': ('test_m', 'test_release_t'),
     'protocols': ('misc/test_pcapng_u', 'test_pc'),
 }
+
+#: The leg whose first part also runs, once, the root modules
+#: :func:`ordering_root_modules` leaves out (#3148).
+ROOT_LEG = 'project'
+
+#: The calls that look a module up in :data:`sys.modules`, or replace it there.
+_MODULE_TABLE_CALLS = frozenset({'import_module', 'reload', '__import__'})
+#: The statements whose bodies run on import, as a module's own top level does.
+_TRY = (ast.Try, ast.TryStar) if hasattr(ast, 'TryStar') else (ast.Try,)
 
 #: Run a full :func:`gc.collect` after every this many tests; see the
 #: module docstring for the measurements behind it. ``--gc-every 0`` disables.
@@ -226,6 +244,80 @@ def root_modules() -> 'tuple[str, ...]':
         name for name in (_dotted(path) for path in sorted(TESTS_ROOT.glob('test_*.py')))
         if name not in _EXCLUDED_ROOT_MODULES
     ))
+
+
+def reads_module_table(path: 'pathlib.Path') -> 'bool':
+    """Whether the module at ``path`` can be desynced by what an earlier one left in :data:`sys.modules`.
+
+    It can when it imports :mod:`pcapkit` at its top level, a ``try:`` or ``if:`` there
+    included, so its bindings are the generation live at load, as #981's
+    :mod:`tests.test_base_class_contract` does; names :data:`sys.modules`; or calls
+    ``import_module``, ``reload`` or ``__import__``, under an alias too. The check is
+    syntactic and best-effort, and a module that does not parse counts.
+
+    """
+    try:
+        tree = ast.parse(path.read_text(encoding='utf-8'), str(path))
+    except SyntaxError:
+        return True
+    for stmt in _on_import(tree.body):
+        if isinstance(stmt, ast.Import) and any(alias.name.split('.')[0] == 'pcapkit' for alias in stmt.names):
+            return True
+        if isinstance(stmt, ast.ImportFrom) and not stmt.level and (stmt.module or '').split('.')[0] == 'pcapkit':
+            return True
+    sys_names, calls = {'sys'}, set(_MODULE_TABLE_CALLS)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            sys_names.update(alias.asname for alias in node.names if alias.name == 'sys' and alias.asname)
+        elif isinstance(node, ast.ImportFrom) and not node.level and node.module in ('sys', 'importlib'):
+            for alias in node.names:
+                if node.module == 'sys' and alias.name == 'modules':
+                    return True
+                if node.module == 'importlib' and alias.name in _MODULE_TABLE_CALLS:
+                    calls.add(alias.asname or alias.name)
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Attribute) and node.attr == 'modules'
+                and isinstance(node.value, ast.Name) and node.value.id in sys_names):
+            return True
+        if isinstance(node, ast.Call):
+            func = node.func
+            if (func.attr in _MODULE_TABLE_CALLS if isinstance(func, ast.Attribute)
+                    else isinstance(func, ast.Name) and func.id in calls):
+                return True
+    return False
+
+
+def _on_import(body: 'list[ast.stmt]') -> 'Iterator[ast.stmt]':
+    """The statements of ``body`` that run on import, through each ``try:`` and ``if:``
+    but the body of an ``if TYPE_CHECKING:``, which never runs."""
+    for node in body:
+        yield node
+        if isinstance(node, _TRY):
+            yield from _on_import(node.body + [stmt for handler in node.handlers for stmt in handler.body]
+                                  + node.orelse + node.finalbody)
+        elif isinstance(node, ast.If):
+            test = node.test
+            if (test.id if isinstance(test, ast.Name) else getattr(test, 'attr', None)) != 'TYPE_CHECKING':
+                yield from _on_import(node.body)
+            yield from _on_import(node.orelse)
+
+
+def ordering_root_modules() -> 'tuple[str, ...]':
+    """The :func:`root_modules` every leg runs: those :func:`reads_module_table` accepts (#981, #3148)."""
+    return tuple(name for name in root_modules()
+                 if reads_module_table(ROOT.joinpath(*name.split('.')).with_suffix('.py')))
+
+
+def cell_root_modules(directory: 'str', start: 'str | None' = None) -> 'tuple[str, ...]':
+    """The :func:`root_modules` a leg runs after its own (#3148).
+
+    All of them in a part of :data:`ROOT_LEG` that starts the leg, which ``start``
+    unset says, and :func:`ordering_root_modules` in every other.
+
+    """
+    if directory == ROOT_LEG and start is None:
+        return root_modules()
+    return ordering_root_modules()
 
 
 def _resolve(spec: 'str', what: 'str') -> 'pathlib.Path':
@@ -308,7 +400,7 @@ def part_bounds(directory: 'str', part: 'int') -> 'dict[str, str]':
 
 def build_suite(directory: 'str', exclude: 'Sequence[str]' = (), *,
                 before: 'str | None' = None, start: 'str | None' = None) -> 'unittest.TestSuite':
-    """The combined suite for one leg: ``directory``'s own tests, then root's.
+    """The combined suite for one leg: ``directory``'s own tests, then :func:`cell_root_modules`'.
 
     See the module docstring for why that order, not the reverse; ``before`` and
     ``start`` are :func:`leg_modules`'s.
@@ -318,7 +410,7 @@ def build_suite(directory: 'str', exclude: 'Sequence[str]' = (), *,
     suite = unittest.TestSuite()
     for name in leg_modules(directory, exclude, before=before, start=start):
         suite.addTests(loader.loadTestsFromName(name))
-    for name in root_modules():
+    for name in cell_root_modules(directory, start):
         suite.addTests(loader.loadTestsFromName(name))
     return suite
 
@@ -415,7 +507,8 @@ def _run(args: 'argparse.Namespace', start: 'float') -> 'int':
             left_out += f" (from {cut['start']})"
         if cut['before'] is not None:
             left_out += f" (before {cut['before']})"
-        print(f'tests/{args.directory}{left_out} + {len(root_modules())} root module(s): '
+        roots = len(cell_root_modules(args.directory, cut['start']))
+        print(f'tests/{args.directory}{left_out} + {roots} root module(s): '
               f'{tally}, {elapsed:.1f}s elapsed')
 
 

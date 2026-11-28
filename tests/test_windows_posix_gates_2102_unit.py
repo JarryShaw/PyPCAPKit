@@ -84,7 +84,7 @@ class WindowsGateTests(unittest.TestCase):
 
     def test_the_cap_file_size_case_skips(self) -> None:
         with mock.patch.object(os, 'name', 'nt'):
-            module = _load('tests/test_tier_guard.py')
+            module = _load('tests/project/test_tier_steps_1958.py')
         self.assertSkipsFor2102(
             module.PythonStubTests.test_the_capped_command_is_recorded_without_the_real_interpreter)
 

@@ -1288,18 +1288,21 @@ jobs:
   # reproduced the failures too; whether it would suffice was never evaluated.
   # util/run_unittest_leg.py's docstring has the fuller reasoning.
   #
-  # Each cell runs one tests/ subdirectory, then every root-level tests/test_*.py
-  # module, in the order #981's reproduction needs. One process over the whole
-  # suite OOMs (29 GB), so a cell per top-level directory is the affordable
-  # approximation, sized for wall time rather than memory.
+  # Each cell runs one tests/ subdirectory, then the root-level tests/test_*.py
+  # modules a purge before them can desync, which reads_module_table() in
+  # util/run_unittest_leg.py keeps, in the order #981's reproduction needs. The
+  # other root-level modules run once, after `project --part 1` (#3148). One
+  # process over the whole suite OOMs (29 GB), so a cell per top-level directory
+  # is the affordable approximation, sized for wall time rather than memory.
   #
   # #1029: the protocols cell took 30.4 minutes of the 45-minute cap, so it is
   # split into `protocols/internet` and the rest (`protocols` with `--exclude
   # protocols/internet`), measured on CI at 8.2m and 7.6m. The cost: a pair of
   # modules split between the two does not share a process, so pollution
   # between them is invisible; every pair of a protocols module followed
-  # by a root-level module survives. The modules directly in tests/protocols
-  # stay in the rest, as moving them would split more pairs than it joins.
+  # by a root-level module every cell runs survives. The modules directly in
+  # tests/protocols stay in the rest, as moving them would split more pairs
+  # than it joins.
   #
   # #2254: the project cell's run step ran near its step cap, so tests/project,
   # which has no subdirectories, is cut at module names: `--part 1` to
@@ -1307,8 +1310,9 @@ jobs:
   # for it, where `project-tests`' docs-only cells cut it too (#2916), so every
   # module, a new one included, runs in exactly one part. The names are chosen
   # so the parts take about the same CI time; each part also runs the
-  # root-level modules. Move one to rebalance. The same cost as #1029's: a pair
-  # split between two cells does not share a process.
+  # root-level modules every cell runs, and part 1 the rest. Move one to
+  # rebalance. The same cost as #1029's: a pair split between two cells does not
+  # share a process.
   #
   # The rest of protocols is cut the same way, at its SHARD_BOUNDARIES
   # entry, with the `--exclude` in every part. Its run step took 527 s on
@@ -1324,16 +1328,15 @@ jobs:
   # cut, the rest of protocols' as its registry-wide sweeps grew with each
   # protocol. So each is cut in three. On the --verbose logs of ab14cd8f0,
   # 6b5fda6e9 and 4da6f2e6c, the modules' mean CI time splits 225, 214 and
-  # 228 s for project and 258, 252 and 265 s for the rest of protocols, and
-  # the root-level modules took about 113 s a cell.
+  # 228 s for project and 258, 252 and 265 s for the rest of protocols.
   #
   # Every tests/ subdirectory is a leg except those below, and
   # tests/project/test_unittest_ordering_shards.py fails on a new one left out:
   #
   #   * tests/integration -- needs generated captures, and `integration` runs
   #     it under pytest. tests._tiers.is_unit_tier() rejects every one of its
-  #     files, so the leg would run the root-level modules alone -- green,
-  #     while covering none of it.
+  #     files, so the leg would run the root-level modules every cell runs
+  #     alone -- green, while covering none of it.
   #
   # The `project` cells keep the project pins (#1954): whether a module passes
   # in one interpreter, in file order, with no xdist, is a question about the
