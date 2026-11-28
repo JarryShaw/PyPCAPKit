@@ -19,6 +19,7 @@ alone.
 
 from __future__ import annotations
 
+import concurrent.futures
 import os
 import pathlib
 import shutil
@@ -47,6 +48,8 @@ SHARDS = ('tests/const tests/corekit/test_fields_n* tests/corekit/test_[a-h]* te
           'tests/protocols/test_[a-o]* tests/protocols/test_protocol_[a-m]* tests/protocols/test_p* '
           'tests/protocols/test_q* tests/protocols/test_t* tests/protocols tests/toolkit')
 SCRIPT = ROOT / 'util' / 'pytest_shards.py'
+#: How many parts :class:`TestTheShardsPartitionTheTier` cuts the shards into, each collected at once.
+PARTS = 4
 #: The lines that build the command the step's caps run, in order.
 PYTEST = 'set -- python -m pytest "$@"\n'
 SHARDED = 'set -- /usr/bin/python3 util/pytest_shards.py "$SHARDS" -- "$@"\n'
@@ -190,14 +193,39 @@ class TestTheStepRuns(unittest.TestCase):
 
     def test_the_timeout_ends_the_run_in_progress_and_starts_no_other(self) -> None:
         # pytest ends on SIGINT, which timeout sends to its whole process group, with exit 2.
+        # The stub's sleep, run in the background, ignores SIGINT, so the trap ends it rather
+        # than leave it holding the step's output open for the rest of its 30 seconds (#3148).
         script = step(TESTS)['run'].replace('--kill-after=3m 180m', '--kill-after=5s 1s')
         self.assertNotEqual(script, step(TESTS)['run'])
-        result = self.run_step("trap 'echo interrupted; exit 2' INT\nsleep 30 &\nwait $!\nexit 0\n", script)
+        result = self.run_step("trap 'echo interrupted; kill $!; exit 2' INT\nsleep 30 &\nwait $!\nexit 0\n", script)
         self.assertEqual(result.returncode, 124, result.stderr)
         self.assertEqual(len(self.runs()), 1)
         self.assertIn('interrupted\n', result.stdout)
         self.assertIn('pytest_shards: interrupted during tests/a; no later run starts', result.stdout)
         self.assertEqual(self.status()['exit'], '124')
+
+
+def collected(command: 'list[str]', timeout: 'float' = 600) -> 'subprocess.CompletedProcess[str]':
+    """``command`` run from the root, as the tests step runs it, in a session of its own.
+
+    A part's pytest is the script's child, so a timeout kills the whole process group,
+    where POSIX has one, rather than leave that pytest running once the script is killed.
+
+    """
+    with subprocess.Popen(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE,  # nosec: B603
+                          text=True, start_new_session=True) as process:
+        try:
+            stdout, stderr = process.communicate(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            if hasattr(os, 'killpg'):
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+            process.kill()
+            process.communicate()
+            raise
+    return subprocess.CompletedProcess(command, process.returncode, stdout, stderr)
 
 
 class TestTheShardsPartitionTheTier(unittest.TestCase):
@@ -207,18 +235,29 @@ class TestTheShardsPartitionTheTier(unittest.TestCase):
         collect = [sys.executable, '-m', 'pytest', '--collect-only', '-q', '-p', 'no:cacheprovider',
                    '--ignore=tests/integration', '--ignore-glob=*_runtime.py', '--ignore-glob=*_regression.py',
                    *(f'--ignore={module}' for module in latest_tier_paths())]
-        whole = subprocess.run(collect, cwd=ROOT, capture_output=True, text=True,  # nosec: B603
-                               check=False, timeout=600)
+        # #3148: each run pays pytest's start-up, so the script's parts (#2899) cut the runs
+        # and run beside the whole; TestTheScript pins that the parts are the unsplit runs.
+        shards = SHARDS.split()
+        size = -(-len(shards) // PARTS)
+        groups = [shards[start:start + size] for start in range(0, len(shards), size)]
+        spec = ' | '.join(' '.join(group) for group in groups)
+        commands = [collect, *([sys.executable, str(SCRIPT), '--part', str(part), spec, '--', *collect]
+                               for part in range(1, len(groups) + 1))]
+        with concurrent.futures.ThreadPoolExecutor(len(commands)) as pool:
+            ran = list(pool.map(collected, commands))
+        whole, parts = ran[0], ran[1:]
         self.assertEqual(whole.returncode, 0, whole.stdout[-2000:] + whole.stderr[-2000:])
-        sharded = subprocess.run([sys.executable, str(SCRIPT), SHARDS, '--', *collect], cwd=ROOT,  # nosec: B603
-                                 capture_output=True, text=True, check=False, timeout=600)
-        self.assertEqual(sharded.returncode, 0, sharded.stdout[-2000:] + sharded.stderr[-2000:])
-        self.assertNotIn('pytest_shards: skipping', sharded.stdout)
-        self.assertIn(f'pytest_shards: run {len(SHARDS.split()) + 1} of {len(SHARDS.split()) + 1}, the rest',
-                      sharded.stdout)
+        for part, (group, sharded) in enumerate(zip(groups, parts), 1):
+            with self.subTest(part=part):
+                self.assertEqual(sharded.returncode, 0, sharded.stdout[-2000:] + sharded.stderr[-2000:])
+                self.assertNotIn('pytest_shards: skipping', sharded.stdout)
+                # Every shard of the part runs, and the last part's runs end with the rest.
+                runs, last = (len(group) + 1, 'the rest') if part == len(groups) else (len(group), group[-1])
+                self.assertIn(f'pytest_shards: run {runs} of {runs}, {last}', sharded.stdout)
         tests = [line for line in whole.stdout.splitlines() if '::' in line]
         self.assertTrue(tests)
-        self.assertEqual(sorted(line for line in sharded.stdout.splitlines() if '::' in line), sorted(tests))
+        self.assertEqual(sorted(line for sharded in parts for line in sharded.stdout.splitlines() if '::' in line),
+                         sorted(tests))
 
 
 class TestTheScript(unittest.TestCase):
