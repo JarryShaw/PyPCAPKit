@@ -59,7 +59,7 @@ if TYPE_CHECKING:
     ControlParser = Callable[[Enum_Protocol, Schema_ControlPacket], Data_ControlPacket]
     #: Constructor of a control packet registered as a callable -- the protocol
     #: number and a data model or a mapping of its fields, to the layout.
-    ControlConstructor = Callable[[Enum_Protocol, Union[Data_ControlPacket, Mapping[str, Any]]],
+    ControlConstructor = Callable[[Enum_Protocol, Union[Data_ControlPacket, 'Mapping[str, Any]']],
                                   Schema_ControlPacket]
 
 __all__ = ['PPP']

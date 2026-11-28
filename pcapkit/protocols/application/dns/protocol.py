@@ -101,7 +101,7 @@ if TYPE_CHECKING:
     #: Constructor of an RDATA, given its type and fields, and the offset it is
     #: written at and the names written so far for compression.
     RDataConstructor = Callable[[Enum_RRType, 'Mapping[str, Any]', NamedArg(int, 'offset'),
-                                 NamedArg(Optional[dict[tuple[bytes, ...], int]], 'table')], bytes]
+                                 NamedArg(Optional['dict[tuple[bytes, ...], int]'], 'table')], bytes]
     #: Parser of an EDNS(0) OPTION-DATA.
     OptionParser = Callable[[Enum_Option, bytes], Union[Data_OptionData, bytes]]
     #: Constructor of an EDNS(0) OPTION-DATA.
