@@ -134,6 +134,11 @@ SA context is supplied through the protocol-keyed context channel of
    .. rubric:: Utilities
 
    .. automethod:: _split_key
+   .. automethod:: _missing_cryptography
+   .. automethod:: _cryptography
+   .. automethod:: _cipher
+   .. automethod:: _seal
+   .. automethod:: _open
 
 .. autoclass:: pcapkit.protocols.internet.esp.protocol.ESPContext
    :no-members:
@@ -195,52 +200,70 @@ refuse anything outside them rather than half-working:
      ...
    pcapkit.utilities.exceptions.ProtocolError: ESP: unsupported encryption
    algorithm: 'ENCR_3DES'; pcapkit implements ENCR_NULL, ENCR_AES_CBC,
-   ENCR_AES_GCM_8, ENCR_AES_GCM_12, ENCR_AES_GCM_16
+   ENCR_AES_CTR, ENCR_AES_CCM_8, ENCR_AES_CCM_12, ENCR_AES_CCM_16,
+   ENCR_AES_GCM_8, ENCR_AES_GCM_12, ENCR_AES_GCM_16, ENCR_NULL_AUTH_AES_GMAC,
+   ENCR_CAMELLIA_CBC, ENCR_CHACHA20_POLY1305
 
-An AES suite needs the optional |cryptography|_ dependency
-(``pip install pypcapkit[crypto]``). :mod:`pcapkit` works without it; an SA
-naming such a suite then warns and leaves its payloads opaque.
+A suite marked ``requires_cryptography`` below needs the optional
+|cryptography|_ dependency (``pip install pypcapkit[crypto]``). :mod:`pcapkit` works
+without it; an SA naming such a suite then warns and leaves its payloads opaque.
 
-The supported set is anchored on :rfc:`8221`'s *mandatory to implement*
-algorithms. The tables below are the authority on what an SA may name: the rows
-marked ``yes`` are exactly the keys of
-:data:`~pcapkit.protocols.internet.esp.protocol.CIPHER_SUITES`, and everything else
-the registry lists is enumerated and rejected.
+The tables below are the authority on what an SA may name: the rows marked ``yes``
+are exactly the keys of
+:data:`~pcapkit.protocols.internet.esp.protocol.CIPHER_SUITES`, a ``no`` row's note
+says why, and everything else the registry lists is enumerated and rejected.
+:mod:`pcapkit` applies a transform only through a |cryptography|_ primitive, so a
+mode |cryptography|_ lacks is left out.
 
-============================ =================== ============ ==================================
+============================ =================== ============ ===================================================
 Encryption                   :rfc:`8221` status   Implemented  Notes
-============================ =================== ============ ==================================
+============================ =================== ============ ===================================================
 ``ENCR_NULL``                MUST                yes          :rfc:`2410`; needs no |cryptography|_
 ``ENCR_AES_CBC``             MUST                yes          :rfc:`3602`; 128/192/256-bit keys
 ``ENCR_AES_GCM_16``          MUST                yes          :rfc:`4106`; 8-octet explicit IV
 ``ENCR_AES_GCM_8``           --                  yes          :rfc:`4106`, 8-octet ICV
 ``ENCR_AES_GCM_12``          --                  yes          :rfc:`4106`, 12-octet ICV
-``ENCR_AES_CCM_8``           SHOULD              **no**       registered, not implemented
-``ENCR_CHACHA20_POLY1305``   SHOULD              **no**       registered, not implemented
+``ENCR_AES_CCM_8``           SHOULD              yes          :rfc:`4309`; 3-octet salt
+``ENCR_AES_CCM_12``          --                  yes          :rfc:`4309`, 12-octet ICV
+``ENCR_AES_CCM_16``          --                  yes          :rfc:`4309`, 16-octet ICV
+``ENCR_CHACHA20_POLY1305``   SHOULD              yes          :rfc:`7634`; 256-bit key
+``ENCR_AES_CTR``             --                  yes          :rfc:`3686`; needs an integrity algorithm
+``ENCR_NULL_AUTH_AES_GMAC``  --                  yes          :rfc:`4543`; authenticates, never encrypts
+``ENCR_CAMELLIA_CBC``        --                  yes          :rfc:`5529`; 128/192/256-bit keys
+``ENCR_CAMELLIA_CTR``        --                  **no**       |cryptography|_ cannot run Camellia in CTR mode
+``ENCR_CAMELLIA_CCM_*``      --                  **no**       |cryptography|_ has CCM for AES alone
+``ENCR_*_IIV``               --                  **no**       :rfc:`8750`; with ESN, :issue:`2963`
+``ENCR_*_MGM_*``             --                  **no**       :rfc:`9227`; no GOST primitive, :issue:`3009`
 ``ENCR_3DES``                SHOULD NOT          **no**       registered, deliberately omitted
 DES, Blowfish, 3IDEA         MUST NOT            **no**       registered, deliberately omitted
-============================ =================== ============ ==================================
+============================ =================== ============ ===================================================
 
 "DES, Blowfish, 3IDEA" above covers ``ENCR_DES``, ``ENCR_DES_IV64``,
-``ENCR_DES_IV32``, ``ENCR_BLOWFISH`` and ``ENCR_3IDEA``.
+``ENCR_DES_IV32``, ``ENCR_BLOWFISH`` and ``ENCR_3IDEA``;
+``ENCR_CAMELLIA_CCM_*`` covers the 8-, 12- and 16-octet ICV suites,
+``ENCR_*_IIV`` the implicit IV suites of :rfc:`8750`, and ``ENCR_*_MGM_*``
+the Kuznyechik and Magma suites of :rfc:`9227`.
 
 Likewise, the rows marked ``yes`` below are exactly the keys of
 :data:`~pcapkit.protocols.internet.esp.protocol.INTEGRITY_SUITES`:
 
-============================ =================== ============ ==================================
+============================ =================== ============ ===================================================
 Integrity                    :rfc:`8221` status   Implemented  Notes
-============================ =================== ============ ==================================
+============================ =================== ============ ===================================================
 ``NONE``                     MUST (AEAD only)    yes          for AEAD suites
 ``AUTH_HMAC_SHA2_256_128``   MUST                yes          :rfc:`4868`
 ``AUTH_HMAC_SHA2_512_256``   SHOULD              yes          :rfc:`4868`
 ``AUTH_HMAC_SHA2_384_192``   --                  yes          :rfc:`4868`
 ``AUTH_HMAC_SHA1_96``        MUST-               yes          :rfc:`2404`; still widely captured
-``AUTH_AES_XCBC_96``         SHOULD / MAY        **no**       registered, not implemented
-``AUTH_AES_*_GMAC``          MAY                 **no**       registered, not implemented
+``AUTH_AES_CMAC_96``         --                  yes          :rfc:`4494`; 128-bit key
+``AUTH_AES_XCBC_96``         SHOULD / MAY        **no**       :rfc:`3566`; |cryptography|_ has no AES-XCBC-MAC
+``AUTH_AES_*_GMAC``          MAY                 **no**       AH only (:rfc:`4543` §5.3)
 MD5, DES-MAC, KPDK-MD5       MUST NOT            **no**       registered, deliberately omitted
-============================ =================== ============ ==================================
+============================ =================== ============ ===================================================
 
-"MD5, DES-MAC, KPDK-MD5" above covers ``AUTH_HMAC_MD5_96``,
+``AUTH_AES_*_GMAC`` above covers the 128-, 192- and 256-bit key transforms,
+which :rfc:`4543` §5.3 keeps to AH; ESP's GMAC is the combined mode
+``ENCR_NULL_AUTH_AES_GMAC``. "MD5, DES-MAC, KPDK-MD5" covers ``AUTH_HMAC_MD5_96``,
 ``AUTH_HMAC_MD5_128``, ``AUTH_DES_MAC`` and ``AUTH_KPDK_MD5``.
 
 The implemented suites' parameters, as
@@ -248,25 +271,33 @@ The implemented suites' parameters, as
 :data:`~pcapkit.protocols.internet.esp.protocol.INTEGRITY_SUITES` record them, with
 lengths and sizes in octets:
 
-========================== =========== ============== ============== ============== ============== =============== =========================
-Encryption                 ``is_aead`` ``iv_length``  ``block_size`` ``icv_length`` ``key_sizes``  ``salt_length`` ``requires_cryptography``
-========================== =========== ============== ============== ============== ============== =============== =========================
-``ENCR_NULL``              no          0              1              0              0              0               no
-``ENCR_AES_CBC``           no          16             16             0              16, 24, 32     0               yes
-``ENCR_AES_GCM_8``         yes         8              1              8              16, 24, 32     4               yes
-``ENCR_AES_GCM_12``        yes         8              1              12             16, 24, 32     4               yes
-``ENCR_AES_GCM_16``        yes         8              1              16             16, 24, 32     4               yes
-========================== =========== ============== ============== ============== ============== =============== =========================
+=========================== =========== ============= ============== ============== ============= =============== =========================
+Encryption                  ``is_aead`` ``iv_length`` ``block_size`` ``icv_length`` ``key_sizes`` ``salt_length`` ``requires_cryptography``
+=========================== =========== ============= ============== ============== ============= =============== =========================
+``ENCR_NULL``               no          0             1              0              0             0               no
+``ENCR_AES_CBC``            no          16            16             0              16, 24, 32    0               yes
+``ENCR_AES_CTR``            no          8             1              0              16, 24, 32    4               yes
+``ENCR_AES_CCM_8``          yes         8             1              8              16, 24, 32    3               yes
+``ENCR_AES_CCM_12``         yes         8             1              12             16, 24, 32    3               yes
+``ENCR_AES_CCM_16``         yes         8             1              16             16, 24, 32    3               yes
+``ENCR_AES_GCM_8``          yes         8             1              8              16, 24, 32    4               yes
+``ENCR_AES_GCM_12``         yes         8             1              12             16, 24, 32    4               yes
+``ENCR_AES_GCM_16``         yes         8             1              16             16, 24, 32    4               yes
+``ENCR_NULL_AUTH_AES_GMAC`` yes         8             1              16             16, 24, 32    4               yes
+``ENCR_CAMELLIA_CBC``       no          16            16             0              16, 24, 32    0               yes
+``ENCR_CHACHA20_POLY1305``  yes         8             1              16             32            4               yes
+=========================== =========== ============= ============== ============== ============= =============== =========================
 
-========================== ============== ============== ==============
-Integrity                  ``digest``     ``icv_length`` ``key_size``
-========================== ============== ============== ==============
-``NONE``                   :data:`None`   0              0
-``AUTH_HMAC_SHA1_96``      ``sha1``       12             20
-``AUTH_HMAC_SHA2_256_128`` ``sha256``     16             32
-``AUTH_HMAC_SHA2_384_192`` ``sha384``     24             48
-``AUTH_HMAC_SHA2_512_256`` ``sha512``     32             64
-========================== ============== ============== ==============
+========================== ============ ============ ============== ============ =========================
+Integrity                  ``mac``      ``digest``   ``icv_length`` ``key_size`` ``requires_cryptography``
+========================== ============ ============ ============== ============ =========================
+``NONE``                   :data:`None` :data:`None` 0              0            no
+``AUTH_HMAC_SHA1_96``      ``hmac``     ``sha1``     12             20           no
+``AUTH_AES_CMAC_96``       ``cmac``     :data:`None` 12             16           yes
+``AUTH_HMAC_SHA2_256_128`` ``hmac``     ``sha256``   16             32           no
+``AUTH_HMAC_SHA2_384_192`` ``hmac``     ``sha384``   24             48           no
+``AUTH_HMAC_SHA2_512_256`` ``hmac``     ``sha512``   32             64           no
+========================== ============ ============ ============== ============ =========================
 
 .. autoclass:: pcapkit.protocols.internet.esp.protocol.CipherSuite
    :members:

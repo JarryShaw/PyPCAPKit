@@ -161,8 +161,10 @@ class ESPRegistryTests(unittest.TestCase):
         # authority on the latter
         self.assertGreater(len(Cipher), 30)
         self.assertEqual(set(CIPHER_SUITES), {
-            Cipher.ENCR_NULL, Cipher.ENCR_AES_CBC, Cipher.ENCR_AES_GCM_8,
-            Cipher.ENCR_AES_GCM_12, Cipher.ENCR_AES_GCM_16,
+            Cipher.ENCR_NULL, Cipher.ENCR_AES_CBC, Cipher.ENCR_AES_CTR, Cipher.ENCR_AES_CCM_8,
+            Cipher.ENCR_AES_CCM_12, Cipher.ENCR_AES_CCM_16, Cipher.ENCR_AES_GCM_8,
+            Cipher.ENCR_AES_GCM_12, Cipher.ENCR_AES_GCM_16, Cipher.ENCR_NULL_AUTH_AES_GMAC,
+            Cipher.ENCR_CAMELLIA_CBC, Cipher.ENCR_CHACHA20_POLY1305,
         })
 
         null = CIPHER_SUITES[Cipher.ENCR_NULL]
@@ -190,12 +192,12 @@ class ESPRegistryTests(unittest.TestCase):
         # them -- and its own permissive ``get`` answers only "did IANA
         # register this" -- while the suite lookup refuses them
         self.assertEqual(Cipher.ENCR_3DES, 3)
-        self.assertEqual(Cipher.ENCR_CHACHA20_POLY1305, 28)
+        self.assertEqual(Cipher.ENCR_CAMELLIA_CTR, 24)
         self.assertIs(Cipher.get('ENCR_3DES'), Cipher.ENCR_3DES)
         with self.assertRaises(ProtocolError):
             CipherSuite.get('3DES')
         with self.assertRaises(ProtocolError):
-            CipherSuite.get('CHACHA20_POLY1305')
+            CipherSuite.get('CAMELLIA_CTR')
         with self.assertRaises(ProtocolError):
             CipherSuite.get(3)
         # and a name that is in no registry at all
@@ -229,8 +231,9 @@ class ESPRegistryTests(unittest.TestCase):
                               Integrity.AUTH_HMAC_SHA2_256_128)
 
         self.assertEqual(set(INTEGRITY_SUITES), {
-            Integrity.NONE, Integrity.AUTH_HMAC_SHA1_96, Integrity.AUTH_HMAC_SHA2_256_128,
-            Integrity.AUTH_HMAC_SHA2_384_192, Integrity.AUTH_HMAC_SHA2_512_256,
+            Integrity.NONE, Integrity.AUTH_HMAC_SHA1_96, Integrity.AUTH_AES_CMAC_96,
+            Integrity.AUTH_HMAC_SHA2_256_128, Integrity.AUTH_HMAC_SHA2_384_192,
+            Integrity.AUTH_HMAC_SHA2_512_256,
         })
 
         # RFC 4868 truncation lengths and key sizes
