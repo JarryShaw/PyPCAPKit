@@ -78,6 +78,7 @@ VENDOR_ROOT = pathlib.Path(__file__).resolve().parents[2] / 'pcapkit' / 'vendor'
 #: :func:`_constant_miss_lines` for which, and
 #: :file:`tests/const/test_const_enum_lookup.py` for their behavioural cover.
 CRAWLERS_WITH_CONSTANT_MISS_LINES = (
+    'pcapkit/vendor/dhcp/opcode.py',
     'pcapkit/vendor/icmp/destination_unreachable_code.py',
     'pcapkit/vendor/icmp/parameter_problem_code.py',
     'pcapkit/vendor/icmp/time_exceeded_code.py',

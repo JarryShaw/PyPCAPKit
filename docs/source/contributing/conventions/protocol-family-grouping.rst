@@ -125,12 +125,12 @@ states in its ``version`` (a subclass of the other bases has none). The keyword 
 no hook: an IP layer hands its own version to the layer it carries through the private
 next-layer channel, so the check never meets it (:issue:`2840`).
 
-The member a call through a versioned base gives, as a decision:
+The member a call through a family's dispatching base gives, as a decision:
 
 .. mermaid::
 
    flowchart TD
-       IN["octets, fields or from\_data<br/>through a versioned family's base"] --> SUB
+       IN["octets, fields or from\_data<br/>through a family's dispatching base"] --> SUB
        SUB{"called on a subclass of the base?"}
        SUB -->|yes| SELF["constructed as itself"]
        SUB -->|"no: octets or fields"| VER{"version= given?"}
@@ -139,9 +139,10 @@ The member a call through a versioned base gives, as a decision:
        VER -->|"no: fields"| ERR["ProtocolError"]
        VER -->|"no: octets"| OCT{"does the format carry a version?"}
        OCT -->|"no: ICMP, LinuxSLL"| ERR
+       OCT -->|"no, but a discriminator:<br/>DHCP's option 53"| MEM
        OCT -->|"yes: HTTP, IGMP, IP, L2TP, OSPF, STP"| HAS
        FD -->|"IGMP, IP, L2TP, OSPF:<br/>the data's version"| HAS
-       FD -->|"HTTP, ICMP, LinuxSLL, STP"| DM{"a member's data model?"}
+       FD -->|"DHCP, HTTP, ICMP, LinuxSLL, STP"| DM{"a member's data model?"}
        DM -->|"no, e.g. a dict"| ERR
        DM -->|yes| MEM
        HAS{"a member for that version?"}
@@ -156,6 +157,11 @@ The member a call through a versioned base gives, as a decision:
      - ``version``
      - Octets without ``version``
      - ``from_data``
+   * - :class:`~pcapkit.protocols.application.dhcp.protocol.DHCP`
+     - none, below
+     - :meth:`~pcapkit.protocols.application.dhcp.protocol.DHCP._classify`: the DHCP
+       Message Type option, whole before any option runs past its field
+     - the data model; a :obj:`dict` is refused
    * - :class:`~pcapkit.protocols.application.http.protocol.HTTP`
      - ``1``, ``2``
      - :meth:`~pcapkit.protocols.application.http.protocol.HTTP._dispatch_version`: the
@@ -213,6 +219,22 @@ field: the enclosing layer names it, by IP protocol number 1 or 58 and by link t
 rather than guess, as does their ``from_data`` on a :obj:`dict`, whose keys pick no
 member. A version a family has no member for, such as L2TP's ``1`` (L2F) and ``3``,
 raises the same way.
+
+**A base may also join two protocols where the RFC defines one as the extension of
+the other on the same wire format and port**, the one exception to `Grouping by
+Name`_, ruled in review of :pr:`3199` (:issue:`2959`). :rfc:`2131#section-1` builds DHCP
+on BOOTP, whose message format and UDP ports 67 and 68 it keeps, so
+:class:`~pcapkit.protocols.application.dhcp.protocol.DHCP` dispatches between
+:class:`~pcapkit.protocols.application.bootp.protocol.BOOTP` and
+:class:`~pcapkit.protocols.application.dhcpv4.protocol.DHCPv4`, which share no name.
+Such a family has no version, and takes no ``version``. Unlike ICMP's and LinuxSLL's
+above, its octets are not refused, since they carry their own discriminator: a DHCP
+message is one whose options carry the DHCP Message Type option whole before any
+option runs past its field (:rfc:`2131#section-3`), which :meth:`DHCP._classify
+<pcapkit.protocols.application.dhcp.protocol.DHCP._classify>` reads. Its
+``from_data`` reads the data model's class, fields through the base raise
+:exc:`~pcapkit.utilities.exceptions.ProtocolError`, since nothing names a member, and
+each member builds itself and refuses the other's octets and fields.
 
 **Octets neither version takes**, a frameless HTTP/2 connection preface among them,
 are :class:`~pcapkit.protocols.misc.raw.protocol.Raw` with no ``error`` on the transport path,
@@ -331,7 +353,10 @@ parsing and for construction alike. Ruled in review of :pr:`3107` (:issue:`3105`
        ``('OSPFv3',)``; :class:`~pcapkit.protocols.application.rstp.protocol.RSTP`
        ``('RSTP',)`` and :class:`~pcapkit.protocols.application.mstp.protocol.MSTP`
        ``('MSTP',)`` -- :class:`~pcapkit.protocols.application.stpv0.protocol.STPv0`
-       narrows to ``('STP',)``, as IGMPv1 does (:ref:`protocol-family-canonical-names`)
+       narrows to ``('STP',)``, as IGMPv1 does (:ref:`protocol-family-canonical-names`);
+       :class:`~pcapkit.protocols.application.bootp.protocol.BOOTP` ``('BOOTP',)`` --
+       :class:`~pcapkit.protocols.application.dhcpv4.protocol.DHCPv4` narrows to
+       ``('DHCP',)``, as ICMPv4 does
    * - Family-inclusive
      - the member's label plus the family name
      - :class:`~pcapkit.protocols.link.c_tag.protocol.C_Tag` ``('C_Tag', 'VLAN')``,
@@ -401,6 +426,14 @@ of :pr:`2446` (:issue:`2436`): ``ICMPv4`` keeps its versioned class and module n
 but its ``id()`` drops the version for the RFC canonical name (:rfc:`792` names it
 plain ``ICMP``), and its ``name`` carries no "version 4". ``ICMPv6`` keeps its own
 version, since :rfc:`4443` names it with one.
+
+**DHCPv4 takes ICMPv4's shape**, an application of it (:issue:`2959`). :rfc:`2131`
+names its protocol plain ``DHCP`` and :rfc:`3396` calls it DHCPv4, so the member is
+:class:`~pcapkit.protocols.application.dhcpv4.protocol.DHCPv4`, whose ``id()`` is
+``('DHCP',)``, and the base holds the family name:
+:meth:`DHCP.id() <pcapkit.protocols.application.dhcp.protocol.DHCP.id>` is
+``('DHCP', 'BOOTP')``. So ``'DHCP' in`` selects both members' layers and ``'BOOTP' in``
+only BOOTP's.
 
 **IGMPv1 follows the same shape**, ruled in review of :pr:`2506`; no issue holds the
 ruling.

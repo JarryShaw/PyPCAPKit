@@ -175,7 +175,7 @@ class PcapngByteOrderTests(EndToEndTestCase):
             chains[capture] = [str(frame.protochain) for frame in extractor.frame]
 
         self.assertEqual(list(chains.values()),
-                         [['Ethernet:IPv4:UDP:Raw'] * 4] * 3)
+                         [['Ethernet:IPv4:UDP:DHCP'] * 4] * 3)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

@@ -107,6 +107,7 @@ Application Layer
 .. toctree::
    :maxdepth: 2
 
+   dhcp
    dns
    ftp
    http

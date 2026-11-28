@@ -66,6 +66,8 @@ class UDP(Transport[Data_UDP, Schema_UDP],
          - Protocol
        * - 53
          - :class:`pcapkit.protocols.application.dns.protocol.DNS`
+       * - 67, 68
+         - :class:`pcapkit.protocols.application.dhcp.protocol.DHCP`
        * - 80
          - :class:`pcapkit.protocols.application.http.protocol.HTTP`
        * - 1701
@@ -111,6 +113,12 @@ class UDP(Transport[Data_UDP, Schema_UDP],
        :class:`~pcapkit.protocols.application.dns.protocol.DNS`
        (:issue:`2816`).
 
+    .. versionchanged:: 1.10.0
+
+       Ports 67 and 68 bind
+       :class:`~pcapkit.protocols.application.dhcp.protocol.DHCP`
+       (:issue:`2959`).
+
     """
 
     ##########################################################################
@@ -129,14 +137,18 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             # registry's own service name and description:
             #
             #   53    domain     Domain Name Server
+            #   67    bootps     Bootstrap Protocol Server
+            #   68    bootpc     Bootstrap Protocol Client
             #   80    http       World Wide Web HTTP
             #   1701  l2tp       l2tp
             #   5684  coaps      CoAP over DTLS
             #   8080  http-alt   HTTP Alternate (see port 80)
             #
             # The HTTP entries bind the version-dispatching HTTP base, as TCP's
-            # table does.
+            # table does, and 67 and 68 the DHCP base, which picks BOOTP or DHCP.
             53: ModuleDescriptor('pcapkit.protocols.application.dns.protocol', 'DNS'),
+            67: ModuleDescriptor('pcapkit.protocols.application.dhcp.protocol', 'DHCP'),
+            68: ModuleDescriptor('pcapkit.protocols.application.dhcp.protocol', 'DHCP'),
             80: ModuleDescriptor('pcapkit.protocols.application.http.protocol', 'HTTP'),
 
             # L2TPv2 (RFC 2661) is the only L2TP version implemented, so the

@@ -37,9 +37,10 @@ if TYPE_CHECKING:
 __tier__ = 'LATEST'
 
 #: ``make()`` keywords for a class whose defaults build nothing it reads back: a Query
-#: with a Max Resp Time of zero is IGMPv1's (RFC 3376, section 7.1), and HTTP builds
-#: through the member its ``version`` names.
+#: with a Max Resp Time of zero is IGMPv1's (RFC 3376, section 7.1), HTTP builds
+#: through the member its ``version`` names, and a DHCP message carries its Message Type.
 MAKE = {
+    'pcapkit.protocols.application.dhcpv4.protocol.DHCPv4': {'options': ({'code': 53, 'data': {'type': 1}},)},
     'pcapkit.protocols.application.http.protocol.HTTP': {'version': 2},
     'pcapkit.protocols.internet.igmpv2.protocol.IGMPv2': {'max_resp_time': 100},
 }

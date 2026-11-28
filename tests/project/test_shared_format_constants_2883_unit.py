@@ -111,6 +111,8 @@ MOVED_HELPERS = (
 #: helpers as their own, as a family base's schema module is shared in
 #: :mod:`tests.project.test_schema_helpers_boundary_2674_unit`.
 FAMILIES = {
+    # BOOTP and DHCPv4 subclass DHCP, whose header layout and magic cookie they share.
+    'pcapkit.protocols.application.dhcp.const': ('application.bootp', 'application.dhcpv4'),
     # HTTP/1 and HTTP/2 subclass HTTP, whose patterns and preface they share.
     'pcapkit.protocols.application.http.const': ('application.httpv1', 'application.httpv2'),
     # TLS and DTLS subclass SSL, whose record content types and versions they share.

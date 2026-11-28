@@ -73,6 +73,7 @@ __all__ = [
     'DCCP', 'TCP', 'UDP', 'SCTP',
 
     # Application Layer
+    'DHCP', 'BOOTP', 'DHCPv4',
     'DNS',
     'FTP', 'FTP_DATA',
     'HTTP', 'HTTPv1', 'HTTPv2',

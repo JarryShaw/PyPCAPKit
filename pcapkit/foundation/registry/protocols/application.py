@@ -16,11 +16,13 @@ This module provides the registries of the application layer protocols in
 """
 from typing import TYPE_CHECKING
 
+from pcapkit.const.dhcp.option import Option as DHCP_Option
 from pcapkit.const.dns.option import Option as DNS_Option
 from pcapkit.const.dns.rr_type import RRType as DNS_RRType
 from pcapkit.const.http.frame import Frame as HTTP_Frame
 from pcapkit.const.tls.extension_type import ExtensionType as TLS_ExtensionType
 from pcapkit.foundation.registry.protocols.protocol import _check_code, _check_meth
+from pcapkit.protocols.application.dhcp.protocol import DHCP
 from pcapkit.protocols.application.dns.protocol import DNS
 from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 from pcapkit.protocols.application.httpv2.schema import FrameType as Schema_HTTP_FrameType
@@ -32,6 +34,9 @@ from pcapkit.utilities.logging import get_logger
 if TYPE_CHECKING:
     from typing import Optional, Type
 
+    from pcapkit.protocols.application.dhcp.protocol import \
+        OptionConstructor as DHCP_OptionConstructor
+    from pcapkit.protocols.application.dhcp.protocol import OptionParser as DHCP_OptionParser
     from pcapkit.protocols.application.dns.protocol import \
         OptionConstructor as DNS_OptionConstructor
     from pcapkit.protocols.application.dns.protocol import OptionParser as DNS_OptionParser
@@ -45,6 +50,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.application.ssl.protocol import ExtensionParser as TLS_ExtensionParser
 
 __all__ = [
+    'register_dhcp_option',
     'register_dns_rdata', 'register_dns_option',
     'register_http_frame',
     'register_tls_extension',
@@ -58,6 +64,41 @@ logger = get_logger(__name__)
 ###############################################################################
 # Application Layer Registries
 ###############################################################################
+
+
+# NOTE: pcapkit.protocols.application.dhcp.protocol.DHCP.__option__
+def register_dhcp_option(code: 'DHCP_Option', meth: 'str | tuple[DHCP_OptionParser, DHCP_OptionConstructor]') -> 'None':
+    """Register an option parser.
+
+    The function will register the given option parser to the
+    :data:`pcapkit.protocols.application.dhcp.protocol.DHCP.__option__` registry,
+    which :class:`~pcapkit.protocols.application.bootp.protocol.BOOTP` and
+    :class:`~pcapkit.protocols.application.dhcpv4.protocol.DHCPv4` share.
+
+    Args:
+        code: Option code as in :class:`~pcapkit.const.dhcp.option.Option`.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the option's data. A name names the
+            ``_read_opt_*`` and ``_make_opt_*`` methods, and has to name an
+            existing ``_read_opt_*`` one.
+
+    Raises:
+        RegistryError: If ``code`` is not an
+            :class:`~pcapkit.const.dhcp.option.Option` member, e.g. a member of
+            another enum, or ``meth`` is a name with no matching
+            ``_read_opt_*`` method, or neither a name
+            nor a pair of two callables.
+
+    .. versionadded:: 1.10.0
+
+    """
+    _check_code(code, DHCP_Option, DHCP)  # type: ignore[type-abstract]
+    _check_meth(meth, DHCP)  # type: ignore[type-abstract]
+    if isinstance(meth, str) and not hasattr(DHCP, f'_read_opt_{meth}'):
+        raise RegistryError('method must be a valid DHCP option parser function')
+
+    DHCP.register_option(code, meth)
+    logger.debug('registered DHCP option parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.application.dns.protocol.DNS.__rdata__

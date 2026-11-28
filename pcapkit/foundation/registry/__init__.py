@@ -48,6 +48,7 @@ __all__ = [
     'register_sctp_chunk', 'register_sctp_parameter', 'register_sctp_cause',
     'register_dccp_option',
 
+    'register_dhcp_option',
     'register_dns_rdata', 'register_dns_option',
     'register_http_frame',
     'register_tls_extension',

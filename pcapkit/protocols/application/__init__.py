@@ -15,7 +15,7 @@
    this package (:issue:`2730`).
 
 """
-# TODO: Implements BGP, DHCP, DHCPv6, IMAP, LDAP, MQTT,
+# TODO: Implements BGP, DHCPv6, IMAP, LDAP, MQTT,
 #       NNTP, NTP, ONC:RPC, POP, RIP, RTP, SIP, SMTP, SNMP,
 #       SSH, TELNET, XMPP.
 #
@@ -33,6 +33,8 @@ if TYPE_CHECKING:
     from pcapkit.protocols.application.application import Application
 
     # Application Layer Protocols
+    from pcapkit.protocols.application.bootp import BOOTP
+    from pcapkit.protocols.application.dhcpv4 import DHCPv4
     from pcapkit.protocols.application.dns import DNS
     from pcapkit.protocols.application.ftp import FTP
     from pcapkit.protocols.application.ftp_data import FTP_DATA
@@ -53,6 +55,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.application.mstp import MSTP
 
     # Base Classes
+    from pcapkit.protocols.application.dhcp import DHCP
     from pcapkit.protocols.application.http import HTTP
     from pcapkit.protocols.application.ospf import OSPF
     from pcapkit.protocols.application.ssl import SSL
@@ -60,6 +63,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     'APPTYPE',
+    'DHCP', 'BOOTP', 'DHCPv4',
     'DNS',
     'FTP', 'FTP_DATA',
     'HTTP', 'HTTPv1', 'HTTPv2',
@@ -72,6 +76,9 @@ __all__ = [
 
 __getattr__, __dir__ = lazy_exports(__name__, globals(), {
     'Application': ('application', 'Application'),
+    'DHCP': ('dhcp', 'DHCP'),
+    'BOOTP': ('bootp', 'BOOTP'),
+    'DHCPv4': ('dhcpv4', 'DHCPv4'),
     'DNS': ('dns', 'DNS'),
     'FTP': ('ftp', 'FTP'),
     'FTP_DATA': ('ftp_data', 'FTP_DATA'),
