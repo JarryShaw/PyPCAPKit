@@ -36,7 +36,7 @@ All notable changes to PyPCAPKit are recorded here.
 Releases are listed newest first. :file:`CHANGELOG.md` at the repository root
 carries only the version being released.
 
-* **1.9.0** (unreleased) -- Neighbor Discovery decoded in ICMPv6, dissectors for
+* **1.9.0** (2026-11-28) -- Neighbor Discovery decoded in ICMPv6, dissectors for
   802.2 LLC and SNAP and the Spanning Tree Protocol family, SCTP user messages and
   TLS records split across TCP segments reassembled, HIP's HMACs and signatures
   verified, and :mod:`pcapkit.corekit`'s multi-word module names separated by

@@ -7,8 +7,8 @@ one is in pre-release. Older lines are not patched; upgrade instead.
 
 | Version         | Supported          | Notes                                   |
 | --------------- | ------------------ | --------------------------------------- |
-| 1.8.x           | :white_check_mark: | current stable                          |
-| 1.7.x and older | :x:                | no longer patched                       |
+| 1.9.x           | :white_check_mark: | current stable                          |
+| 1.8.x and older | :x:                | no longer patched                       |
 | 0.x             | :x:                | no longer patched                       |
 
 Supported interpreters are the test matrix's blocking tier: CPython 3.11 through 3.15,
