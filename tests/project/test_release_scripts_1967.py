@@ -3,12 +3,10 @@
 
 * :class:`TestReleaseTags` runs both of ``release_tags.py``'s commands against a
   stand-in ``git``: each outcome of "Check the release tags name this run's
-  commit" and of "Check which commit the version's tag names".
+  commit" and of "Check which commit the version's tag names", and each case of
+  :data:`CHECK_CASES` and :data:`OWNER_CASES`.
 * :class:`TestReleaseUpload` runs ``release_upload.py``, "Upload package to
-  GitHub Release", against a stand-in ``gh``.
-* :class:`TestTheStepMatchesTheReferenceShell` runs those steps' inline shell form, the
-  reference the scripts must match, against the same stand-ins and requires the same status, standard
-  output and error, ``$GITHUB_OUTPUT`` and calls.
+  GitHub Release", against a stand-in ``gh``, and each case of :data:`UPLOAD_CASES`.
 * :class:`TestTheStepsRunTheScripts` pins each step to its script, after a whole
   checkout of the repository, and the scripts to Python 3.8's syntax.
 
@@ -20,28 +18,20 @@ Their runs against a real repository, and the steps' ``env:``, are
 from __future__ import annotations
 
 import ast
-import functools
 import os
 import pathlib
 import shutil
 import subprocess  # nosec: B404
 import sys
 import tempfile
-import textwrap
 import unittest
-from typing import TYPE_CHECKING
 
-from tests._support import bash_argv
 from tests._workflows import load, steps
 from tests.project.test_requires_python_floor_2051 import FLOOR
-
-if TYPE_CHECKING:
-    from typing import Callable
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 UTIL = ROOT / 'util'
 WORKFLOW = 'create-release.yml'
-BASH = shutil.which('bash') or ''
 
 RUN = '1' * 40
 OTHER = '2' * 40
@@ -92,74 +82,6 @@ case "$1 $2" in
 esac
 '''
 
-#: "Check the release tags name this run's commit" in ``github``, ``pypi`` and
-#: ``conda``, in its inline shell form, the reference :file:`util/release_tags.py`
-#: must match.
-REFERENCE_CHECK = textwrap.dedent(r'''
-    set -euo pipefail
-
-    run_commit="$(git rev-parse --verify "${PCAPKIT_RUN_SHA}^{commit}")"
-    for tag in ${PCAPKIT_TAGS}; do
-      git fetch --quiet --force origin "refs/tags/${tag}:refs/tags/${tag}" || true
-      tagged="$(git rev-parse -q --verify "refs/tags/${tag}^{commit}" || true)"
-      if [ "$tagged" != "$run_commit" ]; then
-        echo "::error title=${tag} is not this run's commit (#1634)::${tag} resolves to '${tagged:-no commit}', but this run was created for ${run_commit}. Refusing to publish this tree under it: every artefact of a release comes from its tag's commit, so finish that release by re-running the run created for that commit."
-        exit 1
-      fi
-      echo "${tag} -> ${run_commit}"
-    done
-''').lstrip()
-
-#: "Check which commit the version's tag names" in ``version_check``, likewise.
-REFERENCE_OWNER = textwrap.dedent(r'''
-    set -euo pipefail
-
-    run_commit="$(git rev-parse --verify "${PCAPKIT_RUN_SHA}^{commit}")"
-    git fetch --quiet --force origin "refs/tags/${PCAPKIT_TAG}:refs/tags/${PCAPKIT_TAG}" || true
-    tagged="$(git rev-parse -q --verify "refs/tags/${PCAPKIT_TAG}^{commit}" || true)"
-    elsewhere=false
-    if [ -n "$tagged" ] && [ "$tagged" != "$run_commit" ]; then
-      elsewhere=true
-    fi
-
-    echo "${PCAPKIT_TAG} -> ${tagged:-no commit}; this run's commit is ${run_commit}; released elsewhere: ${elsewhere}"
-    echo "PCAPKIT_RELEASED_AT=${tagged}" >> "$GITHUB_OUTPUT"
-    echo "PCAPKIT_RELEASED_ELSEWHERE=${elsewhere}" >> "$GITHUB_OUTPUT"
-''').lstrip()
-
-#: "Upload package to GitHub Release" in ``pypi`` and ``conda``, in its inline
-#: shell form, the reference :file:`util/release_upload.py` must match.
-REFERENCE_UPLOAD = textwrap.dedent(r'''
-    set -euo pipefail
-
-    published="$(gh release view "$PCAPKIT_RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[] | [.name, .state] | @tsv')"
-    while IFS= read -r pattern; do
-      [ -n "$pattern" ] || continue
-      for file in $pattern; do
-        if [ ! -f "$file" ]; then
-          echo "::error title=Nothing to upload::'${pattern}' matches no file, so ${PCAPKIT_RELEASE_TAG} would go without it."
-          exit 1
-        fi
-        name="${file##*/}"
-        state=""
-        while IFS=$'\t' read -r asset asset_state; do
-          [ "$asset" != "$name" ] || state="$asset_state"
-        done <<< "$published"
-        if [ "$state" = uploaded ]; then
-          echo "::notice title=${name} already on ${PCAPKIT_RELEASE_TAG}::Left as published (#1640): this run's rebuild is not byte-identical to it."
-          continue
-        fi
-        if [ -n "$state" ]; then
-          echo "::warning title=${name} uploaded again::${PCAPKIT_RELEASE_TAG} holds it in state '${state}', not 'uploaded' -- an upload that failed partway -- so it is deleted and this file uploaded in its place."
-          gh release upload "$PCAPKIT_RELEASE_TAG" "$file" --repo "$GITHUB_REPOSITORY" --clobber
-        else
-          gh release upload "$PCAPKIT_RELEASE_TAG" "$file" --repo "$GITHUB_REPOSITORY"
-        fi
-        echo "${name} -> ${PCAPKIT_RELEASE_TAG}"
-      done
-    done <<< "$PCAPKIT_ASSETS"
-''').lstrip()
-
 #: Each step, as ``(job, step name)``, and the ``run:`` it holds.
 STEPS = {
     ('version_check', "Check which commit the version's tag names"): 'python3 util/release_tags.py owner',
@@ -170,55 +92,69 @@ STEPS = {
     ('conda', 'Upload package to GitHub Release'): 'python3 util/release_upload.py',
 }
 
-#: ``release_tags.py check``'s outcomes: ``(name, $PCAPKIT_TAGS, tags on origin, extra env)``.
+#: ``release_tags.py check``'s outcomes: ``(name, $PCAPKIT_TAGS, tags on origin, extra env,
+#: (status, the tags it confirmed))``.
 CHECK_CASES = (
-    ('every tag names the run', 'v1.5.0 conda-1.5.0+0', {'v1.5.0': RUN, 'conda-1.5.0+0': RUN}, {}),
+    ('every tag names the run', 'v1.5.0 conda-1.5.0+0', {'v1.5.0': RUN, 'conda-1.5.0+0': RUN}, {},
+     (0, ['v1.5.0', 'conda-1.5.0+0'])),
     ('tabs, newlines and runs of spaces split', ' v1.5.0\t\tconda-1.5.0+0\n  v1.5.0 ',
-     {'v1.5.0': RUN, 'conda-1.5.0+0': RUN}, {}),
-    ('the second names another commit', 'v1.5.0 conda-1.5.0+0', {'v1.5.0': RUN, 'conda-1.5.0+0': OTHER}, {}),
-    ('the first is missing', 'v1.5.0 conda-1.5.0+0', {'conda-1.5.0+0': RUN}, {}),
-    ('a failed fetch is ignored', 'v1.5.0', {'v1.5.0': RUN}, {'FETCH_FAIL': '1'}),
-    ('a failed fetch of a missing tag', 'v1.5.0', {}, {'FETCH_FAIL': '1'}),
-    ('no tags at all', '', {}, {}),
-    ('an unresolvable run sha', 'v1.5.0', {'v1.5.0': RUN}, {'RUN_FAIL': '128'}),
-    ('a run sha whose git is killed', 'v1.5.0', {'v1.5.0': RUN}, {'RUN_FAIL': 'TERM'}),
+     {'v1.5.0': RUN, 'conda-1.5.0+0': RUN}, {}, (0, ['v1.5.0', 'conda-1.5.0+0', 'v1.5.0'])),
+    ('the second names another commit', 'v1.5.0 conda-1.5.0+0', {'v1.5.0': RUN, 'conda-1.5.0+0': OTHER}, {},
+     (1, ['v1.5.0'])),
+    ('the first is missing', 'v1.5.0 conda-1.5.0+0', {'conda-1.5.0+0': RUN}, {}, (1, [])),
+    ('a failed fetch is ignored', 'v1.5.0', {'v1.5.0': RUN}, {'FETCH_FAIL': '1'}, (0, ['v1.5.0'])),
+    ('a failed fetch of a missing tag', 'v1.5.0', {}, {'FETCH_FAIL': '1'}, (1, [])),
+    ('no tags at all', '', {}, {}, (0, [])),
+    ('an unresolvable run sha', 'v1.5.0', {'v1.5.0': RUN}, {'RUN_FAIL': '128'}, (128, [])),
+    ('a run sha whose git is killed', 'v1.5.0', {'v1.5.0': RUN}, {'RUN_FAIL': 'TERM'}, (143, [])),
 )
 
-#: ``release_tags.py owner``'s outcomes: ``(name, tags on origin, extra env)``, for ``v1.5.0``.
+#: ``release_tags.py owner``'s outcomes, for ``v1.5.0``: ``(name, tags on origin, extra env,
+#: (status, $GITHUB_OUTPUT))``.
 OWNER_CASES = (
-    ('tagged elsewhere', {'v1.5.0': OTHER}, {}),
-    ('tagged here', {'v1.5.0': RUN}, {}),
-    ('not tagged', {}, {}),
-    ('a failed fetch is ignored', {'v1.5.0': OTHER}, {'FETCH_FAIL': '1'}),
-    ('an unresolvable run sha', {'v1.5.0': OTHER}, {'RUN_FAIL': '128'}),
-    ('a run sha whose git is killed', {}, {'RUN_FAIL': 'TERM'}),
+    ('tagged elsewhere', {'v1.5.0': OTHER}, {},
+     (0, f'PCAPKIT_RELEASED_AT={OTHER}\nPCAPKIT_RELEASED_ELSEWHERE=true\n')),
+    ('tagged here', {'v1.5.0': RUN}, {}, (0, f'PCAPKIT_RELEASED_AT={RUN}\nPCAPKIT_RELEASED_ELSEWHERE=false\n')),
+    ('not tagged', {}, {}, (0, 'PCAPKIT_RELEASED_AT=\nPCAPKIT_RELEASED_ELSEWHERE=false\n')),
+    ('a failed fetch is ignored', {'v1.5.0': OTHER}, {'FETCH_FAIL': '1'},
+     (0, f'PCAPKIT_RELEASED_AT={OTHER}\nPCAPKIT_RELEASED_ELSEWHERE=true\n')),
+    ('an unresolvable run sha', {'v1.5.0': OTHER}, {'RUN_FAIL': '128'}, (128, None)),
+    ('a run sha whose git is killed', {}, {'RUN_FAIL': 'TERM'}, (143, None)),
 )
 
 WHEEL = 'pypcapkit-1.5.0-cp312-none-any.whl'
 SDIST = 'pypcapkit-1.5.0.tar.gz'
 CONDA = 'pypcapkit-1.5.0-py312_0.tar.bz2'
 
-#: ``release_upload.py``'s outcomes: ``(name, $PCAPKIT_ASSETS, files built, the view's lines, extra env)``.
-#: ``{tmp}`` in the assets is the scratch directory; ``{dir}/`` in a file builds a directory.
+#: ``release_upload.py``'s outcomes: ``(name, $PCAPKIT_ASSETS, files built, the view's lines, extra env,
+#: (status, each upload's file and ``--clobber``))``. ``{tmp}`` is the scratch directory; ``<dir>/``
+#: in the files built is a directory.
 UPLOAD_CASES = (
-    ('a new release gets every file, sorted', 'dist/*', [SDIST, WHEEL], '', {}),
-    ('a published file is left alone', 'dist/*', [WHEEL, SDIST], f'{WHEEL}\tuploaded\n', {}),
-    ('a failed upload is clobbered', 'dist/*', [WHEEL], f'{WHEEL}\tstarter\n{SDIST}\tuploaded\n', {}),
+    ('a new release gets every file, sorted', 'dist/*', [SDIST, WHEEL], '', {},
+     (0, [f'dist/{WHEEL}', f'dist/{SDIST}'])),
+    ('a published file is left alone', 'dist/*', [WHEEL, SDIST], f'{WHEEL}\tuploaded\n', {},
+     (0, [f'dist/{SDIST}'])),
+    ('a failed upload is clobbered', 'dist/*', [WHEEL], f'{WHEEL}\tstarter\n{SDIST}\tuploaded\n', {},
+     (0, [f'dist/{WHEEL} --clobber'])),
     ('a name listed twice keeps its last state', 'dist/*', [WHEEL, SDIST],
-     f'{WHEEL}\tuploaded\n{WHEEL}\topen\n{SDIST}\tstarter\n{SDIST}\tuploaded\n', {}),
+     f'{WHEEL}\tuploaded\n{WHEEL}\topen\n{SDIST}\tstarter\n{SDIST}\tuploaded\n', {},
+     (0, [f'dist/{WHEEL} --clobber'])),
     ('tabs around a line and between its fields', 'dist/*', [WHEEL, SDIST],
-     f'\t{WHEEL}\t\tuploaded\t\n\t\t{SDIST}\t open\n', {}),
+     f'\t{WHEEL}\t\tuploaded\t\n\t\t{SDIST}\t open\n', {}, (0, [f'dist/{SDIST} --clobber'])),
     ('paths a line apart, blank lines and spaces between', '\n{tmp}/linux-64/' + CONDA + '\n\n'
-     'dist/' + WHEEL + ' \t dist/' + SDIST + '\n', [WHEEL, SDIST, 'linux-64/' + CONDA], '', {}),
-    ('every glob form', 'dist/pypcapkit-1.5.0-cp31?-*.whl dist/[p]*.gz', [WHEEL, SDIST], '', {}),
-    ('a glob matching nothing', 'dist/*', [], '', {}),
-    ('a path that is not there', 'dist/' + WHEEL + '\ndist/' + SDIST, [WHEEL], '', {}),
-    ('a glob matching a directory', 'dist/*', [WHEEL, 'zz/'], '', {}),
-    ('a name holding a space splits', 'dist/a b.whl', ['a b.whl'], '', {}),
-    ('no release', 'dist/*', [WHEEL], '', {'VIEW_FAIL': '1'}),
-    ('a failing view keeps its status', 'dist/*', [WHEEL], '', {'VIEW_FAIL': '4'}),
-    ('a failed upload stops the rest', 'dist/*', [SDIST, WHEEL], '', {'UPLOAD_FAIL': '1'}),
-    ('a failed clobber keeps its status', 'dist/*', [WHEEL], f'{WHEEL}\topen\n', {'UPLOAD_FAIL': '3'}),
+     'dist/' + WHEEL + ' \t dist/' + SDIST + '\n', [WHEEL, SDIST, 'linux-64/' + CONDA], '', {},
+     (0, ['{tmp}/linux-64/' + CONDA, f'dist/{WHEEL}', f'dist/{SDIST}'])),
+    ('every glob form', 'dist/pypcapkit-1.5.0-cp31?-*.whl dist/[p]*.gz', [WHEEL, SDIST], '', {},
+     (0, [f'dist/{WHEEL}', f'dist/{SDIST}'])),
+    ('a glob matching nothing', 'dist/*', [], '', {}, (1, [])),
+    ('a path that is not there', 'dist/' + WHEEL + '\ndist/' + SDIST, [WHEEL], '', {}, (1, [f'dist/{WHEEL}'])),
+    ('a glob matching a directory', 'dist/*', [WHEEL, 'zz/'], '', {}, (1, [f'dist/{WHEEL}'])),
+    ('a name holding a space splits', 'dist/a b.whl', ['a b.whl'], '', {}, (1, [])),
+    ('no release', 'dist/*', [WHEEL], '', {'VIEW_FAIL': '1'}, (1, [])),
+    ('a failing view keeps its status', 'dist/*', [WHEEL], '', {'VIEW_FAIL': '4'}, (4, [])),
+    ('a failed upload stops the rest', 'dist/*', [SDIST, WHEEL], '', {'UPLOAD_FAIL': '1'}, (1, [f'dist/{WHEEL}'])),
+    ('a failed clobber keeps its status', 'dist/*', [WHEEL], f'{WHEEL}\topen\n', {'UPLOAD_FAIL': '3'},
+     (3, [f'dist/{WHEEL} --clobber'])),
 )
 
 
@@ -273,19 +209,6 @@ class _Stand(unittest.TestCase):
         """``python3 util/<name>`` as the step runs it, with this interpreter."""
         return subprocess.run([sys.executable, str(UTIL / name), *args], cwd=self.work,  # nosec: B603
                               env=env, capture_output=True, text=True, check=False, timeout=120)
-
-    def reference(self, shell: 'str', env: 'dict[str, str]') -> 'subprocess.CompletedProcess[str]':
-        """``shell`` as ``shell: bash`` runs it, ``bash --noprofile --norc -eo pipefail``."""
-        script = self.tmp / 'step.sh'
-        script.write_text(shell, encoding='utf-8')
-        return subprocess.run(bash_argv('-eo', 'pipefail', str(script), executable=BASH),  # nosec: B603
-                              cwd=self.work, env=env, capture_output=True, text=True, check=False, timeout=120)
-
-    def state(self, result: 'subprocess.CompletedProcess[str]') -> 'tuple[object, ...]':
-        """What a run left: status, both streams, ``$GITHUB_OUTPUT`` and each stand-in's calls."""
-        read = [path.read_text(encoding='utf-8') if path.exists() else None
-                for path in (self.output, self.git_log, self.gh_log)]
-        return (result.returncode, result.stdout, result.stderr, *read)
 
     def tags_env(self, case_env: 'dict[str, str]', **variables: 'str') -> 'dict[str, str]':
         return dict(self.base, PCAPKIT_RUN_SHA=RUN, **variables, **case_env)
@@ -372,6 +295,22 @@ class TestReleaseTags(_Stand):
         self.assertEqual(result.returncode, 1)
         self.assertIn('released elsewhere: false', result.stdout)
 
+    def test_every_check_case(self) -> None:
+        for name, tags, tagged, extra, expected in CHECK_CASES:
+            with self.subTest(case=name):
+                self.reset()
+                result = self.check(tags, tagged, **extra)
+                confirmed = [line.split(' -> ')[0] for line in result.stdout.splitlines() if ' -> ' in line]
+                self.assertEqual((result.returncode, confirmed), expected)
+
+    def test_every_owner_case(self) -> None:
+        for name, tagged, extra, expected in OWNER_CASES:
+            with self.subTest(case=name):
+                self.reset()
+                result = self.owner(tagged, **extra)
+                written = self.output.read_text(encoding='utf-8') if self.output.exists() else None
+                self.assertEqual((result.returncode, written), expected)
+
     def test_another_command_is_refused(self) -> None:
         result = self.script('release_tags.py', 'tag', env=self.tags_env({}))
         self.assertEqual(result.returncode, 2)
@@ -409,6 +348,16 @@ class TestReleaseUpload(_Stand):
             f'uploaded dist/{SDIST}', f'{SDIST} -> v1.5.0',
         ])
 
+    def test_every_upload_case(self) -> None:
+        for name, assets, built, published, extra, (status, uploads) in UPLOAD_CASES:
+            with self.subTest(case=name):
+                self.reset()
+                result = self.upload(assets, built, published, **extra)
+                found = [line.split()[3] + (' --clobber' if line.endswith(' --clobber') else '')
+                         for line in self.calls() if line.startswith('release upload ')]
+                self.assertEqual((result.returncode, found),
+                                 (status, [path.format(tmp=self.work) for path in uploads]))
+
     def test_nothing_to_upload_is_an_error(self) -> None:
         result = self.upload('dist/*', [], '')
         self.assertEqual(result.returncode, 1)
@@ -435,60 +384,6 @@ class TestReleaseUpload(_Stand):
         result = self.script('release_upload.py', 'dist/*', env=self.upload_env('dist/*', {}))
         self.assertEqual(result.returncode, 2)
         self.assertEqual(self.calls(), [])
-
-
-@unittest.skipIf(not BASH, 'needs bash, which runs the reference shell')
-class TestTheStepMatchesTheReferenceShell(_Stand):
-    """Each script exits, prints, writes and calls exactly as its step's inline shell form, on every case."""
-
-    def both(self, shell: 'str', command: 'list[str]', env: 'dict[str, str]',
-             prepare: 'Callable[[], None]') -> 'tuple[tuple[object, ...], tuple[object, ...]]':
-        found = []
-        for run in (lambda: self.reference(shell, env), lambda: self.script(*command, env=env)):
-            self.reset()
-            prepare()
-            found.append(self.state(run()))
-        return found[0], found[1]
-
-    def test_the_tag_check(self) -> None:
-        for name, tags, tagged, extra in CHECK_CASES:
-            with self.subTest(case=name):
-                old, new = self.both(REFERENCE_CHECK, ['release_tags.py', 'check'],
-                                     self.tags_env(extra, PCAPKIT_TAGS=tags),
-                                     functools.partial(self.prepare_tags, tagged))
-                self.assertEqual(new, old)
-
-    def test_the_owner_check(self) -> None:
-        for name, tagged, extra in OWNER_CASES:
-            with self.subTest(case=name):
-                old, new = self.both(REFERENCE_OWNER, ['release_tags.py', 'owner'],
-                                     self.tags_env(extra, PCAPKIT_TAG='v1.5.0'),
-                                     functools.partial(self.prepare_tags, tagged))
-                self.assertEqual(new, old)
-
-    def test_the_upload(self) -> None:
-        for name, assets, built, published, extra in UPLOAD_CASES:
-            with self.subTest(case=name):
-                old, new = self.both(REFERENCE_UPLOAD, ['release_upload.py'], self.upload_env(assets, extra),
-                                     functools.partial(self.prepare_assets, built, published))
-                self.assertEqual(new, old)
-
-    def test_every_case_was_reached(self) -> None:
-        """The check and upload cases end each shell in success, in refusal and with ``git``'s or ``gh``'s
-        own failing status, so agreement is not agreement on one path."""
-        statuses = set()
-        for shell, cases in ((REFERENCE_CHECK, CHECK_CASES), (REFERENCE_UPLOAD, UPLOAD_CASES)):
-            for case in cases:
-                self.reset()
-                if shell is REFERENCE_CHECK:
-                    self.prepare_tags(case[2])
-                    env = self.tags_env(case[3], PCAPKIT_TAGS=case[1])
-                else:
-                    self.prepare_assets(case[2], case[3])
-                    env = self.upload_env(case[1], case[4])
-                statuses.add((shell is REFERENCE_CHECK, self.reference(shell, env).returncode))
-        self.assertEqual(statuses, {(True, 0), (True, 1), (True, 128), (True, 143),
-                                    (False, 0), (False, 1), (False, 3), (False, 4)})
 
 
 class TestTheStepsRunTheScripts(unittest.TestCase):

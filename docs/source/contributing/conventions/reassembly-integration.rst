@@ -71,17 +71,22 @@ Parse Ownership
 * The parse is a method of the protocol class:
   :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>` for IPv4 and
   IPv6, :meth:`Transport.analyze <pcapkit.protocols.transport.transport.Transport.analyze>`
-  for TCP, and
+  for TCP,
   :meth:`DTLS.analyze_handshake <pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake>`
-  for a DTLS handshake message.
+  for a DTLS handshake message,
+  :meth:`SCTP.analyze <pcapkit.protocols.transport.sctp.protocol.SCTP.analyze>` for an
+  SCTP user message, and
+  :meth:`TLS.analyze_record <pcapkit.protocols.application.tls.protocol.TLS.analyze_record>`
+  for a TLS record (:issue:`2938`).
 * Each :mod:`pcapkit.foundation.analysis` function is a public wrapper that calls that
   method and holds no parsing of its own.
 * The reassembly :class:`~pcapkit.foundation.reassembly.data.Deferred` calls the
-  same method, on the reassembly's own ``__protocol_type__``. For IP and TCP it
+  same method, on the reassembly's own ``__protocol_type__``. For IP, TCP and SCTP it
   passes the stops and context the extraction's engine parses its frames with: the
   default engine's, and none from a third-party engine, whose frames ignore them
-  (:issue:`2933`). :func:`~pcapkit.foundation.analysis.ip.ip_datagram` and
-  :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram` take them as keyword-only
+  (:issue:`2933`). :func:`~pcapkit.foundation.analysis.ip.ip_datagram`,
+  :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram` and
+  :func:`~pcapkit.foundation.analysis.sctp.sctp_message` take them as keyword-only
   ``layer``, ``protocol`` and ``context``, so given the same they return that
   ``packet`` (:issue:`2947`). The reassembler a TCP flow tracer builds for
   ``analyze`` takes them the same way (:issue:`2946`). For IP both also hand a
@@ -102,9 +107,9 @@ Parse Ownership
        TK["the pcapkit.toolkit.&lt;engine&gt; adapter the engine's<br/>\_\_reassembly\_\_ names, e.g. toolkit.pcap.dtls\_reassembly"]
        RE["each enabled reassembler the Extractor holds,<br/>by its registered name, advanced to the frame's timestamp"]
        DEF["Deferred: a datagram's packet,<br/>parsed on first read"]
-       AN["pcapkit.foundation.analysis<br/>ip\_datagram, tcp\_datagram, dtls\_handshake<br/>public wrappers, no parsing"]
+       AN["pcapkit.foundation.analysis<br/>ip\_datagram, tcp\_datagram, dtls\_handshake,<br/>sctp\_message, tls\_record<br/>public wrappers, no parsing"]
        subgraph protocols ["pcapkit.protocols"]
-           PM["the protocol class's parse method<br/>Protocol.analyze: IPv4, IPv6<br/>Transport.analyze: TCP<br/>DTLS.analyze\_handshake"]
+           PM["the protocol class's parse method<br/>Protocol.analyze: IPv4, IPv6<br/>Transport.analyze: TCP<br/>DTLS.analyze\_handshake<br/>SCTP.analyze: SCTP<br/>TLS.analyze\_record"]
        end
        REG["pcapkit.foundation.registry.protocols"]
 
@@ -122,8 +127,10 @@ Compliance, Measured
 **Point 1 holds for every engine.** None of
 :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`,
 :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`,
-:class:`~pcapkit.protocols.transport.tcp.protocol.TCP` and
-:class:`~pcapkit.protocols.application.dtls.protocol.DTLS` imports or calls into
+:class:`~pcapkit.protocols.transport.tcp.protocol.TCP`,
+:class:`~pcapkit.protocols.application.dtls.protocol.DTLS`,
+:class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` and
+:class:`~pcapkit.protocols.application.tls.protocol.TLS` imports or calls into
 :mod:`pcapkit.foundation.reassembly`. Instead :mod:`pcapkit.foundation.engines` calls a
 ``pcapkit.toolkit.<engine>`` extraction function on an already-parsed frame and feeds
 the result to the reassembly instance the
@@ -137,7 +144,11 @@ that name, and each is advanced to every frame's timestamp before the frame is f
 (:issue:`2814`).
 :meth:`DTLS.read_handshake <pcapkit.protocols.application.dtls.protocol.DTLS.read_handshake>`
 and :meth:`DTLS.analyze_handshake <pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake>`
-are the parser methods the rule allows.
+are the parser methods the rule allows, and so are
+:meth:`TLS.record_header <pcapkit.protocols.application.tls.protocol.TLS.record_header>`, which
+reads the header a TLS stream is cut into records by, and
+:meth:`TLS.analyze_record <pcapkit.protocols.application.tls.protocol.TLS.analyze_record>`
+(:issue:`2938`).
 
 **Point 2 holds through the engines, not through one** :mod:`pcapkit.toolkit`
 **helper.** Each engine's :attr:`EngineBase.__reassembly__
@@ -149,7 +160,10 @@ declare which engines support a reassembler, and registering an adapter on an en
 makes it support one. An enabled reassembler with no entry is
 disabled with an :class:`~pcapkit.utilities.warnings.AttributeWarning`, and an engine
 with no entries at all, as :mod:`pcapkit.foundation.engines.pyshark`, disables
-reassembly (:issue:`2814`). DTLS has entries on the default engine alone.
+reassembly (:issue:`2814`). DTLS and SCTP have entries on the default engine alone. TLS has
+entries on every engine with a TCP one: TLS reassembly reads TCP reassembly's record of each
+segment, which each engine's ``tls_reassembly`` keeps for a stream on a port TCP binds to TLS
+(:issue:`2938`).
 
 **Flow tracing takes the same shape.** Every enabled flow tracer is made by the name it
 is registered under in :attr:`Extractor.__traceflow__
@@ -182,21 +196,29 @@ datagram's payload by its payload protocol type, through
 :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram` parses a reassembled TCP
 datagram's by its ports, through
 :meth:`Transport.analyze <pcapkit.protocols.transport.transport.Transport.analyze>`;
-and :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes a reassembled
+:func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes a reassembled
 DTLS handshake message (:issue:`2496`), through
 :meth:`DTLS.analyze_handshake <pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake>`
-(:issue:`2622`). IP and TCP have analysis modules of their own, each function named
-for the datagram its engine reassembles, by the owner's choice on :issue:`2581`; without
-them the rule held for DTLS alone.
+(:issue:`2622`); :func:`~pcapkit.foundation.analysis.sctp.sctp_message` parses a
+reassembled SCTP user message's by its payload protocol identifier, through
+:meth:`SCTP.analyze <pcapkit.protocols.transport.sctp.protocol.SCTP.analyze>`; and
+:func:`~pcapkit.foundation.analysis.tls.tls_record` decodes a TLS record reassembled from a
+TCP stream, through
+:meth:`TLS.analyze_record <pcapkit.protocols.application.tls.protocol.TLS.analyze_record>`
+(:issue:`2938`). IP and TCP have analysis modules of their own, each function named for the
+datagram its engine reassembles, by the owner's choice on :issue:`2581`; without them the
+rule held for DTLS alone.
 
-**Where the rule is silent, DTLS takes the IP/TCP shape** (:issue:`2531`). IPv4, IPv6,
-TCP and DTLS reassembly each set ``__protocol_type__`` and report the parsed outcome as
-a datagram's ``packet``, deferred to first read by
-:class:`~pcapkit.foundation.reassembly.data.Deferred`. Each ``Deferred`` runs the
-parse behind its engine's analysis function, so a ``packet`` is what that function
-returns, and binds it to ``__protocol_type__`` -- ``analyze`` for IP and TCP
-(:issue:`2581`), ``analyze_handshake`` for DTLS (:issue:`2622`) -- so a subclass naming
-another protocol has its ``packet`` parsed by that one. They differ on an incomplete
-outcome: IP and TCP parse a contiguous payload, complete or not, as ``strict=False``
-reports one, and hold :data:`None` only for the received runs ``strict=True`` reports;
-DTLS holds :data:`None` for any incomplete message.
+**Where the rule is silent, DTLS takes the IP/TCP shape** (:issue:`2531`), and so does
+SCTP, and TLS takes DTLS's (:issue:`2938`). IPv4, IPv6, TCP, DTLS, SCTP and TLS reassembly
+each set ``__protocol_type__`` and report the parsed outcome as a datagram's ``packet``,
+deferred to first read by :class:`~pcapkit.foundation.reassembly.data.Deferred`. Each
+``Deferred`` runs the parse behind its engine's analysis function, so a ``packet`` is what
+that function returns, and binds it to ``__protocol_type__`` -- ``analyze`` for IP and TCP
+(:issue:`2581`) and for SCTP, ``analyze_handshake`` for DTLS (:issue:`2622`),
+``analyze_record`` for TLS -- so a subclass naming another protocol has its ``packet``
+parsed by that one. They differ on an incomplete outcome: IP, TCP and SCTP parse a
+contiguous payload, complete or not, as ``strict=False`` reports one, and hold :data:`None`
+only for the received runs ``strict=True`` reports; DTLS holds :data:`None` for any
+incomplete message, and TLS for any incomplete record, whose zero-filled octets would decode
+as content.

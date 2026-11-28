@@ -21,6 +21,10 @@ _DTLSV1_2_VERSION = 0xFEFD
 _DTLS13_LEGACY_VERSIONS = frozenset({_DTLSV1_0_VERSION, _DTLSV1_2_VERSION})
 #: Top three bits of a unified-header first octet, ``001`` (:rfc:`9147#section-4.1`).
 _UNIFIED_PREFIX = 0b001
+#: Longest ciphertext a unified-header record may carry. Its length is a TLS 1.3
+#: record's (:rfc:`9147#section-4`), at most ``2 ** 14 + 256``
+#: (:rfc:`9846#section-5.2`).
+_UNIFIED_MAX_LENGTH = 2 ** 14 + 256
 #: Shortest ciphertext a unified-header record may carry. The record-number
 #: sample is taken from its first 16 octets (:rfc:`9147#section-4.2.3`).
 _CIPHERTEXT_MIN_LENGTH = 16

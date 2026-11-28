@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 __all__ = ['ManagementSubtype']
 
-#: Management frame (Type ``0b00``) Subtype values (IEEE Std 802.11-2020,
+#: Management frame (Type ``0b00``) Subtype values (:ieee:`802.11-2020`,
 #: Table 9-1).
 #:
 #: Maps a Subtype value to its *Subtype description*. A single ``Reserved``
@@ -50,7 +50,7 @@ DATA = {
 
 
 class ManagementSubtype(Vendor):
-    """IEEE 802.11 Management Frame Subtypes [IEEE Std 802.11-2020, Table 9-1]"""
+    """IEEE 802.11 Management Frame Subtypes [:ieee:`802.11-2020`, Table 9-1]"""
 
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0b0000 <= value <= 0b1111'

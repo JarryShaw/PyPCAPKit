@@ -70,6 +70,8 @@ from aenum import IntEnum, IntFlag
 from tests._support import (ISOLATED_PREFIXES, purge_modules, reimport_once_per_class,
                             restore_modules, snapshot_modules)
 from tests.const import census
+# NOTE: test_const_enum_builtin_parity and the #923 provenance test import it from here.
+from tests.vendor._crawler import normalize as _normalize
 
 #: Test tier (#1958): exercises metaclass, ABC or enum machinery, which differs by
 #: interpreter.
@@ -105,32 +107,6 @@ MH_FLAG_ENUMS = (
     ('handover_ack_flag', 'HandoverACKFlag', ('F', 'P'), 0x60),
     ('handover_initiate_flag', 'HandoverInitiateFlag', ('F', 'P'), 0x30),
 )
-
-
-def _normalize(context: 'str') -> 'str':
-    """Whitespace-normalise a rendered template the way the writer does.
-
-    :meth:`pcapkit.vendor.default.Vendor.__init__` rstrips every non-blank line,
-    drops whitespace-only lines, joins with ``\\n`` and writes the result with
-    :func:`print`, which restores the single trailing newline. Reproducing it
-    here is what lets a rendered template be compared against a committed module
-    character for character.
-
-    Args:
-        context: Rendered template text.
-
-    Returns:
-        The text as it would be written to ``pcapkit/const/``.
-
-    """
-    lines = []  # type: list[str]
-    for line in context.splitlines():
-        if line:
-            if line.strip():
-                lines.append(line.rstrip())
-        else:
-            lines.append(line)
-    return '\n'.join(lines) + '\n'
 
 
 def _iter_const_int_enums() -> 'list[type]':

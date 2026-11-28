@@ -9,7 +9,7 @@
 :mod:`pcapkit`, including PCAP file extraction tool
 :class:`~pcapkit.foundation.extraction.Extractor`, flow tracing
 :mod:`~pcapkit.foundation.traceflow`, registry management
-APIs for :mod:`pcapkit`, TCP/IP and DTLS reassembly implementations, and
+APIs for :mod:`pcapkit`, TCP/IP, DTLS, SCTP and TLS reassembly implementations, and
 the :mod:`~pcapkit.foundation.analysis` of what they reassemble.
 
 """
@@ -24,10 +24,11 @@ __all__ = [
     'Extractor',
     'DumpOptions', 'ReassemblyOptions', 'TraceFlowOptions', 'StreamOptions',
 
-    'IPv4_Reassembly', 'IPv6_Reassembly', 'TCP_Reassembly', 'DTLS_Reassembly',
+    'IPv4_Reassembly', 'IPv6_Reassembly', 'TCP_Reassembly', 'DTLS_Reassembly', 'SCTP_Reassembly',
+    'TLS_Reassembly',
     'ReassemblyManager',
 
-    'ip_datagram', 'tcp_datagram', 'dtls_handshake',
+    'ip_datagram', 'tcp_datagram', 'dtls_handshake', 'sctp_message', 'tls_record',
 
     'TCP_TraceFlow',
     'TraceFlowManager',
@@ -38,14 +39,15 @@ __all__ = [
     'register_pcap', 'register_pcapng',
     'register_ethertype',
     'register_loopback',
-    'register_arphrd', 'register_frad', 'register_netlink', 'register_ppp', 'register_ppp_control',
-    'register_radiotap', 'register_radiotap_field',
+    'register_arphrd', 'register_frad', 'register_lsap', 'register_netlink', 'register_ppp',
+    'register_ppp_control', 'register_radiotap', 'register_radiotap_field',
     'register_transtype',
     'register_ipx',
-    'register_icmp_type',
+    'register_icmp_type', 'register_icmpv6_option',
     'register_ipv4_option', 'register_hip_parameter', 'register_hopopt_option',
     'register_ipv6_opts_option', 'register_ipv6_route_routing',
     'register_mh_message', 'register_mh_option', 'register_mh_extension',
+    'register_mh_selector', 'register_mh_multicast',
     'register_apptype',
     'register_tcp', 'register_udp', 'register_sctp', 'register_dccp',
     'register_tcp_option', 'register_tcp_mp_option',

@@ -11,6 +11,9 @@ one bit, raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`.
 subtype resolves against the registry the type selects. Every case builds its own
 frame in memory and reads no capture.
 
+The checks the ``*_make_codes_2594`` modules share run from
+:class:`~tests.protocols._make_codes.MakeCodeChecks` over this module's own table (#3148).
+
 """
 
 import importlib
@@ -18,6 +21,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
+from tests.protocols._make_codes import Case, MakeCodeChecks
 
 if TYPE_CHECKING:
     from typing import Any
@@ -42,7 +46,7 @@ def _attr(path: 'str') -> 'Any':
     return getattr(importlib.import_module(module), name)
 
 
-class TestIEEE802_11MakeCodes(unittest.TestCase):
+class TestIEEE802_11MakeCodes(MakeCodeChecks, unittest.TestCase):
     """``type`` and ``subtype`` refuse what their field cannot carry."""
 
     def setUp(self) -> None:
@@ -51,21 +55,11 @@ class TestIEEE802_11MakeCodes(unittest.TestCase):
     def _build(self, **kwargs: 'Any') -> 'bytes':
         return _attr('pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11').from_fields(**kwargs).data
 
-    def test_refusals(self) -> None:
-        exc = _attr('pcapkit.utilities.exceptions.ProtocolError')
-        for label, keyword, enum_path, bits, member, extra in ROWS:
-            for value in (1 << bits, True, member):
-                with self.subTest(row=label, value=value):
-                    with self.assertRaisesRegex(exc, rf'^802\.11: invalid {keyword}: '):
-                        self._build(**extra, **{keyword: value})
-
-    def test_member_and_code_build_the_same(self) -> None:
-        for label, keyword, enum_path, _, member, extra in ROWS:
-            with self.subTest(row=label):
-                value = getattr(_attr(enum_path), member)
-                built = self._build(**extra, **{keyword: value})
-                self.assertEqual(self._build(**extra, **{keyword: int(value)}), built)
-                self.assertNotEqual(self._build(**extra), built)
+    def cases(self) -> 'list[Case]':
+        return [Case(label, bits, getattr(_attr(enum_path), member),
+                     lambda value, keyword=keyword, extra=extra: self._build(**extra, **{keyword: value}),
+                     f'802.11: invalid {keyword}: ', bare=lambda extra=extra: self._build(**extra))
+                for label, keyword, enum_path, bits, member, extra in ROWS]
 
     def test_removed_keywords_are_refused(self) -> None:
         exc = _attr('pcapkit.utilities.exceptions.UnsupportedCall')

@@ -47,7 +47,7 @@ class Data(Info):
         __next_type__: 'Type[ProtocolBase]'
         #: Name of the header field the data ended inside, and how many of its
         #: octets were there; present only then. See
-        #: :func:`~pcapkit.corekit.schema.shortread.keep_short_read`.
+        #: :func:`~pcapkit.corekit.schema.short_read.keep_short_read`.
         __short_read__: 'tuple[str, int]'
         #: Length of data the parse read the header at, where it recorded
         #: ``__short_read__``; present only then. ``from_data`` reads the

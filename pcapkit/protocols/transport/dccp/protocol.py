@@ -48,7 +48,7 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.schema.padding import pad_length
-from pcapkit.corekit.schema.shortread import cut_on_its_own, fill_short_options
+from pcapkit.corekit.schema.short_read import cut_on_its_own, fill_short_options
 from pcapkit.protocols.schema import Schema
 from pcapkit.protocols.transport.dccp.const import (ACK_TYPES, DCCP_MAX_HEADER_LEN,
                                                     DCCP_MIN_HEADER_LEN,

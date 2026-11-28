@@ -391,6 +391,22 @@ Format and Mechanics
    lower one the file lacks, such as a Discussion's. Its ``ALLOWED`` set exempts the
    hand-written links and the bare ``#1962`` on :doc:`/contributing/workflows`, which
    other tests pin in that form, so converting one changes its pin in the same commit.
+*  **Cite an IEEE standard by role, by the edition the text relies on**, wherever
+   Sphinx renders the text, as ``:rfc:`` cites an RFC: ``:ieee:`802.1Q-2022```
+   renders as :ieee:`802.1Q-2022`, linked to that edition's IEEE SA page. A clause
+   follows the role as text, ``:ieee:`802.1Q-2022` clause 14.4``, since the page
+   holds no anchor for it. The designation is a key of ``IEEE_STANDARDS`` in
+   :file:`docs/source/conf.py`, and one the table lacks stops the docs build: a new
+   edition goes in with its page's URL, opened and checked, since the site serves
+   any product id it is given. A citation naming no edition stays text, as does a
+   standard's name used for its technology, *an IEEE 802.11 frame*, and the files
+   that keep ``#NNN`` keep plain citations too. The crawlers render a dated IEEE
+   reference as the role
+   (:meth:`~pcapkit.vendor.default.Vendor.split_references`), so a designation the
+   upstream data cites, as IANA could cite ``IEEE Std 1588-2008``, must be in the
+   table too, or the docs build fails until it is added. Ruled on :issue:`3168`;
+   :file:`tests/project/test_docs_ieee_role_3168_unit.py` fails on a role the table
+   lacks and on a dated citation left as text.
 *  **Prose names the real defining module, not a re-export**, a strand of the
    consistency sweep on :doc:`the roadmap </contributing/pep>`. Every sentinel is
    defined in :mod:`pcapkit.corekit.sentinels`, and :ref:`sentinel-convention`'s table

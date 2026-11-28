@@ -64,6 +64,10 @@ def _payload(code: 'Any') -> 'tuple[bytes, bool]':
     if code == LinkType.PPP_ETHER:
         from pcapkit.protocols.link.pppoe.protocol import PPPoE
         return bytes(PPPoE.from_fields(session_id=1, payload=generator._ppp(_ip4(6, _tcp(9999)), acfc=True))), False
+    if code == LinkType.ATM_RFC1483:  # an LLC UI PDU, SNAP and IPv4 (#2936)
+        from pcapkit.protocols.link.llc.protocol import LLC
+        from pcapkit.protocols.link.snap.protocol import SNAP
+        return bytes(LLC.from_fields(payload=SNAP.from_fields(payload=_ip4(6, _tcp(9999))))), False
     if code == LinkType.FRELAY:  # direct NLPID 0xCC, IPv4
         from pcapkit.protocols.link.frad.protocol import FRAD
         return bytes(FRAD.from_fields(nlpid=0xCC, payload=_ip4(6, _tcp(9999)))), False
@@ -116,6 +120,7 @@ PINNED_TARGETS = {
     'pcap-frame/PPP': ('pcapkit.protocols.link', 'PPP'),
     'pcap-frame/PPP_HDLC': ('pcapkit.protocols.link', 'PPP'),
     'pcap-frame/PPP_ETHER': ('pcapkit.protocols.link', 'PPPoE'),
+    'pcap-frame/ATM_RFC1483': ('pcapkit.protocols.link', 'LLC'),
     'pcap-frame/LOOP': ('pcapkit.protocols.link', 'Loopback'),
     'pcap-frame/IPV4': ('pcapkit.protocols.internet', 'IPv4'),
     'pcap-frame/IPV6': ('pcapkit.protocols.internet', 'IPv6'),
@@ -131,6 +136,7 @@ PINNED_TARGETS = {
     'pcapng-frame/PPP': ('pcapkit.protocols.link', 'PPP'),
     'pcapng-frame/PPP_HDLC': ('pcapkit.protocols.link', 'PPP'),
     'pcapng-frame/PPP_ETHER': ('pcapkit.protocols.link', 'PPPoE'),
+    'pcapng-frame/ATM_RFC1483': ('pcapkit.protocols.link', 'LLC'),
     'pcapng-frame/LOOP': ('pcapkit.protocols.link', 'Loopback'),
     'pcapng-frame/IPV4': ('pcapkit.protocols.internet', 'IPv4'),
     'pcapng-frame/IPV6': ('pcapkit.protocols.internet', 'IPv6'),

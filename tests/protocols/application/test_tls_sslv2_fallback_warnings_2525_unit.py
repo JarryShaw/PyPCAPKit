@@ -34,8 +34,9 @@ VERSIONS = (0x0300, 0x0301, 0x0303)
 #: An SSLv2 CLIENT-HELLO cut 4 octets short of its RECORD-LENGTH.
 CUT_HELLO = (b'\x80\x1c' + b'\x01\x00\x02\x00\x03\x00\x00\x00\x10'
              + b'\x01\x00\x80' + bytes(12))
-#: A TLS record header declaring a fragment far past the octets that follow it.
-LONG_RECORD = b'\x17\x03\x03\xff\xffhello'
+#: A TLS record header declaring a fragment far past the octets that follow it, though
+#: within the ``2 ** 14 + 2048`` a record may declare (#2938).
+LONG_RECORD = b'\x17\x03\x03\x40\x00hello'
 
 
 def _client_hello(version: 'int', *, two_byte_header: 'bool') -> 'bytes':
@@ -122,7 +123,7 @@ class TestSSLv2FallbackWarnings(unittest.TestCase):
                 parsed, caught = self._tcp(LONG_RECORD, action)
                 self.assertEqual(str(parsed.protochain), 'TCP:Raw')  # type: ignore[attr-defined]
                 self.assertEqual(parsed.payload.info.error,  # type: ignore[attr-defined]
-                                 'TLS: invalid format: record length 65535 runs past the end of the buffer')
+                                 'TLS: invalid format: record length 16384 runs past the end of the buffer')
                 self.assertEqual([str(item.message) for item in caught], [])
 
     def test_both_trials_rejected_outside_beholder_report_tls_alone(self) -> None:
@@ -135,13 +136,13 @@ class TestSSLv2FallbackWarnings(unittest.TestCase):
         from pcapkit.utilities.contextvars import frame_depth
         from pcapkit.utilities.exceptions import ProtocolError
 
-        for depth, expected in ((1, ['packet length < 0: -65530']), (0, [])):
+        for depth, expected in ((1, ['packet length < 0: -16379']), (0, [])):
             with self.subTest(depth=depth):
                 token = frame_depth.set(depth)
                 try:
                     with warnings.catch_warnings(record=True) as caught:
                         warnings.simplefilter('always')
-                        with self.assertRaisesRegex(ProtocolError, 'record length 65535 runs past'):
+                        with self.assertRaisesRegex(ProtocolError, 'record length 16384 runs past'):
                             TLS(LONG_RECORD, len(LONG_RECORD))
                 finally:
                     frame_depth.reset(token)

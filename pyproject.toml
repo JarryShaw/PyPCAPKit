@@ -96,7 +96,8 @@ pcapkit-vendor = "pcapkit.vendor.__main__:main"
 [project.optional-dependencies]
 # for CLI display
 cli = [ "emoji" ]
-# for ESP payload decryption, c.f. pcapkit.protocols.internet.esp.protocol
+# for ESP payload decryption and HIP signature verification, c.f.
+# pcapkit.protocols.internet.esp.protocol and pcapkit.protocols.internet.hip.protocol
 #
 # Capped below 46 on PyPy older than 3.11 (#2040), and nowhere else, which the
 # complementary marker on the first line keeps. 45.0.7 is the newest release
@@ -279,7 +280,7 @@ docs = [
     # ``docs/source/conf.py`` imports that release's private modules and is
     # written against it alone (#1856). tests/project/test_docs_typehints_pin_1856_unit.py
     # fails when the pins differ.
-    "sphinx-autodoc-typehints==3.17.6", "sphinxext-opengraph", "sphinx-copybutton",
+    "sphinx-autodoc-typehints==3.17.7", "sphinxext-opengraph", "sphinx-copybutton",
     "sphinxcontrib-mermaid",
     "typing-extensions", "mypy-extensions",
 ]

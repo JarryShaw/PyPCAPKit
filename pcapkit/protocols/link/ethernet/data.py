@@ -20,8 +20,12 @@ class Ethernet(Protocol):
     dst: 'str'
     #: Source MAC address.
     src: 'str'
-    #: Protocol (internet layer).
+    #: Length/Type, an EtherType or the length of the payload.
     type: 'EtherType'
 
     if TYPE_CHECKING:
+        #: Octets captured past the length a Length/Type field gives, the pad
+        #: among them, present only when there are any.
+        trailer: 'bytes'
+
         def __init__(self, dst: 'str', src: 'str', type: 'EtherType') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements

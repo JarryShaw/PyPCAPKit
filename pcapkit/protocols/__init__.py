@@ -55,8 +55,8 @@ __all__ = [
 
     # Link Layer
     'ARP', 'C_Tag', 'Ethernet', 'FRAD', 'GRE', 'IEEE802_11', 'InARP', 'L2TP', 'L2TPv2',
-    'LinuxSLL', 'LinuxSLL1', 'LinuxSLL2', 'Loopback', 'Netlink', 'PPP', 'PPPoE', 'Radiotap', 'S_Tag',
-    'VLAN',
+    'LinuxSLL', 'LinuxSLL1', 'LinuxSLL2', 'LLC', 'Loopback', 'Netlink', 'PPP', 'PPPoE', 'Radiotap',
+    'S_Tag', 'SNAP', 'VLAN',
 
     # Internet Layer
     'AH', 'ESP', 'ICMP', 'ICMPv4', 'ICMPv6', 'IGMP', 'IGMPv1', 'IGMPv2', 'IGMPv3',
@@ -80,6 +80,7 @@ __all__ = [
     'OSPF', 'OSPFv1', 'OSPFv2', 'OSPFv3',
     'RARP', 'DRARP',
     'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS',
+    'STP', 'STPv0', 'RSTP', 'MSTP',
 
     # Protocol Numbers
     'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE', 'APPTYPE',

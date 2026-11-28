@@ -105,24 +105,7 @@ from __future__ import annotations
 import inspect
 import unittest
 
-#: Header fields shared by every constructed segment here, spelled with the parameter
-#: names :meth:`TCP.make <pcapkit.protocols.transport.tcp.protocol.TCP.make>` actually declares.
-#:
-#: Deliberately *not* a copy of :data:`examples.generators.option_families.tcp.TCP_BASE`, which
-#: sibling modules in this directory mirror -- and, unlike theirs, this dict omits
-#: ``syn``/``ack`` altogether, since every case here passes those two explicitly to
-#: select a layout, where a shared constant could not. The names matter: ``ack`` is the
-#: *acknowledgement flag*, not ``ack_no``, and ``make`` raises ``UnsupportedCall`` for any
-#: keyword it does not declare (#617), so a ``seq`` or an ``ack_flag`` would be refused
-#: rather than silently swallowed by its ``**kwargs``. This module dispatches on the ACK
-#: flag, so it cannot leave which-``ack``-is-which to inference.
-TCP_HEADER = {
-    'srcport': 50000, 'dstport': 80, 'seq_no': 1, 'ack_no': 0,
-    'ns': False, 'cwr': False, 'ece': False, 'urg': False,
-    'psh': False, 'rst': False, 'fin': False,
-    'window': 8192, 'checksum': b'\x00\x00', 'urgent': 0,
-    'payload': b'',
-}
+from tests.protocols.transport._mptcp import TCP_HEADER, build_tcp_segment
 
 #: Figure 5 of :rfc:`8684` section 3.2, as octets: ``Kind`` 30, ``Length`` 12, subtype 1
 #: (MP_JOIN) in the high nibble with ``B`` clear, ``Address ID`` 1, then the 32-bit
@@ -168,44 +151,6 @@ def build_join(*, syn: 'bool', ack: 'bool', **option: 'object') -> 'object':
     return TCP.from_fields(syn=syn, ack=ack,
                            options=[(Enum_Option.Multipath_TCP, args)],  # type: ignore[arg-type]
                            **TCP_HEADER)
-
-
-def build_tcp_segment(option_octets: 'bytes', *, syn: 'bool', ack: 'bool') -> 'bytes':
-    """Pack a segment carrying ``option_octets`` verbatim, bypassing every maker.
-
-    Goes through the *schema* rather than the protocol, so the option bytes reach the
-    wire exactly as given and the parse path can be exercised against hand-derived
-    figures. The same helper, and the same reason for it, as
-    :func:`tests.protocols.transport.test_tcp_mptcp_length_arithmetic_unit.build_tcp_segment`.
-
-    Args:
-        option_octets: The whole option, already a multiple of 4 octets long.
-        syn: Whether to set the ``SYN`` flag.
-        ack: Whether to set the ``ACK`` flag.
-
-    Returns:
-        The packed TCP segment.
-
-    Raises:
-        ValueError: If ``option_octets`` is not a multiple of 4 octets long, which would
-            make the header's ``offset`` unrepresentable.
-
-    """
-    from pcapkit.protocols.transport.tcp.schema import TCP as Schema_TCP
-
-    if len(option_octets) % 4:
-        raise ValueError('option_octets must already be a multiple of 4 octets long')
-
-    schema = Schema_TCP(
-        srcport=50000, dstport=80, seq=1, ack=0,
-        offset={'offset': 5 + len(option_octets) // 4, 'reserved': 0, 'ns': 0},
-        flags={'cwr': 0, 'ece': 0, 'urg': 0, 'ack': int(ack), 'psh': 0, 'rst': 0,
-               'syn': int(syn), 'fin': 0},
-        window=8192, checksum=b'\x00\x00', urgent=0,
-        options=option_octets,
-        payload=b'',
-    )
-    return schema.pack()
 
 
 class JoinLayoutMixin:

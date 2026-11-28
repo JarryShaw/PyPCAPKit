@@ -47,6 +47,13 @@ A final release, ``X.Y.0`` or ``X.Y.Z``, runs these steps in order, ruled on
 #. **A docs sweep** runs once they have closed and before the bump: the documentation
    re-checked against the code and the rules on :ref:`documentation`. It also brings
    :doc:`the roadmap <pep>` up to date, a page feature pull requests leave alone.
+#. **At a minor release, a test-suite audit** runs beside the docs sweep, on the
+   owner's ask in review of :pr:`3147` (:issue:`3146`), with its rules on
+   :issue:`3148`. It looks for slow, overlapping and mis-tiered tests and for copied
+   setup. Its trims merge into ``develop`` as pull requests grouped by area, before
+   ``develop`` merges into ``main``. Each keeps the coverage of every :mod:`pcapkit`
+   module it touches, and drops a test only when a named mutation shows another still
+   catches what it guarded.
 #. **At a minor release,** ``develop`` **merges into** ``main`` (:issue:`2942`).
 #. **The version-bump push** (`The One Manual Step`_) starts the release. The changelog
    pull request merges no later than that push, since the release ships its run's

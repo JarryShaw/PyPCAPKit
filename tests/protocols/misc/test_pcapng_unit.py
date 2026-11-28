@@ -3913,6 +3913,16 @@ class NamedBuffer(io.BufferedReader):
         return self._name
 
 
+def extract_in_memory(data: bytes) -> 'tuple[object, list[warnings.WarningMessage]]':
+    """Extract ``data`` in memory, returning the extractor and its warnings."""
+    from pcapkit.foundation.extraction import Extractor
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter('always')
+        extractor = Extractor(NamedBuffer(data), store=True)
+    return extractor, caught
+
+
 class Unseekable(io.RawIOBase):
     """A read-only stream that reports itself unseekable."""
 
@@ -3948,20 +3958,12 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
     ``struct.error``. C.f. #678, #431, #571, and #676 for the option-area bound
     this was found beside.
 
+    Every boundary is swept in
+    :mod:`tests.protocols.misc.test_pcapng_truncation_sweep_678_unit`, on
+    ``latest`` alone, as the tier rule has a sweep (#1732, #1958); the levels
+    here are hand-picked.
+
     """
-
-    #: The result of :meth:`_sweep`, computed by the first test that asks for it
-    #: and shared by the rest: one extraction per octet of the sample is
-    #: this class's whole cost (GitHub issue #1062).
-    _swept = None  # type: tuple[dict[int, int], dict[int, BaseException]] | None
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
-        cls._swept = None
-        # The failures keep their tracebacks, and with them this class's pcapkit
-        # import, so the sweep goes once the class is done (#2750).
-        cls.addClassCleanup(setattr, cls, '_swept', None)
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -3969,128 +3971,31 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
         with open(sample_path('dhcp.pcapng'), 'rb') as stream:
             self.whole = stream.read()
 
-    def _extract(self, data: bytes):
-        """Extract ``data`` in memory, returning the extractor and its warnings."""
-        from pcapkit.foundation.extraction import Extractor
+    def test_a_hand_picked_level_of_each_kind_parses_or_fails_in_the_library(self) -> None:
+        """One or two of each kind of level the sweep tells apart, by hand.
 
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter('always')
-            extractor = Extractor(NamedBuffer(data), store=True)
-        return extractor, caught
-
-    def _sweep(self) -> 'tuple[dict[int, int], dict[int, BaseException]]':
-        """Extract every truncation of the sample, one octet at a time.
-
-        Returns the frame count for each level that parsed and the exception for
-        each that did not. Sweeping every boundary rather than picking one is the
-        point: the levels that behave differently are not the ones anybody would
-        have chosen by hand -- 372 and 373 are where ``struct.error`` lived, and
-        376 is where the cut happens to land on a block boundary.
-
-        Computed once per class, lazily rather than in :meth:`setUpClass`, so the
-        sweep runs against the class's own :mod:`pcapkit` import, which
-        :func:`tests._support.reimport_once_per_class` sets up from ``setUp``.
+        The last packet block cut in its packet's UDP header, after its IPv4
+        header and inside it, inside its Ethernet type and before its packet,
+        then inside its first twelve octets, where ``struct.error`` lived; the
+        first packet block cut; the interface block cut, inside it and its first
+        twelve octets; and the section header cut to twelve octets. Each keeps
+        the frames before the cut. Under twelve octets the file is an end of
+        stream, and under four no PCAP-NG, both raised from the library.
 
         """
-        if type(self)._swept is None:
-            type(self)._swept = self._sweep_uncached()
-        return type(self)._swept
+        from pcapkit.utilities.exceptions import FormatError, StreamEOFError
 
-    def _sweep_uncached(self) -> 'tuple[dict[int, int], dict[int, BaseException]]':
-        """Run the sweep :meth:`_sweep` caches."""
-        frames = {}  # type: dict[int, int]
-        failures = {}  # type: dict[int, BaseException]
-
-        for cut in range(len(self.whole) + 1):
-            data = self.whole[:len(self.whole) - cut]
-            try:
-                extractor, _ = self._extract(data)
-            except BaseException as error:  # noqa: BLE001 -- classifying, not handling
-                failures[cut] = error
-            else:
-                frames[cut] = len(extractor.frame)
-
-        self.assertEqual(len(frames) + len(failures), len(self.whole) + 1)
-        return frames, failures
-
-    def test_no_truncation_level_raises_from_outside_the_library(self) -> None:
-        """The whole of #678, asserted over every boundary rather than one.
-
-        A caller cannot tell a bare ``ValueError`` or ``struct.error`` from a bug
-        in its own code, and neither is an :exc:`EOFError`, so neither is caught
-        where the frame loop catches the end of a file. Every failure that is
-        left has to come from :mod:`pcapkit.utilities.exceptions`.
-
-        """
-        from pcapkit.utilities.exceptions import BaseError
-
-        _, failures = self._sweep()
-
-        foreign = {cut: error for cut, error in failures.items()
-                   if not isinstance(error, BaseError)}
-        self.assertEqual(
-            foreign, {},
-            f'{len(foreign)} truncation level(s) raised from outside '
-            f'pcapkit.utilities.exceptions: '
-            f'{sorted((cut, type(err).__name__) for cut, err in foreign.items())[:8]}'
-        )
-
-    def test_almost_every_truncation_level_parses(self) -> None:
-        """The #431 bar: a truncated capture parses, it does not fail.
-
-        Absence of a foreign exception would be satisfied by turning all 1,509
-        levels into a tidy in-library refusal, which is the failure this guards
-        against. Without the fix six levels parse; the rest is what the fix is
-        for.
-
-        """
-        frames, failures = self._sweep()
-
-        self.assertGreater(len(frames), 0.98 * (len(self.whole) + 1))
-        self.assertLess(len(failures), 16)
-
-    def test_every_failing_cut_fails_for_a_reason_of_its_own(self) -> None:
-        """The handful left are all cuts that reach the section header itself.
-
-        None of them costs a frame that was in the file: a cut that deep has
-        already removed every packet block. A file under twelve octets cannot
-        hold a block at all and is reported as end-of-stream; under four it
-        cannot even be identified as PCAP-NG.
-
-        """
-        from pcapkit.utilities.exceptions import (FormatError, ProtocolError,
-                                                  StreamEOFError)
-
-        frames, failures = self._sweep()
-
-        for cut, error in sorted(failures.items()):
-            with self.subTest(cut=cut, error=type(error).__name__):
-                self.assertIsInstance(error, (StreamEOFError, ProtocolError, FormatError))
-                self.assertGreater(cut, len(self.whole) - 64)
-
-        # every level that failed is deeper than every level that still had a
-        # frame to report, so no failure cost a frame that was in the file
-        deepest_with_a_frame = max(cut for cut, count in frames.items() if count)
-        self.assertLess(deepest_with_a_frame, min(failures))
-
-    def test_the_frame_count_never_rises_as_the_cut_deepens(self) -> None:
-        """Removing octets may lose frames; it may not invent them.
-
-        The structural property a zero-padded short read could break: padding a
-        shortfall out of nothing is how a block gets fabricated, and a fabricated
-        block would show up here as a frame count going *up* while the file got
-        smaller.
-
-        """
-        frames, _ = self._sweep()
-
-        levels = sorted(frames)
-        for deeper, shallower in zip(levels[1:], levels):
-            with self.subTest(cut=deeper):
-                self.assertLessEqual(frames[deeper], frames[shallower])
-
-        self.assertEqual(frames[0], 4)
-        self.assertEqual(frames[max(levels)], 0)
+        whole = len(self.whole)
+        # octets of the file left, and the frames they keep
+        for left, frames in {whole: 4, whole - 310: 4, whole - 314: 4, whole - 315: 4, whole - 336: 4,
+                             whole - 355: 4, whole - 372: 3, whole - 373: 3, whole - 1101: 1,
+                             55: 0, 39: 0, 12: 0}.items():
+            with self.subTest(left=left):
+                extractor, _ = extract_in_memory(self.whole[:left])
+                self.assertEqual(len(extractor.frame), frames)  # type: ignore[attr-defined]
+        for left, error in ((11, StreamEOFError), (3, FormatError)):
+            with self.subTest(left=left), self.assertRaises(error):
+                extract_in_memory(self.whole[:left])
 
     def test_a_truncated_last_block_keeps_the_frames_before_it(self) -> None:
         """The levels the issue reports, with the frame counts they should give.
@@ -4100,11 +4005,11 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
         the cut on a block boundary.
 
         """
-        shallow, _ = self._extract(self.whole[:-4])
-        boundary, _ = self._extract(self.whole[:-376])
+        shallow, _ = extract_in_memory(self.whole[:-4])
+        boundary, _ = extract_in_memory(self.whole[:-376])
 
-        self.assertEqual(len(shallow.frame), 4)
-        self.assertEqual(len(boundary.frame), 3)
+        self.assertEqual(len(shallow.frame), 4)  # type: ignore[attr-defined]
+        self.assertEqual(len(boundary.frame), 3)  # type: ignore[attr-defined]
 
     def test_a_block_overrunning_the_file_is_reported_and_leaves_the_reader_at_the_end(self) -> None:
         """The root cause, on its own: the seek must not go past the end.
@@ -4118,7 +4023,7 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
         """
         from pcapkit.utilities.warnings import ProtocolWarning
 
-        _, caught = self._extract(self.whole[:-4])
+        _, caught = extract_in_memory(self.whole[:-4])
 
         overruns = [str(entry.message) for entry in caught
                     if entry.category is ProtocolWarning

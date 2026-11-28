@@ -23,7 +23,9 @@ job stays green while covering less. The assertions are therefore over the
   ``--exclude`` or boundary, i.e. runs that whole directory;
 * every ``tests/`` subdirectory holding a test module is a leg, except the
   :data:`NOT_LEGS` names, each left out for the reason the workflow comment
-  gives (#2115: a directory such as ``corekit`` left out, with nothing to say so).
+  gives (#2115: a directory such as ``corekit`` left out, with nothing to say so);
+* #981, #3148: a root module that reads the module table runs in every cell, and
+  every other root module in one cell of each job.
 
 The workflow is read with a small hand-rolled scan rather than :mod:`yaml`,
 which comes only with the ``test`` extra of :file:`pyproject.toml`; the same split
@@ -38,6 +40,7 @@ import json
 import pathlib
 import re
 import sys
+import tempfile
 import unittest
 import unittest.mock
 
@@ -208,7 +211,7 @@ class TestShardedProtocolsLeg(unittest.TestCase):
     def test_project_tests_cells_partition_the_pins(self):
         """#2798: on any other diff each cell runs the pins on its side of
         :data:`tests._tiers.PROJECT_BOUNDARY`, and between them every pin, once, a pin
-        added later included."""
+        added later included. The one home of that check (#3148)."""
         self.assertIn(f'{_tiers.PROJECT_PIN_HALF_SELECTOR} "$HALF"', _job('project-tests'))
         self.assertIn('HALF: ${{ matrix.half }}', _job('project-tests'))
         cells = _project_tests_matrix(docs_only=False)
@@ -258,6 +261,62 @@ class TestShardedProtocolsLeg(unittest.TestCase):
     def test_no_shard_is_empty(self):
         for cell in _matrix():
             self.assertTrue(_modules(*cell), cell[0])
+
+
+class TestTheRootModules(unittest.TestCase):
+    """#981, #3148: which root modules each cell runs after its own."""
+
+    def test_each_runs_in_every_cell_or_in_one(self):
+        """A root module :func:`run_unittest_leg.reads_module_table` accepts runs in every
+        cell of ``unittest-ordering``, and of ``project-tests``' docs-only matrix; any
+        other runs in one of each, as the owner ruled on #3148."""
+        every = set(leg.ordering_root_modules())
+        self.assertIn('tests.test_base_class_contract', every)  # #981's reproduction
+        self.assertLess(every, set(leg.root_modules()))
+        runs = re.findall(r'run_unittest_leg\.py\s+project\b([^\n]*)', _job('project-tests'))
+        self.assertEqual(len(runs), 1)
+        jobs = {
+            'unittest-ordering': [leg.cell_root_modules(name, boundary.get('start'))
+                                  for name, _, boundary in _matrix()],
+            'project-tests': [leg.cell_root_modules('project', _boundary(
+                'project', runs[0].replace('${{ matrix.part }}', str(part))).get('start'))
+                for part in _project_tests_matrix(docs_only=True)['part']],
+        }
+        for job, cells in jobs.items():
+            for module in leg.root_modules():
+                with self.subTest(job=job, module=module):
+                    self.assertEqual(sum(module in cell for cell in cells),
+                                     len(cells) if module in every else 1)
+        self.assertEqual(leg.cell_root_modules('cli'), leg.ordering_root_modules())
+        self.assertEqual(leg.cell_root_modules(leg.ROOT_LEG), leg.root_modules())
+
+    def test_a_module_that_can_be_desynced_is_seen(self):
+        cases = {
+            'pcapkit at the top level': ('from pcapkit.foundation.extraction import Extractor\n', True),
+            'import pcapkit': ('import pcapkit.protocols\n', True),
+            'the module table': ('import sys\nNAMES = sorted(sys.modules)\n', True),
+            'import_module': ('import importlib\ndef test():\n    importlib.import_module("pcapkit")\n', True),
+            'reload, bare': ('from importlib import reload\ndef test(module):\n    reload(module)\n', True),
+            'unparsable': ('def broken(:\n', True),
+            # Aliases, and a top-level import under `try:` or `if:`.
+            'sys under an alias': ('import sys as _sys\nNAMES = sorted(_sys.modules)\n', True),
+            'the table taken from sys': ('from sys import modules\n', True),
+            'import_module under an alias': ('from importlib import import_module as im\ndef test():\n    im("x")\n', True),
+            'reload under an alias': ('from importlib import reload as rl\ndef test(module):\n    rl(module)\n', True),
+            '__import__': ('def test():\n    __import__("pcapkit")\n', True),
+            'pcapkit in a top-level try': ('try:\n    import pcapkit\nexcept ImportError:\n    pcapkit = None\n', True),
+            'pcapkit in a top-level if': ('import os\nif os.name != "nt":\n    from pcapkit.protocols import Raw\n', True),
+            'pcapkit for the type checker': ('from typing import TYPE_CHECKING\nif TYPE_CHECKING:\n'
+                                             '    from pcapkit.protocols import Raw\n', False),
+            'pcapkit inside a test': ('def test():\n    from pcapkit.corekit.infoclass import Info\n', False),
+            'named in a string': ('SOURCE = "import pcapkit; sys.modules"\n', False),
+            'text alone': ('import ast\nTREE = ast.parse("x")\n', False),
+        }
+        for label, (source, expected) in cases.items():
+            with self.subTest(case=label), tempfile.TemporaryDirectory(prefix='pcapkit-root-module-') as temp:
+                path = pathlib.Path(temp, 'test_probe.py')
+                path.write_text(source, encoding='utf-8')
+                self.assertIs(leg.reads_module_table(path), expected)
 
 
 class TestLegModulesSubpath(unittest.TestCase):

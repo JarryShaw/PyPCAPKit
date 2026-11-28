@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-"""The ``mh-message``, ``mh-option`` and ``mh-extension`` families: Mobility Header
-messages, options and extensions.
+"""The ``mh-message``, ``mh-option``, ``mh-extension``, ``mh-selector``,
+``mh-qos-selector`` and ``mh-multicast`` families: Mobility Header messages,
+options, extensions and the option payloads parsed through a registry of their
+own (#2937).
 
 A family module of :file:`examples/generators/options.py`, which loads it by
 path and binds ``generator`` to itself before this body runs (#2615).
@@ -175,6 +177,100 @@ def _mh_extension_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
                           **MH_BASE)
 
 
+#: An RFC 6088 binary traffic selector selecting nothing: its flag word and
+#: reserved half-word, both zero, which both formats share [RFC 6088 section 3].
+TS_EMPTY = b'\x00\x00\x00\x00'
+
+#: Multicast group addresses for the records below: 224.0.0.251 and ff02::fb.
+GROUP_V4 = bytes.fromhex('e00000fb')
+GROUP_V6 = bytes.fromhex('ff0200000000000000000000000000fb')
+
+#: An IGMPv3 group record [RFC 3376 section 4.2] and an MLDv2 multicast address
+#: record [RFC 3810 section 5.2]: MODE_IS_INCLUDE, no auxiliary data, no sources.
+IGMPV3_RECORD = b'\x01\x00\x00\x00' + GROUP_V4
+MLDV2_RECORD = b'\x01\x00\x00\x00' + GROUP_V6
+
+
+def _mh_selector_registry() -> 'Any':
+    from pcapkit.protocols.internet.mh.protocol import MH
+    return MH.__selector__
+
+
+def _mh_selector_overrides() -> 'dict[Any, dict[str, Any]]':
+    return {}
+
+
+def _mh_selector_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
+    from pcapkit.const.mh.flow_id_suboption import FlowIDSuboption as Enum_FlowIDSuboption
+    from pcapkit.const.mh.option import Option as Enum_Option
+    from pcapkit.protocols.internet.mh.protocol import MH
+
+    # The flow identification option's sub-option [RFC 6089 section 4.2.1.4].
+    selector = {'ts_format': code, 'selector': TS_EMPTY, **kwargs}
+    option = (Enum_Option.Flow_Identification_Mobility_Option,
+              {'suboptions': [(Enum_FlowIDSuboption.Traffic_Selector, selector)]})
+    return MH.from_fields(type=_mh_carrier(), data={'options': [option]}, **MH_BASE)
+
+
+def _mh_qos_selector_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
+    from pcapkit.const.mh.option import Option as Enum_Option
+    from pcapkit.const.mh.qos_attribute import QoSAttribute as Enum_QoSAttribute
+    from pcapkit.protocols.internet.mh.protocol import MH
+
+    # The QoS option's attribute [RFC 7222 section 4.2.10], the selector's other carrier.
+    selector = {'ts_format': code, 'selector': TS_EMPTY, **kwargs}
+    option = (Enum_Option.Quality_of_Service,
+              {'attributes': [(Enum_QoSAttribute.QoS_Traffic_Selector, selector)]})
+    return MH.from_fields(type=_mh_carrier(), data={'options': [option]}, **MH_BASE)
+
+
+def _mh_multicast_registry() -> 'Any':
+    from pcapkit.protocols.internet.mh.protocol import MH
+    return MH.__multicast__
+
+
+def _mh_multicast_overrides() -> 'dict[Any, dict[str, Any]]':
+    from pcapkit.const.mh.option import Option as Enum_Option
+
+    selector = Enum_Option.Dynamic_IP_Multicast_Selector
+    ipv4 = Enum_Option.Active_Multicast_Subscription_IPv4
+    ipv6 = Enum_Option.Active_Multicast_Subscription_IPv6
+    mobility = Enum_Option.Multicast_Mobility_Option
+    # A report payload opens with a reserved half-word and the record count
+    # [RFC 7411 section 5.3], one record here.
+    igmpv3_report = b'\x00\x00\x00\x01' + IGMPV3_RECORD
+    mldv2_report = b'\x00\x00\x00\x01' + MLDV2_RECORD
+    return {
+        # One record each, in the format RFC 7028 sections 5.1.2 and 8 name.
+        (selector, 0x12): {'protocol': 0x12, 'records': 1, 'data': GROUP_V4},
+        (selector, 0x16): {'protocol': 0x16, 'records': 1, 'data': GROUP_V4},
+        (selector, 0x22): {'protocol': 0x22, 'records': 1, 'data': IGMPV3_RECORD},
+        (selector, 131): {'protocol': 131, 'records': 1, 'data': GROUP_V6},
+        (selector, 143): {'protocol': 143, 'records': 1, 'data': MLDV2_RECORD},
+        # RFC 7161 sections 6.1, 4.1.2 and 4.1.3; MLDv1's context is a reserved
+        # word and the address.
+        (ipv4, 0x12): {'igmp_type': 0x12, 'context': GROUP_V4},
+        (ipv4, 0x16): {'igmp_type': 0x16, 'context': GROUP_V4},
+        (ipv4, 0x22): {'igmp_type': 0x22, 'context': IGMPV3_RECORD},
+        (ipv6, 131): {'mld_type': 131, 'context': b'\x00' * 4 + GROUP_V6},
+        (ipv6, 143): {'mld_type': 143, 'context': MLDV2_RECORD},
+        (mobility, 1): {'code': 1, 'data': igmpv3_report},
+        (mobility, 2): {'code': 2, 'data': mldv2_report},
+        (mobility, 3): {'code': 3, 'data': igmpv3_report},
+        (mobility, 4): {'code': 4, 'data': mldv2_report},
+        # Status 1 carries the header line and no records [RFC 7411 section 5.4].
+        (Enum_Option.Multicast_Acknowledgement_Option, 0): {
+            'code': 0, 'status': 1, 'data': b'\x00\x00\x00\x00'},
+    }
+
+
+def _mh_multicast_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
+    from pcapkit.protocols.internet.mh.protocol import MH
+
+    option, _ = code
+    return MH.from_fields(type=_mh_carrier(), data={'options': [(option, dict(kwargs))]}, **MH_BASE)
+
+
 #: The families this module adds.
 FAMILIES = (
     generator.Family('mh-message', _mh_message_registry, _mh_message_overrides,
@@ -185,5 +281,14 @@ FAMILIES = (
                      capture='options-internet.pcap', envelope='ipv6', proto=135),
     generator.Family('mh-extension', _mh_extension_registry, _mh_extension_overrides,
                      _mh_extension_build, _mh_parse, _mh_option_extract, _mh_option_rebuild,
+                     capture='options-internet.pcap', envelope='ipv6', proto=135),
+    generator.Family('mh-selector', _mh_selector_registry, _mh_selector_overrides,
+                     _mh_selector_build, _mh_parse, _mh_option_extract, _mh_option_rebuild,
+                     capture='options-internet.pcap', envelope='ipv6', proto=135),
+    generator.Family('mh-qos-selector', _mh_selector_registry, _mh_selector_overrides,
+                     _mh_qos_selector_build, _mh_parse, _mh_option_extract, _mh_option_rebuild,
+                     capture='options-internet.pcap', envelope='ipv6', proto=135),
+    generator.Family('mh-multicast', _mh_multicast_registry, _mh_multicast_overrides,
+                     _mh_multicast_build, _mh_parse, _mh_option_extract, _mh_option_rebuild,
                      capture='options-internet.pcap', envelope='ipv6', proto=135),
 )

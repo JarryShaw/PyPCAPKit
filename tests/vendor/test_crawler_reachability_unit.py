@@ -51,13 +51,13 @@ from __future__ import annotations
 
 import importlib
 import importlib.util
-import pathlib
 import pkgutil
 import unittest
 from collections import Counter
 from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
+from tests.vendor._crawler import defined_crawlers, import_from_checkout, is_crawler
 
 if TYPE_CHECKING:
     from typing import Any
@@ -65,9 +65,6 @@ if TYPE_CHECKING:
 #: Test tier (#1958): checks which crawlers the package reaches, a question about the
 #: tree.
 __tier__ = 'LATEST'
-
-#: Repository root, i.e. the grandparent of the directory holding this file.
-ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: Whether the crawler machinery is importable at all. Importing
 #: :mod:`pcapkit.vendor` pulls in every subpackage only when :mod:`requests` and
@@ -106,56 +103,8 @@ class CrawlerReachabilityTests(unittest.TestCase):
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
-
-        import pcapkit
-        import pcapkit.vendor as vendor
-        from pcapkit.vendor.default import Vendor
-
-        # The whole assertion is "what is on disk in *this* checkout is reachable
-        # from this checkout's __all__". An installed copy imported from
-        # somewhere else would be comparing two trees, which is an environment
-        # mismatch rather than a defect -- hence a skip rather than a failure.
-        resolved = pathlib.Path(pcapkit.__file__).resolve()
-        if ROOT not in resolved.parents:
-            self.skipTest(f'pcapkit was imported from {resolved}, which is outside {ROOT}; '
-                          f'install this checkout with `pip install -e .`, or set PYTHONPATH to '
-                          f'it, to run this suite against it')
-
-        self.vendor = vendor
-        self.Vendor = Vendor
-
-    def _is_crawler(self, obj: 'Any') -> 'bool':
-        """Whether ``obj`` is a concrete crawler class.
-
-        :class:`~pcapkit.vendor.default.Vendor` itself is excluded: it is the
-        abstract base, it is exported from :mod:`pcapkit.vendor` for subclassing
-        rather than for running, and it is not in :attr:`__all__`.
-
-        """
-        return isinstance(obj, type) and issubclass(obj, self.Vendor) and obj is not self.Vendor
-
-    def _defined_crawlers(self) -> 'dict[str, Any]':
-        """Every crawler defined under :file:`pcapkit/vendor/`, by qualified name.
-
-        Discovered from the filesystem with :func:`pkgutil.walk_packages`, which
-        is the half of the comparison :attr:`__all__` cannot influence -- the
-        point being to find a crawler that exists and is not listed.
-
-        A class is attributed to the module that *defines* it, i.e. where
-        ``__module__`` points, so the re-exports every subpackage performs do not
-        each count as another crawler.
-
-        """
-        found = {}  # type: dict[str, Any]
-        for info in pkgutil.walk_packages(self.vendor.__path__, prefix='pcapkit.vendor.'):
-            if any(part.startswith('_') for part in info.name.split('.')):
-                continue
-            module = importlib.import_module(info.name)
-            for name in getattr(module, '__all__', ()):
-                obj = getattr(module, name, None)
-                if self._is_crawler(obj) and obj.__module__ == info.name:
-                    found[f'{info.name}.{name}'] = obj
-        return found
+        self.vendor, default = import_from_checkout(self, 'pcapkit.vendor', 'pcapkit.vendor.default')
+        self.Vendor = default.Vendor
 
     def _reachable_from(self, module: 'Any') -> 'dict[str, Any]':
         """The crawlers ``pcapkit-vendor`` would collect from ``module``.
@@ -163,7 +112,8 @@ class CrawlerReachabilityTests(unittest.TestCase):
         The expression :func:`pcapkit.vendor.__main__.main` uses on both paths,
         reproduced -- ``getattr(module, name) for name in module.__all__`` --
         keyed by defining module and class name so the result is comparable with
-        :meth:`_defined_crawlers` regardless of the alias each is exported under.
+        :func:`~tests.vendor._crawler.defined_crawlers` regardless of the alias
+        each is exported under.
 
         ``main()`` itself is deliberately not called: it does not merely build the
         list, it runs every crawler in it, which fetches from IANA and rewrites
@@ -173,7 +123,7 @@ class CrawlerReachabilityTests(unittest.TestCase):
         reachable = {}  # type: dict[str, Any]
         for name in module.__all__:
             obj = getattr(module, name, None)
-            if self._is_crawler(obj):
+            if is_crawler(obj, self.Vendor):
                 reachable[f'{obj.__module__}.{obj.__name__}'] = obj
         return reachable
 
@@ -188,7 +138,7 @@ class CrawlerReachabilityTests(unittest.TestCase):
         # The bare `pcapkit-vendor` path, which is what cron-vendor.yml runs:
         # every crawler on disk has to be in the list that run() is handed, or it
         # silently never executes and its constant file goes stale.
-        defined = self._defined_crawlers()
+        defined = defined_crawlers(self.vendor, self.Vendor)
         reachable = self._reachable_from(self.vendor)
 
         unreachable = sorted(set(defined) - set(reachable))
@@ -205,7 +155,7 @@ class CrawlerReachabilityTests(unittest.TestCase):
         # The `--target <name>` path, which reads the subpackage's __all__ rather
         # than the root's. It is a separate list and can be separately wrong, so a
         # crawler can be reachable one way and not the other.
-        defined = self._defined_crawlers()
+        defined = defined_crawlers(self.vendor, self.Vendor)
 
         reachable = {}  # type: dict[str, Any]
         for target in self._subpackages():
@@ -261,7 +211,7 @@ class CrawlerReachabilityTests(unittest.TestCase):
 
         module = importlib.import_module(module_name)
         crawler = getattr(module, class_name)
-        self.assertTrue(self._is_crawler(crawler))
+        self.assertTrue(is_crawler(crawler, self.Vendor))
 
         import pcapkit.vendor.mh as mh
         self.assertIn(exported, mh.__all__)

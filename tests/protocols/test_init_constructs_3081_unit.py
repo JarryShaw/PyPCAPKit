@@ -35,6 +35,7 @@ from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
 from tests.foundation import _roundtrip as wire
+from tests.protocols._rebuild import depth
 
 if TYPE_CHECKING:
     from typing import Any, Callable
@@ -70,25 +71,6 @@ def ipv4_in_ipv4(count: int) -> bytes:
     for _ in range(count):
         data, proto = wire.ipv4(data, proto=proto), 4
     return wire.ethernet(data, 0x0800)
-
-
-def depth(func: 'Callable[[], object]') -> int:
-    """How many Python frames deeper than its caller ``func()`` goes, as #1610's test counts."""
-    state = {'now': 0, 'most': 0}
-
-    def profile(frame: object, event: str, arg: object) -> None:  # pylint: disable=unused-argument
-        if event == 'call':
-            state['now'] += 1
-            state['most'] = max(state['most'], state['now'])
-        elif event == 'return':
-            state['now'] -= 1
-
-    sys.setprofile(profile)
-    try:
-        func()
-    finally:
-        sys.setprofile(None)
-    return state['most']
 
 
 class ParseShapeTests(unittest.TestCase):

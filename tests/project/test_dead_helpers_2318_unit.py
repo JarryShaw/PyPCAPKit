@@ -16,12 +16,11 @@ something reads it, in its own module or in another.
 """
 
 import ast
-import importlib.util
 import pathlib
 import re
-import sys
-import types
 import unittest
+
+from tests._support import load_source
 
 #: Test tier (#1958): reads repository files and the dispatch case table, which
 #: do not differ by interpreter.
@@ -37,27 +36,6 @@ RELEASE_TEST = ROOT / 'tests' / 'project' / 'test_release_tags_the_run_sha_1634.
 SWEEPS_TEST = ROOT / 'tests' / 'project' / 'test_sweeps_on_latest_only_1732.py'
 #: Where a query ``FAKE_GH`` answers has to be sent from.
 CALLERS = (ROOT / 'util' / 'release_upload.py', *sorted((ROOT / '.github' / 'workflows').glob('*.yml')))
-
-
-def load_dispatch() -> 'types.ModuleType':
-    """Load :file:`examples/generators/dispatch.py` by path.
-
-    Follows :func:`tests.protocols.test_dispatch_registry_unit._load_generator`:
-    the directory is not a package and its module name is too generic to put on
-    :data:`sys.path`.
-
-    Raises:
-        RuntimeError: If the module cannot be found or loaded.
-
-    """
-    spec = importlib.util.spec_from_file_location('pcapkit_samples_dispatch_2318', DISPATCH)
-    if spec is None or spec.loader is None:  # pragma: no cover
-        raise RuntimeError(f'cannot load the dispatch case table from {DISPATCH}')
-
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
 
 
 def constants(path: 'pathlib.Path') -> 'list[str]':
@@ -92,7 +70,7 @@ class DispatchEnumTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.dispatch = load_dispatch()
+        cls.dispatch = load_source(DISPATCH, 'pcapkit_samples_dispatch_2318', register=True)
 
     def test_an_enum_is_given_only_where_a_key_needs_it(self) -> None:
         for family in self.dispatch.FAMILIES:

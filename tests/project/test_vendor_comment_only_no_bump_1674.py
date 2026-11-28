@@ -25,7 +25,6 @@ The layers:
 
 from __future__ import annotations
 
-import importlib.util
 import os
 import pathlib
 import re
@@ -36,7 +35,7 @@ import tempfile
 import unittest
 from typing import TYPE_CHECKING
 
-from tests._support import bash_argv, scale_timeout
+from tests._support import bash_argv, load_source, scale_timeout
 from tests.project.test_release_gates import (_RUN_LITERAL, NULL, STATUS, block_scalar_after,
                                               evaluate_condition, evaluate_expression, job_blocks,
                                               step_block, step_mapping)
@@ -158,13 +157,7 @@ def edited(edits: 'list[tuple[str, str]]') -> 'str':
 
 def _load_script() -> 'Optional[types.ModuleType]':
     """:file:`util/vendor_code_changed.py` as a module, or :data:`None` on a tree without it (#1674)."""
-    if not SCRIPT.exists():
-        return None
-    spec = importlib.util.spec_from_file_location('vendor_code_changed', SCRIPT)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    return load_source(SCRIPT, 'vendor_code_changed') if SCRIPT.exists() else None
 
 
 class ScratchRepository(unittest.TestCase):

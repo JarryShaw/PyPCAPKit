@@ -25,12 +25,9 @@ module that purged it earlier does not leave these tests holding stale classes.
 """
 
 import unittest
-from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
-
-if TYPE_CHECKING:
-    from typing import Any
+from tests.protocols.misc._pcapng import make_context
 
 #: Test tier (#1958): hand-picked round-trip cases, not a sweep.
 __tier__ = 'ALL'
@@ -81,27 +78,13 @@ class TestPCAPNGRoundTrip(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def _context(self) -> 'Any':
-        """A one-section context with one Ethernet interface, as the engine builds it."""
-        from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
-
-        section = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
-        context = Context(section.info)  # type: Any
-        interface = PCAPNG.from_fields(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
-                                       block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
-        context.interfaces.append(interface.info)
-        return context
-
     def _rebuild(self, octets: 'bytes') -> 'bytes':
         """Parse ``octets`` as one block and rebuild it from its data model."""
         import warnings
 
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        context = self._context()
+        context = make_context()
         with warnings.catch_warnings():
             # the Packet Block's maker warns that the block is obsolete
             warnings.simplefilter('ignore')
@@ -114,7 +97,7 @@ class TestPCAPNGRoundTrip(unittest.TestCase):
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        block = PCAPNG.from_fields(num=2, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
+        block = PCAPNG.from_fields(num=2, sct=1, ctx=make_context(), type=BlockType.Interface_Description_Block,
                                    block={'linktype': 1, 'snaplen': 65535,
                                           'options': [(OptionType.if_name, {'name': 'eth0'})]})
         self.assertEqual(block.info.options[OptionType.if_name].name, 'eth0')
@@ -128,7 +111,7 @@ class TestPCAPNGRoundTrip(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaisesRegex(ProtocolError, r'\[if_name\] option must be only one, not 2'):
-            PCAPNG.from_fields(num=2, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
+            PCAPNG.from_fields(num=2, sct=1, ctx=make_context(), type=BlockType.Interface_Description_Block,
                                block={'linktype': 1, 'snaplen': 65535,
                                       'options': [(OptionType.if_name, {'name': 'eth0'}),
                                                   (OptionType.if_name, {'name': 'eth1'})]})
@@ -139,7 +122,7 @@ class TestPCAPNGRoundTrip(unittest.TestCase):
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        block = PCAPNG.from_fields(num=2, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
+        block = PCAPNG.from_fields(num=2, sct=1, ctx=make_context(), type=BlockType.Interface_Description_Block,
                                    block={'linktype': 1, 'snaplen': 65535,
                                           'options': [(OptionType.if_IPv6addr, {'interface': '2001:db8::1/64'})]})
         # 20 octets of block (16 before the options), a 4-octet option header, 17 octets of value and

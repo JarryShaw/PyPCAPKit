@@ -44,7 +44,7 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.ospf.authentication import Authentication as Enum_Authentication
 from pcapkit.const.ospf.packet import Packet as Enum_Packet
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
-from pcapkit.corekit.schema.shortread import cut_on_its_own
+from pcapkit.corekit.schema.short_read import cut_on_its_own
 from pcapkit.protocols.application.ospf.protocol import OSPF
 from pcapkit.protocols.application.ospfv2.data import \
     CryptographicAuthentication as Data_CryptographicAuthentication

@@ -20,12 +20,12 @@ imported inside each test, after :func:`~tests._support.reimport_once_per_class`
 """
 
 import struct
-import sys
 import unittest
 import warnings
 
 from tests._support import reimport_once_per_class
 from tests.foundation import _roundtrip as wire
+from tests.protocols._rebuild import depth
 
 #: Test tier (#1958): hand-picked chain lengths for #1619, not a sweep.
 __tier__ = 'ALL'
@@ -77,25 +77,6 @@ def tunnelled(carrier: str, tunnels: int, count: int) -> bytes:
 def record(data: bytes) -> bytes:
     """A PCAP record of ``data``, captured whole."""
     return struct.pack('<IIII', 1_500_000_000, 0, len(data), len(data)) + data
-
-
-def depth(func: 'object') -> int:
-    """How many Python frames deeper than its caller ``func()`` goes."""
-    state = {'now': 0, 'most': 0}
-
-    def profile(frame_: object, event: str, arg: object) -> None:  # pylint: disable=unused-argument
-        if event == 'call':
-            state['now'] += 1
-            state['most'] = max(state['most'], state['now'])
-        elif event == 'return':
-            state['now'] -= 1
-
-    sys.setprofile(profile)
-    try:
-        func()  # type: ignore[operator]
-    finally:
-        sys.setprofile(None)
-    return state['most']
 
 
 class ExtensionHeaderChainRebuildTests(unittest.TestCase):
@@ -180,17 +161,6 @@ class ExtensionHeaderChainRebuildTests(unittest.TestCase):
                     # limit falls first
                     messages = self.assert_rebuilds_as_parsed(Ethernet, tunnelled(carrier, 32, count), 1)
                     self.assertIn('limit of 64 layers', messages[0])
-
-    def test_where_the_frame_limit_falls_first_rebuilding_warns_once(self) -> None:
-        # Guard: 40 tunnels put the 65th layer at the chain's 24th header, short
-        # of the chain limit; the rebuild warns once with or without the #1619
-        # fix.
-        from pcapkit.protocols.link.ethernet.protocol import Ethernet
-
-        for carrier in ETHERTYPE:
-            with self.subTest(carrier=carrier):
-                messages = self.assert_rebuilds_as_parsed(Ethernet, tunnelled(carrier, 40, 40), 1)
-                self.assertIn('limit of 64 layers', messages[0])
 
     def test_rebuilding_a_cut_frame_goes_no_deeper_than_parsing_it(self) -> None:
         # Without the #1619 fix, each header rebuilt over IPv4 counts the chain

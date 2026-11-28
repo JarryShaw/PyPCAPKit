@@ -20,18 +20,16 @@ The messages are built here; this module is unit-tier and reads no capture file.
 """
 from __future__ import annotations
 
-import contextlib
-import logging
 import unittest
-import warnings
 from typing import TYPE_CHECKING
 from unittest import mock
 
 from tests._support import reimport_once_per_class
 from tests.foundation import _roundtrip as wire
+from tests.protocols._rebuild import reported as _reported
 
 if TYPE_CHECKING:
-    from typing import Any, Iterator
+    from typing import Any
 
 #: Test tier (#1958): hand-picked parse -> rebuild round trips.
 __tier__ = 'ALL'
@@ -63,32 +61,6 @@ STARTS = tuple(8 + sum(map(len, RECORDS[:index])) for index in range(len(RECORDS
 def begun(keep: int) -> int:
     """How many records the first ``keep`` octets of the message begin."""
     return sum(1 for start in STARTS if start < keep)
-
-
-class _Logged(logging.Handler):
-    """Collect what the ``pcapkit`` logger reports."""
-
-    def __init__(self) -> None:
-        super().__init__(logging.DEBUG)
-        self.messages = []  # type: list[str]
-
-    def emit(self, record: 'logging.LogRecord') -> None:  # pylint: disable=redefined-outer-name
-        self.messages.append(record.getMessage())
-
-
-@contextlib.contextmanager
-def _reported() -> 'Iterator[list[str]]':
-    """Collect what the block reports, on the logger and the :mod:`warnings` channel."""
-    handler = _Logged()
-    logger = logging.getLogger('pcapkit')
-    logger.addHandler(handler)
-    try:
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter('always')
-            yield handler.messages
-            handler.messages.extend(f'{item.category.__name__}: {item.message}' for item in caught)
-    finally:
-        logger.removeHandler(handler)
 
 
 class FramedReportCutTests(unittest.TestCase):

@@ -23,7 +23,6 @@ Two layers, as in :mod:`tests.project.test_release_gates`:
 
 from __future__ import annotations
 
-import importlib.util
 import os
 import pathlib
 import re
@@ -34,7 +33,7 @@ import tempfile
 import unittest
 from typing import TYPE_CHECKING
 
-from tests._support import scale_timeout
+from tests._support import load_source, scale_timeout
 from tests.project.test_release_gates import (NULL, STATUS, _evaluate, declared_if, declared_needs,
                                               evaluate_condition, job_blocks, parse_condition)
 
@@ -55,16 +54,8 @@ ACTING_JOBS = {
 }
 
 
-def _load_script():
-    """:file:`util/verdict_covers_checkout.py` as a module; it has no import-time effects."""
-    spec = importlib.util.spec_from_file_location('verdict_covers_checkout', SCRIPT)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-verdict_covers_checkout = _load_script()
+#: :file:`util/verdict_covers_checkout.py`, which has no import-time effects.
+verdict_covers_checkout = load_source(SCRIPT, 'verdict_covers_checkout')
 
 #: The identities on the 2026-10-13 commits: a squash merge is authored by its PR's
 #: author and committed by GitHub; pyup's weekly update the same way.

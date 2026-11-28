@@ -32,7 +32,10 @@ Call sites that would otherwise carry the shape the ruling rejects are pinned to
   ``ValueError`` conversion, only the ``key.lower()`` call --
   :class:`TransportProtocolCaseFoldingTests`.
 * ``Criticality.get`` does not exist, since its body would be a pure
-  pass-through -- :class:`CriticalityGetDeletionTests`.
+  pass-through. ``CriticalityGetTests`` in
+  :mod:`tests.corekit.test_enum_lookup_reparent_877_unit` pins that and the
+  name and value misses; :class:`CriticalityGetDeletionTests` pins what the
+  inherited base resolves, and its ``default`` handling.
 * :class:`~pcapkit.protocols.internet.mh.protocol.FastBindingAcknowledgmentStatus` and
   :class:`~pcapkit.protocols.internet.mh.protocol.IPv6AddressPrefixCode` raise from
   :mod:`pcapkit.utilities.exceptions` on a *name* miss as ``EnumKeyError``, not
@@ -43,7 +46,7 @@ Without the fix every test below fails at import, since
 :exc:`~pcapkit.utilities.exceptions.EnumKeyError` does not exist; with the
 exception but not the base's use of it, each fails on its own assertion instead.
 :meth:`TransportProtocolCaseFoldingTests.test_upper_case_still_resolves` and the
-resolving half of :class:`CriticalityGetDeletionTests` are regression guards
+resolving tests of :class:`CriticalityGetDeletionTests` are regression guards
 rather than defect repros and cannot fail without the fix; they pin what
 reducing ``TransportProtocol.get`` and doing without ``Criticality.get`` could
 plausibly break.
@@ -434,11 +437,6 @@ class CriticalityGetDeletionTests(unittest.TestCase):
     directions.
     """
 
-    def test_the_override_is_gone(self) -> 'None':
-        from pcapkit.protocols.application.ngap.protocol import Criticality
-
-        self.assertNotIn('get', Criticality.__dict__)
-
     def test_names_and_values_resolve_through_the_inherited_get(self) -> 'None':
         """Invariants rather than repros -- they pass without the #923 fix too,
         and are what relying on the inherited ``get`` has to preserve."""
@@ -450,16 +448,6 @@ class CriticalityGetDeletionTests(unittest.TestCase):
         self.assertIs(Criticality.get(0), Criticality.reject)
         self.assertIs(Criticality.get(2), Criticality.notify)
         self.assertIs(Criticality.get(Criticality.reject), Criticality.reject)
-
-    def test_a_name_miss_reports_in_the_stdlib_shape(self) -> 'None':
-        from pcapkit.protocols.application.ngap.protocol import Criticality
-        from pcapkit.utilities.exceptions import EnumKeyError
-
-        with self.assertRaises(EnumKeyError) as caught:
-            Criticality.get('nosuch')
-        self.assertIsInstance(caught.exception, KeyError)
-        self.assertNotIsInstance(caught.exception, ValueError)
-        self.assertIn('nosuch', str(caught.exception))
 
     def test_a_member_valued_default_is_honoured(self) -> 'None':
         from pcapkit.protocols.application.ngap.protocol import Criticality
@@ -479,15 +467,6 @@ class CriticalityGetDeletionTests(unittest.TestCase):
         with self.assertRaises(EnumKeyError):
             Criticality.get('nosuch', 99)
         self.assertEqual(len(Criticality.__members__), before)
-
-    def test_a_value_miss_still_goes_through_missing(self) -> 'None':
-        from pcapkit.protocols.application.ngap.protocol import Criticality
-        from pcapkit.utilities.exceptions import EnumValueError
-
-        with self.assertRaises(EnumValueError) as caught:
-            Criticality.get(3)
-        self.assertIsInstance(caught.exception, ValueError)
-        self.assertIn('3', str(caught.exception))
 
 
 class MobilityHeaderNameMissTests(unittest.TestCase):

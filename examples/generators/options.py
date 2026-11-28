@@ -17,8 +17,9 @@ Capture                         Codes
 :file:`options-ipv6.pcap`       HOPOPT, IPv6-Opts and IPv6-Route
 :file:`options-transport.pcap`  SCTP chunks, parameters and error causes,
                                 HTTP/2 frames, and DCCP options
-:file:`options-internet.pcap`   Mobility Header messages, options and
-                                extensions, and HIP parameters
+:file:`options-internet.pcap`   Mobility Header messages, options,
+                                extensions and option payloads, and HIP
+                                parameters
 =============================== =============================================
 
 Each frame carries exactly one item of exactly one code, so a parse failure

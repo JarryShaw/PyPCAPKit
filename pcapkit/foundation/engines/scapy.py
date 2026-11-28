@@ -299,12 +299,13 @@ class Scapy(EngineBase['ScapyPacket']):
     __engine_module__ = 'scapy'
 
     #: Reassembly adapters, each called as ``adapter(packet, count=n)`` on the
-    #: Scapy packet and its frame number. There is no DTLS adapter, as DTLS
-    #: reassembly reads :mod:`pcapkit`'s own DTLS layer.
+    #: Scapy packet and its frame number. There is no DTLS or SCTP adapter, as
+    #: their reassembly reads :mod:`pcapkit`'s own DTLS and SCTP layers.
     __reassembly__ = {
         'ipv4': ModuleDescriptor('pcapkit.toolkit.scapy', 'ipv4_reassembly'),
         'ipv6': ModuleDescriptor('pcapkit.toolkit.scapy', 'ipv6_reassembly'),
         'tcp': ModuleDescriptor('pcapkit.toolkit.scapy', 'tcp_reassembly'),
+        'tls': ModuleDescriptor('pcapkit.toolkit.scapy', 'tls_reassembly'),
     }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
     #: Flow tracing adapters, each called as ``adapter(packet, count=n)`` on the
@@ -356,7 +357,7 @@ class Scapy(EngineBase['ScapyPacket']):
                 or if :attr:`self.extractor._exctx <pcapkit.foundation.extraction.Extractor._exctx>`
                 is provided, as the Scapy engine does not parse with :mod:`pcapkit`'s own
                 protocol implementations; or if a reassembler with no adapter in
-                :attr:`__reassembly__` is enabled, as DTLS's is not, for the same
+                :attr:`__reassembly__` is enabled, as DTLS's and SCTP's are not, for the same
                 reason, or a flow tracer with none in :attr:`__traceflow__`.
 
         """

@@ -29,11 +29,17 @@ protocol's layer is decided by function rather than encapsulation; see
    tls
    sslv3
    dtls
+   stp
+   stpv0
+   rstp
+   mstp
 
 .. todo::
 
-   Implement BGP, DHCP, DHCPv6, IMAP, LDAP, MQTT, NNTP, NTP, ONC:RPC,
-   POP, RIP, RTP, SIP, SMTP, SNMP, SSH, TELNET, XMPP.
+   Implement BFD, BGP, DHCP, DHCPv6, IKE, IMAP, Kerberos, LACP, LDAP, LLDP,
+   mDNS and LLMNR, MQTT, NetBIOS, NNTP, NTP, ONC/RPC, POP, RADIUS, RIP, RSVP,
+   RTP, SIP, SMB, SMTP, SNMP, SSDP, SSH, syslog, Telnet, VRRP and XMPP, and
+   decode OSPF's packet bodies; :doc:`/contributing/pep` gives each its issue.
 
 Protocol Registry
 -----------------

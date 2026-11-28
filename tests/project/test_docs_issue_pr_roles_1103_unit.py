@@ -37,11 +37,11 @@ import pathlib
 import re
 import subprocess  # nosec B404
 import tempfile
-import tokenize
 import unittest
 from typing import TYPE_CHECKING
 from unittest import mock
 
+from tests import _sources
 from util import issue_pr_kinds
 
 if TYPE_CHECKING:
@@ -215,7 +215,10 @@ def scan_text(text: 'str', first_line: 'int' = 1) -> 'Iterator[tuple[int, str]]'
 
 def docstrings(source: 'str') -> 'Iterator[tuple[int, str]]':
     """The first line and text of each docstring, attribute docstrings included."""
-    tree = ast.parse(source)
+    return _docstrings_in(ast.parse(source))
+
+
+def _docstrings_in(tree: 'ast.Module') -> 'Iterator[tuple[int, str]]':
     for node in ast.walk(tree):
         if not isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
             continue
@@ -232,19 +235,23 @@ def docstrings(source: 'str') -> 'Iterator[tuple[int, str]]':
 def doc_comments(source: 'str') -> 'Iterator[tuple[int, str]]':
     """The first line and joined text of each run of consecutive ``#:`` comments."""
     start, block, last = 0, [], -1
-    for token in tokenize.generate_tokens(io.StringIO(source).readline):
-        if token.type != tokenize.COMMENT or not token.string.startswith('#:'):
+    for line, _, comment in _sources.comments_in(source):
+        if not comment.startswith('#:'):
             continue
-        line = token.start[0]
         if block and line != last + 1:
             yield start, '\n'.join(block)
             block = []
         if not block:
             start = line
-        block.append(token.string[2:])
+        block.append(comment[2:])
         last = line
     if block:
         yield start, '\n'.join(block)
+
+
+def _rendered_in(tree: 'ast.Module', source: 'str') -> 'tuple[tuple[int, str], ...]':
+    """The first line and text of each docstring and ``#:`` doc-comment, for :func:`tests._sources.parsed`."""
+    return (*_docstrings_in(tree), *doc_comments(source))
 
 
 def scan_python(source: 'str') -> 'Iterator[tuple[int, str]]':
@@ -265,12 +272,10 @@ def scan_roles(text: 'str', first_line: 'int' = 1) -> 'Iterator[tuple[int, str, 
 def rendered_texts() -> 'Iterator[tuple[str, int, str]]':
     """The path, first line and text of each ``.rst`` page, docstring and ``#:`` doc-comment."""
     for path in sorted(DOCS.rglob('*.rst')):
-        yield path.relative_to(ROOT).as_posix(), 1, path.read_text('utf-8')
+        yield path.relative_to(ROOT).as_posix(), 1, _sources.text(path)
     for path in sorted(PACKAGE.rglob('*.py')):
-        name, source = path.relative_to(ROOT).as_posix(), path.read_text('utf-8')
-        for line, text in docstrings(source):
-            yield name, line, text
-        for line, text in doc_comments(source):
+        name = path.relative_to(ROOT).as_posix()
+        for line, text in _sources.parsed(path, _rendered_in):
             yield name, line, text
 
 

@@ -676,11 +676,13 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         'LINUXSLL': ModuleDescriptor('pcapkit.protocols.link.linux_sll.protocol', 'LinuxSLL'),
         'LINUXSLL1': ModuleDescriptor('pcapkit.protocols.link.linux_sll1.protocol', 'LinuxSLL1'),
         'LINUXSLL2': ModuleDescriptor('pcapkit.protocols.link.linux_sll2.protocol', 'LinuxSLL2'),
+        'LLC': ModuleDescriptor('pcapkit.protocols.link.llc.protocol', 'LLC'),
         'LOOPBACK': ModuleDescriptor('pcapkit.protocols.link.loopback.protocol', 'Loopback'),
         'NETLINK': ModuleDescriptor('pcapkit.protocols.link.netlink.protocol', 'Netlink'),
         'PPP': ModuleDescriptor('pcapkit.protocols.link.ppp.protocol', 'PPP'),
         'PPPOE': ModuleDescriptor('pcapkit.protocols.link.pppoe.protocol', 'PPPoE'),
         'RADIOTAP': ModuleDescriptor('pcapkit.protocols.link.radiotap.protocol', 'Radiotap'),
+        'SNAP': ModuleDescriptor('pcapkit.protocols.link.snap.protocol', 'SNAP'),
         'S_TAG': ModuleDescriptor('pcapkit.protocols.link.s_tag.protocol', 'S_Tag'),
         'VLAN': ModuleDescriptor('pcapkit.protocols.link.vlan.protocol', 'VLAN'),
         # Internet Layer
@@ -719,15 +721,19 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         'HTTP': ModuleDescriptor('pcapkit.protocols.application.http.protocol', 'HTTP'),
         'HTTPV1': ModuleDescriptor('pcapkit.protocols.application.httpv1.protocol', 'HTTPv1'),
         'HTTPV2': ModuleDescriptor('pcapkit.protocols.application.httpv2.protocol', 'HTTPv2'),
+        'MSTP': ModuleDescriptor('pcapkit.protocols.application.mstp.protocol', 'MSTP'),
         'NGAP': ModuleDescriptor('pcapkit.protocols.application.ngap.protocol', 'NGAP'),
         'OSPF': ModuleDescriptor('pcapkit.protocols.application.ospf.protocol', 'OSPF'),
         'OSPFV1': ModuleDescriptor('pcapkit.protocols.application.ospfv1.protocol', 'OSPFv1'),
         'OSPFV2': ModuleDescriptor('pcapkit.protocols.application.ospfv2.protocol', 'OSPFv2'),
         'OSPFV3': ModuleDescriptor('pcapkit.protocols.application.ospfv3.protocol', 'OSPFv3'),
         'RARP': ModuleDescriptor('pcapkit.protocols.application.rarp.protocol', 'RARP'),
+        'RSTP': ModuleDescriptor('pcapkit.protocols.application.rstp.protocol', 'RSTP'),
         'SSL': ModuleDescriptor('pcapkit.protocols.application.ssl.protocol', 'SSL'),
         'SSLV2': ModuleDescriptor('pcapkit.protocols.application.sslv2.protocol', 'SSLv2'),
         'SSLV3': ModuleDescriptor('pcapkit.protocols.application.sslv3.protocol', 'SSLv3'),
+        'STP': ModuleDescriptor('pcapkit.protocols.application.stp.protocol', 'STP'),
+        'STPV0': ModuleDescriptor('pcapkit.protocols.application.stpv0.protocol', 'STPv0'),
         'TLS': ModuleDescriptor('pcapkit.protocols.application.tls.protocol', 'TLS'),
         # Miscellaneous
         'FRAME': ModuleDescriptor('pcapkit.protocols.misc.pcap.frame.protocol', 'Frame'),
@@ -1092,7 +1098,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             a cut inside it is the short read it records, with no
             ``packet length < 0`` warning per field and no length resolved below
             zero (:issue:`2880`). A check :meth:`read` makes of a value the cut
-            left asks :func:`~pcapkit.corekit.schema.shortread.cut_on_its_own`
+            left asks :func:`~pcapkit.corekit.schema.short_read.cut_on_its_own`
             whether to leave it to the short read.
 
         Raises:

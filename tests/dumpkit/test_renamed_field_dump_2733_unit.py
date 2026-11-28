@@ -36,6 +36,7 @@ import unittest
 from ipaddress import ip_address
 
 from tests._support import reimport_once_per_class, scale_timeout
+from tests.foundation.reassembly._reassemblers import builtins, datagram
 
 #: Repository root, the working directory of a fresh interpreter.
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -272,28 +273,17 @@ class DeferredPacketDumpTests(DumpTestCase):
                         self.assertEqual(block['packet'], self.block(writer, {'packet': packet})['packet'])
 
     def test_the_dump_resolves_a_deferred_packet_once(self) -> None:
-        """Every model with a deferred ``packet``, IP, TCP and DTLS reassembly's and a traced flow's."""
-        from pcapkit.foundation.reassembly.data import Completion
+        """Every model with a deferred ``packet``, each shipped reassembler's and a traced flow's."""
         from pcapkit.foundation.reassembly.data import Deferred as ReassemblyDeferred
-        from pcapkit.foundation.reassembly.dtls.data import Datagram as DTLS_Datagram
-        from pcapkit.foundation.reassembly.ip.data import Datagram as IP_Datagram
-        from pcapkit.foundation.reassembly.tcp.data import Datagram as TCP_Datagram
         from pcapkit.foundation.traceflow.data import Deferred as TraceFlowDeferred
         from pcapkit.foundation.traceflow.tcp.data import Index
 
-        def datagram(cls: 'type', counting: 'Counting') -> 'object':
-            return cls(completed=Completion.COMPLETE, id=None, index=(1,), header=b'', payload=b'payload',
-                       packet=ReassemblyDeferred(counting, 'proto', b'payload'), conflict=())
+        def deferred(counting: 'Counting') -> 'object':
+            return ReassemblyDeferred(counting, 'proto', b'payload')
 
-        builders = {
-            'ip': lambda counting: datagram(IP_Datagram, counting),
-            'tcp': lambda counting: datagram(TCP_Datagram, counting),
-            'dtls': lambda counting: DTLS_Datagram(
-                completed=Completion.COMPLETE, id=None, index=(1,), message_seq=0, msg_type=None, length=7,
-                body=b'payload', packet=ReassemblyDeferred(counting, 'proto', b'payload')),
-            'trace': lambda counting: Index(fpout=None, index=(1,), label='label', forward=(1,), reverse=(),
-                                            packet=TraceFlowDeferred(counting)),  # type: ignore[arg-type]
-        }
+        builders = {name: lambda counting, name=name: datagram(name, deferred(counting)) for name in builtins()}
+        builders['trace'] = lambda counting: Index(fpout=None, index=(1,), label='label', forward=(1,), reverse=(),
+                                                   packet=TraceFlowDeferred(counting))  # type: ignore[arg-type]
         for (label, build) in builders.items():
             with self.subTest(model=label):
                 counting = Counting()

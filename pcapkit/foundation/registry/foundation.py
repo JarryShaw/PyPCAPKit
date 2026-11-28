@@ -235,8 +235,8 @@ def register_reassembly_callback(protocol: 'str', callback: 'Reasm_CallbackFn', 
     ``__callback_fn__`` list of the reassembly class registered under ``protocol``
     in :data:`pcapkit.foundation.extraction.Extractor.__reassembly__`, through its
     :meth:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase.register_callback`. It
-    reaches DTLS and a reassembler registered with
-    :func:`register_extractor_reassembly` as it reaches IPv4, IPv6 and TCP.
+    reaches every reassembler registered there, one added with
+    :func:`register_extractor_reassembly` included.
 
     Arguments:
         protocol: name the reassembler is registered by, case-insensitively,

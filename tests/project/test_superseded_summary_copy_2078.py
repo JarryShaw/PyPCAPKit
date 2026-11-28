@@ -23,15 +23,12 @@ import pathlib
 import shutil
 import signal
 import sys
-import tempfile
-import threading
 import unittest
 from typing import TYPE_CHECKING
 
-from tests.project.test_python_versions_1660 import ROOT
+from tests.project._watcher import NEWER, OURS, Runner, quickened, tmpdir
 from tests.project.test_resource_monitor_1740 import BASH, DEFAULT, TESTS, sh, step
-from tests.project.test_superseded_runs_1938 import (NEWER, OURS, REPO, SLEEPER, FakeApi, Files, Handler, Server,
-                                                     main_at)
+from tests.project.test_superseded_runs_1938 import SLEEPER, FakeApi, Files, main_at
 from util import superseded
 
 if TYPE_CHECKING:
@@ -49,40 +46,17 @@ class TestTheSteps(unittest.TestCase):
     """The tests step, then the step that names the copy, then the upload's own paths."""
 
     def setUp(self) -> None:
-        tmp = tempfile.TemporaryDirectory(prefix='pcapkit-2078-')  # pylint: disable=consider-using-with
-        self.addCleanup(tmp.cleanup)
-        self.tmp = pathlib.Path(tmp.name)
+        self.tmp = tmpdir(self, 'pcapkit-2078-')
         self.temp = self.tmp / 'temp'
-        self.temp.mkdir()
         self.seen = self.tmp / 'seen'
-        bindir = self.tmp / 'bin'
-        bindir.mkdir()
-        (self.temp / 'resource-monitor.log').write_text('', encoding='utf-8')
-        # No real sudo, so the tests run uncapped; `python`, the tests, records whether it sees the copy.
-        for name, body in (('sudo', 'echo "sudo: a password is required" >&2\nexit 1\n'),
-                           ('python', f'echo "${{JOB_SUMMARY_COPY-unset}}" > {self.seen}\nexec sleep 60\n')):
-            (bindir / name).write_text('#!/bin/sh\n' + body, encoding='utf-8')
-            (bindir / name).chmod(0o755)
-        self.server = Server(('127.0.0.1', 0), Handler)
-        thread = threading.Thread(target=self.server.serve_forever, daemon=True)
-        thread.start()
-        self.addCleanup(self.server.server_close)
-        self.addCleanup(self.server.shutdown)
         self.summary = self.tmp / 'summary.md'
-        self.env = {key: value for key, value in os.environ.items()
-                    if not key.startswith('GITHUB_') and key != 'JOB_SUMMARY_COPY'}
-        self.env.update(RUNNER_TEMP=str(self.temp), GITHUB_WORKSPACE=str(ROOT), WORKERS='3', GRAAL_PYTHON_VM_ARGS='',
-                        GITHUB_STEP_SUMMARY=str(self.summary), GH_TOKEN='token',
-                        GITHUB_API_URL=f'http://127.0.0.1:{self.server.server_address[1]}',
-                        GITHUB_EVENT_NAME='push', GITHUB_REF='refs/heads/main', GITHUB_SHA=OURS,
-                        GITHUB_REPOSITORY=REPO, PATH=str(bindir) + os.pathsep + os.environ.get('PATH', ''),
-                        WATCHER='success', WATCHER_PYTHON=sys.executable)
+        # `python`, the tests, records whether it sees the copy.
+        runner = Runner(self, self.tmp, self.temp, self.summary,
+                        python=f'echo "${{JOB_SUMMARY_COPY-unset}}" > {self.seen}\nexec sleep 60\n')
+        self.env, self.server = runner.env, runner.server
 
     def tests(self, **env: 'str') -> 'None':
-        script = step(TESTS)['run']
-        quick = script.replace('watch --interval 60 --grace 30 ', 'watch --interval 0.5 --grace 2 --kill-wait 2 ')
-        self.assertNotEqual(quick, script)
-        result = sh(quick, dict(self.env, **env), DEFAULT)
+        result = sh(quickened(self), dict(self.env, **env), DEFAULT)
         self.assertEqual(result.returncode, 0 if self.server.head == NEWER else 1, result.stderr)
 
     def save(self) -> 'None':

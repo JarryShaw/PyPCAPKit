@@ -47,7 +47,8 @@ A whole record after the first in a TCP segment is dissected as a further
   :class:`~pcapkit.protocols.misc.raw.protocol.Raw` together with everything after it,
   with no SSLv2 trial.
 * Octets that open no record -- an unsupported content type, a legacy
-  version outside ``0x03xx``, or a header cut short -- stay raw, with no error.
+  version outside ``0x03xx``, a length past the ``2 ** 14 + 2048`` of
+  :rfc:`5246#section-6.2.3`, or a header cut short -- stay raw, with no error.
 * A parse told to stop at TLS (``protocol='TLS'`` or ``layer='Application'``)
   keeps the rest of the segment raw.
 * Each record is a layer, so :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`
@@ -56,10 +57,14 @@ A whole record after the first in a TCP segment is dissected as a further
 Known Limitation
 ----------------
 
-**A record split across two TCP segments is not reassembled**, and decodes as
+**A record split across TCP segments is not reassembled here**, and decodes as
 :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, as does the partial record a segment
 ends inside. A record may be up to 16 KiB against a typical 1460-octet MSS, so
-this is routine.
+this is routine. ``Extractor(fin, reassembly=['tls'])`` reassembles every record
+of the stream (:class:`~pcapkit.foundation.reassembly.tls.reassembly.TLS`), framing
+it with :meth:`TLS.record_header`, and
+:func:`~pcapkit.foundation.analysis.tls.tls_record` decodes it with
+:meth:`TLS.analyze_record`.
 
 .. versionadded:: 1.6.0
 
@@ -69,8 +74,8 @@ from typing import TYPE_CHECKING
 from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
 from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.module import ModuleDescriptor
-from pcapkit.protocols.application.ssl.const import (_TLS_VERSION_MAJOR, _WIRE_CONTENT_TYPES,
-                                                     TLS13_VERSION)
+from pcapkit.protocols.application.ssl.const import (_RECORD_MAX_LENGTH, _TLS_VERSION_MAJOR,
+                                                     _WIRE_CONTENT_TYPES, TLS13_VERSION)
 from pcapkit.protocols.application.ssl.protocol import SSL
 from pcapkit.protocols.application.sslv2.data import ClientHello as SSLv2_ClientHello
 from pcapkit.protocols.application.sslv2.data import ServerHello as SSLv2_ServerHello
@@ -81,7 +86,7 @@ from pcapkit.protocols.application.tls.const import (_RECORD_HEADER_LENGTH, _SSL
 from pcapkit.protocols.application.tls.data import TLS as Data_TLS
 from pcapkit.protocols.application.tls.schema import TLS as Schema_TLS
 from pcapkit.utilities.contextvars import beholding
-from pcapkit.utilities.exceptions import ProtocolError
+from pcapkit.utilities.exceptions import CaughtByCaller, ProtocolError
 from pcapkit.utilities.warnings import hold_warnings
 
 if TYPE_CHECKING:
@@ -105,11 +110,8 @@ _TCP: 'ModuleDescriptor[AppType_TCP]' = ModuleDescriptor('pcapkit.const.reg.appt
 def _opens_whole_record(data: 'bytes') -> 'bool':
     """Whether ``data`` opens with a whole TLS record.
 
-    Only the record header is read, against the same checks as
-    :meth:`SSL._validate_tls_record
-    <pcapkit.protocols.application.ssl.protocol.SSL._validate_tls_record>`: a content
-    type a genuine record carries, a ``0x03xx`` legacy version, and a fragment
-    that ends inside ``data``.
+    Only the record header is read, by :meth:`TLS.record_header`, and its fragment
+    must end inside ``data``.
 
     Args:
         data: Octets after a record.
@@ -118,10 +120,12 @@ def _opens_whole_record(data: 'bytes') -> 'bool':
         Whether a further record opens ``data`` and ends inside it.
 
     """
-    if len(data) < _RECORD_HEADER_LENGTH:
+    try:
+        with CaughtByCaller(ProtocolError):
+            header = TLS.record_header(data)
+    except ProtocolError:
         return False
-    return (data[0] in _WIRE_CONTENT_TYPES and data[1] == _TLS_VERSION_MAJOR
-            and _RECORD_HEADER_LENGTH + int.from_bytes(data[3:5], 'big') <= len(data))
+    return header is not None and header[2] + header[3] <= len(data)
 
 
 class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
@@ -246,7 +250,9 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
             ProtocolError: If ``content_type`` is a name, a :obj:`bool`, or a
                 member or code the 8-bit content type field cannot carry, or
                 an extension of ``content`` given as a ``(type, kwargs)`` pair
-                has such a type for its 16-bit field.
+                has such a type for its 16-bit field; or if the fragment is
+                longer than ``2 ** 14 + 2048`` octets, which no version allows
+                (:rfc:`5246#section-6.2.3`).
             StructError: If ``version`` or the record length, or a field of
                 ``content``, does not fit its width.
 
@@ -258,6 +264,9 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
         # refuse a wider value with the StructError the content makers raise.
         for value, size in ((version, 2), (len(fragment), 2)):
             self._make_pack(value, size=size)
+        if len(fragment) > _RECORD_MAX_LENGTH:
+            raise ProtocolError(f'{self.alias}: invalid record length {len(fragment)}: exceeds '
+                                f'{_RECORD_MAX_LENGTH} (record_overflow)')
         return Schema_TLS(
             content_type=content_type_,
             version=version,
@@ -335,6 +344,81 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
         if isinstance(data, SSLv2_Data) or 'two_byte_header' in data:
             return SSLv2.from_data(data, **kwargs)
         return super().from_data(data, **kwargs)
+
+    @classmethod
+    def record_header(cls, data: 'bytes', /) -> 'Optional[tuple[Enum_ContentType, int, int, int]]':
+        """Read the header of the record ``data`` opens, as a stream delimits it.
+
+        A record over TCP is delimited by its header alone
+        [:rfc:`9846#section-5.1`], read against the checks of
+        :meth:`SSL._validate_tls_record
+        <pcapkit.protocols.application.ssl.protocol.SSL._validate_tls_record>`: a
+        content type a genuine record carries and a ``0x03xx`` legacy version. Its
+        length may not exceed ``2 ** 14 + 2048``, the longest TLSCiphertext of
+        SSLv3 to TLS 1.2 [:rfc:`6101#section-5.2.3`, :rfc:`5246#section-6.2.3`];
+        TLS 1.3's ``2 ** 14 + 256`` [:rfc:`9846#section-5.2`] is within it, and
+        the record header does not tell the two apart.
+        :class:`~pcapkit.foundation.reassembly.tls.reassembly.TLS` frames a stream
+        with this.
+
+        Args:
+            data: Octets from a record boundary on.
+
+        Returns:
+            The record's content type, legacy version, header length and
+            fragment length; :data:`None` if ``data`` is shorter than a record
+            header.
+
+        Raises:
+            ProtocolError: If the header opens no TLS record, a length past
+                that bound included.
+
+        .. versionadded:: 1.9.0
+
+        """
+        if len(data) < _RECORD_HEADER_LENGTH:
+            return None
+        content_type = Enum_ContentType.get(data[0])
+        if content_type not in _WIRE_CONTENT_TYPES:
+            raise ProtocolError(f'{cls.__name__}: invalid format: unrecognised content type {data[0]}')
+        if data[1] != _TLS_VERSION_MAJOR:
+            raise ProtocolError(f'{cls.__name__}: invalid format: legacy record version '
+                                f'{int.from_bytes(data[1:3], "big"):#06x} is not a TLS one')
+        length = int.from_bytes(data[3:5], 'big')
+        if length > _RECORD_MAX_LENGTH:
+            raise ProtocolError(f'{cls.__name__}: invalid format: record length {length} exceeds '
+                                f'{_RECORD_MAX_LENGTH} (record_overflow)')
+        return (content_type, int.from_bytes(data[1:3], 'big'), _RECORD_HEADER_LENGTH, length)
+
+    @classmethod
+    def analyze_record(cls, header: 'tuple[Enum_ContentType, int]', fragment: 'bytes') -> 'ProtocolBase':
+        """Analyse a record reassembled from a TCP stream, from its header and fragment.
+
+        :func:`~pcapkit.foundation.analysis.tls.tls_record` runs this, and so does
+        the :class:`~pcapkit.foundation.reassembly.data.Deferred` that
+        :class:`~pcapkit.foundation.reassembly.tls.reassembly.TLS` stores as a
+        complete record's ``packet``.
+
+        The record is parsed as a segment's first record is, without the SSLv2
+        trial, since its header is a TLS one.
+
+        Args:
+            header: The record's ``(type, legacy_record_version)``.
+            fragment: The record's fragment, its ``length`` octets.
+
+        Returns:
+            The record, as an instance of this class. A record that fails to
+            decode is kept as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`,
+            as :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>`
+            keeps a payload, its ``protocol`` this class's :meth:`__index__`.
+
+        .. versionadded:: 1.9.0
+
+        """
+        content_type, version = header
+        record = (bytes((int(content_type),)) + version.to_bytes(2, 'big')
+                  + len(fragment).to_bytes(2, 'big') + fragment)
+        return cls._analyze_next_layer(cls, record, cls.__index__(), chained=True)
 
     ##########################################################################
     # Data models.

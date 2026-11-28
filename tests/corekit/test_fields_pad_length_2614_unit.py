@@ -24,6 +24,7 @@ import warnings
 from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
+from tests.protocols.misc._pcapng import make_context
 
 if TYPE_CHECKING:
     from typing import Any
@@ -225,16 +226,9 @@ class PCAPNGAlignedPaddingTests(unittest.TestCase):
 
     def _parse(self, octets: 'bytes') -> 'tuple[Any, bytes, list[str]]':
         """Parse ``octets`` as one little-endian block, rebuild it, and keep the warnings."""
-        from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.foundation.engines.pcapng import Context
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        section = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
-        context = Context(section.info)  # type: Any
-        interface = PCAPNG.from_fields(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
-                                       block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
-        context.interfaces.append(interface.info)
+        context = make_context()
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
             parsed = PCAPNG(octets, len(octets), num=2, sct=1, ctx=context)

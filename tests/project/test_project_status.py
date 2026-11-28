@@ -31,7 +31,6 @@ from __future__ import annotations
 
 import contextlib
 import datetime
-import importlib.util
 import io
 import os
 import pathlib
@@ -43,24 +42,14 @@ import tempfile
 import unittest
 from unittest import mock
 
-from tests._support import bash_argv
+from tests._support import bash_argv, load_source
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 PROCESS_RST = ROOT / 'docs' / 'source' / 'contributing' / 'conventions' / 'process.rst'
 WORKFLOW = ROOT / '.github' / 'workflows' / 'project-status.yml'
 
 
-def _load_script():
-    """Load :file:`util/project_status.py`, which is a script and not a package."""
-    path = ROOT / 'util' / 'project_status.py'
-    spec = importlib.util.spec_from_file_location('project_status', path)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-project_status = _load_script()
+project_status = load_source(ROOT / 'util' / 'project_status.py', 'project_status')
 status_for = project_status.status_for
 
 

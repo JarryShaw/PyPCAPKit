@@ -8,7 +8,8 @@
 :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` only,
 which is an abstract base class for all reassembly classes,
 based on algorithms described in :rfc:`791` and :rfc:`815`,
-that implement datagram reassembly of IP and TCP packets.
+that implement datagram reassembly of IP packets, TCP segments, DTLS
+handshake messages, SCTP user messages and TLS records.
 
 """
 import abc
@@ -114,7 +115,9 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
         strict: if :data:`True`, report a datagram that is not completely
             reassembled as the tuple of its received runs; otherwise as one
             contiguous payload, its holes zero-filled -- or, for IP while the
-            total length is unknown, only the prefix up to the first hole
+            total length is unknown and for SCTP, only the prefix up to the
+            first hole; for TLS, a record's fragment, zero-filled to the length
+            its header declares
         store: if store reassembled datagram in memory, i.e.,
             :attr:`self._dtgram
             <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
@@ -517,7 +520,9 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
             strict: if :data:`True`, report a datagram that is not completely
                 reassembled as the tuple of its received runs; otherwise as one
                 contiguous payload, its holes zero-filled -- or, for IP while the
-                total length is unknown, only the prefix up to the first hole
+                total length is unknown and for SCTP, only the prefix up to the
+                first hole; for TLS, a record's fragment, zero-filled to the
+                length its header declares
             store: if store reassembled datagram in memory, i.e.,
                 :attr:`self._dtgram <_dtgram>` (if not, datagram
                 will be discarded after callback)
@@ -534,7 +539,9 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
         #: not completely reassembled is reported as the tuple of its
         #: received runs; otherwise, as one contiguous payload, its
         #: holes zero-filled -- or, for IP while the total length is
-        #: unknown, only the prefix up to the first hole.
+        #: unknown and for SCTP, only the prefix up to the first hole; for
+        #: TLS, a record's fragment, zero-filled to the length its header
+        #: declares.
         self._flag_s = strict
         #: bool: Store mode flag. If set to :data:`True`, all
         #: reassembled datagram will be stored in memory, i.e.,
@@ -704,7 +711,9 @@ class Reassembly(ReassemblyBase[_PT, _DT, _IT, _BT], Generic[_PT, _DT, _IT, _BT]
         strict: if :data:`True`, report a datagram that is not completely
             reassembled as the tuple of its received runs; otherwise as one
             contiguous payload, its holes zero-filled -- or, for IP while the
-            total length is unknown, only the prefix up to the first hole
+            total length is unknown and for SCTP, only the prefix up to the
+            first hole; for TLS, a record's fragment, zero-filled to the length
+            its header declares
         store: if store reassembled datagram in memory, i.e.,
             :attr:`self._dtgram <_dtgram>` (if not, datagram
             will be discarded after callback)

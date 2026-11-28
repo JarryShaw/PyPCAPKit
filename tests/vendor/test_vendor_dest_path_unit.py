@@ -89,12 +89,10 @@ installs ``vendor`` (#1958).
 """
 from __future__ import annotations
 
-import importlib
 import importlib.util
 import inspect
 import os
 import pathlib
-import pkgutil
 import sys
 import tempfile
 import textwrap
@@ -103,6 +101,7 @@ from typing import TYPE_CHECKING
 from unittest import mock
 
 from tests._support import reimport_once_per_class
+from tests.vendor._crawler import defined_crawlers, import_from_checkout
 
 if TYPE_CHECKING:
     from typing import Any
@@ -113,9 +112,6 @@ if TYPE_CHECKING:
 #: run on every leg in tests/vendor/test_vendor_snapshot_restore_unit.py and
 #: tests/vendor/test_vendor_variables_1726_unit.py.
 __tier__ = 'LATEST'
-
-#: Repository root, i.e. the grandparent of the directory holding this file.
-ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: Every distribution importing :mod:`pcapkit.vendor` needs, for the reason the
 #: module docstring above gives. Deliberately just the two
@@ -182,49 +178,11 @@ class ExistingCrawlerDestPathTests(unittest.TestCase):
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
-
-        import pcapkit
-        import pcapkit.vendor as vendor
-        from pcapkit.vendor.default import Vendor
-
-        # Comparing this checkout's crawlers against this checkout's __file__
-        # only means something if pcapkit was imported from here --
-        # see test_crawler_reachability_unit.py's setUp for the same guard.
-        resolved = pathlib.Path(pcapkit.__file__).resolve()
-        if ROOT not in resolved.parents:
-            self.skipTest(f'pcapkit was imported from {resolved}, which is outside {ROOT}; '
-                          f'install this checkout with `pip install -e .`, or set PYTHONPATH to '
-                          f'it, to run this suite against it')
-
-        self.vendor = vendor
-        self.Vendor = Vendor
-
-    def _is_crawler(self, obj: 'Any') -> 'bool':
-        return isinstance(obj, type) and issubclass(obj, self.Vendor) and obj is not self.Vendor
-
-    def _defined_crawlers(self) -> 'dict[str, Any]':
-        """Every crawler class defined under :file:`pcapkit/vendor/`.
-
-        Discovered from the filesystem with :func:`pkgutil.walk_packages`, the
-        same approach :file:`tests/vendor/test_crawler_reachability_unit.py`
-        uses -- this file is not about ``__all__`` reachability, but the
-        discovery itself is identical, and reusing it means the enumeration
-        here covers exactly what that suite calls "defined".
-
-        """
-        found = {}  # type: dict[str, Any]
-        for info in pkgutil.walk_packages(self.vendor.__path__, prefix='pcapkit.vendor.'):
-            if any(part.startswith('_') for part in info.name.split('.')):
-                continue
-            module = importlib.import_module(info.name)
-            for name in getattr(module, '__all__', ()):
-                obj = getattr(module, name, None)
-                if self._is_crawler(obj) and obj.__module__ == info.name:
-                    found[f'{info.name}.{name}'] = obj
-        return found
+        self.vendor, default = import_from_checkout(self, 'pcapkit.vendor', 'pcapkit.vendor.default')
+        self.Vendor = default.Vendor
 
     def test_every_crawler_resolves_to_its_existing_const_file(self) -> None:
-        crawlers = self._defined_crawlers()
+        crawlers = defined_crawlers(self.vendor, self.Vendor)
         # A suite that silently discovered zero crawlers would report success
         # having checked nothing -- fail loudly instead if discovery itself broke.
         self.assertGreater(len(crawlers), 0, 'no crawlers were discovered under pcapkit.vendor')
@@ -270,22 +228,10 @@ class NestedCrawlerDestPathTests(unittest.TestCase):
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
-
-        import pcapkit
-        import pcapkit.vendor as vendor
-        import pcapkit.vendor.default as default
-        from pcapkit.utilities.exceptions import VendorPathNotFound
-
-        resolved = pathlib.Path(pcapkit.__file__).resolve()
-        if ROOT not in resolved.parents:
-            self.skipTest(f'pcapkit was imported from {resolved}, which is outside {ROOT}; '
-                          f'install this checkout with `pip install -e .`, or set PYTHONPATH to '
-                          f'it, to run this suite against it')
-
-        self.vendor = vendor
-        self.Vendor = default.Vendor
-        self.default = default
-        self.VendorPathNotFound = VendorPathNotFound
+        self.vendor, self.default, exceptions = import_from_checkout(
+            self, 'pcapkit.vendor', 'pcapkit.vendor.default', 'pcapkit.utilities.exceptions')
+        self.Vendor = self.default.Vendor
+        self.VendorPathNotFound = exceptions.VendorPathNotFound
 
         self._tempdir = tempfile.TemporaryDirectory(prefix='pcapkit-vendor-nested-test-')
         self.addCleanup(self._tempdir.cleanup)

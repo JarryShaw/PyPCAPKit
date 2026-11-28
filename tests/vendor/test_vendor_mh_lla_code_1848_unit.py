@@ -13,11 +13,11 @@ byte for byte, so the template and the module cannot drift apart.
 from __future__ import annotations
 
 import importlib.util
-import pathlib
 import unittest
 from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
+from tests.vendor._crawler import ROOT, import_from_checkout, make_crawler, normalize
 
 if TYPE_CHECKING:
     from typing import Any
@@ -25,9 +25,6 @@ if TYPE_CHECKING:
 #: Test tier (#1958): renders a constant module from recorded data and compares it
 #: with the committed file, which the vendor scripts regenerate on one interpreter.
 __tier__ = 'LATEST'
-
-#: Repository root, i.e. the grandparent of the directory holding this file.
-ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: The committed module the crawler generates.
 CONST = ROOT / 'pcapkit' / 'const' / 'mh' / 'lla_code.py'
@@ -40,26 +37,6 @@ VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 HAS_VENDOR_DEPS = all(importlib.util.find_spec(name) is not None for name in VENDOR_DEPS)
 
 
-def _normalize(context: 'str') -> 'str':
-    """Apply the whitespace normalisation :meth:`Vendor.__init__` writes with.
-
-    Args:
-        context: Return value of :meth:`~pcapkit.vendor.default.Vendor.context`.
-
-    Returns:
-        The text as the generator would have written it to disk.
-
-    """
-    lines = []  # type: list[str]
-    for line in context.splitlines():
-        if line:
-            if line.strip():
-                lines.append(line.rstrip())
-        else:
-            lines.append(line)
-    return '\n'.join(lines) + '\n'
-
-
 @unittest.skipUnless(HAS_VENDOR_DEPS, f'vendor extra not installed ({", ".join(VENDOR_DEPS)})')
 class LLACodeVendorTests(unittest.TestCase):
     """The hand-written table and its template, rendered without a write."""
@@ -69,26 +46,11 @@ class LLACodeVendorTests(unittest.TestCase):
 
     def setUp(self) -> 'None':
         reimport_once_per_class(self)
-
-        import pcapkit.vendor.mh.lla_code as vendor_module
-
-        resolved = pathlib.Path(vendor_module.__file__).resolve()
-        if ROOT not in resolved.parents:
-            self.skipTest(f'{vendor_module.__name__} was imported from {resolved}, which is '
-                          f'outside {ROOT}; install this checkout with `pip install -e .` to '
-                          f'run this suite against it')
-
-        self.vendor_module = vendor_module
+        self.vendor_module = import_from_checkout(self, 'pcapkit.vendor.mh.lla_code')[0]
 
     def _vendor(self) -> 'tuple[Any, dict[int, str]]':
         """A crawler with the attributes ``__init__`` sets, but none of its I/O."""
-        cls = self.vendor_module.LLACode
-        vendor = cls.__new__(cls)
-        vendor.NAME = cls.__name__
-        vendor.DOCS = cls.__doc__
-        data = vendor.request()
-        vendor.record = vendor.count(data)
-        return vendor, data
+        return make_crawler(self.vendor_module.LLACode)
 
     def test_the_table_carries_the_rfc_names(self) -> 'None':
         vendor, data = self._vendor()
@@ -114,7 +76,7 @@ class LLACodeVendorTests(unittest.TestCase):
 
     def test_context_matches_the_committed_const_file_byte_for_byte(self) -> 'None':
         vendor, data = self._vendor()
-        rendered = _normalize(vendor.context(data))
+        rendered = normalize(vendor.context(data))
         self.assertEqual(rendered, CONST.read_text(encoding='utf-8'))
 
 

@@ -64,6 +64,7 @@ LISTS = frozenset({
     'internet.hip:ViaRVSParameter.address',
     'internet.icmpv6:MLDv2QueryExtension.sources',
     'internet.icmpv6:MulticastAddressRecord.sources',
+    'internet.icmpv6:RDNSSOption.addresses',
     'internet.igmpv3:GroupRecord.sources',
     'internet.igmpv3:QueryExtension.sources',
     'internet.ipv4:LSROption.route',

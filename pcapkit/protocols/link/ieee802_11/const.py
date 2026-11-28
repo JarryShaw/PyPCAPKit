@@ -17,9 +17,9 @@ if TYPE_CHECKING:
 
     from pcapkit.protocols.link.ieee802_11.protocol import Subtype
 
-__all__ = ['SUBTYPE', 'CONTROL_WITH_ADDR2']
+__all__ = ['SUBTYPE', 'CONTROL_WITH_ADDR2', 'DATA_WITH_BODY']
 
-#: Subtype registry of each frame type (IEEE Std 802.11-2020, Table 9-1).
+#: Subtype registry of each frame type (:ieee:`802.11-2020`, Table 9-1).
 SUBTYPE = {
     Enum_Type.Management: Enum_ManagementSubtype,
     Enum_Type.Control: Enum_ControlSubtype,
@@ -28,8 +28,8 @@ SUBTYPE = {
 }  # type: dict[int, Type[Subtype]]
 
 #: Control frame subtypes whose MAC header carries a TA (or BSSID) as
-#: Address 2 after the RA; IEEE Std 802.11-2020 §9.3.1, *Control frames*, and
-#: IEEE Std 802.11ax-2021 for ``Trigger``. CTS and Ack carry the RA alone. A
+#: Address 2 after the RA; :ieee:`802.11-2020` §9.3.1, *Control frames*, and
+#: :ieee:`802.11ax-2021` for ``Trigger``. CTS and Ack carry the RA alone. A
 #: Control Frame Extension frame takes the six octets after the RA as Address 2,
 #: as the Linux kernel's ``ieee80211_hdrlen()`` reads it; in a DMG DTS
 #: (extension 6) they are NAV-SA rather than a TA, and NAV-DA stays in the body.
@@ -45,4 +45,16 @@ CONTROL_WITH_ADDR2 = frozenset({
     Enum_ControlSubtype.RTS,
     Enum_ControlSubtype.CF_End,
     Enum_ControlSubtype.CF_End_CF_ACK,
+})
+
+#: Data frame subtypes that carry a frame body, an MSDU or an A-MSDU
+#: (:ieee:`802.11-2020`, Table 9-1): those not marked *(no data)* nor reserved.
+#:
+#: .. versionadded:: 1.9.0
+DATA_WITH_BODY = frozenset({
+    Enum_DataSubtype.Data,
+    Enum_DataSubtype.QoS_Data,
+    Enum_DataSubtype.QoS_Data_CF_ACK,
+    Enum_DataSubtype.QoS_Data_CF_Poll,
+    Enum_DataSubtype.QoS_Data_CF_ACK_CF_Poll,
 })

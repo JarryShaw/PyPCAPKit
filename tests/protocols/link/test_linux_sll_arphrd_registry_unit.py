@@ -19,31 +19,7 @@ import unittest
 import warnings
 
 from tests._support import reimport_once_per_class
-
-#: An IPv4 header (DF clear, protocol UDP) and an 8-octet UDP header.
-IPV4 = (bytes.fromhex('4500001c00010000401100000a0000010a000002')
-        + bytes.fromhex('3039003500080000'))
-
-#: The payload each ``arphrd_type`` case carries, and the chain it parses to
-#: after the LinuxSLL layer.
-CASES = {
-    'FRAD': (bytes.fromhex('0c21') + b'\x03\xcc' + IPV4, 'FRAD:IPv4:UDP'),
-    'IPGRE': (bytes.fromhex('00000800') + IPV4, 'GRE:IPv4:UDP'),
-    'IP6GRE': (bytes.fromhex('00000800') + IPV4, 'GRE:IPv4:UDP'),
-    'IEEE80211_RADIOTAP': (bytes.fromhex('00' '00' '0800' '00000000' 'd4000000' 'aaaaaaaaaaaa' '11223344'),
-                           'Radiotap:802.11:Raw'),
-    'NETLINK': (struct.pack('<IHHII', 20, 3, 0, 1, 0) + b'\xaa\xbb\xcc\xdd', 'Netlink:Raw'),
-}
-
-
-def _sll1(protocol_type: int, arphrd_type: int) -> bytes:
-    """A ``LINUX_SLL`` header carrying ``protocol_type`` on ``arphrd_type``."""
-    return struct.pack('>HHH8sH', 0, arphrd_type, 0, b'', protocol_type)
-
-
-def _sll2(protocol_type: int, arphrd_type: int) -> bytes:
-    """A ``LINUX_SLL2`` header carrying ``protocol_type`` on ``arphrd_type``."""
-    return struct.pack('>HHIHBB8s', protocol_type, 0, 0, arphrd_type, 0, 0, b'')
+from tests.protocols.link._linux_sll import CASES, IPV4, sll1, sll2
 
 
 class LinuxSLLRegistryTests(unittest.TestCase):
@@ -56,7 +32,7 @@ class LinuxSLLRegistryTests(unittest.TestCase):
         from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
         from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
-        return ((LinuxSLL1, _sll1, 'LINUX_SLL1'), (LinuxSLL2, _sll2, 'LINUX_SLL2'))
+        return ((LinuxSLL1, sll1, 'LINUX_SLL1'), (LinuxSLL2, sll2, 'LINUX_SLL2'))
 
     def _snapshot(self):  # type: ignore[no-untyped-def]
         """Every registry the registrars here write, to put back after a test."""

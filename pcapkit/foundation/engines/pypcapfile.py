@@ -131,11 +131,12 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
 
     #: Reassembly adapters, each called as ``adapter(packet, count=n)`` on the
     #: decoded packet and its frame number. There is no IPv6 adapter, as
-    #: |pcapfile|_ has no IPv6 decoder, nor a DTLS one, as DTLS reassembly reads
-    #: :mod:`pcapkit`'s own DTLS layer.
+    #: |pcapfile|_ has no IPv6 decoder, nor a DTLS or SCTP one, as their
+    #: reassembly reads :mod:`pcapkit`'s own DTLS and SCTP layers.
     __reassembly__ = {
         'ipv4': ModuleDescriptor('pcapkit.toolkit.pypcapfile', 'ipv4_reassembly'),
         'tcp': ModuleDescriptor('pcapkit.toolkit.pypcapfile', 'tcp_reassembly'),
+        'tls': ModuleDescriptor('pcapkit.toolkit.pypcapfile', 'tls_reassembly'),
     }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
     #: Flow tracing adapters, each called as
@@ -241,7 +242,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
                   is provided, as the PyPCAPFile engine does not parse with :mod:`pcapkit`'s
                   own protocol implementations.
                 * if a reassembler with no adapter in :attr:`__reassembly__` is
-                  enabled, as IPv6's and DTLS's are not, or a flow tracer with
+                  enabled, as IPv6's, DTLS's and SCTP's are not, or a flow tracer with
                   none in :attr:`__traceflow__`.
                 * if |pcapfile|_ has no decoder for the savefile's link layer
                   type, in which case frames are left undecoded.

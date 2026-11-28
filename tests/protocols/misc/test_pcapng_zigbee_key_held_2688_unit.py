@@ -16,14 +16,12 @@ Each key is cut at every offset, and read past its fixed width as well.
 
 """
 
-import contextlib
-import logging
 import struct
 import unittest
-import warnings
 from typing import TYPE_CHECKING
 
 from tests.protocols.misc.test_pcapng_roundtrip2_unit import PCAPNGTestCase
+from tests.protocols._rebuild import reported as _reported
 
 if TYPE_CHECKING:
     from typing import Any, Iterator, Optional
@@ -60,32 +58,6 @@ def _cut(fields: 'tuple[tuple[str, int], ...]', count: 'int') -> 'Optional[tuple
             return (name, count - offset)
         offset += width
     return None
-
-
-class _Logged(logging.Handler):
-    """Collect what the ``pcapkit`` logger reports."""
-
-    def __init__(self) -> None:
-        super().__init__(logging.DEBUG)
-        self.messages = []  # type: list[str]
-
-    def emit(self, record: 'logging.LogRecord') -> None:
-        self.messages.append(f'logged: {record.getMessage()}')
-
-
-@contextlib.contextmanager
-def _reported() -> 'Iterator[list[str]]':
-    """Collect what the block reports, on the :mod:`warnings` channel and the logger."""
-    handler = _Logged()
-    logger = logging.getLogger('pcapkit')
-    logger.addHandler(handler)
-    try:
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter('always')
-            yield handler.messages
-    finally:
-        logger.removeHandler(handler)
-    handler.messages.extend(f'warned: {item.message}' for item in caught)
 
 
 class TestPCAPNGZigBeeKeyHeld(PCAPNGTestCase):

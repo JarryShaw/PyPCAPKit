@@ -81,19 +81,10 @@ from __future__ import annotations
 import unittest
 from typing import TYPE_CHECKING
 
+from tests.protocols.transport._mptcp import TCP_BASE
+
 if TYPE_CHECKING:
     from typing import Optional
-
-#: Header fields shared by every constructed TCP segment in this module, matching
-#: :data:`examples.generators.option_families.tcp.TCP_BASE` so these cases build through exactly the
-#: keyword shape the fixture generator uses.
-TCP_BASE = {
-    'srcport': 50000, 'dstport': 80, 'seq_no': 1, 'ack_no': 0,
-    'ns': False, 'cwr': False, 'ece': False, 'urg': False, 'ack': False,
-    'psh': False, 'rst': False, 'syn': True, 'fin': False,
-    'window': 8192, 'checksum': b'\x00\x00', 'urgent': 0,
-    'payload': b'',
-}
 
 
 def build_mptcp_option(subtype: 'object', *, header: 'Optional[dict[str, object]]' = None,

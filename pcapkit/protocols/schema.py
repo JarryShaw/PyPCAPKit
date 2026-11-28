@@ -5,8 +5,8 @@
 
    ``pcapkit.protocols.schema.schema.keep_short_read`` and
    ``pcapkit.protocols.schema.schema.replay_short_read``, now
-   :func:`pcapkit.corekit.schema.shortread.keep_short_read` and
-   :func:`pcapkit.corekit.schema.shortread.replay_short_read` (:issue:`2674`).
+   :func:`pcapkit.corekit.schema.short_read.keep_short_read` and
+   :func:`pcapkit.corekit.schema.short_read.replay_short_read` (:issue:`2674`).
 
 """
 
@@ -1078,7 +1078,7 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
 
         Each field's length is resolved from this schema's own values under two
         lengths given; the one that changes with them is sized by what was left.
-        :func:`~pcapkit.corekit.schema.shortread.keep_short_read` records a
+        :func:`~pcapkit.corekit.schema.short_read.keep_short_read` records a
         frame the capture cut short on that field.
 
         """

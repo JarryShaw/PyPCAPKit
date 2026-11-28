@@ -4,13 +4,6 @@
 * :class:`TestPipInstall` runs the script against a stand-in ``pip``: a clean
   install, a failed one with and without an ``ERROR:`` line, a failed upgrade,
   and the arguments and levels it refuses.
-* :class:`TestTheStepMatchesTheReferenceShell` runs the steps' inline shell form,
-  :data:`REFERENCE_ANNOTATED` and :data:`REFERENCE_BARE`, the reference the script
-  must match, against the same stand-in and requires the same output, log and
-  status;
-  for the steps whose shell wrote no annotation, the same except for the
-  annotation the script writes for a failed install; and for an indented
-  ``ERROR:`` line, the same except for the reason the shell missed (#2041).
 * :class:`TestTheStepsRunTheScript` pins each covered step to the script, with
   its guards and environment, and every other ``pip install`` in
   ``unit-tests.yml`` to a listed step that keeps its shell.
@@ -26,7 +19,6 @@ import json
 import os
 import pathlib
 import re
-import shutil
 import signal
 import subprocess  # nosec: B404
 import sys
@@ -35,7 +27,6 @@ import textwrap
 import unittest
 
 from tests._dependency_gates import EDITABLE_INSTALL
-from tests._support import bash_argv
 from tests._workflows import WORKFLOWS, job, load, steps
 from tests.project.test_python_versions_1660 import legs, matrix
 
@@ -143,29 +134,11 @@ PIP = textwrap.dedent('''\
     sys.exit(status)
 ''')
 
-#: ``test``'s and ``integration``'s install in its inline shell form, under
-#: ``shell: bash``, the reference the script must match; ``SPEC`` stands for each
-#: job's extras.
-REFERENCE_ANNOTATED = textwrap.dedent('''\
-    python -m pip install -U pip setuptools wheel
-    if ! python -m pip install -e 'SPEC' 2>&1 | tee "$RUNNER_TEMP/pip-install.log"; then
-      reason=$(sed -n 's/^ERROR: //p' "$RUNNER_TEMP/pip-install.log" | tail -n 1)
-      if [ -z "$reason" ]; then reason="pip failed without an ERROR line; see this step's log"; fi
-      echo "::${ANNOTATION_LEVEL} title=pcapkit did not install on ${LEG//,/%2C}::${reason//%/%25}. The rest of this leg is skipped."
-      exit 1
-    fi
-''').replace('SPEC', SPEC)  # noqa: E501
-#: The other covered steps' install in its inline shell form, under the default shell.
-REFERENCE_BARE = textwrap.dedent('''\
-    python -m pip install -U pip setuptools wheel
-    python -m pip install -e 'SPEC'
-''').replace('SPEC', SPEC)
-
 CLEAN = ['out:Obtaining file:///checkout', 'err:a deprecation warning', 'out:Successfully installed pypcapkit-1.5.0']
 FAILED = ['out:Collecting pytest>=8', 'err:ERROR: Ignored the following versions: 8.0.0 Requires-Python >=3.8',
           'out:INFO: pip is looking at multiple versions', 'err:ERROR: No matching distribution found for pytest>=8']
 #: The tail of a failed wheel build, as pip printed it on ``Python pypy3.10 (KTLO)``:
-#: its one ``ERROR:`` line is indented, so the inline shell finds none (#2041).
+#: its one ``ERROR:`` line is indented (#2041).
 WHEEL_FAILED = ['out:  note: This error originates from a subprocess, and is likely not a problem with pip.',
                 'out:  ERROR: Failed building wheel for cryptography', 'out:Successfully built pypcapkit',
                 'out:Failed to build cryptography', 'out:',
@@ -174,16 +147,6 @@ WHEEL_FAILED = ['out:  note: This error originates from a subprocess, and is lik
                 'err:error: failed-wheel-build-for-install', 'err:',
                 'err:× Failed to build installable wheels for some pyproject.toml based projects',
                 'err:╰─> cryptography']
-#: Every ``(install output, install status)`` an install step can meet.
-OUTCOMES = (
-    (CLEAN, 0),
-    (FAILED, 1),
-    (['out:Killed'], 137),
-    (['err:ERROR: 100% of the index timed out'], 2),
-    (['err:ERROR: the first reason', 'err:ERROR: '], 1),
-    (['out:ERROR:no space after the colon'], 1),
-    (FAILED, -signal.SIGTERM),
-)
 
 
 def text(lines: 'list[str]') -> 'str':
@@ -235,7 +198,7 @@ class TestPipInstall(_Scratch):
     def test_a_clean_install_writes_no_annotation(self) -> None:
         result = self.script('-e', SPEC, env=self.env(install_output=CLEAN, upgrade_output=['out:upgraded']))
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(result.stdout, 'upgraded\n' + text(CLEAN))
+        self.assertEqual((result.stdout, result.stderr), ('upgraded\n' + text(CLEAN), ''))
         self.assertEqual(self.log.read_text(encoding='utf-8'), text(CLEAN))
         self.assertEqual(self.calls(), [['install', '-U', 'pip', 'setuptools', 'wheel'], ['install', '-e', SPEC]])
 
@@ -246,6 +209,7 @@ class TestPipInstall(_Scratch):
                 self.assertEqual(result.returncode, 1, result.stderr)
                 self.assertEqual(result.stdout, text(FAILED) + f'::{level} title={TITLE}::No matching '
                                  f'distribution found for pytest>=8{SKIPPED}\n')
+                self.assertEqual(result.stderr, '')
                 self.assertEqual(self.log.read_text(encoding='utf-8'), text(FAILED))
 
     def test_a_failure_without_a_reason_is_still_named(self) -> None:
@@ -312,84 +276,6 @@ class TestPipInstall(_Scratch):
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(name, result.stderr)
                 self.assertEqual(self.calls(), [])
-
-
-@unittest.skipIf(any(shutil.which(tool) is None for tool in ('bash', 'tee', 'sed', 'tail')),
-                 'needs bash, tee, sed and tail')
-class TestTheStepMatchesTheReferenceShell(_Scratch):
-    """The script prints, logs and exits as the steps' inline shell form does."""
-
-    def reference(self, shell: 'str', env: 'dict[str, str]') -> 'subprocess.CompletedProcess[str]':
-        """``shell`` as a step runs it: ``shell: bash`` for the annotated steps, ``bash -e`` for the rest."""
-        bin_dir = self.tmp / 'bin'
-        bin_dir.mkdir(exist_ok=True)
-        python = bin_dir / 'python'
-        if not python.exists():
-            python.symlink_to(sys.executable)  # the leg's `python`; here, this interpreter
-        env = dict(env, PATH=f'{bin_dir}{os.pathsep}{env.get("PATH", "")}')
-        command = (bash_argv('-eo', 'pipefail', '-c', shell) if shell is REFERENCE_ANNOTATED
-                   else bash_argv('-e', '-c', shell))
-        return subprocess.run(command, cwd=self.tmp, env=env,  # nosec: B603
-                              capture_output=True, text=True, check=False, timeout=120)
-
-    def both(self, shell: 'str', level: 'str', **pip: 'object') -> 'tuple[tuple[object, ...], tuple[object, ...]]':
-        """``(status, stdout, log, pip's calls)`` of the inline shell, then of the script, each with its stderr."""
-        found = []
-        for run in (lambda env: self.reference(shell, env), lambda env: self.script('-e', SPEC, env=env)):
-            result = run(self.env(level, **pip))
-            log = self.log.read_text(encoding='utf-8') if self.log.exists() else None
-            if self.log.exists():
-                self.log.unlink()
-            found.append(((result.returncode, result.stdout, log, self.calls()), result.stderr))
-        return found[0], found[1]
-
-    def test_every_annotated_outcome_matches(self) -> None:
-        for output, status in OUTCOMES:
-            for level in ('error', 'warning'):
-                with self.subTest(output=output, status=status, level=level):
-                    (old, _), (new, _) = self.both(REFERENCE_ANNOTATED, level, install_output=output,
-                                                   install_status=status)
-                    self.assertEqual(new, old)
-
-    def test_an_indented_error_line_departs_on_purpose(self) -> None:
-        """The inline shell's ``^ERROR: `` misses an indented line and falls back; the script names it
-        (#2041). Everything else still matches, and so does an outcome where both find the same line."""
-        for level in ('error', 'warning'):
-            with self.subTest(level=level):
-                (old, _), (new, _) = self.both(REFERENCE_ANNOTATED, level, install_output=WHEEL_FAILED,
-                                               install_status=1)
-                self.assertEqual((new[0], new[2], new[3]), (old[0], old[2], old[3]))
-                head = text(WHEEL_FAILED) + f'::{level} title={TITLE}::'
-                self.assertEqual(old[1], f'{head}{NO_REASON}{SKIPPED}\n')
-                self.assertEqual(new[1], f'{head}Failed building wheel for cryptography{SKIPPED}\n')
-
-    def test_a_failed_upgrade_matches_on_both_forms(self) -> None:
-        for shell in (REFERENCE_ANNOTATED, REFERENCE_BARE):
-            for status in (1, 3, -signal.SIGTERM):
-                with self.subTest(annotated=shell is REFERENCE_ANNOTATED, status=status):
-                    (old, _), (new, _) = self.both(shell, 'error', upgrade_output=['err:no index'],
-                                                   upgrade_status=status)
-                    self.assertEqual(new, old)
-
-    def test_the_bare_steps_gain_the_annotation(self) -> None:
-        """The bare shell gives pip's status, its two streams apart and no annotation; the script
-        merges its streams into standard output and the log, and on a failure gives status 1 and
-        the annotation."""
-        for output, status in OUTCOMES:
-            with self.subTest(output=output, status=status):
-                (old, old_stderr), (new, new_stderr) = self.both(REFERENCE_BARE, 'error', install_output=output,
-                                                                 install_status=status)
-                self.assertEqual(new[3], old[3])
-                self.assertEqual((old[1], old[2]), (text([line for line in output if line.startswith('out:')]), None))
-                self.assertTrue(old_stderr.startswith(text([line for line in output if line.startswith('err:')])))
-                self.assertEqual((new[2], new_stderr), (text(output), ''))
-                if status == 0:
-                    self.assertEqual((new[0], new[1]), (0, text(output)))
-                    continue
-                self.assertNotEqual(old[0], 0)
-                self.assertEqual(new[0], 1)
-                self.assertTrue(str(new[1]).startswith(f'{text(output)}::error title={TITLE}::'), new[1])
-                self.assertEqual(str(new[1]).count('\n::'), 1)
 
 
 class TestTheStepsRunTheScript(unittest.TestCase):

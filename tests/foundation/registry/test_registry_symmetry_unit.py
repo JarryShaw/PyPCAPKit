@@ -80,6 +80,7 @@ DISPATCH = {
     'LinuxSLL': 'pcapkit.protocols.link.linux_sll.protocol:LinuxSLL',
     'FRAD': 'pcapkit.protocols.link.frad.protocol:FRAD',
     'PPP': 'pcapkit.protocols.link.ppp.protocol:PPP',
+    'LLC': 'pcapkit.protocols.link.llc.protocol:LLC',
     'Radiotap': 'pcapkit.protocols.link.radiotap.protocol:Radiotap',
     'Internet': 'pcapkit.protocols.internet.internet:Internet',
     'TCP': 'pcapkit.protocols.transport.tcp.protocol:TCP',
@@ -105,6 +106,9 @@ METHOD_REGISTRARS = (
     MethodRegistrar('register_ipv4_option', 'pcapkit.protocols.internet.ipv4.protocol:IPv4', '__option__',
                     'pcapkit.protocols.internet.ipv4.schema:Option',
                     ('pcapkit.const.ipv4.option_number:OptionNumber.NOP',)),
+    MethodRegistrar('register_icmpv6_option', 'pcapkit.protocols.internet.icmpv6.protocol:ICMPv6', '__option__',
+                    'pcapkit.protocols.internet.icmpv6.schema:NDOption',
+                    ('pcapkit.const.icmpv6.nd_option:NDOption.MTU',)),
     MethodRegistrar('register_hip_parameter', 'pcapkit.protocols.internet.hip.protocol:HIP', '__parameter__',
                     'pcapkit.protocols.internet.hip.schema:Parameter',
                     ('pcapkit.const.hip.parameter:Parameter.R1_Counter',)),
@@ -202,6 +206,8 @@ MODULE_REGISTRARS = (
     ModuleRegistrar('register_arphrd', 'pcapkit.const.linux.arphrd:ARPHRD.FRAD', 'LinuxSLL',
                     'pcapkit.protocols.link.link:Link'),
     ModuleRegistrar('register_frad', 0xCC, 'FRAD', 'pcapkit.protocols.internet.internet:Internet'),
+    ModuleRegistrar('register_lsap', 'pcapkit.const.llc.lsap:LSAP.SNAP', 'LLC',
+                    'pcapkit.protocols.link.link:Link'),
     ModuleRegistrar('register_ppp', 'pcapkit.const.ppp.protocol:Protocol.Internet_Protocol_version_4', 'PPP',
                     'pcapkit.protocols.internet.internet:Internet'),
     ModuleRegistrar('register_radiotap', 'pcapkit.const.reg.linktype:LinkType.IEEE802_11', 'Radiotap',
@@ -264,6 +270,8 @@ def _tables() -> 'dict[str, dict[Any, Any]]':
                 tables[f'{schema.__name__}.registry[{namespace}]'] = table
         else:
             tables[f'{schema.__module__}.{schema.__name__}.__enum__'] = schema.__enum__
+    # LLC's paired flags are written with its __proto__ entries (#2936).
+    tables['LLC.__paired__'] = resolve(DISPATCH['LLC']).__paired__
     tables['Extractor.__engine__'] = Extractor.__engine__
     tables['Extractor.__reassembly__'] = Extractor.__reassembly__
     tables['Extractor.__traceflow__'] = Extractor.__traceflow__
@@ -468,6 +476,10 @@ class TestRegistrySymmetry(harness.RoundTripBase):
             'register_dns_option': 'no schema argument; override and restore are in test_dns_unit',
             'register_dns_rdata': 'no schema argument; override and restore are in test_dns_unit',
             'register_icmp_type': 'no schema argument; override and restore are in test_icmp_type_registrar_unit',
+            'register_mh_multicast': 'not a __proto__ map; override and restore are in '
+                                     'test_mh_payload_registry_2937_unit',
+            'register_mh_selector': 'not a __proto__ map; override and restore are in '
+                                    'test_mh_payload_registry_2937_unit',
             'register_ipx': 'IPX.__proto__ ships no entry, so an override has nothing to be restored to',
             'register_netlink': 'Netlink.__proto__ ships no entry, so there is none to restore',
             'register_dccp': 'DCCP.__proto__ ships no entry, so there is none to restore',

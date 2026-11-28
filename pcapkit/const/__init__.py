@@ -41,6 +41,7 @@ if TYPE_CHECKING:
     from pcapkit.const.ipx import *
     from pcapkit.const.l2tp import *
     from pcapkit.const.linux import *
+    from pcapkit.const.llc import *
     from pcapkit.const.mh import *
     from pcapkit.const.ngap import *
     from pcapkit.const.ospf import *
@@ -50,6 +51,7 @@ if TYPE_CHECKING:
     from pcapkit.const.radiotap import *
     from pcapkit.const.sctp import *
     from pcapkit.const.sslv2 import *
+    from pcapkit.const.stp import *
     from pcapkit.const.tcp import *
     from pcapkit.const.tls import *
     from pcapkit.const.vlan import *
@@ -79,7 +81,7 @@ __all__ = [
     'ICMP_Type', 'ICMP_DestinationUnreachableCode', 'ICMP_TimeExceededCode', 'ICMP_ParameterProblemCode',
     # ICMPv6
     'ICMPv6_Type', 'ICMPv6_DestinationUnreachableCode', 'ICMPv6_TimeExceededCode',
-    'ICMPv6_ParameterProblemCode',
+    'ICMPv6_ParameterProblemCode', 'ICMPv6_NDOption', 'ICMPv6_RouterPreference',
     # IEEE 802.11
     'IEEE802_11_Type', 'IEEE802_11_ManagementSubtype', 'IEEE802_11_ControlSubtype',
     'IEEE802_11_DataSubtype', 'IEEE802_11_ExtensionSubtype',
@@ -98,6 +100,8 @@ __all__ = [
     'L2TP_Type',
     # Linux
     'Linux_ARPHRD',
+    # LLC
+    'LLC_LSAP', 'LLC_SupervisoryFunction', 'LLC_ModifierFunction',
     # MH
     'MH_Packet', 'MH_Option', 'MH_DNSStatusCode', 'MH_ACKStatusCode',
     'MH_MNIDSubtype', 'MH_StatusCode', 'MH_EnumeratingAlgorithm',
@@ -134,6 +138,8 @@ __all__ = [
     'SCTP_Chunk', 'SCTP_Parameter', 'SCTP_CauseCode', 'SCTP_PayloadProtocolIdentifier',
     # SSLv2
     'SSLv2_HandshakeType', 'SSLv2_Version',
+    # STP
+    'STP_ProtocolVersion', 'STP_BPDUType', 'STP_PortRole',
     # TCP
     'TCP_Checksum', 'TCP_Option', 'TCP_MPTCPOption', 'TCP_Flags',
     # TLS/DTLS
@@ -152,6 +158,6 @@ __all__ = [
 # type checkers star-import above.
 __getattr__, __dir__ = lazy_exports(__name__, globals(), packages=(
     'reg', 'pcapng', 'arp', 'dccp', 'dns', 'esp', 'ftp', 'hip', 'http', 'icmp', 'icmpv6',
-    'ieee802_11', 'igmp', 'ipv4', 'ipv6', 'ipx', 'l2tp', 'linux', 'mh', 'ngap', 'ospf',
-    'ospfv1', 'ppp', 'pppoe', 'radiotap', 'sctp', 'sslv2', 'tcp', 'tls', 'vlan',
+    'ieee802_11', 'igmp', 'ipv4', 'ipv6', 'ipx', 'l2tp', 'linux', 'llc', 'mh', 'ngap', 'ospf',
+    'ospfv1', 'ppp', 'pppoe', 'radiotap', 'sctp', 'sslv2', 'stp', 'tcp', 'tls', 'vlan',
 ))

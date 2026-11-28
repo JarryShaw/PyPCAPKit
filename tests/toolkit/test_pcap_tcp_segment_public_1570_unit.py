@@ -24,6 +24,7 @@ from typing import TYPE_CHECKING
 from unittest import mock
 
 from tests._support import close_extractor, reimport_once_per_class
+from tests.foundation.reassembly._reassemblers import builtins
 
 if TYPE_CHECKING:
     from typing import Any
@@ -87,9 +88,9 @@ class TestPublicSurface(_Base):
     def test_all(self) -> None:
         from pcapkit.toolkit import pcap
 
-        self.assertEqual(pcap.__all__, ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly',
-                                        'dtls_reassembly', 'tcp_traceflow', 'tcp_segment',
-                                        'TCPSegment'])
+        # the default engine feeds every shipped reassembler, each through an adapter here
+        self.assertEqual(pcap.__all__, [*(f'{name}_reassembly' for name in builtins()),
+                                        'tcp_traceflow', 'tcp_segment', 'TCPSegment'])
 
     def test_callers_share_the_public_helper(self) -> None:
         from pcapkit.toolkit import pcap, pcapng

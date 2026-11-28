@@ -48,12 +48,12 @@ from pcapkit.const.tcp.checksum import Checksum as Enum_Checksum
 from pcapkit.const.tcp.flags import Flags as Enum_Flags
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
 from pcapkit.const.tcp.option import Option as Enum_Option
-from pcapkit.corekit.const.tcpheader import TCP_MIN_HEADER_LEN
+from pcapkit.corekit.const.tcp_header import TCP_MIN_HEADER_LEN
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.schema.padding import pad_length
-from pcapkit.corekit.schema.shortread import cut_on_its_own, ends_inside_option, fill_short_options
+from pcapkit.corekit.schema.short_read import cut_on_its_own, ends_inside_option, fill_short_options
 from pcapkit.protocols.schema import Schema
 from pcapkit.protocols.transport.tcp.data import CC as Data_CC
 from pcapkit.protocols.transport.tcp.data import MPTCPDSS as Data_MPTCPDSS

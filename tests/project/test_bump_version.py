@@ -34,7 +34,6 @@ from __future__ import annotations
 import ast
 import contextlib
 import datetime
-import importlib.util
 import io
 import os
 import pathlib
@@ -46,6 +45,8 @@ import unittest
 from unittest import mock
 
 from packaging.version import Version
+
+from tests._support import load_source
 
 #: Test tier (#1958): drives util/bump_version.py, which runs on one interpreter.
 __tier__ = 'LATEST'
@@ -96,24 +97,9 @@ __getattr__, __dir__ = lazy_exports(__name__, globals(), packages=('protocols',)
 """
 
 
-def _load_script():
-    """Load :file:`util/bump_version.py` as a module.
-
-    ``util/`` is a directory of scripts rather than a package, so there is no
-    import path to it. Loading it by location is safe because the bump runs under
-    a ``__main__`` guard; without it, importing the module would rewrite two files
-    as a side effect.
-
-    """
-    path = ROOT / 'util' / 'bump_version.py'
-    spec = importlib.util.spec_from_file_location('bump_version', path)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-bump_version = _load_script()
+#: :file:`util/bump_version.py`. Its bump runs under a ``__main__`` guard, so
+#: loading it rewrites nothing.
+bump_version = load_source(ROOT / 'util' / 'bump_version.py', 'bump_version')
 
 
 class CitationTreeMixin:

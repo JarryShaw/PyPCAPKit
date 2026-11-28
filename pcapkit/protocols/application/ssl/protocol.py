@@ -61,8 +61,8 @@ from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.application.ssl.const import (_DTLS_VERSION_MAJOR, _ECH_CONFIRMATION_LENGTH,
                                                      _ECH_INNER, _ECH_OUTER, _HOST_NAME,
-                                                     _HRR_RANDOM, _TLS_VERSION_MAJOR,
-                                                     _WIRE_CONTENT_TYPES)
+                                                     _HRR_RANDOM, _RECORD_MAX_LENGTH,
+                                                     _TLS_VERSION_MAJOR, _WIRE_CONTENT_TYPES)
 from pcapkit.protocols.application.ssl.data import Alert as Data_Alert
 from pcapkit.protocols.application.ssl.data import \
     CertificateCompressionAlgorithms as Data_CertificateCompressionAlgorithms
@@ -2362,12 +2362,14 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             ProtocolError: If ``schema`` cannot be a genuine record, so that
                 :func:`~pcapkit.corekit.decorators.beholder` degrades
                 dispatch to :class:`~pcapkit.protocols.misc.raw.protocol.Raw` instead
-                of accepting a fabricated one.
+                of accepting a fabricated one. That includes a ``length`` past
+                ``2 ** 14 + 2048``, more than any TLS or DTLS version allows
+                (:rfc:`5246#section-6.2.3`).
 
         Note:
             A record split across TCP segments is rejected too: this layer
             holds only a fragment of it, and reassembly is
-            :class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP`'s job.
+            :class:`~pcapkit.foundation.reassembly.tls.reassembly.TLS`'s job.
 
         """
         # NOTE: ``make()`` leaves ``content_type`` a bare :obj:`int`, not the enum member a
@@ -2385,6 +2387,11 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             raise ProtocolError(
                 f'{self.alias}: invalid format: legacy record version {schema.version:#06x} is '
                 f'not a {"DTLS" if dtls else "TLS"} one')
+
+        if schema.length > _RECORD_MAX_LENGTH:
+            raise ProtocolError(
+                f'{self.alias}: invalid format: record length {schema.length} exceeds '
+                f'{_RECORD_MAX_LENGTH} (record_overflow)')
 
         if self.length + schema.length > available:
             raise ProtocolError(

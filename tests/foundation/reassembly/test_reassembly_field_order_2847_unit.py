@@ -20,6 +20,7 @@ import pickle  # nosec: B403 -- round-trips objects built here
 import unittest
 
 from tests._support import reimport_once_per_class
+from tests.foundation.reassembly._reassemblers import builtins
 
 #: Test tier (#1958): exercises PyPy's instance layout, and pickling and
 #: copying, which differ by interpreter.
@@ -27,9 +28,6 @@ __tier__ = 'ALL'
 
 #: The bookkeeping attributes every instance carries in ``__dict__``.
 BOOKKEEPING = ('__map__', '__map_reverse__', '__multi__', '__keys__')
-
-#: The built-in fields of the record, which come first.
-BUILTINS = ('ipv4', 'ipv6', 'tcp', 'dtls')
 
 
 def scramble(info):  # type: ignore[no-untyped-def]
@@ -54,6 +52,8 @@ class _OrderCase(unittest.TestCase):
         self.Info = Info
         self.Manager = ReassemblyManager
         self.Data = ReassemblyData
+        # the record's built-in fields, which come first: one per shipped reassembler
+        self.builtins = builtins()
 
     def assertOrder(self, info, pairs) -> None:  # type: ignore[no-untyped-def]
         """Every view of ``info`` lists ``pairs``, in order."""
@@ -122,7 +122,7 @@ class DataOrderTests(_OrderCase):
 
     def pairs(self, **extra):  # type: ignore[no-untyped-def]
         """The record's pairs for ``ReassemblyData(tcp=('t',), **extra)``."""
-        return [('ipv4', None), ('ipv6', None), ('tcp', ('t',)), ('dtls', None), *extra.items()]
+        return [*((name, ('t',) if name == 'tcp' else None) for name in self.builtins), *extra.items()]
 
     def test_built_ins_then_the_rest_as_given(self) -> None:
         for extra in ({}, {'late': (), 'early': ('e',)}, {'early': ('e',), 'late': ()}):
@@ -130,8 +130,9 @@ class DataOrderTests(_OrderCase):
                 self.assertOrder(scramble(self.Data(tcp=('t',), **extra)), self.pairs(**extra))
 
     def test_built_ins_given_out_of_order(self) -> None:
-        data = scramble(self.Data(dummy=('d',), dtls=(), tcp=('t',), ipv6=(), ipv4=('4',)))
-        self.assertOrder(data, [('ipv4', ('4',)), ('ipv6', ()), ('tcp', ('t',)), ('dtls', ()), ('dummy', ('d',))])
+        given = [(name, (name,) if index % 2 else ()) for (index, name) in enumerate(self.builtins)]
+        data = scramble(self.Data(dummy=('d',), **dict(given[::-1])))
+        self.assertOrder(data, [*given, ('dummy', ('d',))])
 
     def test_from_dict(self) -> None:
         reverse = self.pairs(dummy=('d',))[::-1]
@@ -157,7 +158,7 @@ class SecondInstanceTests(_OrderCase):
 
     def test_data(self) -> None:
         self.Data(late=(), early=())
-        self.assertOrder(self.Data(early=(), late=()), [*((name, None) for name in BUILTINS),
+        self.assertOrder(self.Data(early=(), late=()), [*((name, None) for name in self.builtins),
                                                         ('early', ()), ('late', ())])
 
 
@@ -174,8 +175,8 @@ class OneRecordTests(_OrderCase):
         self.assertEqual(manager.__keys__, ('dummy', 'tcp'))
 
         data = self.Data(dummy=())
-        self.assertEqual(set(data.__dict__), {*BOOKKEEPING, *BUILTINS, 'dummy'})
-        self.assertEqual(data.__keys__, (*BUILTINS, 'dummy'))
+        self.assertEqual(set(data.__dict__), {*BOOKKEEPING, *self.builtins, 'dummy'})
+        self.assertEqual(data.__keys__, (*self.builtins, 'dummy'))
 
 
 if __name__ == '__main__':

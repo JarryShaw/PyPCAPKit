@@ -37,8 +37,12 @@ model, and an Extension frame, are read as the minimal frame format of
 S1G Beacon lay out B8-B15 of Frame Control differently; see
 :class:`~pcapkit.protocols.link.ieee802_11.data.FrameControl`.
 
-The frame body (§9.2.4.7) follows the header and is kept as
-:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, protected or not. The FCS
+The frame body (§9.2.4.7) follows the header. That of a data frame of a
+subtype carrying one, unprotected and holding an MSDU rather than an A-MSDU,
+is an IEEE 802.2 :class:`~pcapkit.protocols.link.llc.protocol.LLC` PDU; any
+other is kept as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. A mesh
+STA's Mesh Control field ahead of the MSDU is not read: bit 8 of QoS Control
+announces it only in a mesh BSS, which the header does not tell. The FCS
 (§9.2.4.8), where one was captured, stays at the end of the body: this class
 does not decide whether a capture carries one, which behind radiotap is a
 Flags bit :class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` decodes but does
@@ -49,7 +53,7 @@ A frame of any protocol version but 0 is refused: version 1 is the PV1 frame
 format of §9.8, whose Frame Control field is laid out differently, and
 versions 2 and 3 are reserved.
 
-.. [*] IEEE Std 802.11-2020, clause 9, *Frame formats*. The clause numbers
+.. [*] :ieee:`802.11-2020`, clause 9, *Frame formats*. The clause numbers
    above are its own, checked against Wireshark's ``packet-ieee80211.c`` where
    it cites one: §9.2.4.1.10, §9.2.4.6, §9.2.4.7 and §9.8.
 
@@ -64,7 +68,8 @@ from pcapkit.const.ieee802_11.extension_subtype import ExtensionSubtype as Enum_
 from pcapkit.const.ieee802_11.management_subtype import ManagementSubtype as Enum_ManagementSubtype
 from pcapkit.const.ieee802_11.type import Type as Enum_Type
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
-from pcapkit.protocols.link.ieee802_11.const import SUBTYPE
+from pcapkit.corekit.decorators import beholder
+from pcapkit.protocols.link.ieee802_11.const import DATA_WITH_BODY, SUBTYPE
 from pcapkit.protocols.link.ieee802_11.data import IEEE802_11 as Data_IEEE802_11
 from pcapkit.protocols.link.ieee802_11.data import FrameControl as Data_FrameControl
 from pcapkit.protocols.link.ieee802_11.data import HTControl as Data_HTControl
@@ -98,8 +103,14 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
                  schema=Schema_IEEE802_11, data=Data_IEEE802_11):
     """This class implements the IEEE 802.11 MAC header.
 
-    The frame body is kept as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`; see
-    the module docstring.
+    The frame body of a data frame carrying an MSDU is dissected as
+    :class:`~pcapkit.protocols.link.llc.protocol.LLC`, and any other is kept as
+    :class:`~pcapkit.protocols.misc.raw.protocol.Raw`; see the module docstring.
+
+    .. versionchanged:: 1.9.0
+
+       The frame body of a data frame carrying an MSDU is dissected as LLC,
+       where it was kept raw (:issue:`2936`).
 
     """
 
@@ -142,8 +153,8 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
     def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_IEEE802_11':  # pylint: disable=unused-argument
         """Read IEEE 802.11 MAC header.
 
-        Structure of the MAC header with every field present (IEEE Std
-        802.11-2020 §9.2.3, *General frame format*), in octets:
+        Structure of the MAC header with every field present
+        (:ieee:`802.11-2020` §9.2.3, *General frame format*), in octets:
 
         .. code-block:: text
 
@@ -184,7 +195,14 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
             ht_control=None if schema.ht_control is None else self._read_ht_control(schema.ht_control),
         )
         hdr_len = _header_length(layout(frame_control))
-        return self._decode_next_layer(ieee802_11, -1, max(0, length - hdr_len))
+
+        # NOTE: Only an MSDU is an LLC PDU; a protected body is ciphertext, and an
+        # A-MSDU a run of subframes.
+        control = ieee802_11.frame_control
+        msdu = (control.type == Enum_Type.Data and control.subtype in DATA_WITH_BODY
+                and not control.protected
+                and not (ieee802_11.qos_control is not None and ieee802_11.qos_control.amsdu_present))
+        return self._decode_next_layer(ieee802_11, Enum_Type.Data if msdu else -1, max(0, length - hdr_len))
 
     def make(self, *,
              type: 'Enum_Type | int' = Enum_Type.Data,  # pylint: disable=redefined-builtin
@@ -362,7 +380,7 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
         }
 
     def _read_frame_control(self, value: 'int') -> 'Data_FrameControl':
-        """Read the Frame Control field (IEEE Std 802.11-2020 §9.2.4.1).
+        """Read the Frame Control field (:ieee:`802.11-2020` §9.2.4.1).
 
         In a Control Frame Extension frame, B8-B11 are the Control Frame
         Extension subfield rather than To DS, From DS, More Fragments and
@@ -406,7 +424,7 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
                             power_management: 'Optional[bool]', more_data: 'Optional[bool]',
                             protected: 'Optional[bool]', order: 'Optional[bool]',
                             s1g_beacon_flags: 'Optional[int]') -> 'int':
-        """Make the Frame Control field (IEEE Std 802.11-2020 §9.2.4.1).
+        """Make the Frame Control field (:ieee:`802.11-2020` §9.2.4.1).
 
         Args:
             version: Protocol Version.
@@ -474,7 +492,7 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
         return version | type << 2 | subtype << 4 | low << 8 | high << 12
 
     def _read_seq_ctrl(self, value: 'int') -> 'Data_SequenceControl':
-        """Read the Sequence Control field (IEEE Std 802.11-2020 §9.2.4.4).
+        """Read the Sequence Control field (:ieee:`802.11-2020` §9.2.4.4).
 
         Args:
             value: Sequence Control field, as a little-endian integer.
@@ -489,7 +507,7 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
         )
 
     def _make_seq_ctrl(self, seq_ctrl: 'Optional[Data_SequenceControl | Mapping[str, int]]') -> 'int':
-        """Make the Sequence Control field (IEEE Std 802.11-2020 §9.2.4.4).
+        """Make the Sequence Control field (:ieee:`802.11-2020` §9.2.4.4).
 
         Args:
             seq_ctrl: Sequence Control field; :obj:`None` makes zeros.
@@ -508,7 +526,7 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
         return fragment_number | sequence_number << 4
 
     def _read_qos_control(self, value: 'int') -> 'Data_QoSControl':
-        """Read the QoS Control field (IEEE Std 802.11-2020 §9.2.4.5).
+        """Read the QoS Control field (:ieee:`802.11-2020` §9.2.4.5).
 
         Args:
             value: QoS Control field, as a little-endian integer.
@@ -526,7 +544,7 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
         )
 
     def _make_qos_control(self, qos_control: 'Optional[Data_QoSControl | Mapping[str, Any]]') -> 'int':
-        """Make the QoS Control field (IEEE Std 802.11-2020 §9.2.4.5).
+        """Make the QoS Control field (:ieee:`802.11-2020` §9.2.4.5).
 
         Args:
             qos_control: QoS Control field; :obj:`None` makes zeros.
@@ -547,7 +565,7 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
                 | self._make_uint(qos_control['bits_8_15'], bits=8, name='bits_8_15') << 8)
 
     def _read_ht_control(self, value: 'int') -> 'Data_HTControl':
-        """Read the HT Control field (IEEE Std 802.11-2020 §9.2.4.6).
+        """Read the HT Control field (:ieee:`802.11-2020` §9.2.4.6).
 
         Args:
             value: HT Control field, as a little-endian integer.
@@ -565,7 +583,7 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
         return Data_HTControl(variant=variant, value=value)
 
     def _make_ht_control(self, value: 'Optional[int]') -> 'int':
-        """Make the HT Control field (IEEE Std 802.11-2020 §9.2.4.6).
+        """Make the HT Control field (:ieee:`802.11-2020` §9.2.4.6).
 
         Args:
             value: HT Control field, as an integer; :obj:`None` makes zeros.
@@ -603,3 +621,25 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
         if addr is None:
             return bytes(size or 0)
         return super()._make_mac_addr(addr, size=size, name=name, alias=alias)
+
+    @beholder  # type: ignore[arg-type]
+    def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,  # type: ignore[misc]
+                           packet: 'Optional[dict[str, Any]]' = None) -> 'ProtocolBase':
+        """Import next layer extractor.
+
+        Arguments:
+            proto: next layer protocol index: the Data type where :meth:`read`
+                found the frame body an MSDU, and ``-1`` otherwise
+            length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack
+                <pcapkit.protocols.protocol.Protocol.unpack>`)
+
+        Returns:
+            Instance of next layer: :class:`~pcapkit.protocols.link.llc.protocol.LLC`
+            for an MSDU, and :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
+            otherwise.
+
+        """
+        if proto == -1:
+            return super()._import_next_layer(proto, length, packet=packet)  # type: ignore[misc,call-arg]
+        return self._import_llc(proto, length, packet=packet)

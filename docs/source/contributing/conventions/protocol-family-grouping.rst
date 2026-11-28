@@ -139,9 +139,9 @@ The member a call through a versioned base gives, as a decision:
        VER -->|"no: fields"| ERR["ProtocolError"]
        VER -->|"no: octets"| OCT{"does the format carry a version?"}
        OCT -->|"no: ICMP, LinuxSLL"| ERR
-       OCT -->|"yes: HTTP, IGMP, IP, L2TP, OSPF"| HAS
+       OCT -->|"yes: HTTP, IGMP, IP, L2TP, OSPF, STP"| HAS
        FD -->|"IGMP, IP, L2TP, OSPF:<br/>the data's version"| HAS
-       FD -->|"HTTP, ICMP, LinuxSLL"| DM{"a member's data model?"}
+       FD -->|"HTTP, ICMP, LinuxSLL, STP"| DM{"a member's data model?"}
        DM -->|"no, e.g. a dict"| ERR
        DM -->|yes| MEM
        HAS{"a member for that version?"}
@@ -188,12 +188,22 @@ The member a call through a versioned base gives, as a decision:
      - ``1``, ``2``, ``3``
      - the Version octet
      - ``version``
+   * - :class:`~pcapkit.protocols.application.stp.protocol.STP`
+     - ``0``, ``2``, ``3``
+     - :meth:`~pcapkit.protocols.application.stp.protocol.STP._classify`: the
+       BPDU Type, the Protocol Version Identifier and the length, as
+       :ieee:`802.1Q-2022` clause 14.4 validates a BPDU
+     - the data model; a :obj:`dict` is refused
 
 HTTP octets carry their version, but the HTTP data models have no top-level
 ``version`` field, only HTTP/1's ``receipt.version`` string, so
 :meth:`HTTP.from_data <pcapkit.protocols.application.http.protocol.HTTP.from_data>` reads the
 data model's class. It refuses a :obj:`dict` even though the ``receipt`` and ``sid``
 keys would tell the members apart, since no key picks a member (:issue:`2628`).
+:meth:`STP.from_data <pcapkit.protocols.application.stp.protocol.STP.from_data>` reads
+the data model's class too, an application of that ruling (:issue:`3115`): a BPDU's
+version does not pick its member, as a Configuration BPDU is one whatever its version
+and a BPDU of version 3 or more that fails the MST checks is an RST BPDU.
 
 **Octets that carry no version are refused through the base without** ``version``
 (:issue:`2574`). An ICMP message and a Linux cooked-capture header have no version
@@ -318,7 +328,10 @@ parsing and for construction alike. Ruled in review of :pr:`3107` (:issue:`3105`
        ``('SSLv2',)``; :class:`OSPFv1 <pcapkit.protocols.application.ospfv1.protocol.OSPFv1>`
        ``('OSPFv1',)``, :class:`OSPFv2 <pcapkit.protocols.application.ospfv2.protocol.OSPFv2>`
        ``('OSPFv2',)`` and :class:`OSPFv3 <pcapkit.protocols.application.ospfv3.protocol.OSPFv3>`
-       ``('OSPFv3',)``
+       ``('OSPFv3',)``; :class:`~pcapkit.protocols.application.rstp.protocol.RSTP`
+       ``('RSTP',)`` and :class:`~pcapkit.protocols.application.mstp.protocol.MSTP`
+       ``('MSTP',)`` -- :class:`~pcapkit.protocols.application.stpv0.protocol.STPv0`
+       narrows to ``('STP',)``, as IGMPv1 does (:ref:`protocol-family-canonical-names`)
    * - Family-inclusive
      - the member's label plus the family name
      - :class:`~pcapkit.protocols.link.c_tag.protocol.C_Tag` ``('C_Tag', 'VLAN')``,
@@ -402,6 +415,14 @@ them with one. The family base's ``id()`` follows:
 ``('IGMP', 'IGMPv2', 'IGMPv3')``, the family-inclusive shape, because IGMPv1's
 canonical name and the family's own name are the same string -- the same shape
 :meth:`ICMP.id() <pcapkit.protocols.internet.icmp.protocol.ICMP.id>` takes, ``('ICMP', 'ICMPv6')``.
+
+**STP takes IGMP's shape**, an application of it rather than a ruling of its own
+(:issue:`3115`). :ieee:`802.1D-2004` names the version 0 protocol plain ``STP``, so
+:meth:`STPv0.id() <pcapkit.protocols.application.stpv0.protocol.STPv0.id>` is
+``('STP',)``, while RSTP and MSTP keep their own names, and
+:meth:`STP.id() <pcapkit.protocols.application.stp.protocol.STP.id>` is
+``('STP', 'RSTP', 'MSTP')``. The member takes the package name ``STPv0``, after the
+Protocol Version Identifier it sends, since the family base holds ``STP``.
 
 **HTTP takes the RFC names as well** (:issue:`2524`). :rfc:`9113` names its protocol
 ``HTTP/2``, so :meth:`HTTPv2.id() <pcapkit.protocols.application.httpv2.protocol.HTTPv2.id>` is

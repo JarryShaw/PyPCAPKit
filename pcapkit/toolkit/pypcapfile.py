@@ -48,8 +48,8 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.const import ipheader as Module_IPHeader
-from pcapkit.corekit.const import tcpheader as Module_TCPHeader
+from pcapkit.corekit.const import ip_header as Module_IPHeader
+from pcapkit.corekit.const import tcp_header as Module_TCPHeader
 from pcapkit.corekit.const.capture import RESOLUTION
 from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
 from pcapkit.foundation.reassembly.ip.data import Packet as IP_Packet
@@ -57,6 +57,7 @@ from pcapkit.foundation.reassembly.tcp.data import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.tcp.data import Packet as TF_TCP_Packet
 from pcapkit.protocols.internet.ipv4.protocol import IPv4 as Protocol_IPv4
 from pcapkit.protocols.transport.tcp.protocol import TCP as Protocol_TCP
+from pcapkit.toolkit.pcap import _tls_segment
 from pcapkit.utilities import config
 from pcapkit.utilities.contextvars import beholding
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, stacklevel
@@ -74,7 +75,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     'packet2timestamp', 'ipv4_header', 'packet2chain', 'packet2dict',
-    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',
+    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tls_reassembly', 'tcp_traceflow',
 ]
 
 #: Message prefix shared by every message below, read off
@@ -549,7 +550,7 @@ def _walk_extension_headers(protocol: 'int', data: 'bytes') -> 'Optional[tuple[i
         :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`
         follow in a row. An AH is ``(Payload Length + 2) * 4`` octets long
         (:rfc:`4302#section-2.2`), and no shorter than
-        :data:`~pcapkit.corekit.const.ipheader.AH_HEADER_LEN`. Any other
+        :data:`~pcapkit.corekit.const.ip_header.AH_HEADER_LEN`. Any other
         is stepped over by the length :func:`_default_extension_header` gives,
         so one it keeps though cut short leaves no octets after it
         (:issue:`2695`).
@@ -848,6 +849,31 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
         len=len(payload),                     # payload length, header excludes
         timestamp=packet2timestamp(packet),   # capture timestamp
     )
+
+
+def tls_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None':
+    """Make data for TLS record reassembly.
+
+    A packet can be reassembled if it can be for TCP reassembly (see
+    :func:`tcp_reassembly`) and the port its TCP segment's next layer is looked up
+    by binds TLS (see :func:`pcapkit.toolkit.pcap._tls_segment`), whether its
+    payload opens a record or continues one.
+
+    Args:
+        packet: PyPCAPFile packet.
+        count: Packet index. If not provided, defaults to ``-1``.
+
+    Returns:
+        Data for TCP reassembly (:term:`reasm.tcp.packet`) if the ``packet`` can be
+        reassembled; otherwise :data:`None`.
+
+    See Also:
+        :class:`pcapkit.foundation.reassembly.tls.reassembly.TLS`
+
+    .. versionadded:: 1.9.0
+
+    """
+    return _tls_segment(tcp_reassembly(packet, count=count))
 
 
 def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',

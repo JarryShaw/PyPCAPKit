@@ -21,7 +21,6 @@ import contextlib
 import email.utils
 import http.client
 import http.server
-import importlib.util
 import io
 import os
 import pathlib
@@ -38,7 +37,7 @@ from unittest import mock
 import requests
 import urllib3
 
-from tests._support import PCAPNG_GENERATOR, scale_timeout
+from tests._support import PCAPNG_GENERATOR, load_source, scale_timeout
 
 #: Test tier (#1958): drives the PCAP-NG generator's download retry with HTTP mocked.
 __tier__ = 'LATEST'
@@ -60,17 +59,12 @@ BUDGET = 30.0
 
 def _load_generator() -> 'types.ModuleType':
     """Load the generator by path, leaving :data:`sys.path` as it was."""
-    spec = importlib.util.spec_from_file_location('_pcapng_generator_1658', PCAPNG_GENERATOR)
-    if spec is None or spec.loader is None:  # pragma: no cover
-        raise RuntimeError(f'cannot load {PCAPNG_GENERATOR}')
-    module = importlib.util.module_from_spec(spec)
     saved = list(sys.path)
     try:
-        spec.loader.exec_module(module)
+        return load_source(PCAPNG_GENERATOR, '_pcapng_generator_1658')
     finally:
         # The generator puts the tree root on sys.path for its own sake (#1343).
         sys.path[:] = saved
-    return module
 
 
 def _response(code: int, body: bytes = b'', retry_after: 'str | None' = None) -> requests.Response:

@@ -53,13 +53,13 @@ PACKAGE = ROOT / 'pcapkit'
 
 #: Each consolidated constant: its home module, its name and its value.
 HOMES = (
-    ('pcapkit.corekit.const.ipheader', 'IPV4_HEADER_LEN', 20),
-    ('pcapkit.corekit.const.ipheader', 'IPV6_HEADER_LEN', 40),
-    ('pcapkit.corekit.const.ipheader', 'IPV6_NEXT_HEADER_OFFSET', 6),
-    ('pcapkit.corekit.const.ipheader', 'IP_MAX_LENGTH', 65535),
-    ('pcapkit.corekit.const.ipheader', 'AH_HEADER_LEN', 12),
-    ('pcapkit.corekit.const.tcpheader', 'TCP_MIN_HEADER_LEN', 20),
-    ('pcapkit.corekit.const.tcpheader', 'TCP_DATA_OFFSET_OCTET', 12),
+    ('pcapkit.corekit.const.ip_header', 'IPV4_HEADER_LEN', 20),
+    ('pcapkit.corekit.const.ip_header', 'IPV6_HEADER_LEN', 40),
+    ('pcapkit.corekit.const.ip_header', 'IPV6_NEXT_HEADER_OFFSET', 6),
+    ('pcapkit.corekit.const.ip_header', 'IP_MAX_LENGTH', 65535),
+    ('pcapkit.corekit.const.ip_header', 'AH_HEADER_LEN', 12),
+    ('pcapkit.corekit.const.tcp_header', 'TCP_MIN_HEADER_LEN', 20),
+    ('pcapkit.corekit.const.tcp_header', 'TCP_DATA_OFFSET_OCTET', 12),
     ('pcapkit.protocols.transport.dccp.const', 'DCCP_MIN_HEADER_LEN', 12),
     ('pcapkit.protocols.misc.pcap.header.const', 'GLOBAL_HEADER_LEN', 24),
     ('pcapkit.corekit.const.capture', 'RECORD_HEADER_LEN', 16),
@@ -118,23 +118,23 @@ LITERALS = {
 
 #: Each reader module, the home it imports from, and the names it imports.
 READERS = (
-    ('pcapkit/toolkit/scapy.py', 'pcapkit.corekit.const.ipheader', 'IPV4_HEADER_LEN'),
-    ('pcapkit/toolkit/scapy.py', 'pcapkit.corekit.const.ipheader', 'IPV6_HEADER_LEN'),
-    ('pcapkit/toolkit/scapy.py', 'pcapkit.corekit.const.tcpheader', 'TCP_MIN_HEADER_LEN'),
-    ('pcapkit/toolkit/scapy.py', 'pcapkit.corekit.const.tcpheader', 'TCP_DATA_OFFSET_OCTET'),
+    ('pcapkit/toolkit/scapy.py', 'pcapkit.corekit.const.ip_header', 'IPV4_HEADER_LEN'),
+    ('pcapkit/toolkit/scapy.py', 'pcapkit.corekit.const.ip_header', 'IPV6_HEADER_LEN'),
+    ('pcapkit/toolkit/scapy.py', 'pcapkit.corekit.const.tcp_header', 'TCP_MIN_HEADER_LEN'),
+    ('pcapkit/toolkit/scapy.py', 'pcapkit.corekit.const.tcp_header', 'TCP_DATA_OFFSET_OCTET'),
     ('pcapkit/toolkit/scapy.py', 'pcapkit.corekit.const.capture', 'RESOLUTION'),
     ('pcapkit/toolkit/scapy.py', 'pcapkit.corekit.const.capture', 'RESOLUTION_PLACES'),
-    ('pcapkit/toolkit/pcap.py', 'pcapkit.corekit.const.tcpheader', 'TCP_MIN_HEADER_LEN'),
-    ('pcapkit/toolkit/pcap.py', 'pcapkit.corekit.const.tcpheader', 'TCP_DATA_OFFSET_OCTET'),
+    ('pcapkit/toolkit/pcap.py', 'pcapkit.corekit.const.tcp_header', 'TCP_MIN_HEADER_LEN'),
+    ('pcapkit/toolkit/pcap.py', 'pcapkit.corekit.const.tcp_header', 'TCP_DATA_OFFSET_OCTET'),
     ('pcapkit/toolkit/pcapng.py', 'pcapkit.corekit.const.capture', 'RESOLUTION'),
     ('pcapkit/toolkit/dpkt.py', 'pcapkit.corekit.const.capture', 'RESOLUTION'),
     ('pcapkit/toolkit/dpkt.py', 'pcapkit.corekit.const.capture', 'RESOLUTION_PLACES'),
     ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.corekit.const.capture', 'RESOLUTION'),
-    ('pcapkit/foundation/reassembly/ip/reassembly.py', 'pcapkit.corekit.const.ipheader', 'IP_MAX_LENGTH'),
-    ('pcapkit/foundation/reassembly/ipv6/reassembly.py', 'pcapkit.corekit.const.ipheader', 'IPV6_HEADER_LEN'),
-    ('pcapkit/foundation/reassembly/ipv6/reassembly.py', 'pcapkit.corekit.const.ipheader',
+    ('pcapkit/foundation/reassembly/ip/reassembly.py', 'pcapkit.corekit.const.ip_header', 'IP_MAX_LENGTH'),
+    ('pcapkit/foundation/reassembly/ipv6/reassembly.py', 'pcapkit.corekit.const.ip_header', 'IPV6_HEADER_LEN'),
+    ('pcapkit/foundation/reassembly/ipv6/reassembly.py', 'pcapkit.corekit.const.ip_header',
      'IPV6_NEXT_HEADER_OFFSET'),
-    ('pcapkit/protocols/internet/ipv6/protocol.py', 'pcapkit.corekit.const.ipheader', 'IP_MAX_LENGTH'),
+    ('pcapkit/protocols/internet/ipv6/protocol.py', 'pcapkit.corekit.const.ip_header', 'IP_MAX_LENGTH'),
     ('pcapkit/dumpkit/pcap.py', 'pcapkit.corekit.const.capture', 'RESOLUTION'),
     ('pcapkit/protocols/misc/pcap/header/protocol.py', 'pcapkit.corekit.const.capture',
      'MAGIC_NUMBER'),
@@ -177,9 +177,9 @@ READERS = (
      'RECORD_HEADER_LEN'),
     ('pcapkit/protocols/misc/pcap/header/protocol.py', 'pcapkit.protocols.misc.pcap.header.const',
      'GLOBAL_HEADER_LEN'),
-    ('pcapkit/protocols/internet/ipv4/protocol.py', 'pcapkit.corekit.const.ipheader', 'IPV4_HEADER_LEN'),
-    ('pcapkit/protocols/internet/ah/protocol.py', 'pcapkit.corekit.const.ipheader', 'AH_HEADER_LEN'),
-    ('pcapkit/protocols/transport/tcp/protocol.py', 'pcapkit.corekit.const.tcpheader',
+    ('pcapkit/protocols/internet/ipv4/protocol.py', 'pcapkit.corekit.const.ip_header', 'IPV4_HEADER_LEN'),
+    ('pcapkit/protocols/internet/ah/protocol.py', 'pcapkit.corekit.const.ip_header', 'AH_HEADER_LEN'),
+    ('pcapkit/protocols/transport/tcp/protocol.py', 'pcapkit.corekit.const.tcp_header',
      'TCP_MIN_HEADER_LEN'),
     ('pcapkit/protocols/transport/dccp/protocol.py', 'pcapkit.protocols.transport.dccp.const',
      'DCCP_MIN_HEADER_LEN'),
@@ -193,17 +193,17 @@ READERS = (
     ('pcapkit/protocols/misc/pcapng/schema.py', 'pcapkit.corekit.const.capture', 'GENERIC_BLOCK_MINIMUM'),
     ('pcapkit/protocols/misc/pcapng/schema.py', 'pcapkit.corekit.const.capture', 'BLOCK_MINIMUM'),
     ('pcapkit/dumpkit/pcapng.py', 'pcapkit.corekit.const.capture', 'RESOLUTION'),
-    ('pcapkit/protocols/internet/ipv6/schema.py', 'pcapkit.corekit.const.ipheader', 'IP_MAX_LENGTH'),
-    ('pcapkit/protocols/internet/icmpv6/schema.py', 'pcapkit.corekit.const.ipheader', 'IP_MAX_LENGTH'),
-    ('pcapkit/protocols/internet/igmpv3/schema.py', 'pcapkit.corekit.const.ipheader', 'IP_MAX_LENGTH'),
-    ('pcapkit/protocols/misc/checksum/ip_pseudo/protocol.py', 'pcapkit.corekit.const.ipheader',
+    ('pcapkit/protocols/internet/ipv6/schema.py', 'pcapkit.corekit.const.ip_header', 'IP_MAX_LENGTH'),
+    ('pcapkit/protocols/internet/icmpv6/schema.py', 'pcapkit.corekit.const.ip_header', 'IP_MAX_LENGTH'),
+    ('pcapkit/protocols/internet/igmpv3/schema.py', 'pcapkit.corekit.const.ip_header', 'IP_MAX_LENGTH'),
+    ('pcapkit/protocols/misc/checksum/ip_pseudo/protocol.py', 'pcapkit.corekit.const.ip_header',
      'IP_MAX_LENGTH'),
-    ('pcapkit/protocols/misc/checksum/ip_pseudo/protocol.py', 'pcapkit.corekit.const.ipheader',
+    ('pcapkit/protocols/misc/checksum/ip_pseudo/protocol.py', 'pcapkit.corekit.const.ip_header',
      'IPV6_HEADER_LEN'),
-    ('pcapkit/protocols/internet/ipv6/protocol.py', 'pcapkit.corekit.const.ipheader', 'IPV6_HEADER_LEN'),
-    ('pcapkit/protocols/internet/ipv4/schema.py', 'pcapkit.corekit.const.ipheader', 'IPV4_HEADER_LEN'),
-    ('pcapkit/protocols/internet/ah/schema.py', 'pcapkit.corekit.const.ipheader', 'AH_HEADER_LEN'),
-    ('pcapkit/protocols/transport/tcp/schema.py', 'pcapkit.corekit.const.tcpheader', 'TCP_MIN_HEADER_LEN'),
+    ('pcapkit/protocols/internet/ipv6/protocol.py', 'pcapkit.corekit.const.ip_header', 'IPV6_HEADER_LEN'),
+    ('pcapkit/protocols/internet/ipv4/schema.py', 'pcapkit.corekit.const.ip_header', 'IPV4_HEADER_LEN'),
+    ('pcapkit/protocols/internet/ah/schema.py', 'pcapkit.corekit.const.ip_header', 'AH_HEADER_LEN'),
+    ('pcapkit/protocols/transport/tcp/schema.py', 'pcapkit.corekit.const.tcp_header', 'TCP_MIN_HEADER_LEN'),
 )
 
 #: Readers that reach a home as a module attribute, ``Module.NAME``, rather than
@@ -211,12 +211,12 @@ READERS = (
 #: :mod:`pcapkit.toolkit.pypcapfile` does so because binding the homed names it
 #: reads would re-export them (see :meth:`TestReaders.test_pypcapfile_binds_none`).
 ATTRIBUTE_READERS = (
-    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.corekit.const.ipheader', 'IPV4_HEADER_LEN'),
-    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.corekit.const.ipheader', 'IPV6_HEADER_LEN'),
-    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.corekit.const.ipheader', 'IPV6_NEXT_HEADER_OFFSET'),
-    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.corekit.const.ipheader', 'AH_HEADER_LEN'),
-    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.corekit.const.tcpheader', 'TCP_MIN_HEADER_LEN'),
-    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.corekit.const.tcpheader',
+    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.corekit.const.ip_header', 'IPV4_HEADER_LEN'),
+    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.corekit.const.ip_header', 'IPV6_HEADER_LEN'),
+    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.corekit.const.ip_header', 'IPV6_NEXT_HEADER_OFFSET'),
+    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.corekit.const.ip_header', 'AH_HEADER_LEN'),
+    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.corekit.const.tcp_header', 'TCP_MIN_HEADER_LEN'),
+    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.corekit.const.tcp_header',
      'TCP_DATA_OFFSET_OCTET'),
 )
 
@@ -449,6 +449,12 @@ UNRELATED = {
     'pcapkit/protocols/application/httpv2/protocol.py': ((6, 9), 'HTTP/2 frame header and setting sizes'),
     'pcapkit/protocols/application/httpv2/schema.py': ((6, 32),
                                                        'an HTTP/2 setting size and a flag bit'),
+    'pcapkit/protocols/application/mstp/protocol.py': ((16, 32), 'the MSTI Configuration Message length '
+                                                      'and the Learning and Forwarding flag masks '
+                                                      '(IEEE 802.1Q-2022 clause 14)'),
+    'pcapkit/protocols/application/mstp/schema.py': ((16, 32), 'the MSTI Configuration Message length '
+                                                    'and the MST Configuration Name and Digest '
+                                                    'widths (IEEE 802.1Q-2022 clause 14)'),
     'pcapkit/protocols/application/ospf/protocol.py': ((16, 24),
                                               'the 24-octet OSPFv1 and OSPFv2 header length, and '
                                               'the offset 16 of the Authentication field their '
@@ -463,23 +469,36 @@ UNRELATED = {
                                                         'appendix A.3.1), not a PCAP record header'),
     'pcapkit/protocols/application/ospfv3/schema.py': ((16,), 'the OSPFv3 header length, not a PCAP '
                                                       'record header'),
+    'pcapkit/protocols/application/stp/protocol.py': ((6, 16, 32), 'the Agreement flag bit, the MSTI '
+                                                     'Configuration Message length and the Learning '
+                                                     'and Forwarding flag masks of a BPDU (IEEE '
+                                                     '802.1Q-2022 clause 14)'),
     'pcapkit/protocols/internet/ah/protocol.py': ((6, 20), 'the IP version number the ICV is padded '
                                          "for (#2886), and AH's length estimate, its 12-octet "
                                          'fixed part plus a minimal ICV, not the fixed part itself'),
     'pcapkit/protocols/internet/esp/protocol.py': ((12, 16, 20, 24, 32), 'ESP ICV and key sizes'),
-    'pcapkit/protocols/internet/hip/protocol.py': ((6, 12, 16, 20, 32, 40, 65535),
+    'pcapkit/protocols/internet/hip/const.py': ((16, 32), 'HIP cipher key and ECDSA and EdDSA '
+                                                'key lengths (#2939)'),
+    'pcapkit/protocols/internet/hip/protocol.py': ((6, 12, 16, 20, 24, 32, 40, 65535),
                                           'HIP parameter fields and sizes; 65535 bounds the '
                                           'two-octet TLV Length a TRANSACTION_ID or OVERLAY_ID '
                                           'may declare (#2271), as it does in the schema module, '
-                                          'and is not an IP total length'),
+                                          'and is not an IP total length; 24 is the offset of '
+                                          'the Receiver\'s HIT HIP_SIGNATURE_2 zeroes (#2939)'),
     'pcapkit/protocols/internet/hip/schema.py': ((12, 16, 20, 65535),
                                                 'HIP parameter fields, sizes and bit-fields'),
     'pcapkit/protocols/internet/hopopt/protocol.py': ((6, 16, 32), 'HOPOPT option fields, widths and sizes'),
     'pcapkit/protocols/internet/hopopt/schema.py': ((6, 16), 'HOPOPT option field sizes '
                                                    'and bit-fields'),
-    'pcapkit/protocols/internet/icmpv6/schema.py': ((16, 20), 'an IPv6 address is 16 octets, and '
+    'pcapkit/protocols/internet/icmpv6/const.py': ((32, 40), 'NAT64 prefix lengths a PREF64 option '
+                                                 'codes (RFC 8781 section 4)'),
+    'pcapkit/protocols/internet/icmpv6/protocol.py': ((6, 12, 16, 24), 'the IP version, an IPv6 address '
+                                                    'of 16 octets, the 12 a PREF64 option carries and '
+                                                    'the Route Information option sizes'),
+    'pcapkit/protocols/internet/icmpv6/schema.py': ((6, 12, 16, 20), 'an IPv6 address is 16 octets, '
                                                   'the fixed part of an MLDv2 multicast address '
-                                                  'record 20 (RFC 9777 section 5.2)'),
+                                                  'record 20 (RFC 9777 section 5.2), ND option field '
+                                                  'sizes and an RA flag bit (RFC 4861 section 4)'),
     'pcapkit/protocols/internet/igmp/protocol.py': ((12,), "the minimum overall length (RFC 3376 "
                                            "section 7.1) at which a Membership Query carries "
                                            "IGMPv3's source-list extension rather than being "
@@ -521,6 +540,9 @@ UNRELATED = {
     'pcapkit/protocols/link/linux_sll1/protocol.py': ((65535,), "the max value of LINUX_SLL's own "
                                             '2-octet link_addr_length field, not an IP total '
                                             'length'),
+    'pcapkit/protocols/link/llc/protocol.py': ((12, 16), 'the masks of the supervisory function '
+                                          'bits and the U-format P/F bit of the LLC control '
+                                          'field'),
     'pcapkit/protocols/link/loopback/protocol.py': ((24, 28), 'the BSD loopback address families of IPv6 '
                                            '(NetBSD and OpenBSD 24, FreeBSD 28)'),
     'pcapkit/protocols/link/netlink/protocol.py': ((16,), 'the nlmsghdr fixed header length (16 '

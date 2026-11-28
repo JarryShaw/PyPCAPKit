@@ -24,7 +24,7 @@ __all__ = ['ControlSubtype']
 
 
 class ControlSubtype(EnumRegistry, IntEnum):
-    """[ControlSubtype] IEEE 802.11 Control Frame Subtypes [IEEE Std 802.11-2020, Table 9-1]"""
+    """[ControlSubtype] IEEE 802.11 Control Frame Subtypes [:ieee:`802.11-2020`, Table 9-1]"""
 
     #: Trigger
     Trigger = 2

@@ -25,7 +25,7 @@ import unittest
 import warnings
 from typing import TYPE_CHECKING
 
-from tests._support import reimport_once_per_class
+from tests._support import install_hook_sentinels, reimport_once_per_class
 from tests.utilities._harness import capture
 
 if TYPE_CHECKING:
@@ -136,21 +136,7 @@ class AnalyzeRefusalQuietTests(unittest.TestCase):
         # NOTE: Imported before the sentinels go in, since importing pcapkit
         # outside development mode installs tbtrim's hook itself.
         import pcapkit  # pylint: disable=import-outside-toplevel,unused-import
-        saved = sys.excepthook, threading.excepthook
-
-        def restore() -> None:
-            sys.excepthook, threading.excepthook = saved
-
-        self.addCleanup(restore)
-
-        def sentinel(*args: 'object') -> None:
-            sys.__excepthook__(*args)  # type: ignore[arg-type]
-
-        def thread_sentinel(args: 'object') -> None:
-            pass
-
-        self.sentinels = sentinel, thread_sentinel
-        sys.excepthook, threading.excepthook = self.sentinels
+        self.sentinels = install_hook_sentinels(self)
 
     def run_quietly(self, func: 'Callable[..., Any]', *args: 'Any') -> 'Any':
         """``func(*args)``, asserting it logs nothing, warns nothing and hooks nothing."""

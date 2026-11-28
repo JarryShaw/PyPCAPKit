@@ -74,12 +74,11 @@ from __future__ import annotations
 import importlib
 import importlib.util
 import pkgutil
-import sys
 import types
 import unittest
 from typing import TYPE_CHECKING, NamedTuple
 
-from tests._support import purge_modules, time_limit
+from tests._support import load_source, purge_modules, time_limit
 from tests._tiers import ROOT
 
 if TYPE_CHECKING:
@@ -99,6 +98,8 @@ CASE_TIMEOUT = 30
 #: The non-empty option-like maps no family exercises, by ``module.Class.__map__``
 #: path, and why. Every other one is some family's registry (#2615).
 UNCOVERED = {
+    'pcapkit.protocols.link.llc.protocol.LLC.__paired__':
+        "LLC's paired flags, a DSAP mapped to a flag rather than to a payload; test_llc_unit.py covers it (#2936)",
     'pcapkit.protocols.protocol.ProtocolBase.__registry__':
         'the by-name protocol registry, keyed by class name rather than by an option code; '
         'tests/protocols/test_protocol_registry_2763_unit.py covers it (#2763)',
@@ -228,28 +229,13 @@ def _gap_for(label: 'str') -> 'Optional[Gap]':
 def _load_generator() -> 'types.ModuleType':
     """Load :file:`examples/generators/options.py` by path.
 
-    That directory is not a package, and its module names are too generic to put
-    on :data:`sys.path` -- which is exactly why
-    :file:`examples/generators/make_samples.py` loads its siblings by path too.
-    This follows it.
-
     Returns:
         The generator module, which exposes ``cases``, ``roundtrip``, ``FAMILIES``
         and ``SKIP``.
 
-    Raises:
-        RuntimeError: If the module cannot be found or loaded.
-
     """
-    path = ROOT / 'examples' / 'generators' / 'options.py'
-    spec = importlib.util.spec_from_file_location('pcapkit_samples_options', path)
-    if spec is None or spec.loader is None:  # pragma: no cover
-        raise RuntimeError(f'cannot load the option case table from {path}')
-
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
+    return load_source(ROOT / 'examples' / 'generators' / 'options.py', 'pcapkit_samples_options',
+                       register=True)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

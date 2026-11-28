@@ -179,7 +179,7 @@ class DNSCompressionTests(DNSTestCase):
         self.assertEqual(DNS.from_fields(question=[{'name': '.'}]).info.question[0].name.labels, ())
 
     def test_presentation_escapes(self) -> None:
-        from pcapkit.protocols.application.dns.schema import name_to_text, text_to_labels
+        from pcapkit.corekit.schema.domain_name import name_to_text, text_to_labels
 
         labels = (b'a.b', b'c\\d', b'e f', b'\x00\xff')
         text = name_to_text(labels)
@@ -189,7 +189,7 @@ class DNSCompressionTests(DNSTestCase):
         self.assertEqual(text_to_labels(''), ())
 
     def test_malformed_names_are_refused(self) -> None:
-        from pcapkit.protocols.application.dns.schema import make_name, read_name, text_to_labels
+        from pcapkit.corekit.schema.domain_name import make_name, read_name, text_to_labels
         from pcapkit.utilities.exceptions import CaughtByCaller, ProtocolError
 
         cases = (

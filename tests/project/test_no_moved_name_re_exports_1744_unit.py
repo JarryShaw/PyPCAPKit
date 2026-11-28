@@ -137,6 +137,13 @@ PURE = (
     ('pcapkit.protocols.application.ospf', 'Schema_CryptographicAuthentication'),
     ('pcapkit.protocols.application.ospf', 'Data_OSPF'),
     ('pcapkit.protocols.application.ospf', 'Data_CryptographicAuthentication'),
+    # #2934: the domain name codec ICMPv6's DNSSL option reads too, and its
+    # pointer limit, moved to pcapkit.corekit.
+    ('pcapkit.protocols.application.dns.schema', 'read_name'),
+    ('pcapkit.protocols.application.dns.schema', 'make_name'),
+    ('pcapkit.protocols.application.dns.schema', 'name_to_text'),
+    ('pcapkit.protocols.application.dns.schema', 'text_to_labels'),
+    ('pcapkit.protocols.application.dns.const', 'POINTER_LIMIT'),
 )
 
 #: Removed paths the old module still uses, as ``(old module, name, new home)``.
@@ -158,18 +165,18 @@ USED = (
     ('pcapkit.protocols.misc.pcapng.schema', 'BYTE_ORDER_MAGIC', 'pcapkit.corekit.const.capture'),
     ('pcapkit.protocols.misc.pcapng.schema', 'GENERIC_BLOCK_MINIMUM', 'pcapkit.corekit.const.capture'),
     ('pcapkit.protocols.misc.pcapng.schema', 'BLOCK_MINIMUM', 'pcapkit.corekit.const.capture'),
-    ('pcapkit.protocols.internet.ipv6.schema', 'IP_MAX_LENGTH', 'pcapkit.corekit.const.ipheader'),
-    ('pcapkit.protocols.internet.ipv6.protocol', 'IPV6_HEADER_LEN', 'pcapkit.corekit.const.ipheader'),
-    ('pcapkit.protocols.internet.ipv4.schema', 'IPV4_HEADER_LEN', 'pcapkit.corekit.const.ipheader'),
-    ('pcapkit.protocols.internet.ah.schema', 'AH_HEADER_LEN', 'pcapkit.corekit.const.ipheader'),
-    ('pcapkit.protocols.transport.tcp.schema', 'TCP_MIN_HEADER_LEN', 'pcapkit.corekit.const.tcpheader'),
+    ('pcapkit.protocols.internet.ipv6.schema', 'IP_MAX_LENGTH', 'pcapkit.corekit.const.ip_header'),
+    ('pcapkit.protocols.internet.ipv6.protocol', 'IPV6_HEADER_LEN', 'pcapkit.corekit.const.ip_header'),
+    ('pcapkit.protocols.internet.ipv4.schema', 'IPV4_HEADER_LEN', 'pcapkit.corekit.const.ip_header'),
+    ('pcapkit.protocols.internet.ah.schema', 'AH_HEADER_LEN', 'pcapkit.corekit.const.ip_header'),
+    ('pcapkit.protocols.transport.tcp.schema', 'TCP_MIN_HEADER_LEN', 'pcapkit.corekit.const.tcp_header'),
     # #2897: the helper the old module still calls.
     ('pcapkit.protocols.link.loopback.protocol', 'family_byteorder', 'pcapkit.corekit.schema.byteorder'),
     # #2896: the constants documented at their old paths, now in their package's
     # const module. The old modules still read them, so they need no
     # versionremoved.
     ('pcapkit.protocols.application.dns.schema', 'HEADER_LENGTH', 'pcapkit.protocols.application.dns.const'),
-    ('pcapkit.protocols.application.dns.schema', 'POINTER_LIMIT', 'pcapkit.protocols.application.dns.const'),
+    ('pcapkit.protocols.application.dns.schema', 'POINTER_LIMIT', 'pcapkit.corekit.const.domain_name'),
     ('pcapkit.protocols.application.http.protocol', '_HTTP2_PREFACE', 'pcapkit.protocols.application.http.const'),
     ('pcapkit.protocols.internet.hip.schema', 'LOCATOR_SET_LEN', 'pcapkit.protocols.internet.hip.const'),
     ('pcapkit.protocols.link.ieee802_11.protocol', 'SUBTYPE', 'pcapkit.protocols.link.ieee802_11.const'),
@@ -295,6 +302,19 @@ SHIPPED = (
      'pcapkit/protocols/application/ospf/protocol.py', 'pcapkit/protocols/application/ospf.rst', '1.8.1'),
     ('pcapkit.protocols.application.ospf', 'Data_CryptographicAuthentication',
      'pcapkit/protocols/application/ospf/protocol.py', 'pcapkit/protocols/application/ospf.rst', '1.8.1'),
+    # #2934: shipped in 1.7.0 through 1.8.1, the four codec functions moved to
+    # pcapkit.corekit.schema.domain_name and POINTER_LIMIT to
+    # pcapkit.corekit.const.domain_name, both in 1.9.0.
+    ('pcapkit.protocols.application.dns.schema', 'read_name',
+     'pcapkit/protocols/application/dns/schema.py', 'pcapkit/protocols/application/dns.rst', '1.9.0'),
+    ('pcapkit.protocols.application.dns.schema', 'make_name',
+     'pcapkit/protocols/application/dns/schema.py', 'pcapkit/protocols/application/dns.rst', '1.9.0'),
+    ('pcapkit.protocols.application.dns.schema', 'name_to_text',
+     'pcapkit/protocols/application/dns/schema.py', 'pcapkit/protocols/application/dns.rst', '1.9.0'),
+    ('pcapkit.protocols.application.dns.schema', 'text_to_labels',
+     'pcapkit/protocols/application/dns/schema.py', 'pcapkit/protocols/application/dns.rst', '1.9.0'),
+    ('pcapkit.protocols.application.dns.const', 'POINTER_LIMIT',
+     'pcapkit/protocols/application/dns/const.py', 'pcapkit/protocols/application/dns.rst', '1.9.0'),
 )
 
 #: Shipped modules that moved whole, as ``(old module, the module recording its
@@ -329,6 +349,16 @@ MOVED_MODULES = (
      'pcapkit/protocols/application/ospf.rst', '1.8.1'),
     ('pcapkit.protocols.application.ospf.data', 'pcapkit.protocols.application.ospf.protocol',
      'pcapkit/protocols/application/ospf.rst', '1.8.1'),
+    # #3153: shipped in 1.6.0 and 1.7.0, renamed so that their words are
+    # separated by underscores.
+    ('pcapkit.corekit.schema.shortread', 'pcapkit.corekit.schema.short_read',
+     'pcapkit/corekit/schema/short_read.rst', '1.9.0'),
+    ('pcapkit.corekit.schema.extlen', 'pcapkit.corekit.schema.ext_len',
+     'pcapkit/corekit/schema/ext_len.rst', '1.9.0'),
+    ('pcapkit.corekit.const.ipheader', 'pcapkit.corekit.const.ip_header',
+     'pcapkit/corekit/const/ip_header.rst', '1.9.0'),
+    ('pcapkit.corekit.const.tcpheader', 'pcapkit.corekit.const.tcp_header',
+     'pcapkit/corekit/const/tcp_header.rst', '1.9.0'),
 )
 
 

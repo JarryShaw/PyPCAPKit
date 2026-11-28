@@ -4,10 +4,11 @@
 
 from typing import TYPE_CHECKING, cast
 
+from pcapkit.const.icmpv6.nd_option import NDOption as Enum_NDOption
 from pcapkit.const.icmpv6.type import Type as Enum_Type
 from pcapkit.const.igmp.record_type import RecordType as Enum_RecordType
-from pcapkit.corekit.const.ipheader import IP_MAX_LENGTH
-from pcapkit.corekit.fields.collections import ListField
+from pcapkit.corekit.const.ip_header import IP_MAX_LENGTH
+from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.ipaddress import IPv6AddressField
 from pcapkit.corekit.fields.misc import ConditionalField, PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
@@ -21,8 +22,15 @@ __all__ = [
 
     'ICMPv6Type', 'Unknown', 'DestinationUnreachable', 'PacketTooBig', 'TimeExceeded',
     'ParameterProblem', 'Echo', 'MLDQuery', 'MLDv1', 'MLDv2Report',
+    'RouterSolicitation', 'RouterAdvertisement', 'NeighborSolicitation', 'NeighborAdvertisement',
+    'Redirect',
 
     'MLDv2QueryExtension', 'MulticastAddressRecord',
+
+    'NDOption', 'UnknownOption', 'LinkLayerAddressOption', 'PrefixInformationOption',
+    'RedirectedHeaderOption', 'MTUOption', 'AdvertisementIntervalOption',
+    'HomeAgentInformationOption', 'NonceOption', 'RouteInformationOption', 'RDNSSOption',
+    'RAFlagsExtensionOption', 'DNSSLOption', 'CaptivePortalOption', 'PREF64Option',
 ]
 
 if TYPE_CHECKING:
@@ -46,6 +54,88 @@ if TYPE_CHECKING:
         s_flag: int
         #: Querier's Robustness Variable.
         qrv: int
+
+    class RAFlags(TypedDict):
+        """Router Advertisement flags octet, as IANA's Router Advertisement Flags assigns it.
+
+        .. versionadded:: 1.9.0
+
+        """
+
+        #: Managed Address Configuration flag.
+        m_flag: int
+        #: Other Configuration flag.
+        o_flag: int
+        #: Mobile IPv6 Home Agent flag.
+        h_flag: int
+        #: Default Router Preference.
+        prf: int
+        #: Neighbor Discovery Proxy flag.
+        p_flag: int
+        #: SNAC Router flag.
+        s_flag: int
+        #: Reserved.
+        reserved: int
+
+    class NAFlags(TypedDict):
+        """Neighbor Advertisement flags and Reserved (:rfc:`4861#section-4.4`).
+
+        .. versionadded:: 1.9.0
+
+        """
+
+        #: Router flag.
+        r_flag: int
+        #: Solicited flag.
+        s_flag: int
+        #: Override flag.
+        o_flag: int
+        #: Reserved.
+        reserved: int
+
+    class PrefixInformationFlags(TypedDict):
+        """Prefix Information option flags octet, as IANA's Prefix Information Option Flags assigns it.
+
+        .. versionadded:: 1.9.0
+
+        """
+
+        #: On-link flag.
+        l_flag: int
+        #: Autonomous Address Configuration flag.
+        a_flag: int
+        #: Router Address flag.
+        r_flag: int
+        #: DHCPv6-PD Preferred flag.
+        p_flag: int
+        #: Reserved1.
+        reserved1: int
+
+    class RouteInformationFlags(TypedDict):
+        """Route Information option Reserved and Prf octet (:rfc:`4191#section-2.3`).
+
+        .. versionadded:: 1.9.0
+
+        """
+
+        #: Reserved, the high-order 3 bits.
+        reserved1: int
+        #: Route Preference.
+        prf: int
+        #: Reserved, the low-order 3 bits.
+        reserved2: int
+
+    class PREF64Lifetime(TypedDict):
+        """PREF64 option Scaled Lifetime and PLC (:rfc:`8781#section-4`).
+
+        .. versionadded:: 1.9.0
+
+        """
+
+        #: Scaled Lifetime, in units of 8 seconds.
+        scaled_lifetime: int
+        #: Prefix Length Code.
+        plc: int
 
 
 def icmpv6_data_selector(pkt: 'dict[str, Any]') -> 'Field':
@@ -113,7 +203,7 @@ def mldv2_record_count(pkt: 'dict[str, Any]') -> 'int':
     Raises:
         ProtocolError: If the records counted, at the 20 fixed octets of each,
             behind the 8 octets ahead of them, reach past the
-            :data:`~pcapkit.corekit.const.ipheader.IP_MAX_LENGTH` octets
+            :data:`~pcapkit.corekit.const.ip_header.IP_MAX_LENGTH` octets
             an IP payload holds, so the count is no cut but one the message
             cannot carry.
 
@@ -127,6 +217,46 @@ def mldv2_record_count(pkt: 'dict[str, Any]') -> 'int':
     if 8 + 20 * count > IP_MAX_LENGTH:
         raise ProtocolError(f'ICMPv6: {count} multicast address records cannot fit in one IP payload')
     return count
+
+
+def nd_option_length(pkt: 'dict[str, Any]', offset: 'int') -> 'int':
+    """Octets an ND option's Length declares past its first ``offset``.
+
+    The Length counts the whole option in units of 8 octets
+    (:rfc:`4861#section-4.6`).
+
+    Args:
+        pkt: Option unpacked so far.
+        offset: Octets of the option ahead of the field sized.
+
+    Returns:
+        ``Length * 8 - offset``, or ``0`` for a Length too small to reach past
+        ``offset``, an option
+        :meth:`~pcapkit.protocols.internet.icmpv6.protocol.ICMPv6._read_nd_options`
+        refuses.
+
+    .. versionadded:: 1.9.0
+
+    """
+    return max(pkt['length'] * 8 - offset, 0)
+
+
+def rdnss_address_length(pkt: 'dict[str, Any]') -> 'int':
+    """Length of :attr:`RDNSSOption.addresses`.
+
+    Args:
+        pkt: Option unpacked so far.
+
+    Returns:
+        16 octets for each of the ``(Length - 1) / 2`` addresses
+        (:rfc:`8106#section-5.1`). A Length below 3 or even is one
+        :meth:`~pcapkit.protocols.internet.icmpv6.protocol.ICMPv6._read_opt_rdnss`
+        refuses (:rfc:`8106#section-5.3.1`).
+
+    .. versionadded:: 1.9.0
+
+    """
+    return max(pkt['length'] - 1, 0) // 2 * 16
 
 
 @schema_final
@@ -414,3 +544,470 @@ class MLDv2Report(ICMPv6Type, code=Enum_Type.Version_2_Multicast_Listener_Report
     if TYPE_CHECKING:
         def __init__(self, flags: 'int', num_records: 'int',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
                      records: 'list[MulticastAddressRecord]', data: 'bytes') -> 'None': ...
+
+
+class NDOption(EnumSchema[Enum_NDOption]):
+    """Header schema for ICMPv6 Neighbor Discovery options (:rfc:`4861#section-4.6`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    __default__ = lambda: UnknownOption
+
+    #: Option type.
+    type: 'Enum_NDOption' = EnumField(length=1, namespace=Enum_NDOption)
+    #: Option length, in units of 8 octets, type and length included.
+    length: 'int' = UInt8Field()
+
+    @classmethod
+    def pre_unpack(cls, packet: 'dict[str, Any]') -> 'None':
+        """Prepare ``packet`` data for unpacking process.
+
+        Args:
+            packet: packet data
+
+        An option of a message parsed on its own, as
+        :data:`~pcapkit.utilities.contextvars.frame_depth` tells, is read with
+        ``__data_end__``: its octets end at most with the data, where the
+        capture cut them (:issue:`2880`), so a field past the cut does not
+        warn.
+
+        """
+        if not frame_depth.get():
+            packet['__data_end__'] = True
+
+
+@schema_final
+class UnknownOption(NDOption):
+    """Header schema for an ND option of a type not decoded.
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Option data.
+    data: 'bytes' = BytesField(length=lambda pkt: nd_option_length(pkt, 2))
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', data: 'bytes') -> 'None': ...
+
+
+@schema_final
+class LinkLayerAddressOption(NDOption, code=[Enum_NDOption.Source_Link_layer_Address,
+                                             Enum_NDOption.Target_Link_layer_Address]):
+    """Header schema for Source and Target Link-layer Address options (:rfc:`4861#section-4.6.1`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Link-layer address, laid out as the link's own specification gives.
+    link_layer_address: 'bytes' = BytesField(length=lambda pkt: nd_option_length(pkt, 2))
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', link_layer_address: 'bytes') -> 'None': ...
+
+
+@schema_final
+class PrefixInformationOption(NDOption, code=Enum_NDOption.Prefix_Information):
+    """Header schema for Prefix Information options (:rfc:`4861#section-4.6.2`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Prefix length.
+    prefix_length: 'int' = UInt8Field()
+    #: Flags, as IANA's Prefix Information Option Flags assigns them.
+    flags: 'PrefixInformationFlags' = BitField(length=1, namespace={
+        'l_flag': (0, 1),
+        'a_flag': (1, 1),
+        'r_flag': (2, 1),
+        'p_flag': (3, 1),
+        'reserved1': (4, 4),
+    })
+    #: Valid lifetime, in seconds.
+    valid_lifetime: 'int' = UInt32Field()
+    #: Preferred lifetime, in seconds.
+    preferred_lifetime: 'int' = UInt32Field()
+    #: Reserved2.
+    reserved2: 'bytes' = BytesField(length=4)
+    #: Prefix.
+    prefix: 'IPv6Address' = IPv6AddressField()
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', prefix_length: 'int',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+                     flags: 'PrefixInformationFlags', valid_lifetime: 'int', preferred_lifetime: 'int',
+                     reserved2: 'bytes', prefix: 'IPv6Address | str | bytes | int') -> 'None': ...
+
+
+@schema_final
+class RedirectedHeaderOption(NDOption, code=Enum_NDOption.Redirected_Header):
+    """Header schema for Redirected Header options (:rfc:`4861#section-4.6.3`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Reserved.
+    reserved: 'bytes' = BytesField(length=6)
+    #: As much of the redirected packet as fits.
+    data: 'bytes' = BytesField(length=lambda pkt: nd_option_length(pkt, 8))
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', reserved: 'bytes', data: 'bytes') -> 'None': ...
+
+
+@schema_final
+class MTUOption(NDOption, code=Enum_NDOption.MTU):
+    """Header schema for MTU options (:rfc:`4861#section-4.6.4`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Reserved.
+    reserved: 'bytes' = BytesField(length=2)
+    #: Recommended MTU of the link.
+    mtu: 'int' = UInt32Field()
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', reserved: 'bytes', mtu: 'int') -> 'None': ...
+
+
+@schema_final
+class AdvertisementIntervalOption(NDOption, code=Enum_NDOption.Advertisement_Interval_Option):
+    """Header schema for Advertisement Interval options (:rfc:`6275#section-7.3`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Reserved.
+    reserved: 'bytes' = BytesField(length=2)
+    #: Advertisement interval, in milliseconds.
+    interval: 'int' = UInt32Field()
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', reserved: 'bytes', interval: 'int') -> 'None': ...
+
+
+@schema_final
+class HomeAgentInformationOption(NDOption, code=Enum_NDOption.Home_Agent_Information_Option):
+    """Header schema for Home Agent Information options (:rfc:`6275#section-7.4`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Reserved.
+    reserved: 'bytes' = BytesField(length=2)
+    #: Home agent preference.
+    preference: 'int' = UInt16Field()
+    #: Home agent lifetime, in seconds.
+    lifetime: 'int' = UInt16Field()
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', reserved: 'bytes',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+                     preference: 'int', lifetime: 'int') -> 'None': ...
+
+
+@schema_final
+class NonceOption(NDOption, code=Enum_NDOption.Nonce_option):
+    """Header schema for Nonce options (:rfc:`3971#section-5.3.2`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Nonce.
+    nonce: 'bytes' = BytesField(length=lambda pkt: nd_option_length(pkt, 2))
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', nonce: 'bytes') -> 'None': ...
+
+
+@schema_final
+class RouteInformationOption(NDOption, code=Enum_NDOption.Route_Information_Option):
+    """Header schema for Route Information options (:rfc:`4191#section-2.3`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Prefix length.
+    prefix_length: 'int' = UInt8Field()
+    #: Reserved, Route Preference and Reserved.
+    flags: 'RouteInformationFlags' = BitField(length=1, namespace={
+        'reserved1': (0, 3),
+        'prf': (3, 2),
+        'reserved2': (5, 3),
+    })
+    #: Route lifetime, in seconds.
+    lifetime: 'int' = UInt32Field()
+    #: Prefix, as many octets of it as the Length leaves.
+    prefix: 'bytes' = BytesField(length=lambda pkt: nd_option_length(pkt, 8))
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', prefix_length: 'int',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+                     flags: 'RouteInformationFlags', lifetime: 'int', prefix: 'bytes') -> 'None': ...
+
+
+@schema_final
+class RDNSSOption(NDOption, code=Enum_NDOption.Recursive_DNS_Server_Option):
+    """Header schema for Recursive DNS Server options (:rfc:`8106#section-5.1`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Reserved.
+    reserved: 'bytes' = BytesField(length=2)
+    #: Lifetime, in seconds.
+    lifetime: 'int' = UInt32Field()
+    #: Addresses of the recursive DNS servers.
+    addresses: 'list[IPv6Address]' = ListField(
+        length=rdnss_address_length,
+        item_type=IPv6AddressField(),
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', reserved: 'bytes',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+                     lifetime: 'int', addresses: 'list[IPv6Address | str | bytes | int]') -> 'None': ...
+
+
+@schema_final
+class RAFlagsExtensionOption(NDOption, code=Enum_NDOption.RA_Flags_Extension_Option):
+    """Header schema for RA Flags Extension options (:rfc:`5175#section-4`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Bits 8 onwards of IANA's Router Advertisement Flags.
+    bits: 'bytes' = BytesField(length=lambda pkt: nd_option_length(pkt, 2))
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', bits: 'bytes') -> 'None': ...
+
+
+@schema_final
+class DNSSLOption(NDOption, code=Enum_NDOption.DNS_Search_List_Option):
+    """Header schema for DNS Search List options (:rfc:`8106#section-5.2`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Reserved.
+    reserved: 'bytes' = BytesField(length=2)
+    #: Lifetime, in seconds.
+    lifetime: 'int' = UInt32Field()
+    #: Domain names, each uncompressed (:rfc:`1035#section-3.1`), then zero
+    #: padding.
+    names: 'bytes' = BytesField(length=lambda pkt: nd_option_length(pkt, 8))
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', reserved: 'bytes',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+                     lifetime: 'int', names: 'bytes') -> 'None': ...
+
+
+@schema_final
+class CaptivePortalOption(NDOption, code=Enum_NDOption.DHCP_Captive_Portal):
+    """Header schema for Captive-Portal options (:rfc:`8910#section-2.3`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: URI, then NUL padding.
+    uri: 'bytes' = BytesField(length=lambda pkt: nd_option_length(pkt, 2))
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', uri: 'bytes') -> 'None': ...
+
+
+@schema_final
+class PREF64Option(NDOption, code=Enum_NDOption.PREF64_option):
+    """Header schema for PREF64 options (:rfc:`8781#section-4`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Scaled Lifetime and Prefix Length Code.
+    lifetime: 'PREF64Lifetime' = BitField(length=2, namespace={
+        'scaled_lifetime': (0, 13),
+        'plc': (13, 3),
+    })
+    #: Highest 96 bits of the prefix.
+    prefix: 'bytes' = BytesField(length=12)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_NDOption', length: 'int', lifetime: 'PREF64Lifetime',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+                     prefix: 'bytes') -> 'None': ...
+
+
+class NDOptionField(OptionField[NDOption]):
+    """The option list closing a Neighbor Discovery message (:rfc:`4861#section-4.6`).
+
+    The list runs to the end of the message, which a message parsed on its own
+    knows only as the end of the data.
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    def _accepts_short_read(self, option: 'NDOption') -> 'bool':  # pylint: disable=unused-argument
+        """Whether an option that read past the end of the data may stand.
+
+        Args:
+            option: Option just unpacked, which read short.
+
+        Returns:
+            Whether the message was parsed on its own, as
+            :data:`~pcapkit.utilities.contextvars.frame_depth` tells: its data
+            then ends where it was cut (:issue:`2880`), and the option keeps the
+            short read its schema records. Inside a frame its lengths say where
+            the message ends, so an option past them is refused.
+
+        """
+        return not frame_depth.get()
+
+
+def nd_options() -> 'NDOptionField':
+    """The option list of a Neighbor Discovery message.
+
+    Returns:
+        A list of :class:`NDOption` running to the end of the message.
+
+    .. versionadded:: 1.9.0
+
+    """
+    return NDOptionField(
+        length=lambda pkt: pkt['__length__'],
+        base_schema=NDOption,
+        type_name='type',
+        registry=NDOption.registry,
+        eool=None,
+    )
+
+
+@schema_final
+class RouterSolicitation(ICMPv6Type, code=Enum_Type.Router_Solicitation):
+    """Header schema for Router Solicitation messages (:rfc:`4861#section-4.1`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Reserved.
+    reserved: 'bytes' = BytesField(length=4)
+    #: Options.
+    options: 'list[NDOption]' = nd_options()
+
+    if TYPE_CHECKING:
+        def __init__(self, reserved: 'bytes', options: 'list[NDOption | bytes]') -> 'None': ...
+
+
+@schema_final
+class RouterAdvertisement(ICMPv6Type, code=Enum_Type.Router_Advertisement):
+    """Header schema for Router Advertisement messages (:rfc:`4861#section-4.2`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Current hop limit.
+    cur_hop_limit: 'int' = UInt8Field()
+    #: Flags, as IANA's Router Advertisement Flags assigns them.
+    flags: 'RAFlags' = BitField(length=1, namespace={
+        'm_flag': (0, 1),
+        'o_flag': (1, 1),
+        'h_flag': (2, 1),
+        'prf': (3, 2),
+        'p_flag': (5, 1),
+        's_flag': (6, 1),
+        'reserved': (7, 1),
+    })
+    #: Router lifetime, in seconds.
+    router_lifetime: 'int' = UInt16Field()
+    #: Reachable time, in milliseconds.
+    reachable_time: 'int' = UInt32Field()
+    #: Retransmission timer, in milliseconds.
+    retrans_timer: 'int' = UInt32Field()
+    #: Options.
+    options: 'list[NDOption]' = nd_options()
+
+    if TYPE_CHECKING:
+        def __init__(self, cur_hop_limit: 'int', flags: 'RAFlags', router_lifetime: 'int',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+                     reachable_time: 'int', retrans_timer: 'int', options: 'list[NDOption | bytes]') -> 'None': ...
+
+
+@schema_final
+class NeighborSolicitation(ICMPv6Type, code=Enum_Type.Neighbor_Solicitation):
+    """Header schema for Neighbor Solicitation messages (:rfc:`4861#section-4.3`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Reserved.
+    reserved: 'bytes' = BytesField(length=4)
+    #: Target address.
+    target_address: 'IPv6Address' = IPv6AddressField()
+    #: Options.
+    options: 'list[NDOption]' = nd_options()
+
+    if TYPE_CHECKING:
+        def __init__(self, reserved: 'bytes', target_address: 'IPv6Address | str | bytes | int',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+                     options: 'list[NDOption | bytes]') -> 'None': ...
+
+
+@schema_final
+class NeighborAdvertisement(ICMPv6Type, code=Enum_Type.Neighbor_Advertisement):
+    """Header schema for Neighbor Advertisement messages (:rfc:`4861#section-4.4`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Router, Solicited and Override flags, and Reserved.
+    flags: 'NAFlags' = BitField(length=4, namespace={
+        'r_flag': (0, 1),
+        's_flag': (1, 1),
+        'o_flag': (2, 1),
+        'reserved': (3, 29),
+    })
+    #: Target address.
+    target_address: 'IPv6Address' = IPv6AddressField()
+    #: Options.
+    options: 'list[NDOption]' = nd_options()
+
+    if TYPE_CHECKING:
+        def __init__(self, flags: 'NAFlags', target_address: 'IPv6Address | str | bytes | int',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+                     options: 'list[NDOption | bytes]') -> 'None': ...
+
+
+@schema_final
+class Redirect(ICMPv6Type, code=Enum_Type.Redirect_Message):
+    """Header schema for Redirect messages (:rfc:`4861#section-4.5`).
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: Reserved.
+    reserved: 'bytes' = BytesField(length=4)
+    #: Target address, the better first hop.
+    target_address: 'IPv6Address' = IPv6AddressField()
+    #: Destination address, the one redirected.
+    destination_address: 'IPv6Address' = IPv6AddressField()
+    #: Options.
+    options: 'list[NDOption]' = nd_options()
+
+    if TYPE_CHECKING:
+        def __init__(self, reserved: 'bytes', target_address: 'IPv6Address | str | bytes | int',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+                     destination_address: 'IPv6Address | str | bytes | int',
+                     options: 'list[NDOption | bytes]') -> 'None': ...

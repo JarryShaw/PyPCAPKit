@@ -7,6 +7,7 @@ from types import SimpleNamespace
 from unittest import mock
 
 from tests._support import reimport_once_per_class
+from tests.protocols.application._http2 import http2_frame_bytes
 
 #: Test tier (#1958): the representative smoke slice for its package's main parse and
 #: build paths.
@@ -35,21 +36,6 @@ def http2_schema(**kwargs: object) -> SimpleNamespace:
     schema = SimpleNamespace(**kwargs)
     setattr(schema, '__flags__', flags)
     return schema
-
-
-def http2_frame_bytes(type_: int, flags: int, sid: int, payload: bytes) -> bytes:
-    """Build the wire bytes of one HTTP/2 frame.
-
-    The length field counts the frame payload only, the 9-octet header
-    excluded [:rfc:`9113#section-4.1`].
-
-    """
-    return (
-        len(payload).to_bytes(3, 'big')
-        + bytes([type_, flags])
-        + sid.to_bytes(4, 'big')
-        + payload
-    )
 
 
 def base_read(raw: bytes) -> object:

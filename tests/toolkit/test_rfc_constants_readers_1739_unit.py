@@ -5,7 +5,7 @@ The constants live in :mod:`pcapkit.corekit.const`; these pin the behaviour of
 the toolkit code that reads them, at exactly the value each one gives:
 
 * :func:`pcapkit.toolkit.pypcapfile._walk_extension_headers` steps over an AH of
-  exactly :data:`~pcapkit.corekit.const.ipheader.AH_HEADER_LEN` octets -- one
+  exactly :data:`~pcapkit.corekit.const.ip_header.AH_HEADER_LEN` octets -- one
   carrying no Integrity Check Value -- and rejects a shorter one;
 * :class:`pcapkit.toolkit.dpkt.Timestamp` defaults to microseconds and
   :class:`~pcapkit.toolkit.dpkt.DecimalTimestamp` to nanoseconds, the two

@@ -32,8 +32,8 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.const.capture import RESOLUTION, RESOLUTION_PLACES
-from pcapkit.corekit.const.ipheader import IPV4_HEADER_LEN, IPV6_HEADER_LEN
-from pcapkit.corekit.const.tcpheader import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
+from pcapkit.corekit.const.ip_header import IPV4_HEADER_LEN, IPV6_HEADER_LEN
+from pcapkit.corekit.const.tcp_header import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
 from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
 from pcapkit.foundation.engines.scapy import Scapy
 from pcapkit.foundation.reassembly.ip.data import Packet as IP_Packet
@@ -41,6 +41,7 @@ from pcapkit.foundation.reassembly.tcp.data import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data import FrameRecord
 from pcapkit.foundation.traceflow.tcp.data import Packet as TF_TCP_Packet
 from pcapkit.protocols.misc.pcap.frame.data import FrameInfo as Data_FrameInfo
+from pcapkit.toolkit.pcap import _tls_segment
 from pcapkit.toolkit.pypcapfile import (IP_TUNNELS, IPV4_EXTENSION_HEADERS, _default_accepts,
                                         _walk_extension_headers)
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
@@ -71,7 +72,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     'attach_linktype', 'attach_resolution', 'packet2chain', 'packet2dict', 'packet2frame',
-    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow'
+    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tls_reassembly', 'tcp_traceflow'
 ]
 
 
@@ -352,7 +353,7 @@ def _tcp_behind_extension_headers(segment: 'bytes') -> 'tuple[bytes, bytes] | No
     Returns:
         The header, as many octets as the Data Offset counts, and the payload
         after it; or :data:`None` if there are fewer than
-        :data:`TCP_MIN_HEADER_LEN <pcapkit.corekit.const.tcpheader.TCP_MIN_HEADER_LEN>`
+        :data:`TCP_MIN_HEADER_LEN <pcapkit.corekit.const.tcp_header.TCP_MIN_HEADER_LEN>`
         octets, the Data Offset counts fewer or more than were captured, or
         pcapkit's own TCP parser rejects the options (see
         :func:`~pcapkit.toolkit.pypcapfile._default_accepts`).
@@ -698,6 +699,31 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
         )
         return data
     return None
+
+
+def tls_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None':
+    """Make data for TLS record reassembly.
+
+    A packet can be reassembled if it can be for TCP reassembly (see
+    :func:`tcp_reassembly`) and the port its TCP segment's next layer is looked up
+    by binds TLS (see :func:`pcapkit.toolkit.pcap._tls_segment`), whether its
+    payload opens a record or continues one.
+
+    Args:
+        packet: Scapy packet.
+        count: Packet index. If not provided, defaults to ``-1``.
+
+    Returns:
+        Data for TCP reassembly (:term:`reasm.tcp.packet`) if the ``packet`` can be
+        reassembled; otherwise :data:`None`.
+
+    See Also:
+        :class:`pcapkit.foundation.reassembly.tls.reassembly.TLS`
+
+    .. versionadded:: 1.9.0
+
+    """
+    return _tls_segment(tcp_reassembly(packet, count=count))
 
 
 def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | None':

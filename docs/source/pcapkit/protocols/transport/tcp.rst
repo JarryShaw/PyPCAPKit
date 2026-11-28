@@ -161,8 +161,8 @@ Header Schemas
 
    ``pcapkit.protocols.transport.tcp.schema.TCP_MIN_HEADER_LEN`` and
    ``pcapkit.protocols.transport.tcp.schema.TCP_DATA_OFFSET_OCTET``, now
-   :data:`pcapkit.corekit.const.tcpheader.TCP_MIN_HEADER_LEN` and
-   :data:`pcapkit.corekit.const.tcpheader.TCP_DATA_OFFSET_OCTET` (:issue:`2883`).
+   :data:`pcapkit.corekit.const.tcp_header.TCP_MIN_HEADER_LEN` and
+   :data:`pcapkit.corekit.const.tcp_header.TCP_DATA_OFFSET_OCTET` (:issue:`2883`).
 
 .. autoclass:: pcapkit.protocols.transport.tcp.schema.TCP
    :members:

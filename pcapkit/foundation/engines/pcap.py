@@ -74,6 +74,8 @@ class PCAP(EngineBase[Frame]):
         'ipv6': ModuleDescriptor('pcapkit.toolkit.pcap', 'ipv6_reassembly'),
         'tcp': ModuleDescriptor('pcapkit.toolkit.pcap', 'tcp_reassembly'),
         'dtls': ModuleDescriptor('pcapkit.toolkit.pcap', 'dtls_reassembly'),
+        'sctp': ModuleDescriptor('pcapkit.toolkit.pcap', 'sctp_reassembly'),
+        'tls': ModuleDescriptor('pcapkit.toolkit.pcap', 'tls_reassembly'),
     }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
     #: Flow tracing adapters, each called as ``adapter(frame, data_link=link)`` on

@@ -56,7 +56,7 @@ from typing import TYPE_CHECKING
 from pcapkit.const.l2tp.type import Type as Enum_Type
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.corekit.module import ModuleDescriptor
-from pcapkit.corekit.schema.shortread import cut_on_its_own
+from pcapkit.corekit.schema.short_read import cut_on_its_own
 from pcapkit.protocols.link.l2tp.data import L2TP as Data_L2TP
 from pcapkit.protocols.link.l2tp.data import Flags as Data_Flags
 from pcapkit.protocols.link.l2tp.protocol import L2TP

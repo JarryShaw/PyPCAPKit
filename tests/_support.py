@@ -15,6 +15,7 @@ import pathlib
 import re
 import signal
 import sys
+import threading
 import time
 import types
 import typing
@@ -442,6 +443,41 @@ def load_module(module_name: str, relative_path: str,
     return module
 
 
+def load_source(path: pathlib.Path, name: str, *, register: bool = False) -> types.ModuleType:
+    """Execute a script of :file:`util/` or :file:`examples/generators/` by path.
+
+    Neither directory is a package, and their module names are too generic to put
+    on :data:`sys.path`, so the file runs under a ``name`` of the caller's. Each
+    call runs it afresh, and :data:`sys.path` is left as the script leaves it.
+
+    :func:`tests._tiers.varies_by_interpreter` reads a call by this name as running
+    its arguments, so the script a caller passes still decides whether the caller
+    is a project pin (#1954). Nothing in this module calls it: an argument passed
+    here would count for every caller.
+
+    Args:
+        path: The script.
+        name: The module's ``__name__``.
+        register: Bind the module in :data:`sys.modules` as ``name`` before it
+            runs, and leave it bound.
+
+    Returns:
+        The executed module.
+
+    Raises:
+        RuntimeError: If no loader handles ``path``.
+
+    """
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:  # pragma: no cover
+        raise RuntimeError(f'cannot load {name!r} from {path}')
+    module = importlib.util.module_from_spec(spec)
+    if register:
+        sys.modules[name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
 def bootstrap_core_modules(test: 'Optional[unittest.TestCase]' = None) -> dict[str, object]:
     """Execute the core :mod:`pcapkit` modules from source, in dependency order.
 
@@ -571,6 +607,41 @@ def install_fake_payload_protocols(test: 'unittest.TestCase', raw_cls: type,
     null_module = types.ModuleType('pcapkit.protocols.misc.no_payload.protocol')
     null_module.NoPayload = null_cls
     sys.modules['pcapkit.protocols.misc.no_payload.protocol'] = null_module
+
+
+def install_hook_sentinels(test: 'unittest.TestCase') -> 'tuple[Callable[..., None], Callable[[object], None]]':
+    """Install stand-ins for :data:`sys.excepthook` and :data:`threading.excepthook`.
+
+    A loud error outside development mode installs :mod:`pcapkit`'s own hooks, so
+    a test asserting that an operation left both hooks alone compares them with
+    these stand-ins by identity. A cleanup on ``test`` puts back the hooks found here,
+    so neither the stand-ins nor a hook the test installed outlives it. Call it
+    after importing :mod:`pcapkit`, whose import installs tbtrim's hooks over
+    whatever is there (#2637).
+
+    Args:
+        test: The running test, which the restore is registered on.
+
+    Returns:
+        The stand-ins, as ``(sys hook, threading hook)``: the first hands its
+        arguments to :data:`sys.__excepthook__`, and the second does nothing.
+
+    """
+    saved = sys.excepthook, threading.excepthook
+
+    def restore() -> None:
+        sys.excepthook, threading.excepthook = saved
+
+    test.addCleanup(restore)
+
+    def sentinel(*args: 'object') -> None:
+        sys.__excepthook__(*args)  # type: ignore[arg-type]
+
+    def thread_sentinel(args: 'object') -> None:  # pylint: disable=unused-argument
+        pass
+
+    sys.excepthook, threading.excepthook = sentinel, thread_sentinel
+    return sentinel, thread_sentinel
 
 
 def _reset_abc_caches() -> None:

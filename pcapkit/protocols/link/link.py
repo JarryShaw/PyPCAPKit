@@ -13,10 +13,12 @@ which is a base class for link layer protocols, e.g.
 :class:`~pcapkit.protocols.link.frad.protocol.FRAD`,
 :class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11`,
 :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP`,
+:class:`~pcapkit.protocols.link.llc.protocol.LLC`,
 :class:`~pcapkit.protocols.link.loopback.protocol.Loopback`,
 :class:`~pcapkit.protocols.link.ppp.protocol.PPP`,
 :class:`~pcapkit.protocols.link.pppoe.protocol.PPPoE`,
-:class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` and
+:class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap`,
+:class:`~pcapkit.protocols.link.snap.protocol.SNAP` and
 :class:`~pcapkit.protocols.link.vlan.protocol.VLAN`.
 
 """
@@ -25,7 +27,7 @@ from typing import TYPE_CHECKING, Generic
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.corekit.module import ModuleDescriptor
-from pcapkit.corekit.schema.shortread import keep_short_read, replay_short_read
+from pcapkit.corekit.schema.short_read import keep_short_read, replay_short_read
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
@@ -235,3 +237,46 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
         _byte = self._read_unpack(size)
         _prot = Enum_EtherType.get(_byte)
         return _prot
+
+    def _import_llc(self, proto: 'Any', length: 'Optional[int]' = None, *,
+                    packet: 'Optional[dict[str, Any]]' = None) -> 'ProtocolBase':
+        """Import the next layer as :class:`~pcapkit.protocols.link.llc.protocol.LLC`.
+
+        For a frame that carries an LLC PDU with no code naming it: an
+        Ethernet frame whose Length/Type field is a length, and an 802.11
+        data frame carrying an MSDU. Their ``_import_next_layer`` calls this
+        under :func:`~pcapkit.corekit.decorators.beholder`, as
+        :meth:`FRAD._import_next_layer
+        <pcapkit.protocols.link.frad.protocol.FRAD._import_next_layer>` parses
+        a SNAP EtherType.
+
+        Arguments:
+            proto: code the frame passed, which a
+                :class:`~pcapkit.protocols.misc.raw.protocol.Raw` records
+            length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack
+                <pcapkit.protocols.protocol.Protocol.unpack>`)
+
+        Returns:
+            Instance of next layer.
+
+        """
+        if TYPE_CHECKING:
+            protocol: 'Type[ProtocolBase]'
+
+        file_ = self._get_payload()
+        if length is None:
+            length = len(file_)
+
+        empty = self._empty_next_layer(file_, length)
+        if empty is not None:
+            protocol = empty
+        elif self._sigterm:
+            from pcapkit.protocols.misc.raw.protocol import \
+                Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+        else:
+            protocol = ModuleDescriptor('pcapkit.protocols.link.llc.protocol', 'LLC').klass
+
+        return self._parse_next_layer(protocol, file_, length, alias=proto, packet=packet,
+                                      layer=self._exlayer, protocol=self._exproto,
+                                      context=self._exctx)

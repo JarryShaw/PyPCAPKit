@@ -28,6 +28,7 @@ from pcapkit.toolkit.scapy import packet2dict as scapy_packet2dict  # isort: ski
 from pcapkit.toolkit.scapy import ipv4_reassembly as scapy_ipv4_reassembly  # isort: skip
 from pcapkit.toolkit.scapy import ipv6_reassembly as scapy_ipv6_reassembly  # isort: skip
 from pcapkit.toolkit.scapy import tcp_reassembly as scapy_tcp_reassembly  # isort: skip
+from pcapkit.toolkit.scapy import tls_reassembly as scapy_tls_reassembly  # isort: skip
 from pcapkit.toolkit.scapy import tcp_traceflow as scapy_tcp_traceflow  # isort: skip
 
 # tools for DPKT engine
@@ -37,6 +38,7 @@ from pcapkit.toolkit.dpkt import packet2dict as dpkt_packet2dict  # isort: skip
 from pcapkit.toolkit.dpkt import ipv4_reassembly as dpkt_ipv4_reassembly  # isort: skip
 from pcapkit.toolkit.dpkt import ipv6_reassembly as dpkt_ipv6_reassembly  # isort: skip
 from pcapkit.toolkit.dpkt import tcp_reassembly as dpkt_tcp_reassembly  # isort: skip
+from pcapkit.toolkit.dpkt import tls_reassembly as dpkt_tls_reassembly  # isort: skip
 from pcapkit.toolkit.dpkt import tcp_traceflow as dpkt_tcp_traceflow  # isort: skip
 
 # tools for PyShark engine
@@ -89,11 +91,15 @@ __all__ = [
     'IPv4_Reassembly', 'IPv6_Reassembly',                   # IP Reassembly
     'TCP_Reassembly',                                       # TCP Reassembly
     'DTLS_Reassembly',                                      # DTLS Reassembly
+    'SCTP_Reassembly',                                      # SCTP Reassembly
+    'TLS_Reassembly',                                       # TLS Reassembly
 
     # pcapkit.foundation.analysis
     'ip_datagram',                                          # IP Analysis
     'tcp_datagram',                                         # TCP Analysis
     'dtls_handshake',                                       # DTLS Analysis
+    'sctp_message',                                         # SCTP Analysis
+    'tls_record',                                           # TLS Analysis
 
     # pcapkit.foundation.registry
     'register_protocol',
@@ -102,14 +108,15 @@ __all__ = [
     'register_pcap', 'register_pcapng',
     'register_ethertype',
     'register_loopback',
-    'register_arphrd', 'register_frad', 'register_netlink', 'register_ppp', 'register_ppp_control',
-    'register_radiotap', 'register_radiotap_field',
+    'register_arphrd', 'register_frad', 'register_lsap', 'register_netlink', 'register_ppp',
+    'register_ppp_control', 'register_radiotap', 'register_radiotap_field',
     'register_transtype',
     'register_ipx',
-    'register_icmp_type',
+    'register_icmp_type', 'register_icmpv6_option',
     'register_ipv4_option', 'register_hip_parameter', 'register_hopopt_option',
     'register_ipv6_opts_option', 'register_ipv6_route_routing',
     'register_mh_message', 'register_mh_option', 'register_mh_extension',
+    'register_mh_selector', 'register_mh_multicast',
     'register_apptype',
     'register_tcp', 'register_udp', 'register_sctp', 'register_dccp',
     'register_tcp_option', 'register_tcp_mp_option',
@@ -141,8 +148,8 @@ __all__ = [
     'NoPayload',                                            # No Payload
     'Raw',                                                  # Raw Packet
     'ARP', 'C_Tag', 'Ethernet', 'FRAD', 'GRE', 'IEEE802_11', 'InARP', 'L2TP', 'L2TPv2',
-    'LinuxSLL', 'LinuxSLL1', 'LinuxSLL2', 'Loopback', 'Netlink', 'PPP', 'PPPoE', 'Radiotap',
-    'S_Tag', 'VLAN',                                        # Link Layer
+    'LinuxSLL', 'LinuxSLL1', 'LinuxSLL2', 'LLC', 'Loopback', 'Netlink', 'PPP', 'PPPoE', 'Radiotap',
+    'S_Tag', 'SNAP', 'VLAN',                                # Link Layer
     'AH', 'ESP', 'ICMP', 'ICMPv4', 'ICMPv6', 'IGMP', 'IGMPv1', 'IGMPv2', 'IGMPv3',
     'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',                   # Internet Layer
     'HIP', 'HOPOPT', 'IPv6_Ext', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
@@ -151,21 +158,24 @@ __all__ = [
     'DCCP', 'TCP', 'UDP', 'SCTP',                           # Transport Layer
     'DNS', 'FTP', 'FTP_DATA',                               # Application Layer
     'HTTP', 'HTTPv1', 'HTTPv2', 'NGAP', 'OSPF', 'OSPFv1', 'OSPFv2', 'OSPFv3', 'RARP', 'DRARP',
-    'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS',
+    'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS', 'STP', 'STPv0', 'RSTP', 'MSTP',
     'Schema', 'schema',                                     # Protocol Schema
     'Data', 'data',                                         # Protocol Data
 
     # pcapkit.toolkit
-    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly', 'tcp_traceflow',
+    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly', 'sctp_reassembly',
+    'tls_reassembly', 'tcp_traceflow',
     'pcapng_ipv4_reassembly', 'pcapng_ipv6_reassembly', 'pcapng_tcp_reassembly', 'pcapng_dtls_reassembly',
-    'pcapng_tcp_traceflow',
+    'pcapng_sctp_reassembly', 'pcapng_tls_reassembly', 'pcapng_tcp_traceflow',
     'pcapng_block2frame',                                   # default engine
     'dpkt_ipv6_hdr_len', 'dpkt_packet2chain', 'dpkt_packet2dict',
-    'dpkt_ipv4_reassembly', 'dpkt_ipv6_reassembly', 'dpkt_tcp_reassembly', 'dpkt_tcp_traceflow',
+    'dpkt_ipv4_reassembly', 'dpkt_ipv6_reassembly', 'dpkt_tcp_reassembly', 'dpkt_tls_reassembly',
+    'dpkt_tcp_traceflow',
                                                             # DPKT engine
     'pyshark_packet2dict', 'pyshark_tcp_traceflow',         # PyShark engine
     'scapy_packet2chain', 'scapy_packet2dict',
-    'scapy_ipv4_reassembly', 'scapy_ipv6_reassembly', 'scapy_tcp_reassembly', 'scapy_tcp_traceflow',
+    'scapy_ipv4_reassembly', 'scapy_ipv6_reassembly', 'scapy_tcp_reassembly', 'scapy_tls_reassembly',
+    'scapy_tcp_traceflow',
                                                             # Scapy engine
 
     # pcapkit.utilities -- unlisted: its names stay reachable as attributes, but

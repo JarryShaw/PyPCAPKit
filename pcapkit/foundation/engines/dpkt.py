@@ -445,11 +445,13 @@ class DPKT(EngineBase['DPKTPacket']):
 
     #: Reassembly adapters, each called as ``adapter(packet, timestamp, count=n)``
     #: on the DPKT packet, its capture timestamp and its frame number. There is
-    #: no DTLS adapter, as DTLS reassembly reads :mod:`pcapkit`'s own DTLS layer.
+    #: no DTLS or SCTP adapter, as their reassembly reads :mod:`pcapkit`'s own
+    #: DTLS and SCTP layers.
     __reassembly__ = {
         'ipv4': ModuleDescriptor('pcapkit.toolkit.dpkt', 'ipv4_reassembly'),
         'ipv6': ModuleDescriptor('pcapkit.toolkit.dpkt', 'ipv6_reassembly'),
         'tcp': ModuleDescriptor('pcapkit.toolkit.dpkt', 'tcp_reassembly'),
+        'tls': ModuleDescriptor('pcapkit.toolkit.dpkt', 'tls_reassembly'),
     }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
     #: Flow tracing adapters, each called as
@@ -493,7 +495,7 @@ class DPKT(EngineBase['DPKTPacket']):
                 or if :attr:`self.extractor._exctx <pcapkit.foundation.extraction.Extractor._exctx>`
                 is provided, as the DPKT engine does not parse with :mod:`pcapkit`'s own
                 protocol implementations; or if a reassembler with no adapter in
-                :attr:`__reassembly__` is enabled, as DTLS's is not, for the same
+                :attr:`__reassembly__` is enabled, as DTLS's and SCTP's are not, for the same
                 reason, or a flow tracer with none in :attr:`__traceflow__`.
 
         Raises:

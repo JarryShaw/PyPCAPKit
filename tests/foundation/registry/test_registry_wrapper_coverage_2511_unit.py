@@ -61,6 +61,8 @@ INHERITED = {
 
 #: ``map path -> (its classmethod, why the name is not register_<kind>)``.
 NAMED = {
+    'pcapkit.protocols.link.llc.protocol.LLC.__paired__':
+        ('register', "written with the DSAP's entry in __proto__, by its paired keyword (#2936)"),
     'pcapkit.protocols.protocol.ProtocolBase.__registry__':
         ('register_protocol', 'named for the protocol class it registers, ruled on #2763'),
 }

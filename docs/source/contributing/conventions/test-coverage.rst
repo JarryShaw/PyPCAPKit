@@ -189,9 +189,14 @@ Running the Tests
 *  **Check ordering under plain unittest.** :file:`tests/conftest.py` heals cross-module
    import pollution after every test, so pytest alone cannot see it (:issue:`981`).
    :file:`util/run_unittest_leg.py` runs one :file:`tests/` subdirectory, then the
-   root-level modules, in one plain-unittest process, which is what CI's
-   ``unittest-ordering`` job does per leg. Run it on the directory a change touches
-   when the change moves imports or module state:
+   root-level modules a purge before them can desync, in one plain-unittest process,
+   which is what CI's ``unittest-ordering`` job does per leg. Those import
+   :mod:`pcapkit` at their top level, as :file:`tests/test_base_class_contract.py`,
+   :issue:`981`'s reproduction, does, or read :data:`sys.modules` or call
+   ``import_module``, ``reload`` or ``__import__``; the other root-level modules run
+   once, after the first part of :file:`tests/project`, as the owner ruled on
+   :issue:`3148`. Run it on the directory a change touches when the change moves
+   imports or module state:
 
    .. code-block:: shell
 

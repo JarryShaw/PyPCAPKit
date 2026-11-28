@@ -24,16 +24,10 @@ import pathlib
 import types
 import unittest
 
+from tests.foundation.reassembly._reassemblers import builtins, datagram
+
 #: The module under test, read as source by the import-layering check.
 MODULE = pathlib.Path(__file__).resolve().parents[2] / 'pcapkit' / 'corekit' / 'packet.py'
-
-#: The models, as ``(module, class, module holding its placeholder)``.
-MODELS = (
-    ('pcapkit.foundation.reassembly.ip.data', 'Datagram', 'pcapkit.foundation.reassembly.data'),
-    ('pcapkit.foundation.reassembly.tcp.data', 'Datagram', 'pcapkit.foundation.reassembly.data'),
-    ('pcapkit.foundation.reassembly.dtls.data', 'Datagram', 'pcapkit.foundation.reassembly.data'),
-    ('pcapkit.foundation.traceflow.tcp.data', 'Index', 'pcapkit.foundation.traceflow.data'),
-)
 
 
 class Placeholder:
@@ -203,13 +197,20 @@ class WiringTests(unittest.TestCase):
 
     def test_every_model_shares_the_one_class_mixin_first(self) -> 'None':
         from pcapkit.corekit.packet import DeferredPacket
+        from pcapkit.foundation.reassembly.data import Deferred as ReassemblyDeferred
+        from pcapkit.foundation.traceflow.data import Deferred as TraceFlowDeferred
+        from pcapkit.foundation.traceflow.tcp.data import Index
 
-        for (module, name, deferred_module) in MODELS:
-            with self.subTest(model=f'{module}.{name}'):
-                cls = getattr(importlib.import_module(module), name)
+        # each shipped reassembler's datagram, and a traced flow's index
+        for name in (*builtins(), 'trace'):
+            with self.subTest(model=name):
+                if name == 'trace':
+                    cls, deferred = Index, TraceFlowDeferred
+                else:
+                    cls, deferred = type(datagram(name, None)), ReassemblyDeferred
                 self.assertIs(cls.__mro__[1], DeferredPacket)
                 self.assertIn('packet', cls.__additional__)
-                self.assertIs(cls.__deferred__, importlib.import_module(deferred_module).Deferred)
+                self.assertIs(cls.__deferred__, deferred)
 
     def test_deferred_packet_has_no_re_export(self) -> 'None':
         """Neither base data module, the paths the name was public at that still
@@ -229,11 +230,7 @@ class WiringTests(unittest.TestCase):
 
     def test_each_model_resolves_its_own_placeholder_and_not_the_other(self) -> 'None':
         from pcapkit.corekit.packet import DeferredPacket
-        from pcapkit.foundation.reassembly.data import Completion
         from pcapkit.foundation.reassembly.data import Deferred as ReassemblyDeferred
-        from pcapkit.foundation.reassembly.dtls.data import Datagram as DTLS_Datagram
-        from pcapkit.foundation.reassembly.ip.data import Datagram as IP_Datagram
-        from pcapkit.foundation.reassembly.tcp.data import Datagram as TCP_Datagram
         from pcapkit.foundation.traceflow.data import Deferred as TraceFlowDeferred
         from pcapkit.foundation.traceflow.tcp.data import Index
 
@@ -243,25 +240,14 @@ class WiringTests(unittest.TestCase):
         def traceflow() -> 'TraceFlowDeferred':
             return TraceFlowDeferred(types.SimpleNamespace(datagram=('reassembled',)))  # type: ignore[arg-type]
 
-        def datagram(cls: 'type', packet: 'object') -> 'DeferredPacket':
-            return cls(completed=Completion.COMPLETE, id=None, index=(1,), header=b'',
-                       payload=b'payload', packet=packet, conflict=())
-
         def index(packet: 'object') -> 'DeferredPacket':
             return Index(fpout=None, index=(1,), label='label', forward=(1,), reverse=(), packet=packet)
 
-        def message(packet: 'object') -> 'DeferredPacket':
-            return DTLS_Datagram(completed=Completion.COMPLETE, id=None, index=(1,), message_seq=0,
-                                 msg_type=None, length=7, body=b'payload', packet=packet)
-
-        cases = (
-            ('ip', lambda packet: datagram(IP_Datagram, packet), reassembly, traceflow,
-             ('parsed', 'proto', b'payload')),
-            ('tcp', lambda packet: datagram(TCP_Datagram, packet), reassembly, traceflow,
-             ('parsed', 'proto', b'payload')),
-            ('dtls', message, reassembly, traceflow, ('parsed', 'proto', b'payload')),
+        cases = [
+            *((name, lambda packet, name=name: datagram(name, packet), reassembly, traceflow,
+               ('parsed', 'proto', b'payload')) for name in builtins()),
             ('trace', index, traceflow, reassembly, ('reassembled',)),
-        )
+        ]
         for (label, build, own, other, expected) in cases:
             with self.subTest(model=label):
                 self.assertEqual(build(own()).packet, expected)

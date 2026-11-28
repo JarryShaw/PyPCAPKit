@@ -91,6 +91,8 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
          - :class:`pcapkit.protocols.link.ppp.protocol.PPP`
        * - :attr:`pcapkit.const.reg.linktype.LinkType.PPP_ETHER`
          - :class:`pcapkit.protocols.link.pppoe.protocol.PPPoE`
+       * - :attr:`pcapkit.const.reg.linktype.LinkType.ATM_RFC1483`
+         - :class:`pcapkit.protocols.link.llc.protocol.LLC`
        * - :attr:`pcapkit.const.reg.linktype.LinkType.IEEE802_11`
          - :class:`pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11`
        * - :attr:`pcapkit.const.reg.linktype.LinkType.FRELAY`
@@ -131,6 +133,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             Enum_LinkType.PPP:                 ModuleDescriptor('pcapkit.protocols.link', 'PPP'),
             Enum_LinkType.PPP_HDLC:            ModuleDescriptor('pcapkit.protocols.link', 'PPP'),
             Enum_LinkType.PPP_ETHER:           ModuleDescriptor('pcapkit.protocols.link', 'PPPoE'),
+            Enum_LinkType.ATM_RFC1483:         ModuleDescriptor('pcapkit.protocols.link', 'LLC'),
             Enum_LinkType.IEEE802_11:          ModuleDescriptor('pcapkit.protocols.link', 'IEEE802_11'),
             Enum_LinkType.FRELAY:              ModuleDescriptor('pcapkit.protocols.link', 'FRAD'),
             Enum_LinkType.LOOP:                ModuleDescriptor('pcapkit.protocols.link', 'Loopback'),

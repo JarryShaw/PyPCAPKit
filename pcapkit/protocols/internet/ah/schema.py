@@ -5,14 +5,14 @@
 .. versionremoved:: 1.7.0
 
    ``pcapkit.protocols.internet.ah.schema.AH_HEADER_LEN``, now
-   :data:`pcapkit.corekit.const.ipheader.AH_HEADER_LEN` (:issue:`2883`).
+   :data:`pcapkit.corekit.const.ip_header.AH_HEADER_LEN` (:issue:`2883`).
 
 """
 
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.const.ipheader import AH_HEADER_LEN
+from pcapkit.corekit.const.ip_header import AH_HEADER_LEN
 from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BytesField

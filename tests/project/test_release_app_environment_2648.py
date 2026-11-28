@@ -9,11 +9,15 @@ Sync Develop (#2942), and Stable Branch's ``mirror`` (#3077), read the same key
 from ``release-app``, which has no reviewer.
 
 * :class:`TestOnlyCreateReleaseNamesTheGate` scans every workflow: Create
-  Release's ``github`` is the only job naming ``github-release``, and every other
-  job reading the key names ``release-app``. Its mutation rows show the scan
-  failing on a ``release-app`` reader pointed back at the gate, on ``github``
-  moved off it, and on any other job, in Create Release or elsewhere, reading
-  the key outside ``release-app``.
+  Release's ``github`` is the only job naming ``github-release``, every other
+  job reading the key names ``release-app``, and none is handed every secret.
+  Its mutation rows show the scan failing on a ``release-app`` reader pointed
+  back at the gate, on ``github`` moved off it, and on any other job, in Create
+  Release or elsewhere, reading the key outside ``release-app``.
+* :class:`TestTheMintStep` pins every reader's one step minting the App's token:
+  one pinned action, the App's inputs, the scopes that reader's token spends,
+  and no other step reading a secret. Each workflow's own module pins where its
+  token is spent.
 * :class:`TestTheKeyCheck` pins how a ``release-app`` reader behaves while that
   environment holds no key: it warns and skips its other steps rather than
   failing at minting. The check's shell runs here under :program:`bash`.
@@ -35,7 +39,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests._support import bash_argv
-from tests._workflows import WORKFLOWS, load
+from tests._workflows import WORKFLOWS, load, pinned, versions
 from tests.project.test_release_gates import evaluate_condition, evaluate_expression
 from tests.project.test_secret_environments_1968 import environment
 
@@ -50,14 +54,31 @@ RELEASE, RELEASE_JOB = 'create-release.yml', 'github'
 #: is none of without the key.
 APP_READERS = {('cron-issue-pr-kinds.yml', 'pr'): 'pull request', ('cron-python-versions.yml', 'pr'): 'pull request',
                ('stable-branch.yml', 'mirror'): 'stable mirror', ('sync-develop.yml', 'pr'): 'pull request'}
-#: A read of the App's private key, as ``secrets.X`` or ``secrets['X']``.
-KEY = re.compile(r"""secrets\s*(?:\.\s*|\[\s*['"])RELEASE_APP_PRIVATE_KEY\b""")
+#: A read of the App's private key, as ``secrets.X`` or ``secrets['X']`` in any
+#: case, as secret names are; a read of any secret; and every secret handed over
+#: at once, this key among them.
+KEY = re.compile(r"""secrets\s*(?:\.\s*|\[\s*['"])(?i:RELEASE_APP_PRIVATE_KEY)\b""")
+SECRET = re.compile(r'\bsecrets\s*[.\[]')
+EVERY_SECRET = re.compile(r'(?i)toJSON\(\s*secrets\s*\)')
 
 #: The first step of every :data:`APP` reader, its ``env:``, and the ``if:`` on
 #: every step after it.
 CHECK_STEP = "Check for the release App's key"
 CHECK_ENV = {'KEY_SET': "${{ secrets.RELEASE_APP_PRIVATE_KEY != '' }}"}
 GATED = "${{ steps.key.outputs.set == 'true' }}"
+
+#: Every reader's step minting the App's token: the action, its major version,
+#: and the inputs naming the App. Without a ``permission-*`` input the token
+#: holds all the installation's permissions (the action's README).
+MINT_STEP = "Mint the release App's token"
+MINT_ACTION, MINT_MAJOR = 'actions/create-github-app-token', 'v3'
+MINT_KEY = {'client-id': '${{ vars.RELEASE_APP_CLIENT_ID }}', 'private-key': '${{ secrets.RELEASE_APP_PRIVATE_KEY }}'}
+#: Each reader's mint step ``id``, and the scopes, each ``write``, its token holds.
+MINTS = {(RELEASE, RELEASE_JOB): ('app_token', ('contents', 'workflows')),
+         ('cron-issue-pr-kinds.yml', 'pr'): ('app', ('contents', 'pull-requests')),
+         ('cron-python-versions.yml', 'pr'): ('app', ('contents', 'pull-requests')),
+         ('stable-branch.yml', 'mirror'): ('app', ('contents', 'workflows')),
+         ('sync-develop.yml', 'pr'): ('app', ('contents', 'pull-requests', 'workflows'))}
 
 BASH = shutil.which('bash')
 
@@ -73,14 +94,28 @@ def jobs(specs: 'dict[str, dict[str, Any]]') -> 'list[tuple[str, str, dict[str, 
             for job_id, job in sorted((spec.get('jobs') or {}).items())]
 
 
+def reads(node: 'Any', pattern: 're.Pattern[str]') -> 'bool':
+    """Whether a key or string anywhere in ``node`` matches ``pattern``.
+
+    Each string is searched as it stands: :func:`repr` escapes the quotes of
+    ``secrets['X']`` in a string that also holds a ``"``.
+    """
+    if isinstance(node, dict):
+        return any(reads(key, pattern) or reads(value, pattern) for key, value in node.items())
+    if isinstance(node, list):
+        return any(reads(item, pattern) for item in node)
+    return isinstance(node, str) and pattern.search(node) is not None
+
+
 def readers(specs: 'dict[str, dict[str, Any]]') -> 'set[tuple[str, str]]':
     """Each ``(workflow, job id)`` in ``specs`` that reads the App's key."""
-    return {(name, job_id) for name, job_id, job in jobs(specs) if KEY.search(repr(job))}
+    return {(name, job_id) for name, job_id, job in jobs(specs) if reads(job, KEY)}
 
 
 def violations(specs: 'dict[str, dict[str, Any]]') -> 'list[str]':
     """What in ``specs`` breaks #2648's rule; empty where it holds."""
-    found = []
+    found = [f'{name} hands every secret over at once' for name, spec in sorted(specs.items())
+             if reads(spec, EVERY_SECRET)]
     gated = sorted((name, job_id) for name, job_id, job in jobs(specs) if environment(job) == GATE)
     if gated != [(RELEASE, RELEASE_JOB)]:
         found.append(f'the jobs naming {GATE} are {gated}, not {RELEASE}\'s {RELEASE_JOB} alone')
@@ -91,6 +126,36 @@ def violations(specs: 'dict[str, dict[str, Any]]') -> 'list[str]':
     return found
 
 
+def mint_violations(specs: 'dict[str, dict[str, Any]]') -> 'list[str]':
+    """What in ``specs`` breaks the mint step's shape; empty where it holds.
+
+    The version comment, which YAML drops, is read from each file on disk.
+    """
+    found, pins = [], set()
+    for (name, job_id), (step_id, scopes) in sorted(MINTS.items()):
+        steps = ((specs[name].get('jobs') or {}).get(job_id) or {}).get('steps') or []
+        minting = [step for step in steps if step.get('name') == MINT_STEP]
+        if len(minting) != 1:
+            found.append(f'{name}\'s {job_id} has {len(minting)} steps named {MINT_STEP!r}')
+            continue
+        mint, = minting
+        pins.add(mint.get('uses'))
+        majors = {version.split('.')[0] for version in versions(name, MINT_ACTION)}
+        if not pinned(mint.get('uses'), MINT_ACTION) or majors != {MINT_MAJOR}:
+            found.append(f'{name}\'s {job_id} mints with {mint.get("uses")!r} at {majors}')
+        expected = {**MINT_KEY, **{f'permission-{scope}': 'write' for scope in scopes}}
+        if (mint.get('id'), mint.get('with')) != (step_id, expected):
+            found.append(f'{name}\'s {job_id} mints as {mint.get("id")!r} with {mint.get("with")!r}')
+        # Create Release also spends GITHUB_TOKEN, so only the key's readers count there.
+        github = (name, job_id) == (RELEASE, RELEASE_JOB)
+        secret = [step.get('name') for step in steps if reads(step, KEY if github else SECRET)]
+        if secret != ([MINT_STEP] if github else [CHECK_STEP, MINT_STEP]):
+            found.append(f'{name}\'s {job_id} reads {"the key" if github else "a secret"} in {secret}')
+    if len(pins) > 1:
+        found.append(f'the readers mint with {sorted(map(str, pins))}, not one pin')
+    return found
+
+
 class TestOnlyCreateReleaseNamesTheGate(unittest.TestCase):
     """``github-release`` is Create Release's alone; the key's other readers use ``release-app``."""
 
@@ -98,8 +163,14 @@ class TestOnlyCreateReleaseNamesTheGate(unittest.TestCase):
         self.assertEqual(violations(workflows()), [])
 
     def test_the_scan_finds_the_readers(self) -> None:
-        """Not vacuous: ``github`` and the ``release-app`` jobs read the key."""
+        """Not vacuous: ``github`` and the ``release-app`` jobs read the key; another secret is no read."""
         self.assertEqual(readers(workflows()), set(APP_READERS) | {(RELEASE, RELEASE_JOB)})
+        for other in ('${{ secrets.RELEASE_APP_PRIVATE_KEY_2 }}', '${{ secrets.OTHER }}'):
+            with self.subTest(secret=other):
+                specs = workflows()
+                specs['lint.yml']['jobs']['probe'] = {'runs-on': 'ubuntu-latest',
+                                                      'steps': [{'run': 'true', 'env': {'KEY': other}}]}
+                self.assertEqual(readers(specs), set(APP_READERS) | {(RELEASE, RELEASE_JOB)})
 
     def test_each_mutation_is_caught(self) -> None:
         def point(name: 'str', job: 'str', value: 'Any') -> 'Any':
@@ -110,10 +181,10 @@ class TestOnlyCreateReleaseNamesTheGate(unittest.TestCase):
                     specs[name]['jobs'][job]['environment'] = value
             return mutate
 
-        def reader(name: 'str', value: 'Any') -> 'Any':
+        def reader(name: 'str', value: 'Any', step: 'Any' = None) -> 'Any':
             def mutate(specs: 'dict[str, dict[str, Any]]') -> 'None':
                 probe = {'runs-on': 'ubuntu-latest',
-                         'steps': [{'run': 'true', 'env': {'KEY': '${{ secrets.RELEASE_APP_PRIVATE_KEY }}'}}]}
+                         'steps': [step or {'run': 'true', 'env': {'KEY': '${{ secrets.RELEASE_APP_PRIVATE_KEY }}'}}]}
                 if value is not None:
                     probe['environment'] = value
                 specs[name]['jobs']['probe'] = probe
@@ -130,12 +201,75 @@ class TestOnlyCreateReleaseNamesTheGate(unittest.TestCase):
             'another Create Release job reading the key from conda-tag': reader(RELEASE, 'conda-tag'),
             'another Create Release job reading the key from no environment': reader(RELEASE, None),
             'a job elsewhere reading the key from conda-tag': reader('lint.yml', 'conda-tag'),
+            'a job elsewhere reading the key in lower case': reader(
+                'lint.yml', None, {'run': 'true', 'env': {'KEY': '${{ secrets.release_app_private_key }}'}}),
+            "a job elsewhere reading secrets['...'] in mixed case": reader(
+                'lint.yml', None, {'run': 'true', 'env': {'KEY': "${{ secrets['Release_App_Private_Key'] }}"}}),
+            "a job elsewhere reading secrets['...'] in a double-quoted run": reader(
+                'lint.yml', None, {'run': """echo "${{ secrets['RELEASE_APP_PRIVATE_KEY'] }}" """}),
+            'a job handed every secret in release-app': reader(
+                'lint.yml', APP, {'run': 'true', 'env': {'ALL': '${{ toJSON(secrets) }}'}}),
         }
         for label, mutate in sorted(mutations.items()):
             with self.subTest(mutation=label):
                 specs = workflows()
                 mutate(specs)
                 self.assertTrue(violations(specs), label)
+
+
+class TestTheMintStep(unittest.TestCase):
+    """Each reader mints in one step, from one pin, with the scopes it spends and no other secret."""
+
+    @staticmethod
+    def specs() -> 'dict[str, dict[str, Any]]':
+        """The readers' workflows alone, parsed afresh."""
+        return {name: load(name) for name in sorted({name for name, _ in MINTS})}
+
+    def test_the_rule_holds(self) -> None:
+        self.assertEqual(mint_violations(self.specs()), [])
+
+    def test_each_mutation_is_caught(self) -> None:
+        def in_mint(name: 'str', job: 'str', key: 'str', value: 'Any', *path: 'str') -> 'Any':
+            def mutate(specs: 'dict[str, dict[str, Any]]') -> 'None':
+                step = next(entry for entry in specs[name]['jobs'][job]['steps'] if entry.get('name') == MINT_STEP)
+                for part in path:
+                    step = step[part]
+                if value is None:
+                    del step[key]
+                else:
+                    step[key] = value
+            return mutate
+
+        def steps(name: 'str', job: 'str', edit: 'Any') -> 'Any':
+            def mutate(specs: 'dict[str, dict[str, Any]]') -> 'None':
+                specs[name]['jobs'][job]['steps'] = edit(specs[name]['jobs'][job]['steps'])
+            return mutate
+
+        mutations = {}
+        for (name, job), (_, scopes) in sorted(MINTS.items()):
+            mutations.update({
+                f'{name}: no mint step': steps(name, job, lambda found: [
+                    entry for entry in found if entry.get('name') != MINT_STEP]),
+                f'{name}: two mint steps': steps(name, job, lambda found: found + [
+                    next(entry for entry in found if entry.get('name') == MINT_STEP)]),
+                f'{name}: another action': in_mint(name, job, 'uses', f'actions/github-script@{"0" * 40}'),
+                f'{name}: a tag, not a commit': in_mint(name, job, 'uses', f'{MINT_ACTION}@v3'),
+                f'{name}: another id': in_mint(name, job, 'id', 'token'),
+                f'{name}: another key': in_mint(name, job, 'private-key', '${{ secrets.OTHER }}', 'with'),
+                f'{name}: no client id': in_mint(name, job, 'client-id', None, 'with'),
+                f'{name}: a scope more': in_mint(name, job, 'permission-issues', 'write', 'with'),
+                f'{name}: a scope fewer': in_mint(name, job, f'permission-{scopes[-1]}', None, 'with'),
+                f'{name}: contents read': in_mint(name, job, 'permission-contents', 'read', 'with'),
+                f'{name}: another step reading a secret': steps(name, job, lambda found: found + [
+                    {'run': 'true', 'env': {'KEY': '${{ secrets.RELEASE_APP_PRIVATE_KEY }}'}}]),
+            })
+        mutations['Sync Develop on another pin'] = in_mint('sync-develop.yml', 'pr', 'uses',
+                                                           f'{MINT_ACTION}@{"0" * 40}')
+        for label, mutate in sorted(mutations.items()):
+            with self.subTest(mutation=label):
+                specs = self.specs()
+                mutate(specs)
+                self.assertTrue(mint_violations(specs), label)
 
 
 class TestTheKeyCheck(unittest.TestCase):

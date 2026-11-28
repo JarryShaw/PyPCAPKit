@@ -11,9 +11,11 @@ HIP - Host Identity Protocol
    (:issue:`2534`).
 
 :mod:`pcapkit.protocols.internet.hip.protocol` contains
-:class:`~pcapkit.protocols.internet.hip.protocol.HIP` only,
+:class:`~pcapkit.protocols.internet.hip.protocol.HIP`,
 which implements the extractor for Host Identity
-Protocol (HIP) [*]_, whose structure is:
+Protocol (HIP) [*]_, and the keys it verifies HMACs and
+signatures with (`Verifying HMACs and Signatures`_). The
+HIP structure:
 
 ======= ========= ====================== ==================================
 Octets      Bits        Name                    Description
@@ -67,6 +69,7 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_data
    .. automethod:: _read_hip_param
    .. automethod:: _make_hip_param
+   .. automethod:: _verify_hip_param
    .. automethod:: _read_param_unassigned
    .. automethod:: _read_param_esp_info
    .. automethod:: _read_param_r1_counter
@@ -166,7 +169,131 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_param_via_rvs
    .. automethod:: _make_param_relay_hmac
    .. automethod:: _make_hip_param_data
+   .. automethod:: _verify_hip_mac
+   .. automethod:: _verify_hip_signature
+   .. automethod:: _auth_scope
    .. automethod:: _verify_pseudo_checksum
+
+Verifying HMACs and Signatures
+------------------------------
+
+``HIP_MAC``, ``HIP_MAC_2``, ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2`` are verified
+with keys the caller supplies through the protocol-keyed context channel of
+:mod:`pcapkit.corekit.context` (:rfc:`7401#section-6.4`). Each records the outcome as
+its ``hmac_status`` or ``signature_status``, and nothing else of the parse changes:
+
+.. code-block:: python
+
+   import pcapkit
+   from pcapkit.const.hip.parameter import Parameter
+   from pcapkit.protocols.internet.hip.protocol import (HIPAssociation, HIPContext,
+                                                        HIPIdentity)
+
+   r1 = ...  # the HIP layer of an R1 packet, parsed without a context
+   context = HIPContext(
+       HIPIdentity(r1.info.shit, r1.info.parameters[Parameter.HOST_ID]),
+       HIPAssociation(initiator_hit, responder_hit,
+                      integrity_gl=bytes.fromhex('...'), integrity_lg=bytes.fromhex('...')),
+   )
+   extraction = pcapkit.extract('hip.pcap', context=context)
+
+An HMAC needs the association's integrity keys, or the Diffie-Hellman session key
+they derive from (:meth:`HIPAssociation.from_keymat
+<pcapkit.protocols.internet.hip.protocol.HIPAssociation.from_keymat>`), and uses only
+the standard library. ``HIP_MAC_2`` also needs the Responder's ``HOST_ID``, and a
+signature its sender's. Verifying a signature needs the optional |cryptography|_
+dependency:
+
+============== ================================ ============ ====================================
+Algorithm      Hash                             Implemented  Encoding
+============== ================================ ============ ====================================
+RSA            SHA-256, RSASSA-PSS              yes          :rfc:`3110` key
+DSA            SHA-256                          yes          :rfc:`2536` key and signature
+ECDSA          SHA-384                          yes          NIST P-256 and P-384, :rfc:`6090` key
+ECDSA_LOW      SHA-1                            **no**       SECP160R1, which |cryptography|_ lacks
+EdDSA          none, :rfc:`8032`                yes          EdDSA25519 and EdDSA448, not the
+                                                             pre-hashed curves
+============== ================================ ============ ====================================
+
+A signature digests with the hash of its Host Identity's HIT Suite, as Table 10 of
+:rfc:`7401#section-5.2.10` groups them, and EdDSA (:rfc:`9374`) with none of its own.
+Only HIP version 2 is verified.
+
+.. autoclass:: pcapkit.protocols.internet.hip.protocol.HIPContext
+   :no-members:
+   :show-inheritance:
+
+   .. rubric:: Properties
+
+   .. autoproperty:: identities
+   .. autoproperty:: associations
+
+   .. rubric:: Methods
+
+   .. automethod:: protocol
+   .. automethod:: register
+   .. automethod:: match_identity
+   .. automethod:: match_association
+
+   .. rubric:: Data Models
+
+   .. automethod:: __repr__
+
+.. autoclass:: pcapkit.protocols.internet.hip.protocol.HIPIdentity
+   :no-members:
+   :show-inheritance:
+
+   .. rubric:: Properties
+
+   .. autoproperty:: hit
+   .. autoproperty:: host_id
+
+   .. rubric:: Methods
+
+   .. automethod:: verify
+
+   .. rubric:: Data Models
+
+   .. automethod:: __repr__
+
+   .. rubric:: Utilities
+
+   .. automethod:: _verify_signature
+   .. automethod:: _verify_ecdsa
+   .. automethod:: _rsa_numbers
+   .. automethod:: _dsa_numbers
+   .. automethod:: _ecdsa_points
+
+.. autoclass:: pcapkit.protocols.internet.hip.protocol.HIPAssociation
+   :no-members:
+   :show-inheritance:
+
+   .. rubric:: Properties
+
+   .. autoproperty:: initiator
+   .. autoproperty:: responder
+   .. autoproperty:: suite
+   .. autoproperty:: integrity_gl
+   .. autoproperty:: integrity_lg
+
+   .. rubric:: Methods
+
+   .. automethod:: from_keymat
+   .. automethod:: matches
+   .. automethod:: compute_hmac
+
+   .. rubric:: Data Models
+
+   .. automethod:: __repr__
+
+   .. rubric:: Utilities
+
+   .. automethod:: _resolve_suite
+   .. automethod:: _hkdf
+
+.. autoclass:: pcapkit.protocols.internet.hip.protocol.HIPAuthStatus
+   :members:
+   :show-inheritance:
 
 Type Stubs
 ----------
@@ -701,6 +828,12 @@ Constants
 .. versionadded:: 1.7.0
 
 .. autodata:: pcapkit.protocols.internet.hip.const.LOCATOR_SET_LEN
+.. autodata:: pcapkit.protocols.internet.hip.const.ORCHID_PREFIX
+.. autodata:: pcapkit.protocols.internet.hip.const.HIT_SUITE_HASH
+.. autodata:: pcapkit.protocols.internet.hip.const.HI_ALGORITHM_SUITE
+.. autodata:: pcapkit.protocols.internet.hip.const.CIPHER_KEY_LEN
+.. autodata:: pcapkit.protocols.internet.hip.const.ECDSA_CURVE_LEN
+.. autodata:: pcapkit.protocols.internet.hip.const.EDDSA_CURVE_LEN
 
 .. rubric:: Footnotes
 

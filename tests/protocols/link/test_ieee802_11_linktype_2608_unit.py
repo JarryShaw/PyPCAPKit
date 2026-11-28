@@ -8,7 +8,8 @@
 ``LinkType.IEEE802_11_RADIOTAP`` (127) to
 :class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap`. A pcap and a pcapng capture
 of each, built here octet by octet, parse to ``802.11`` and
-``Radiotap:802.11``, and every frame and layer rebuilds byte-exactly.
+``Radiotap:802.11``, a data frame's LLC/SNAP body included (#2936), and every
+frame and layer rebuilds byte-exactly.
 
 Each test imports :mod:`pcapkit` itself, after
 :func:`~tests._support.reimport_once_per_class`.
@@ -130,7 +131,7 @@ class TestIEEE802_11LinkTypes(unittest.TestCase):
                                                  (_pcapng(LinkType.IEEE802_11, records), '.pcapng'))):
             with self.subTest(format=suffix):
                 frames = self._extract(data, suffix)
-                self._assert_frames(frames, records, ['802.11', '802.11:Raw'], bool(pcapng))
+                self._assert_frames(frames, records, ['802.11', '802.11:LLC:SNAP'], bool(pcapng))
 
                 ack = frames[0].payload.info
                 self.assertEqual((ack.frame_control.type, ack.frame_control.subtype),
@@ -151,7 +152,8 @@ class TestIEEE802_11LinkTypes(unittest.TestCase):
                                                  (_pcapng(LinkType.IEEE802_11_RADIOTAP, records), '.pcapng'))):
             with self.subTest(format=suffix):
                 frames = self._extract(data, suffix)
-                self._assert_frames(frames, records, ['Radiotap:802.11', 'Radiotap:802.11:Raw'], bool(pcapng))
+                self._assert_frames(frames, records, ['Radiotap:802.11', 'Radiotap:802.11:LLC:SNAP'],
+                                    bool(pcapng))
 
                 for frame, mac in zip(frames, (ACK, DATA)):
                     radiotap = frame.payload

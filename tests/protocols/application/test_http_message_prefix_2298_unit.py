@@ -13,7 +13,9 @@ a closing full stop and without the values that were rejected. The
 ``SETTINGS`` one read ``HTTP/2 : [Type 4] invalid settings`` from
 :meth:`httpv2.HTTPv2._make_http_settings
 <pcapkit.protocols.application.httpv2.protocol.HTTPv2._make_http_settings>`, a space before
-the colon and no rejected value either.
+the colon and no rejected value either. ``TestHTTPv2EmptySettings`` in
+:mod:`tests.protocols.application.test_httpv2_frame_default_2274_unit` pins that
+message.
 
 Every case builds its own octets in memory and reads no capture. Classes are
 imported inside each test, after
@@ -99,27 +101,6 @@ class TestHTTPv1StartLineMessages(unittest.TestCase):
                 self.assertEqual(str(ctx.exception),
                                  'HTTP: invalid start line: must have either a method or a '
                                  f'status, {tail}')
-
-
-class TestHTTPv2SettingsMessage(unittest.TestCase):
-    """Pin ``httpv2.HTTPv2._make_http_settings``'s rejection message."""
-
-    def setUp(self) -> None:
-        reimport_once_per_class(self)
-
-    def test_settings_names_the_rejected_value(self) -> None:
-        from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        # ``None`` is not rejected: it builds a parameterless ``SETTINGS``
-        # frame (#2274), pinned in test_httpv2_frame_default_2274_unit.py.
-        for settings, tail in ((42, '42'), ('x', "'x'"), (4.5, '4.5')):
-            with self.subTest(settings=settings):
-                with self.assertRaises(ProtocolError) as ctx:
-                    bytes(HTTPv2.from_fields(type=Frame.SETTINGS, frame={'settings': settings}))
-                self.assertEqual(str(ctx.exception),
-                                 f'HTTP/2: [Type 4] invalid settings: {tail}')
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ import threading
 import unittest
 
 from tests._support import (bootstrap_core_modules, install_fake_payload_protocols,
-                            isolate_modules)
+                            install_hook_sentinels, isolate_modules)
 from tests.utilities._harness import capture
 
 #: Test tier (#1958): exercises metaclass, ABC or enum machinery, which differs by
@@ -557,29 +557,11 @@ class DecoratorTests(unittest.TestCase):
     # inside the decorated method, where the block declaring it is.
     ##########################################################################
 
-    def _sentinel_hooks(self) -> 'tuple[object, object]':
-        """Install stand-ins for both exception hooks, put back after the test."""
-        saved = sys.excepthook, threading.excepthook
-
-        def restore() -> None:
-            sys.excepthook, threading.excepthook = saved
-
-        self.addCleanup(restore)
-
-        def sentinel(*args: 'object') -> None:
-            sys.__excepthook__(*args)  # type: ignore[arg-type]
-
-        def thread_sentinel(args: 'object') -> None:
-            pass
-
-        sys.excepthook, threading.excepthook = sentinel, thread_sentinel
-        return sentinel, thread_sentinel
-
     def test_beholder_keeps_a_refusal_it_handles_quiet(self) -> None:
         """A refusal is kept on ``error``, logs nothing at any level, and touches neither hook."""
         exceptions = self.exceptions
         Raw, _ = self._payload_stand_ins()
-        hooks = self._sentinel_hooks()
+        hooks = install_hook_sentinels(self)
 
         class DemoProtocol:
             def _get_payload(self) -> bytes:
@@ -602,7 +584,7 @@ class DecoratorTests(unittest.TestCase):
         """Another error stays loud and logged, and so does a refusal declared loud inside the block."""
         exceptions = self.exceptions
         Raw, _ = self._payload_stand_ins()
-        self._sentinel_hooks()
+        install_hook_sentinels(self)
 
         class DemoProtocol:
             def _get_payload(self) -> bytes:
@@ -631,7 +613,7 @@ class DecoratorTests(unittest.TestCase):
         """The outermost recovery runs outside every block, so a refusal it raises is loud and propagates."""
         exceptions = self.exceptions
         self._payload_stand_ins()
-        self._sentinel_hooks()
+        install_hook_sentinels(self)
 
         class DemoProtocol:
             def _get_payload(self) -> bytes:
@@ -653,7 +635,7 @@ class DecoratorTests(unittest.TestCase):
         """An inner recovery runs inside the outer block, so its refusal is quiet and the outer ``error``."""
         exceptions = self.exceptions
         Raw, _ = self._payload_stand_ins()
-        self._sentinel_hooks()
+        install_hook_sentinels(self)
         beholder = self.decorators.beholder
 
         class Inner:
@@ -684,7 +666,7 @@ class DecoratorTests(unittest.TestCase):
         """An inner refusal is quiet, the outer method is back in its own block, and none outlives it."""
         exceptions = self.exceptions
         Raw, _ = self._payload_stand_ins()
-        self._sentinel_hooks()
+        install_hook_sentinels(self)
         beholder = self.decorators.beholder
         seen = []
 

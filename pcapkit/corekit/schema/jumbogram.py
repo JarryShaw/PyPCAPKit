@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.ipv6.option import Option as Enum_Option
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.schema.extlen import ext_len_to_octets
+from pcapkit.corekit.schema.ext_len import ext_len_to_octets
 
 __all__ = ['jumbo_payload_length']
 

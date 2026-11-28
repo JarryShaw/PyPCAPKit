@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 __all__ = ['DataSubtype']
 
-#: Data frame (Type ``0b10``) Subtype values (IEEE Std 802.11-2020, Table 9-1).
+#: Data frame (Type ``0b10``) Subtype values (:ieee:`802.11-2020`, Table 9-1).
 #:
 #: Maps a Subtype value to its *Subtype description*. A single ``Reserved``
 #: row is a member, which :meth:`~Vendor.rename` suffixes with its value.
@@ -49,7 +49,7 @@ RESERVED = ((0b0001, 0b0011), (0b0101, 0b0111))  # type: tuple[tuple[int, int], 
 
 
 class DataSubtype(Vendor):
-    """IEEE 802.11 Data Frame Subtypes [IEEE Std 802.11-2020, Table 9-1]"""
+    """IEEE 802.11 Data Frame Subtypes [:ieee:`802.11-2020`, Table 9-1]"""
 
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0b0000 <= value <= 0b1111'

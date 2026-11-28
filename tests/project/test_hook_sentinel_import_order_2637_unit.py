@@ -7,7 +7,9 @@ tbtrim's :data:`sys.excepthook` and :data:`threading.excepthook`. Under
 imports the package afresh, so a ``setUp`` that installs its sentinels before
 that import has them replaced by the import, not by the code under test. The
 check then fails only for whichever test runs first in its class on a worker,
-which is how ``--dist load`` turned the PyPy leg red.
+which is how ``--dist load`` turned the PyPy leg red. A call to
+:func:`tests._support.install_hook_sentinels` installs them as an assignment
+does, and that helper puts both hooks back after the test.
 
 This module is unit-tier: it parses source and never imports the package.
 
@@ -15,9 +17,12 @@ This module is unit-tier: it parses source and never imports the package.
 from __future__ import annotations
 
 import ast
+import sys
+import threading
 import unittest
 from typing import TYPE_CHECKING
 
+from tests._support import install_hook_sentinels
 from tests._tiers import ROOT
 
 if TYPE_CHECKING:
@@ -32,6 +37,9 @@ MIN_METHODS = 4
 
 #: The hook slots a sentinel is installed into.
 HOOKS = frozenset({('sys', 'excepthook'), ('threading', 'excepthook')})
+
+#: The helper that installs a sentinel into each of :data:`HOOKS`.
+HELPER = install_hook_sentinels.__name__
 
 
 def _purges(stmt: 'ast.stmt') -> bool:
@@ -51,7 +59,11 @@ def _imports_pcapkit(stmt: 'ast.stmt') -> bool:
 
 
 def _sets_hook(stmt: 'ast.stmt') -> bool:
-    """Whether ``stmt`` assigns to ``sys.excepthook`` or ``threading.excepthook``."""
+    """Whether ``stmt`` assigns to ``sys.excepthook`` or ``threading.excepthook``, or calls :data:`HELPER`."""
+    if isinstance(stmt, (ast.Expr, ast.Assign)) and isinstance(stmt.value, ast.Call):
+        func = stmt.value.func
+        if (func.attr if isinstance(func, ast.Attribute) else getattr(func, 'id', None)) == HELPER:
+            return True
     if not isinstance(stmt, ast.Assign):
         return False
     for target in stmt.targets:
@@ -134,12 +146,31 @@ class HookSentinelImportOrderTests(unittest.TestCase):
             'submodule import first': ([], '        from pcapkit.utilities import exceptions\n' + sentinel),
             'restore in a nested function': ([], '        def restore():\n    ' + sentinel
                                              + '        self.addCleanup(restore)\n'),
+            'helper before the import': (['T.setUp'], f'        self.sentinels = {HELPER}(self)\n'
+                                         '        import pcapkit\n'),
+            'helper, no import': (['T.setUp'], f'        {HELPER}(self)\n'),
+            'import, then the helper': ([], f'        import pcapkit\n        self.sentinels = {HELPER}(self)\n'),
         }
         for label, (flagged, body) in cases.items():
             with self.subTest(case=label):
                 source = 'class T:\n    def setUp(self):\n        reimport_once_per_class(self)\n' + body
                 _, offending = scan(source)
                 self.assertEqual([name for name, _ in offending], flagged)
+
+    def test_the_helper_puts_both_hooks_back(self) -> None:
+        """The helper's stand-ins fill both slots, and its cleanup restores what they replaced."""
+        saved = sys.excepthook, threading.excepthook
+        case = unittest.TestCase()
+        try:
+            sentinels = install_hook_sentinels(case)
+            installed = sys.excepthook, threading.excepthook
+        finally:
+            case.doCleanups()
+            restored = sys.excepthook, threading.excepthook
+            sys.excepthook, threading.excepthook = saved
+        self.assertEqual(installed, sentinels)
+        self.assertTrue(set(sentinels).isdisjoint(saved))
+        self.assertEqual(restored, saved)
 
 
 if __name__ == '__main__':

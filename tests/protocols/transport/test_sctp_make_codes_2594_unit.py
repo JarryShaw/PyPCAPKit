@@ -18,6 +18,9 @@ back to ``make`` has its keys checked as those codes are.
 
 Every case builds its own octets, so this belongs to the unit tier.
 
+The checks the ``*_make_codes_2594`` modules share run from
+:class:`~tests.protocols._make_codes.MakeCodeChecks` over this module's own table (#3148).
+
 """
 from __future__ import annotations
 
@@ -28,9 +31,10 @@ from typing import TYPE_CHECKING, NamedTuple
 from unittest import mock
 
 from tests._support import reimport_once_per_class
+from tests.protocols._make_codes import Case, MakeCodeChecks
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Optional
+    from typing import Any, Callable, Optional, Pattern
 
 #: Test tier (#1958): a per-protocol field table.
 __tier__ = 'LATEST'
@@ -175,8 +179,10 @@ FIELDS = (
 )
 
 
-class SCTPMakeCodeTests(unittest.TestCase):
+class SCTPMakeCodeTests(MakeCodeChecks, unittest.TestCase):
     """Each row refuses what its field cannot carry, and resolves a code with ``get``."""
+
+    NEGATIVE = True
 
     def setUp(self) -> 'None':
         reimport_once_per_class(self)
@@ -195,18 +201,15 @@ class SCTPMakeCodeTests(unittest.TestCase):
         return SCTP.make(proto, srcport=9899, dstport=38412, chksum=b'\x00' * 4,
                          chunks=row.chunks(value) if chunks is None else chunks)
 
-    def assertRefused(self, row: 'Row', value: 'Any', chunks: 'Any' = None) -> 'None':
-        """Building with ``value``, or from ``chunks``, raises ``ProtocolError`` naming the field."""
-        from pcapkit.utilities.exceptions import ProtocolError
+    def cases(self) -> 'list[Case]':
+        return [Case(f'{row.maker} {row.field}', row.bits, getattr(self._enum(row), row.member),
+                     lambda value, row=row: self._make(row, value).pack(), self._message(row), row=row)
+                for row in FIELDS]
 
-        try:
-            self._make(row, value, chunks)
-        except ProtocolError as error:
-            self.assertRegex(str(error), rf'^SCTP: invalid (.* )?{re.escape(row.name)}: {re.escape(repr(value))}$')
-        except Exception as error:  # pylint: disable=broad-except
-            self.fail(f'{row.maker} {row.field}={value!r} raised {type(error).__name__}, not ProtocolError: {error}')
-        else:
-            self.fail(f'{row.maker} {row.field}={value!r} was accepted')
+    @staticmethod
+    def _message(row: 'Row') -> 'Pattern[str]':
+        """What a refusal of the row's field says before the value."""
+        return re.compile(rf'SCTP: invalid (.* )?{re.escape(row.name)}: ')
 
     def test_each_row_reaches_its_maker(self) -> 'None':
         from pcapkit.protocols.transport.sctp.protocol import SCTP
@@ -217,33 +220,6 @@ class SCTPMakeCodeTests(unittest.TestCase):
                     mock.patch.object(SCTP, row.maker, autospec=True, side_effect=getattr(SCTP, row.maker)) as maker:
                 self._make(row, member)
                 self.assertTrue(maker.called)
-
-    def test_code_wider_than_the_field_is_refused(self) -> 'None':
-        for row in FIELDS:
-            with self.subTest(maker=row.maker, field=row.field):
-                self.assertRefused(row, 1 << row.bits)
-
-    def test_negative_code_is_refused(self) -> 'None':
-        for row in FIELDS:
-            with self.subTest(maker=row.maker, field=row.field):
-                self.assertRefused(row, -1)
-
-    def test_bool_is_refused(self) -> 'None':
-        for row in FIELDS:
-            self.assertGreater(row.bits, 1)
-            with self.subTest(maker=row.maker, field=row.field):
-                self.assertRefused(row, True)
-
-    def test_name_is_refused(self) -> 'None':
-        for row in FIELDS:
-            with self.subTest(maker=row.maker, field=row.field):
-                self.assertRefused(row, row.member)
-
-    def test_member_and_code_build_identical_octets(self) -> 'None':
-        for row in FIELDS:
-            member = getattr(self._enum(row), row.member)
-            with self.subTest(maker=row.maker, field=row.field):
-                self.assertEqual(self._make(row, member).pack(), self._make(row, int(member)).pack())
 
     def test_code_resolves_to_its_member(self) -> 'None':
         for row in FIELDS:
@@ -264,7 +240,8 @@ class SCTPMakeCodeTests(unittest.TestCase):
             with self.subTest(maker=row.maker):
                 self.assertEqual(self._make(row, member, row.keyed(info, member)).pack(), octets)
                 for value in (1 << row.bits, -1, True, row.member):
-                    self.assertRefused(row, value, row.keyed(info, value))
+                    self.assertRefused(lambda value, row=row, info=info: self._make(
+                        row, value, row.keyed(info, value)).pack(), value, self._message(row))
 
     def test_code_no_member_holds_is_written_as_given(self) -> 'None':
         """A code the field carries but no member holds builds, and its capture

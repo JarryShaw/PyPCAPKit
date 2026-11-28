@@ -43,7 +43,7 @@ parsing a packet from its octets or building one from field values:
        end
 
        subgraph application [Application Layer]
-           Application --> DNS & HTTP & FTP & FTP_DATA & NGAP & OSPF & RARP & SSL
+           Application --> DNS & HTTP & FTP & FTP_DATA & NGAP & OSPF & RARP & SSL & STP
 
            subgraph http [HTTP Family]
                HTTP --> h1["HTTP/1.*"] & h2["HTTP/2"]
@@ -65,10 +65,14 @@ parsing a packet from its octets or building one from field values:
                SSL --> TLS & DTLS & SSLv2
                TLS --> SSLv3
            end
+
+           subgraph stp [STP Family]
+               STP --> STPv0 & RSTP & MSTP
+           end
        end
 
        subgraph link [Link Layer]
-           Link --> Ethernet & FRAD & GRE & IEEE802_11 & L2TP & LinuxSLL & Loopback & Netlink & PPP & PPPoE & Radiotap & VLAN & ARP
+           Link --> Ethernet & FRAD & GRE & IEEE802_11 & L2TP & LinuxSLL & LLC & Loopback & Netlink & PPP & PPPoE & Radiotap & SNAP & VLAN & ARP
 
            subgraph arp [ARP Family]
                ARP --> InARP
@@ -140,11 +144,13 @@ parsing a packet from its octets or building one from field values:
        click LinuxSLL "link/linux_sll.html#pcapkit.protocols.link.linux_sll.protocol.LinuxSLL"
        click LinuxSLL1 "link/linux_sll1.html#pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1"
        click LinuxSLL2 "link/linux_sll2.html#pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2"
+       click LLC "link/llc.html#pcapkit.protocols.link.llc.protocol.LLC"
        click Loopback "link/loopback.html#pcapkit.protocols.link.loopback.protocol.Loopback"
        click Netlink "link/netlink.html#pcapkit.protocols.link.netlink.protocol.Netlink"
        click PPP "link/ppp.html#pcapkit.protocols.link.ppp.protocol.PPP"
        click PPPoE "link/pppoe.html#pcapkit.protocols.link.pppoe.protocol.PPPoE"
        click Radiotap "link/radiotap.html#pcapkit.protocols.link.radiotap.protocol.Radiotap"
+       click SNAP "link/snap.html#pcapkit.protocols.link.snap.protocol.SNAP"
        click VLAN "link/vlan.html#pcapkit.protocols.link.vlan.protocol.VLAN"
        click C_Tag "link/c_tag.html#pcapkit.protocols.link.c_tag.protocol.C_Tag"
        click S_Tag "link/s_tag.html#pcapkit.protocols.link.s_tag.protocol.S_Tag"
@@ -200,6 +206,10 @@ parsing a packet from its octets or building one from field values:
        click TLS "application/tls.html#pcapkit.protocols.application.tls.protocol.TLS"
        click SSLv3 "application/sslv3.html#pcapkit.protocols.application.sslv3.protocol.SSLv3"
        click DTLS "application/dtls.html#pcapkit.protocols.application.dtls.protocol.DTLS"
+       click STP "application/stp.html#pcapkit.protocols.application.stp.protocol.STP"
+       click STPv0 "application/stpv0.html#pcapkit.protocols.application.stpv0.protocol.STPv0"
+       click RSTP "application/rstp.html#pcapkit.protocols.application.rstp.protocol.RSTP"
+       click MSTP "application/mstp.html#pcapkit.protocols.application.mstp.protocol.MSTP"
 
        click Raw "misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw"
        click NoPayload "misc/no_payload.html#pcapkit.protocols.misc.no_payload.protocol.NoPayload"
@@ -249,8 +259,8 @@ Header Schema
 
    ``pcapkit.protocols.schema.schema.keep_short_read`` and
    ``pcapkit.protocols.schema.schema.replay_short_read``, now
-   :func:`pcapkit.corekit.schema.shortread.keep_short_read` and
-   :func:`pcapkit.corekit.schema.shortread.replay_short_read` (:issue:`2674`).
+   :func:`pcapkit.corekit.schema.short_read.keep_short_read` and
+   :func:`pcapkit.corekit.schema.short_read.replay_short_read` (:issue:`2674`).
 
 .. autoclass:: pcapkit.protocols.schema.Schema
    :no-members:

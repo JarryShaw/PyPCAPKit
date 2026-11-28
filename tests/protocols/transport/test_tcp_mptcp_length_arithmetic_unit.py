@@ -99,20 +99,11 @@ from __future__ import annotations
 
 import unittest
 
+from tests.protocols.transport._mptcp import TCP_BASE, build_tcp_segment
+
 #: Test tier (#1958): exercises integer, bytes and struct edge cases, whose limits
 #: differ by interpreter.
 __tier__ = 'ALL'
-
-#: Header fields shared by the constructed TCP segments here, matching
-#: :data:`examples.generators.option_families.tcp.TCP_BASE` and
-#: :data:`tests.protocols.transport.test_tcp_mptcp_subtype_unit.TCP_BASE`.
-TCP_BASE = {
-    'srcport': 50000, 'dstport': 80, 'seq_no': 1, 'ack_no': 0,
-    'ns': False, 'cwr': False, 'ece': False, 'urg': False, 'ack': False,
-    'psh': False, 'rst': False, 'syn': True, 'fin': False,
-    'window': 8192, 'checksum': b'\x00\x00', 'urgent': 0,
-    'payload': b'',
-}
 
 #: A spec-correct MP_FASTCLOSE, :rfc:`8684` section 3.5 figure 14: ``Kind`` ``0x1e``,
 #: ``Length`` ``12``, the subtype nibble ``7`` (MP_FASTCLOSE) with its 12 reserved bits as
@@ -126,53 +117,6 @@ MP_FASTCLOSE_SPEC_OCTETS = bytes([0x1E, 0x0C, 0x70, 0x00]) + b'\xCC' * 8
 MP_JOIN_SYNACK_SPEC_OCTETS = (
     bytes([0x1E, 0x10, 0x10, 0x05]) + b'\xDD' * 8 + bytes([0x00, 0x00, 0x00, 0x09])
 )
-
-
-def build_tcp_segment(option_octets: 'bytes', *, syn: 'bool' = True,
-                      ack_flag: 'bool' = False) -> 'bytes':
-    """Pack a whole TCP segment carrying ``option_octets`` verbatim as its only option.
-
-    Goes through :class:`~pcapkit.protocols.transport.tcp.schema.TCP` (the schema, not the
-    protocol) directly, so nothing here calls a ``_make_mptcp_*`` maker: the option bytes
-    reach the wire exactly as given.
-
-    Args:
-        option_octets: The whole option, header octets included, already padded to a multiple
-            of 4 octets.
-        syn: Whether to set the ``SYN`` flag.
-        ack_flag: Whether to set the ``ACK`` flag.
-
-    Returns:
-        The packed TCP segment.
-
-    Note:
-        ``syn``/``ack_flag`` are parameters rather than fixed because the MP_JOIN *parse* path
-        dispatches on them: ``TCP._read_mptcp_join`` picks between ``_read_join_syn``,
-        ``_read_join_synack`` and ``_read_join_ack`` by inspecting ``self._flags``, which the
-        read path sets from these very bits. A SYN/ACK option in a SYN-only segment would be
-        routed to the wrong reader.
-
-        ``Schema_TCP`` is imported inside the function, not at module level -- see
-        :func:`tests.protocols.transport.test_tcp_mptcp_subtype_unit.build_mptcp_option`'s own
-        docstring for why: a name bound to ``pcapkit`` at collection time can go stale once
-        another module in this suite pops ``pcapkit``'s submodules out of ``sys.modules``.
-
-    """
-    from pcapkit.protocols.transport.tcp.schema import TCP as Schema_TCP
-
-    if len(option_octets) % 4:
-        raise ValueError('option_octets must already be a multiple of 4 octets long')
-
-    schema = Schema_TCP(
-        srcport=50000, dstport=80, seq=1, ack=0,
-        offset={'offset': 5 + len(option_octets) // 4, 'reserved': 0, 'ns': 0},
-        flags={'cwr': 0, 'ece': 0, 'urg': 0, 'ack': int(ack_flag), 'psh': 0, 'rst': 0,
-               'syn': int(syn), 'fin': 0},
-        window=8192, checksum=b'\x00\x00', urgent=0,
-        options=option_octets,
-        payload=b'',
-    )
-    return schema.pack()
 
 
 def make(meth: 'str', subtype_name: 'str', **kwargs: 'object') -> 'bytes':
@@ -310,7 +254,7 @@ class TCPMPTCPJoinSYNACKLengthUnitTests(LengthInvariantMixin, unittest.TestCase)
         from pcapkit.const.tcp.option import Option as Enum_Option
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        raw = build_tcp_segment(MP_JOIN_SYNACK_SPEC_OCTETS, syn=True, ack_flag=True)
+        raw = build_tcp_segment(MP_JOIN_SYNACK_SPEC_OCTETS, syn=True, ack=True)
         data = TCP(raw, len(raw)).info.options[Enum_Option.Multipath_TCP]
 
         self.assertEqual(data.subtype, Enum_MPTCPOption.MP_JOIN)
@@ -334,7 +278,7 @@ class TCPMPTCPJoinSYNACKLengthUnitTests(LengthInvariantMixin, unittest.TestCase)
         from pcapkit.const.tcp.option import Option as Enum_Option
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        raw = build_tcp_segment(MP_JOIN_SYNACK_SPEC_OCTETS, syn=True, ack_flag=True)
+        raw = build_tcp_segment(MP_JOIN_SYNACK_SPEC_OCTETS, syn=True, ack=True)
         parsed = TCP(raw, len(raw)).info.options[Enum_Option.Multipath_TCP]
 
         rebuilt = TCP.__new__(TCP)._make_join_synack(Enum_MPTCPOption.MP_JOIN, parsed).pack()  # pylint: disable=protected-access

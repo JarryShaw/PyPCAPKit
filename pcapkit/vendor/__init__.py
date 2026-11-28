@@ -120,6 +120,7 @@ else:
     from pcapkit.vendor.ipx import *
     from pcapkit.vendor.l2tp import *
     from pcapkit.vendor.linux import *
+    from pcapkit.vendor.llc import *
     from pcapkit.vendor.mh import *
     from pcapkit.vendor.ngap import *
     from pcapkit.vendor.ospf import *
@@ -129,6 +130,7 @@ else:
     from pcapkit.vendor.radiotap import *
     from pcapkit.vendor.sctp import *
     from pcapkit.vendor.sslv2 import *
+    from pcapkit.vendor.stp import *
     from pcapkit.vendor.tcp import *
     from pcapkit.vendor.tls import *
     from pcapkit.vendor.vlan import *
@@ -163,7 +165,7 @@ __all__ = [
     'ICMP_Type', 'ICMP_DestinationUnreachableCode', 'ICMP_TimeExceededCode', 'ICMP_ParameterProblemCode',
     # ICMPv6
     'ICMPv6_Type', 'ICMPv6_DestinationUnreachableCode', 'ICMPv6_TimeExceededCode',
-    'ICMPv6_ParameterProblemCode',
+    'ICMPv6_ParameterProblemCode', 'ICMPv6_NDOption', 'ICMPv6_RouterPreference',
     # IEEE 802.11
     'IEEE802_11_Type', 'IEEE802_11_ManagementSubtype', 'IEEE802_11_ControlSubtype',
     'IEEE802_11_DataSubtype', 'IEEE802_11_ExtensionSubtype',
@@ -182,6 +184,8 @@ __all__ = [
     'L2TP_Type',
     # Linux
     'Linux_ARPHRD',
+    # LLC
+    'LLC_LSAP', 'LLC_SupervisoryFunction', 'LLC_ModifierFunction',
     # MH
     'MH_Packet', 'MH_Option', 'MH_DNSStatusCode', 'MH_ACKStatusCode',
     'MH_MNIDSubtype', 'MH_StatusCode', 'MH_EnumeratingAlgorithm',
@@ -219,6 +223,8 @@ __all__ = [
     'SCTP_PayloadProtocolIdentifier',
     # SSLv2
     'SSLv2_HandshakeType', 'SSLv2_Version',
+    # STP
+    'STP_ProtocolVersion', 'STP_BPDUType', 'STP_PortRole',
     # TCP
     'TCP_Checksum', 'TCP_Option', 'TCP_MPTCPOption', 'TCP_Flags',
     # TLS

@@ -313,7 +313,8 @@ PROJECT_HALVES = (1, 2)
 #: new pin lands in exactly one half. A docs-only diff runs the ``project`` leg instead,
 #: in parts cut at :file:`util/run_unittest_leg.py`'s ``SHARD_BOUNDARIES``, as
 #: ``unittest-ordering`` does (#2913, #2916). It is chosen so the halves take about the
-#: same CI time; move it to rebalance, and the cells follow.
+#: same CI time; move it to rebalance, and the cells follow. The comment above
+#: ``project-tests`` names the runs behind its place.
 PROJECT_BOUNDARY = 'test_pypy_w'
 #: The selector each cell of the ``project-tests`` job asks for its half of the pins,
 #: verbatim from the workflow, with the half as its one argument. Asked at run time,

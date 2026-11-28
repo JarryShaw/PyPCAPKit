@@ -30,7 +30,7 @@ ICMPV6_PACKETS = {
     'parameter-problem':       bytes.fromhex('0401' 'abcd' '00000028') + QUOTED,
     'echo-request':            bytes.fromhex('8000' '1234' '0001' '0002') + b'abcd',
     'echo-reply':              bytes.fromhex('8100' '4321' '0003' '0004') + b'wxyz',
-    'unknown-type-router-sol': bytes.fromhex('8500' '0000') + bytes(8),
+    'unknown-type-private-experimentation': bytes.fromhex('c800' '0000') + bytes(8),
 }
 
 
@@ -98,11 +98,11 @@ class ICMPv6RoundTripTests(unittest.TestCase):
         self.assertEqual(parsed.info.data, b'abcd')
 
     def test_unknown_type_keeps_raw_body(self) -> None:
-        """Router Solicitation (Neighbor Discovery) is unimplemented."""
+        """A private experimentation type (:rfc:`4443#section-2.1`) is kept raw."""
         from pcapkit.protocols.internet.icmpv6.data import Unknown
         from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
 
-        packet = ICMPV6_PACKETS['unknown-type-router-sol']
+        packet = ICMPV6_PACKETS['unknown-type-private-experimentation']
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             parsed = ICMPv6(io.BytesIO(packet), len(packet))

@@ -43,6 +43,7 @@ Link Layer
    ieee802_11
    l2tp
    linux
+   llc
    ppp
    pppoe
    radiotap
@@ -87,6 +88,7 @@ Application Layer
    ospf
    ospfv1
    sslv2
+   stp
    tls
 
 Miscellaneous

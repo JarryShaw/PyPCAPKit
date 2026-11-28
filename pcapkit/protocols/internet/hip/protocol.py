@@ -5,10 +5,10 @@
 .. module:: pcapkit.protocols.internet.hip.protocol
 
 :mod:`pcapkit.protocols.internet.hip.protocol` contains
-:class:`~pcapkit.protocols.internet.hip.protocol.HIP` only,
+:class:`~pcapkit.protocols.internet.hip.protocol.HIP`,
 which implements the extractor for Host Identity
-Protocol (HIP) [*]_, whose structure is described
-as below:
+Protocol (HIP) [*]_, and the keys it verifies HMACs
+and signatures with. The HIP structure:
 
 ======= ========= ====================== ==================================
 Octets      Bits        Name                    Description
@@ -27,14 +27,40 @@ Octets      Bits        Name                    Description
   40        320   ``hip.parameters``        HIP Parameters
 ======= ========= ====================== ==================================
 
+``HIP_MAC``, ``HIP_MAC_2``, ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2`` are
+verified with keys the caller supplies through the protocol-keyed context
+channel of :mod:`pcapkit.corekit.context`, as :class:`HIPContext`; each records
+the outcome as its ``hmac_status`` or ``signature_status``, and nothing else
+of the parse changes:
+
+.. code-block:: python
+
+   import pcapkit
+   from pcapkit.const.hip.parameter import Parameter
+   from pcapkit.protocols.internet.hip.protocol import (HIPAssociation, HIPContext,
+                                                        HIPIdentity)
+
+   r1 = ...  # the HIP layer of an R1 packet, parsed without a context
+   context = HIPContext(
+       HIPIdentity(r1.info.shit, r1.info.parameters[Parameter.HOST_ID]),
+       HIPAssociation(initiator_hit, responder_hit,
+                      integrity_gl=bytes.fromhex('...'), integrity_lg=bytes.fromhex('...')),
+   )
+   extraction = pcapkit.extract('hip.pcap', context=context)
+
 .. [*] https://en.wikipedia.org/wiki/Host_Identity_Protocol
 
 """
 import collections
 import datetime
+import enum
+import hashlib
 import ipaddress
 import math
+import types
 from datetime import timedelta
+from hmac import compare_digest
+from hmac import new as new_hmac
 from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.hip.certificate import Certificate as Enum_Certificate
@@ -56,12 +82,16 @@ from pcapkit.const.hip.registration_failure import RegistrationFailure as Enum_R
 from pcapkit.const.hip.suite import Suite as Enum_Suite
 from pcapkit.const.hip.transport import Transport as Enum_Transport
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.context import ProtocolContext
+from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
-from pcapkit.corekit.schema.extlen import ext_len_to_octets
+from pcapkit.corekit.schema.ext_len import ext_len_to_octets, octets_to_ext_len
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.schema.padding import pad_length
-from pcapkit.corekit.schema.shortread import cut_on_its_own
+from pcapkit.corekit.schema.short_read import cut_on_its_own
+from pcapkit.protocols.internet.hip.const import (CIPHER_KEY_LEN, ECDSA_CURVE_LEN, EDDSA_CURVE_LEN,
+                                                  HI_ALGORITHM_SUITE, HIT_SUITE_HASH, ORCHID_PREFIX)
 from pcapkit.protocols.internet.hip.data import HIP as Data_HIP
 from pcapkit.protocols.internet.hip.data import AckDataParameter as Data_AckDataParameter
 from pcapkit.protocols.internet.hip.data import ACKParameter as Data_ACKParameter
@@ -220,7 +250,7 @@ from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 if TYPE_CHECKING:
     from datetime import timedelta
     from ipaddress import IPv6Address
-    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional
+    from typing import IO, Any, Callable, DefaultDict, Mapping, NoReturn, Optional
 
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal, NotRequired
@@ -236,7 +266,7 @@ if TYPE_CHECKING:
     ParameterConstructor = Callable[[Enum_Parameter, DefaultArg(Optional[Data_Parameter]),
                                      NamedArg(int, 'version'), KwArg(Any)], Schema_Parameter]
 
-__all__ = ['HIP']
+__all__ = ['HIP', 'HIPAuthStatus', 'HIPIdentity', 'HIPAssociation', 'HIPContext']
 
 #: The pseudo-header a checksum is computed and verified over in :class:`HIP`,
 #: resolved there rather than imported, so its first import holds
@@ -265,6 +295,750 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         ip: 'IPv6Address | bytes | int | str'
         #: SPI.
         spi: 'NotRequired[int]'
+
+
+##############################################################################
+# Verification.
+##############################################################################
+
+
+class HIPAuthStatus(EnumLookup, enum.IntEnum):
+    """Outcome of verifying a HIP HMAC or signature parameter.
+
+    Recorded as the ``hmac_status`` of a ``HIP_MAC`` or ``HIP_MAC_2``, and the
+    ``signature_status`` of a ``HIP_SIGNATURE`` or ``HIP_SIGNATURE_2``.
+    ``get`` / ``get_all`` come from :class:`~pcapkit.corekit.enum.EnumLookup`;
+    the class defines no ``_missing_``, so an unknown value raises
+    :exc:`ValueError`.
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    #: The HMAC or signature verifies.
+    VALID = 0
+    #: It does not, which warns with a
+    #: :exc:`~pcapkit.utilities.warnings.ProtocolWarning`.
+    INVALID = 1
+    #: The context holds no key for the packet's sender. This is the expected
+    #: state for a host the caller has no keys for, and is **not** an error.
+    NO_KEY = 2
+    #: The key cannot be applied, as its algorithm is not implemented, the
+    #: packet is not HIP version 2, or a signature needs the optional
+    #: |cryptography|_ dependency, which is missing. Warns as :attr:`INVALID` does.
+    UNSUPPORTED = 3
+
+
+#: Cached |cryptography|_ primitives, see :func:`_load_cryptography`. It is
+#: :data:`NotImplemented` before the import is attempted and :data:`None` once
+#: it has failed, so a missing dependency is not retried on every frame.
+_CRYPTO = NotImplemented  # type: Any
+
+
+def _load_cryptography() -> 'Optional[types.SimpleNamespace]':
+    """Load the optional |cryptography|_ primitives a signature needs.
+
+    Returns:
+        The modules, by name, with ``pss_auto`` the RSASSA-PSS salt length a
+        verifier recovers, :data:`None` before |cryptography|_ 37; or
+        :data:`None` when |cryptography|_ is not installed.
+
+    """
+    global _CRYPTO  # pylint: disable=global-statement
+
+    if _CRYPTO is NotImplemented:
+        try:
+            # pylint: disable=import-outside-toplevel
+            from cryptography import exceptions
+            from cryptography.hazmat.primitives import hashes
+            from cryptography.hazmat.primitives.asymmetric import (dsa, ec, ed448, ed25519, padding,
+                                                                   rsa, utils)
+        except ImportError:
+            _CRYPTO = None
+        else:
+            try:
+                pss_auto = padding.PSS.AUTO  # type: Any
+            except AttributeError:
+                pss_auto = None
+            _CRYPTO = types.SimpleNamespace(exceptions=exceptions, hashes=hashes, dsa=dsa, ec=ec,
+                                            ed448=ed448, ed25519=ed25519, padding=padding,
+                                            rsa=rsa, utils=utils, pss_auto=pss_auto)
+    return _CRYPTO
+
+
+def _hit_value(value: 'IPv6Address | str | int | bytes', name: 'str') -> 'int':
+    """Read a HIT given as an IPv6 address, its text, an :class:`int` or 16 octets.
+
+    Args:
+        value: The HIT.
+        name: The argument's name, for the error.
+
+    Returns:
+        The HIT, as an :class:`int`.
+
+    Raises:
+        ProtocolError: If ``value`` is none of these, or a :obj:`bool`.
+
+    """
+    if not isinstance(value, bool):
+        try:
+            return int(ipaddress.IPv6Address(value))
+        except (TypeError, ValueError):
+            pass
+    raise ProtocolError(f'HIP: invalid {name}: {value!r} is no HIT')
+
+
+def _enum_value(registry: 'Any', value: 'Any', table: 'Mapping[Any, Any]') -> 'Any':
+    """Resolve a member or an :class:`int` code that ``table`` lists.
+
+    Args:
+        registry: The enumeration.
+        value: The member or code.
+        table: The members pcapkit implements.
+
+    Returns:
+        The member, or :data:`None` if ``value`` is a name, a :obj:`bool`, or a
+        code ``table`` does not list.
+
+    """
+    if isinstance(value, bool) or not isinstance(value, int):
+        return None
+    try:
+        member = registry.get(value)
+    except ValueError:
+        return None
+    return member if member in table else None
+
+
+class HIPIdentity:
+    """A HIP host's Host Identity, as the ``HOST_ID`` parameter of its R1 or I2 carries it.
+
+    It verifies the signatures the host sends (:rfc:`7401#section-6.4.2`), and its
+    ``HIP_MAC_2`` as the Responder, which covers this ``HOST_ID`` exactly as R1
+    carried it (:rfc:`7401#section-6.4.1`). A signature digests with the hash of
+    the Host Identity's HIT Suite
+    (:data:`~pcapkit.protocols.internet.hip.const.HI_ALGORITHM_SUITE`), RSA pads
+    with RSASSA-PSS (:rfc:`7401#section-5.2.9`), and each algorithm encodes as
+    :rfc:`7401#section-5.2.14` cites. Verifying one needs the optional
+    |cryptography|_ dependency, which implements neither ECDSA_LOW's SECP160R1
+    nor the pre-hashed EdDSA curves.
+
+    Args:
+        hit: The host's HIT, as an IPv6 address, its text, an :class:`int` or
+            16 octets.
+        host_id: Its ``HOST_ID`` parameter, as :class:`HIP` parsed it.
+
+    Raises:
+        ProtocolError: If ``hit`` is no HIT, or ``host_id`` no parsed ``HOST_ID``.
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    @property
+    def hit(self) -> 'IPv6Address':
+        """The host's HIT."""
+        return ipaddress.IPv6Address(self.__hit__)
+
+    @property
+    def host_id(self) -> 'Data_HostIDParameter':
+        """The host's ``HOST_ID`` parameter."""
+        return self.__host_id__
+
+    ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    def verify(self, algorithm: 'Enum_HIAlgorithm', signature: 'bytes',
+               data: 'bytes') -> 'tuple[HIPAuthStatus, Optional[str]]':
+        """Verify a signature the host made.
+
+        Args:
+            algorithm: The signature's ``SIG alg``.
+            signature: The signature.
+            data: The octets it covers.
+
+        Returns:
+            The outcome, and why it is not :attr:`~HIPAuthStatus.VALID`, if it is not.
+
+        """
+        expected = self.__host_id__.algorithm
+        if algorithm != expected:
+            name = algorithm.name if isinstance(algorithm, enum.Enum) else algorithm
+            return HIPAuthStatus.INVALID, (f'signature algorithm {name} is not the Host '
+                                           f'Identity\'s {expected.name}')
+
+        crypto = _load_cryptography()
+        if crypto is None:
+            return HIPAuthStatus.UNSUPPORTED, ('verifying a signature needs the optional '
+                                               '"cryptography" dependency, which is not '
+                                               'installed (pip install pypcapkit[crypto])')
+        try:
+            return self._verify_signature(crypto, signature, data)
+        except crypto.exceptions.InvalidSignature:
+            return HIPAuthStatus.INVALID, 'the signature does not verify'
+        except crypto.exceptions.UnsupportedAlgorithm as exc:
+            return HIPAuthStatus.UNSUPPORTED, ('"cryptography" cannot apply the Host Identity: '
+                                               f'{exc}')
+        except ValueError:
+            return HIPAuthStatus.INVALID, 'the Host Identity or the signature is malformed'
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, hit: 'IPv6Address | str | int | bytes',
+                 host_id: 'Data_HostIDParameter') -> 'None':
+        if not isinstance(host_id, Data_HostIDParameter):
+            raise ProtocolError(f'HIP: invalid host_id: {host_id!r} is no parsed HOST_ID parameter')
+        self.__hit__ = _hit_value(hit, 'hit')
+        self.__host_id__ = host_id
+
+    def __repr__(self) -> 'str':
+        """Representation of the identity."""
+        return f'<HIPIdentity hit={self.hit} algorithm={self.__host_id__.algorithm.name}>'
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    def _verify_signature(self, crypto: 'types.SimpleNamespace', signature: 'bytes',
+                          data: 'bytes') -> 'tuple[HIPAuthStatus, Optional[str]]':
+        """Verify a signature with |cryptography|_.
+
+        Args:
+            crypto: The primitives :func:`_load_cryptography` loaded.
+            signature: The signature.
+            data: The octets it covers.
+
+        Returns:
+            :attr:`~HIPAuthStatus.VALID`, or :attr:`~HIPAuthStatus.UNSUPPORTED`
+            and why.
+
+        Raises:
+            cryptography.exceptions.InvalidSignature: If the signature does not verify.
+            ValueError: If the Host Identity or the signature is malformed.
+
+        """
+        algorithm, hi = self.__host_id__.algorithm, self.__host_id__.hi
+        suite = HI_ALGORITHM_SUITE.get(algorithm)
+        digest = None if suite is None else getattr(crypto.hashes, HIT_SUITE_HASH[suite].upper())()
+
+        if algorithm == Enum_HIAlgorithm.RSA:
+            if crypto.pss_auto is None:
+                return HIPAuthStatus.UNSUPPORTED, ('RSASSA-PSS needs "cryptography" 37 or later, '
+                                                   'which recovers the salt length')
+            exponent, modulus = self._rsa_numbers(hi)
+            crypto.rsa.RSAPublicNumbers(exponent, modulus).public_key().verify(
+                signature, data, crypto.padding.PSS(mgf=crypto.padding.MGF1(digest),
+                                                    salt_length=crypto.pss_auto), digest)
+        elif algorithm == Enum_HIAlgorithm.DSA:
+            # NOTE: A DSA signature is T, R and S (RFC 2536 section 3), R and S 20 octets each.
+            if len(signature) != 41:
+                raise ValueError('malformed DSA signature')
+            prime, subprime, base, public = self._dsa_numbers(hi)
+            parameters = crypto.dsa.DSAParameterNumbers(prime, subprime, base)
+            crypto.dsa.DSAPublicNumbers(public, parameters).public_key().verify(
+                crypto.utils.encode_dss_signature(int.from_bytes(signature[1:21], 'big'),
+                                                  int.from_bytes(signature[21:], 'big')),
+                data, digest)
+        elif algorithm in (Enum_HIAlgorithm.ECDSA, Enum_HIAlgorithm.EdDSA):
+            if not isinstance(hi, Data_HostIdentity):
+                raise ValueError('malformed Host Identity')
+            if algorithm == Enum_HIAlgorithm.ECDSA:
+                return self._verify_ecdsa(crypto, hi, signature, data, digest)
+
+            size = EDDSA_CURVE_LEN.get(hi.curve)
+            if size is None:
+                return HIPAuthStatus.UNSUPPORTED, ('EdDSA curves other than EdDSA25519 and '
+                                                   'EdDSA448 are not implemented')
+            pubkey = hi.pubkey
+            # NOTE: RFC 9374 Figure 2 puts a 16-bit NULL field between the curve and the key.
+            if len(pubkey) == size + 2 and not any(pubkey[:2]):
+                pubkey = pubkey[2:]
+            kind = crypto.ed25519.Ed25519PublicKey if size == 32 else crypto.ed448.Ed448PublicKey
+            kind.from_public_bytes(pubkey).verify(signature, data)
+        else:
+            return HIPAuthStatus.UNSUPPORTED, (f'Host Identity algorithm {algorithm.name} '
+                                               'is not implemented')
+        return HIPAuthStatus.VALID, None
+
+    def _verify_ecdsa(self, crypto: 'types.SimpleNamespace', hi: 'Data_HostIdentity',
+                      signature: 'bytes', data: 'bytes',
+                      digest: 'Any') -> 'tuple[HIPAuthStatus, Optional[str]]':
+        """Verify an ECDSA signature with |cryptography|_.
+
+        Args:
+            crypto: The primitives :func:`_load_cryptography` loaded.
+            hi: The Host Identity.
+            signature: The signature: R and S, each the curve's coordinate length
+                (:rfc:`4754#section-7`).
+            data: The octets it covers.
+            digest: The hash it digests with.
+
+        Returns:
+            :attr:`~HIPAuthStatus.VALID`, or :attr:`~HIPAuthStatus.UNSUPPORTED`
+            and why.
+
+        Raises:
+            cryptography.exceptions.InvalidSignature: If the signature does not verify.
+            ValueError: If the Host Identity or the signature is malformed.
+
+        """
+        size = ECDSA_CURVE_LEN.get(hi.curve)
+        if size is None:
+            return HIPAuthStatus.UNSUPPORTED, ('ECDSA curves other than NIST P-256 and P-384 '
+                                               'are not implemented')
+        if len(signature) != 2 * size:
+            raise ValueError('malformed ECDSA signature')
+
+        curve = crypto.ec.SECP256R1() if size == 32 else crypto.ec.SECP384R1()
+        der = crypto.utils.encode_dss_signature(int.from_bytes(signature[:size], 'big'),
+                                                int.from_bytes(signature[size:], 'big'))
+        keys = [crypto.ec.EllipticCurvePublicKey.from_encoded_point(curve, point)
+                for point in self._ecdsa_points(hi.pubkey, size)]
+        for key in keys[:-1]:
+            try:
+                key.verify(der, data, crypto.ec.ECDSA(digest))
+            except crypto.exceptions.InvalidSignature:
+                continue
+            return HIPAuthStatus.VALID, None
+        keys[-1].verify(der, data, crypto.ec.ECDSA(digest))
+        return HIPAuthStatus.VALID, None
+
+    @staticmethod
+    def _rsa_numbers(hi: 'Data_HostIdentity | bytes') -> 'tuple[int, int]':
+        """Read the exponent and the modulus of an RSA Host Identity (:rfc:`3110#section-2`).
+
+        Args:
+            hi: The Host Identity.
+
+        Returns:
+            The exponent and the modulus.
+
+        Raises:
+            ValueError: If ``hi`` is malformed.
+
+        """
+        if not isinstance(hi, bytes) or len(hi) < 3:
+            raise ValueError('malformed RSA Host Identity')
+        length, start = (hi[0], 1) if hi[0] else (int.from_bytes(hi[1:3], 'big'), 3)
+        exponent, modulus = hi[start:start + length], hi[start + length:]
+        if not length or len(exponent) != length or not modulus:
+            raise ValueError('malformed RSA Host Identity')
+        return int.from_bytes(exponent, 'big'), int.from_bytes(modulus, 'big')
+
+    @staticmethod
+    def _dsa_numbers(hi: 'Data_HostIdentity | bytes') -> 'tuple[int, int, int, int]':
+        """Read P, Q, G and Y of a DSA Host Identity (:rfc:`2536#section-2`).
+
+        Args:
+            hi: The Host Identity: T, then Q of 20 octets and P, G and Y of
+                ``64 + 8 * T`` octets each.
+
+        Returns:
+            P, Q, G and Y.
+
+        Raises:
+            ValueError: If ``hi`` is malformed.
+
+        """
+        if not isinstance(hi, bytes) or not hi or hi[0] > 8:
+            raise ValueError('malformed DSA Host Identity')
+        size = 64 + 8 * hi[0]
+        if len(hi) != 21 + 3 * size:
+            raise ValueError('malformed DSA Host Identity')
+        prime, base, public = (int.from_bytes(hi[21 + index * size:21 + (index + 1) * size], 'big')
+                               for index in range(3))
+        return prime, int.from_bytes(hi[1:21], 'big'), base, public
+
+    @staticmethod
+    def _ecdsa_points(pubkey: 'bytes', size: 'int') -> 'list[bytes]':
+        """Encode an ECDSA public key as the SEC 1 points it may be.
+
+        Args:
+            pubkey: The public key, in octet-string format (:rfc:`6090#section-6`):
+                ``x`` and ``y``, a SEC 1 point, or ``x`` alone in compact
+                representation (:rfc:`6090#section-4.2`), whose ``y`` is either root.
+            size: The curve's coordinate length, in octets.
+
+        Returns:
+            The SEC 1 encodings of the points it may be.
+
+        Raises:
+            ValueError: If ``pubkey`` is none of these.
+
+        """
+        if len(pubkey) == 2 * size:
+            return [b'\x04' + pubkey]
+        if (len(pubkey) == 2 * size + 1 and pubkey[0] == 4) \
+                or (len(pubkey) == size + 1 and pubkey[0] in (2, 3)):
+            return [pubkey]
+        if len(pubkey) == size:
+            return [b'\x02' + pubkey, b'\x03' + pubkey]
+        raise ValueError('malformed ECDSA public key')
+
+
+class HIPAssociation:
+    """The integrity keys of a HIP association (:rfc:`7401#section-6.5`).
+
+    HOST_g, the host whose HIT is the greater, sends its ``HIP_MAC`` and
+    ``HIP_MAC_2`` under the HIP-gl integrity key, and HOST_l under HIP-lg, each an
+    HMAC with RHASH, the hash of the Responder's HIT Suite
+    (:rfc:`7401#section-6.4.1`). :meth:`from_keymat` derives the keys from the
+    Diffie-Hellman session key.
+
+    Args:
+        initiator: The Initiator's HIT, as an IPv6 address, its text, an :class:`int`
+            or 16 octets.
+        responder: The Responder's HIT, likewise.
+        integrity_gl: The HIP-gl integrity key, as long as RHASH's output.
+        integrity_lg: The HIP-lg integrity key, likewise.
+        suite: The Responder's HIT Suite, as a member or an :class:`int`; by
+            default, the OGA ID of ``responder``, an ORCHID (:rfc:`7343`).
+
+    Raises:
+        ProtocolError: If a HIT is no HIT, or both are one; if ``suite`` is a name,
+            a :obj:`bool`, or none of the HIT Suites
+            :data:`~pcapkit.protocols.internet.hip.const.HIT_SUITE_HASH` lists, or is
+            not given and ``responder`` names none; or if a key is not as long as
+            RHASH's output.
+
+    Important:
+        The keys are held in private attributes, absent from
+        :meth:`~object.__repr__`, and never copied into the data model, which is
+        what reaches the output dumpers.
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    @property
+    def initiator(self) -> 'IPv6Address':
+        """The Initiator's HIT."""
+        return ipaddress.IPv6Address(self.__initiator__)
+
+    @property
+    def responder(self) -> 'IPv6Address':
+        """The Responder's HIT."""
+        return ipaddress.IPv6Address(self.__responder__)
+
+    @property
+    def suite(self) -> 'Enum_HITSuite':
+        """The Responder's HIT Suite, whose hash is RHASH."""
+        return self.__suite__
+
+    @property
+    def integrity_gl(self) -> 'bytes':
+        """The HIP-gl integrity key, of HOST_g's packets."""
+        return self.__integrity_gl__
+
+    @property
+    def integrity_lg(self) -> 'bytes':
+        """The HIP-lg integrity key, of HOST_l's packets."""
+        return self.__integrity_lg__
+
+    ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    @classmethod
+    def from_keymat(cls, initiator: 'IPv6Address | str | int | bytes',
+                    responder: 'IPv6Address | str | int | bytes', *,
+                    kij: 'bytes', random_i: 'bytes | int', random_j: 'bytes | int',
+                    cipher: 'Enum_Cipher | int',
+                    suite: 'Optional[Enum_HITSuite | int]' = None) -> 'HIPAssociation':
+        """Derive the integrity keys from the Diffie-Hellman session key Kij.
+
+        KEYMAT is HKDF (:rfc:`5869`) with RHASH, over the input keying material Kij,
+        with salt ``#I | #J`` and info ``sort(HIT-I | HIT-R)``, the smaller HIT first.
+        It is drawn as HIP-gl's encryption and integrity keys, then HIP-lg's, an
+        encryption key as long as ``cipher`` needs (:rfc:`7401#section-6.5`).
+
+        Args:
+            initiator: As for :class:`HIPAssociation`.
+            responder: As for :class:`HIPAssociation`.
+            kij: Kij.
+            random_i: ``#I``, the Random #I of R1's ``PUZZLE``: RHASH_len / 8
+                octets, or as an :class:`int`.
+            random_j: ``#J``, the Puzzle solution #J of I2's ``SOLUTION``, likewise.
+            cipher: The ``HIP_CIPHER`` the association chose, as a member or an
+                :class:`int`.
+            suite: As for :class:`HIPAssociation`.
+
+        Returns:
+            The association.
+
+        Raises:
+            ProtocolError: As :class:`HIPAssociation` does, if ``cipher`` is a name,
+                a :obj:`bool`, or none of NULL-ENCRYPT, AES-128-CBC and AES-256-CBC,
+                or if ``random_i`` or ``random_j`` is none of these.
+
+        """
+        initiator_hit = _hit_value(initiator, 'initiator')
+        responder_hit = _hit_value(responder, 'responder')
+        member = cls._resolve_suite(responder_hit, suite)
+        digest = HIT_SUITE_HASH[member]
+        hash_len = hashlib.new(digest).digest_size
+
+        cipher_member = _enum_value(Enum_Cipher, cipher, CIPHER_KEY_LEN)
+        if cipher_member is None:
+            raise ProtocolError(f'HIP: unsupported cipher: {cipher!r}; pcapkit implements '
+                                'NULL-ENCRYPT, AES-128-CBC and AES-256-CBC')
+        key_len = CIPHER_KEY_LEN[cipher_member]
+
+        salt = b''
+        for name, value in (('random_i', random_i), ('random_j', random_j)):
+            if isinstance(value, int) and not isinstance(value, bool) \
+                    and 0 <= value < 1 << 8 * hash_len:
+                salt += value.to_bytes(hash_len, 'big')
+            elif isinstance(value, bytes):
+                salt += value
+            else:
+                raise ProtocolError(f'HIP: invalid {name}: {value!r} is no {hash_len}-octet value')
+
+        low, high = sorted((initiator_hit, responder_hit))
+        keymat = cls._hkdf(digest, salt, kij, low.to_bytes(16, 'big') + high.to_bytes(16, 'big'),
+                           2 * (key_len + hash_len))
+        return cls(initiator_hit, responder_hit, suite=member,
+                   integrity_gl=keymat[key_len:key_len + hash_len],
+                   integrity_lg=keymat[2 * key_len + hash_len:])
+
+    def matches(self, sender: 'IPv6Address | str | int | bytes',
+                receiver: 'IPv6Address | str | int | bytes') -> 'bool':
+        """Whether a packet from ``sender`` to ``receiver`` belongs to the association.
+
+        Args:
+            sender: The packet's Sender's HIT.
+            receiver: Its Receiver's HIT.
+
+        Returns:
+            Whether the two are the association's HITs, in either order.
+
+        """
+        return {_hit_value(sender, 'sender'), _hit_value(receiver, 'receiver')} \
+            == {self.__initiator__, self.__responder__}
+
+    def compute_hmac(self, sender: 'IPv6Address | str | int | bytes', data: 'bytes') -> 'bytes':
+        """Compute the HMAC ``sender`` sends over ``data``.
+
+        Args:
+            sender: The Sender's HIT: HOST_g's packets use HIP-gl, HOST_l's HIP-lg.
+            data: The octets the HMAC covers.
+
+        Returns:
+            The HMAC, RHASH's output in full.
+
+        """
+        greater = _hit_value(sender, 'sender') == max(self.__initiator__, self.__responder__)
+        key = self.__integrity_gl__ if greater else self.__integrity_lg__
+        return new_hmac(key, data, HIT_SUITE_HASH[self.__suite__]).digest()
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, initiator: 'IPv6Address | str | int | bytes',
+                 responder: 'IPv6Address | str | int | bytes', *,
+                 integrity_gl: 'bytes', integrity_lg: 'bytes',
+                 suite: 'Optional[Enum_HITSuite | int]' = None) -> 'None':
+        self.__initiator__ = _hit_value(initiator, 'initiator')
+        self.__responder__ = _hit_value(responder, 'responder')
+        if self.__initiator__ == self.__responder__:
+            raise ProtocolError('HIP: invalid association: the Initiator and the Responder '
+                                'have the same HIT')
+        self.__suite__ = self._resolve_suite(self.__responder__, suite)
+
+        hash_len = hashlib.new(HIT_SUITE_HASH[self.__suite__]).digest_size
+        for name, key in (('integrity_gl', integrity_gl), ('integrity_lg', integrity_lg)):
+            if not isinstance(key, bytes) or len(key) != hash_len:
+                raise ProtocolError(f'HIP: invalid {name}: {self.__suite__.name} needs a '
+                                    f'{hash_len}-octet key')
+        self.__integrity_gl__ = integrity_gl
+        self.__integrity_lg__ = integrity_lg
+
+    def __repr__(self) -> 'str':
+        """Representation of the association, free of any key material."""
+        return (f'<HIPAssociation initiator={self.initiator} responder={self.responder} '
+                f'suite={self.__suite__.name}>')
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @staticmethod
+    def _resolve_suite(responder: 'int', suite: 'Optional[Enum_HITSuite | int]') -> 'Enum_HITSuite':
+        """Resolve the Responder's HIT Suite.
+
+        Args:
+            responder: The Responder's HIT.
+            suite: The HIT Suite given, if any.
+
+        Returns:
+            The HIT Suite, or the one the OGA ID of ``responder`` names.
+
+        Raises:
+            ProtocolError: If the HIT Suite is a name, a :obj:`bool`, or one
+                :data:`~pcapkit.protocols.internet.hip.const.HIT_SUITE_HASH` does
+                not list, or is not given and ``responder`` is no ORCHID.
+
+        """
+        if suite is None:
+            if responder >> 100 != ORCHID_PREFIX:
+                raise ProtocolError('HIP: invalid responder: no ORCHID names its HIT Suite; '
+                                    'give suite')
+            suite = (responder >> 96) & 0xF
+        member = _enum_value(Enum_HITSuite, suite, HIT_SUITE_HASH)
+        if member is None:
+            raise ProtocolError(f'HIP: unsupported HIT Suite: {suite!r}; pcapkit implements '
+                                'RSA,DSA/SHA-256, ECDSA/SHA-384 and ECDSA_LOW/SHA-1')
+        return member
+
+    @staticmethod
+    def _hkdf(digest: 'str', salt: 'bytes', ikm: 'bytes', info: 'bytes', length: 'int') -> 'bytes':
+        """Derive ``length`` octets with HKDF (:rfc:`5869#section-2`).
+
+        Args:
+            digest: The hash, as a :mod:`hashlib` name.
+            salt: The salt.
+            ikm: The input keying material.
+            info: The context information.
+            length: How many octets to derive.
+
+        Returns:
+            The output keying material.
+
+        """
+        prk = new_hmac(salt, ikm, digest).digest()
+        okm = block = b''
+        counter = 1
+        while len(okm) < length:
+            block = new_hmac(prk, block + info + bytes([counter]), digest).digest()
+            okm += block
+            counter += 1
+        return okm[:length]
+
+
+class HIPContext(ProtocolContext):
+    """Caller supplied keys for verifying HIP's HMACs and signatures (:rfc:`7401#section-6.4`).
+
+    Given one, :meth:`HIP.read` records the :class:`HIPAuthStatus` of each
+    ``HIP_MAC`` and ``HIP_MAC_2`` as its ``hmac_status``, and of each
+    ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2`` as its ``signature_status``, and
+    parses as it does without one.
+
+    Args:
+        *keys: :class:`HIPIdentity` and :class:`HIPAssociation` instances, the
+            first matching one used.
+
+    Raises:
+        ProtocolError: If a key is neither.
+
+    .. versionadded:: 1.9.0
+
+    """
+
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    @property
+    def identities(self) -> 'tuple[HIPIdentity, ...]':
+        """Registered Host Identities."""
+        return tuple(self.__identities__)
+
+    @property
+    def associations(self) -> 'tuple[HIPAssociation, ...]':
+        """Registered associations."""
+        return tuple(self.__associations__)
+
+    ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    @classmethod
+    def protocol(cls) -> 'tuple[Literal["HIP"]]':
+        """Index ID of the protocol this context applies to."""
+        return ('HIP',)
+
+    def register(self, key: 'HIPIdentity | HIPAssociation') -> 'None':
+        """Add a key to the context.
+
+        Args:
+            key: A Host Identity or an association.
+
+        Raises:
+            ProtocolError: If ``key`` is neither.
+
+        """
+        if isinstance(key, HIPIdentity):
+            self.__identities__.append(key)
+        elif isinstance(key, HIPAssociation):
+            self.__associations__.append(key)
+        else:
+            raise ProtocolError(f'HIP: not a HIP key: {key!r}')
+
+    def match_identity(self, hit: 'IPv6Address | str | int | bytes') -> 'Optional[HIPIdentity]':
+        """Find the Host Identity of a HIT.
+
+        Args:
+            hit: The HIT.
+
+        Returns:
+            The first Host Identity registered for ``hit``, or :data:`None`.
+
+        """
+        value = _hit_value(hit, 'hit')
+        for identity in self.__identities__:
+            if int(identity.hit) == value:
+                return identity
+        return None
+
+    def match_association(self, sender: 'IPv6Address | str | int | bytes',
+                          receiver: 'IPv6Address | str | int | bytes') -> 'Optional[HIPAssociation]':  # pylint: disable=line-too-long
+        """Find the association a packet belongs to.
+
+        Args:
+            sender: The packet's Sender's HIT.
+            receiver: Its Receiver's HIT.
+
+        Returns:
+            The first association :meth:`HIPAssociation.matches` the packet, or
+            :data:`None`.
+
+        """
+        for association in self.__associations__:
+            if association.matches(sender, receiver):
+                return association
+        return None
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, *keys: 'HIPIdentity | HIPAssociation') -> 'None':
+        self.__identities__ = []  # type: list[HIPIdentity]
+        self.__associations__ = []  # type: list[HIPAssociation]
+        for key in keys:
+            self.register(key)
+
+    def __repr__(self) -> 'str':
+        """Representation of the context, free of any key material."""
+        return (f'<HIPContext identities={len(self.__identities__)} '
+                f'associations={len(self.__associations__)}>')
+
+
+##############################################################################
+# Protocol.
+##############################################################################
 
 
 class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
@@ -480,6 +1254,14 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
        ``checksum_status``, and :meth:`make` computes one it is not given under
        :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE` (:issue:`2813`).
 
+    .. versionchanged:: 1.9.0
+
+       Given a :class:`HIPContext`, :meth:`read` verifies ``HIP_MAC``,
+       ``HIP_MAC_2``, ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2``
+       (:rfc:`7401#section-6.4`) and records each outcome, a
+       :class:`HIPAuthStatus`, as the parameter's ``hmac_status`` or
+       ``signature_status`` (:issue:`2939`).
+
     """
 
     ##########################################################################
@@ -645,7 +1427,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            Parsed packet data.
+            Parsed packet data. Given a :class:`HIPContext`, each ``HIP_MAC``,
+            ``HIP_MAC_2``, ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2`` records its
+            :class:`HIPAuthStatus`, see :meth:`_verify_hip_param`.
 
         Raises:
             ProtocolError: If the packet is malformed. Parsed on its own, a
@@ -684,8 +1468,12 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         if _prml < 0 and cut_on_its_own(schema, 'len'):
             _prml = 0
         if _prml:
+            parameters = self._read_hip_param(_prml, version=hip.version)
+            context = self._get_context(HIPContext)
+            if context is not None:
+                self._verify_hip_param(hip, parameters, context)
             hip.__update__([
-                ('parameters', self._read_hip_param(_prml, version=hip.version)),
+                ('parameters', parameters),
             ])
 
         if extension:
@@ -1080,6 +1868,47 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             parameters_list.append(data)
             total_length += len(data_packed)
         return parameters_list, total_length
+
+    def _verify_hip_param(self, hip: 'Data_HIP', parameters: 'Parameter',
+                          context: 'HIPContext') -> 'None':
+        """Verify the HMAC and signature parameters (:rfc:`7401#section-6.4`).
+
+        Each ``HIP_MAC`` and ``HIP_MAC_2`` records its :class:`HIPAuthStatus` as
+        ``hmac_status``, and each ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2`` as
+        ``signature_status``. An outcome other than :attr:`~HIPAuthStatus.VALID`
+        and :attr:`~HIPAuthStatus.NO_KEY` warns with a
+        :exc:`~pcapkit.utilities.warnings.ProtocolWarning`.
+
+        Args:
+            hip: Parsed header.
+            parameters: Parsed parameters, in the order :meth:`_read_hip_param`
+                read them.
+            context: The keys to verify with.
+
+        """
+        unsupported = None if hip.version == 2 else (
+            HIPAuthStatus.UNSUPPORTED, 'only HIP version 2 is verified',
+        )  # type: Optional[tuple[HIPAuthStatus, Optional[str]]]
+
+        # NOTE: A header cut short of its parameters does not parse, so all they cover is here.
+        offset, puzzle = 40, None  # type: int, Optional[int]
+        for schema, (_, param) in zip(self.__header__.param, parameters.items(multi=True)):
+            start, offset = offset, offset + len(schema)
+            if isinstance(param, Data_PuzzleParameter):
+                puzzle = start if puzzle is None else puzzle
+                continue
+            if isinstance(param, (Data_HIPMACParameter, Data_HIPMAC2Parameter)):
+                field = 'hmac_status'
+                status, reason = unsupported or self._verify_hip_mac(hip, param, start, context)
+            elif isinstance(param, (Data_HIPSignatureParameter, Data_HIPSignature2Parameter)):
+                field = 'signature_status'
+                status, reason = unsupported or self._verify_hip_signature(hip, param, start,
+                                                                           puzzle, context)
+            else:
+                continue
+            param.__update__([(field, status)])
+            if reason is not None:
+                warn(f'HIPv{hip.version}: {param.type.name}: {reason}', ProtocolWarning)
 
     def _read_param_unassigned(self, schema: 'Schema_UnassignedParameter', *, version: 'int',  # pylint: disable=unused-argument
                                options: 'Parameter') -> 'Data_UnassignedParameter':  # pylint: disable=unused-argument
@@ -5750,6 +6579,104 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid identifier width: '
                                 f'{id_len} octets cannot hold {identifier!r}')
         return id_len
+
+    def _verify_hip_mac(self, hip: 'Data_HIP',
+                        param: 'Data_HIPMACParameter | Data_HIPMAC2Parameter', offset: 'int',
+                        context: 'HIPContext') -> 'tuple[HIPAuthStatus, Optional[str]]':
+        """Verify a ``HIP_MAC`` or ``HIP_MAC_2`` parameter (:rfc:`7401#section-6.4.1`).
+
+        Args:
+            hip: Parsed header.
+            param: The parameter.
+            offset: Its offset in the header.
+            context: The keys to verify with: the association of the packet's HITs,
+                and for ``HIP_MAC_2`` the Host Identity of its sender, the Responder.
+
+        Returns:
+            The outcome, and why it warns, if it does.
+
+        """
+        association = context.match_association(hip.shit, hip.rhit)
+        if association is None:
+            return HIPAuthStatus.NO_KEY, None
+
+        host_id = b''
+        if isinstance(param, Data_HIPMAC2Parameter):
+            identity = context.match_identity(hip.shit)
+            if identity is None:
+                return HIPAuthStatus.NO_KEY, None
+            # NOTE: The HOST_ID as R1 carried it, which a parse rebuilds byte for byte.
+            schemas, _ = self._make_hip_param([(identity.host_id.type, identity.host_id)],
+                                              version=2)
+            host_id = cast('Schema_HostIDParameter', schemas[0]).pack()
+
+        scope = self._auth_scope(offset, host_id)
+        if scope is None:
+            return HIPAuthStatus.INVALID, 'the Header Length cannot count what the HMAC covers'
+        if compare_digest(association.compute_hmac(hip.shit, scope), param.hmac):
+            return HIPAuthStatus.VALID, None
+        return HIPAuthStatus.INVALID, 'the HMAC does not verify'
+
+    def _verify_hip_signature(self, hip: 'Data_HIP',
+                              param: 'Data_HIPSignatureParameter | Data_HIPSignature2Parameter',
+                              offset: 'int', puzzle: 'Optional[int]',
+                              context: 'HIPContext') -> 'tuple[HIPAuthStatus, Optional[str]]':
+        """Verify a ``HIP_SIGNATURE`` or ``HIP_SIGNATURE_2`` parameter (:rfc:`7401#section-6.4.2`).
+
+        Args:
+            hip: Parsed header.
+            param: The parameter.
+            offset: Its offset in the header.
+            puzzle: Offset of the first ``PUZZLE`` before it, if any.
+            context: The keys to verify with: the Host Identity of the packet's sender.
+
+        Returns:
+            The outcome, and why it warns, if it does.
+
+        """
+        identity = context.match_identity(hip.shit)
+        if identity is None:
+            return HIPAuthStatus.NO_KEY, None
+
+        if isinstance(param, Data_HIPSignature2Parameter):
+            scope = self._auth_scope(offset, receiver=True, puzzle=puzzle)
+        else:
+            scope = self._auth_scope(offset)
+        return identity.verify(param.algorithm, param.signature, cast('bytes', scope))
+
+    def _auth_scope(self, end: 'int', extra: 'bytes' = b'', *, receiver: 'bool' = False,
+                    puzzle: 'Optional[int]' = None) -> 'Optional[bytes]':
+        """Build the octets an HMAC or a signature covers (:rfc:`7401#section-6.4`).
+
+        They are the header and the parameters before ``end``, then ``extra``,
+        with the Checksum zeroed and the Header Length counting them.
+
+        Args:
+            end: Offset of the HMAC or signature parameter.
+            extra: Octets appended, the ``HOST_ID`` of ``HIP_MAC_2``.
+            receiver: Whether the Receiver's HIT is zeroed, as ``HIP_SIGNATURE_2``
+                zeroes the Initiator's in R1 (:rfc:`7401#section-5.2.15`).
+            puzzle: Offset of the ``PUZZLE`` whose Opaque and Random #I are zeroed,
+                as ``HIP_SIGNATURE_2`` asks, if any.
+
+        Returns:
+            The octets, or :data:`None` if the Header Length cannot count them.
+
+        """
+        scope = bytearray(self._data[:end] + extra)
+        units = octets_to_ext_len(len(scope))
+        if units > 0xFF:
+            return None
+        scope[1] = units
+        scope[4:6] = bytes(2)
+        if receiver:
+            scope[24:40] = bytes(16)
+        if puzzle is not None:
+            # NOTE: Opaque and Random #I fill the PUZZLE after #K and Lifetime (RFC 7401
+            # section 5.2.4), the rest of its Length; the PUZZLE parsed, so it is all here.
+            length = int.from_bytes(scope[puzzle + 2:puzzle + 4], 'big')
+            scope[puzzle + 6:puzzle + 4 + length] = bytes(max(length - 2, 0))
+        return bytes(scope)
 
     def _verify_pseudo_checksum(self, pseudo: 'Optional[IP_Pseudo]') -> 'None':
         """Verify the checksum over the pseudo-header of the enclosing IP layer.

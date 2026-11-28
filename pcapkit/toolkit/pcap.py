@@ -9,8 +9,11 @@ The reassembly and flow tracing adapters return the data their
 :mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
 cannot be used for it. The TCP adapters here and in
 :mod:`pcapkit.toolkit.pcapng` read the segment with
-:func:`~pcapkit.toolkit.pcap.tcp_segment`, and the DTLS ones the record with
-:func:`~pcapkit.toolkit.pcap._dtls_fragments`.
+:func:`~pcapkit.toolkit.pcap.tcp_segment`, the DTLS ones the record with
+:func:`~pcapkit.toolkit.pcap._dtls_fragments`, and the SCTP ones the packet with
+:func:`~pcapkit.toolkit.pcap._sctp_fragments`. The TLS adapters of every engine
+keep the TCP ones' records of a TLS stream with
+:func:`~pcapkit.toolkit.pcap._tls_segment`.
 
 """
 from typing import TYPE_CHECKING, NamedTuple, cast
@@ -18,20 +21,25 @@ from typing import TYPE_CHECKING, NamedTuple, cast
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
-from pcapkit.corekit.const.tcpheader import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
+from pcapkit.corekit.const.tcp_header import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
 from pcapkit.foundation.reassembly.dtls.data import Packet as DTLS_Packet
 from pcapkit.foundation.reassembly.ip.data import Packet as IP_Packet
+from pcapkit.foundation.reassembly.sctp.data import Packet as SCTP_Packet
 from pcapkit.foundation.reassembly.tcp.data import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.tcp.data import Packet as TF_TCP_Packet
 from pcapkit.protocols.application.dtls.data import DTLS as Data_DTLS
 from pcapkit.protocols.application.dtls.data import DTLSHandshake as Data_DTLSHandshake
 from pcapkit.protocols.application.dtls.protocol import DTLS
+from pcapkit.protocols.application.tls.protocol import TLS
 from pcapkit.protocols.internet.ip.protocol import IP as Protocol_IP
 from pcapkit.protocols.internet.ipv4.protocol import IPv4
 from pcapkit.protocols.internet.ipv6.protocol import IPv6
 from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 from pcapkit.protocols.misc.raw.protocol import Raw
 from pcapkit.protocols.protocol import ProtocolBase
+from pcapkit.protocols.transport.sctp.data import DATAChunk as Data_DATAChunk
+from pcapkit.protocols.transport.sctp.data import IDATAChunk as Data_IDATAChunk
+from pcapkit.protocols.transport.sctp.protocol import SCTP
 from pcapkit.protocols.transport.tcp.protocol import TCP
 from pcapkit.protocols.transport.udp.protocol import UDP
 
@@ -46,7 +54,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.misc.pcap import Frame
 
 __all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly',
-           'tcp_traceflow', 'tcp_segment', 'TCPSegment']
+           'sctp_reassembly', 'tls_reassembly', 'tcp_traceflow', 'tcp_segment', 'TCPSegment']
 
 
 class TCPSegment(NamedTuple):
@@ -467,6 +475,149 @@ def dtls_reassembly(frame: 'Frame') -> 'Optional[tuple[DTLS_Packet, ...]]':
 
     """
     return _dtls_fragments(frame, num=frame.info.number, timestamp=float(frame.info.time_epoch))
+
+
+def _sctp_fragments(frame: 'ProtocolBase', *, num: 'int',
+                    timestamp: 'float') -> 'Optional[tuple[SCTP_Packet, ...]]':
+    """Make data for SCTP user-message reassembly from a frame's SCTP packet.
+
+    The SCTP adapters of this module and of :mod:`pcapkit.toolkit.pcapng` read
+    the packet with this.
+
+    Args:
+        frame: PCAP frame or PCAP-NG block.
+        num: Original packet range number.
+        timestamp: Capture timestamp, in seconds since the Unix epoch.
+
+    Returns:
+        One record per DATA or I-DATA chunk of the frame's first
+        :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` layer that is a
+        fragment, its ``B`` and ``E`` bits not both set
+        (:rfc:`9260#section-3.3.1`, :rfc:`8260#section-2.1`), in the order the
+        packet bundles them; :data:`None` if it holds none. The buffer ID is
+        the SCTP ports and verification tag, and each record also carries the
+        addresses of the IP layer nearest above the SCTP one.
+
+    .. versionadded:: 1.9.0
+
+    """
+    ip = None  # type: Optional[ProtocolBase]
+    layer = frame  # type: ProtocolBase
+    while isinstance(layer, ProtocolBase) and not isinstance(layer, (NoPayload, SCTP)):
+        if isinstance(layer, Protocol_IP):
+            ip = layer
+        layer = layer.payload
+    if not isinstance(layer, SCTP) or ip is None:
+        return None
+
+    ip_info = cast('Data_IPv4 | Data_IPv6', ip.info)
+    sctp_info = layer.info
+    bufid = (
+        sctp_info.srcport.port,     # source port
+        sctp_info.dstport.port,     # destination port
+        sctp_info.vtag,             # verification tag
+    )
+    packets = []  # type: list[SCTP_Packet]
+    for (_, chunk) in sctp_info.chunks.items(multi=True):
+        if not isinstance(chunk, (Data_DATAChunk, Data_IDATAChunk)) or (chunk.flags.B and chunk.flags.E):
+            continue
+        if isinstance(chunk, Data_DATAChunk):
+            ssn, mid, fsn = chunk.stream_seq, None, None  # type: Optional[int], Optional[int], Optional[int]
+        else:
+            ssn, mid, fsn = None, chunk.mid, chunk.fsn
+        packets.append(SCTP_Packet(
+            bufid=bufid,                    # buffer identifier
+            src=ip_info.src,                # source IP address
+            dst=ip_info.dst,                # destination IP address
+            num=num,                        # original packet range number
+            chunk=chunk.type,               # chunk type
+            tsn=chunk.tsn,                  # transmission sequence number
+            stream_id=chunk.stream_id,      # stream identifier
+            unordered=chunk.flags.U,        # unordered bit
+            beginning=chunk.flags.B,        # beginning fragment bit
+            ending=chunk.flags.E,           # ending fragment bit
+            ssn=ssn,                        # stream sequence number, DATA only
+            mid=mid,                        # message identifier, I-DATA only
+            fsn=fsn,                        # fragment sequence number, I-DATA only
+            ppid=chunk.ppid,                # payload protocol identifier
+            payload=chunk.data,             # raw bytes type user data
+            timestamp=timestamp,            # capture timestamp
+        ))
+    return tuple(packets) or None
+
+
+def sctp_reassembly(frame: 'Frame') -> 'Optional[tuple[SCTP_Packet, ...]]':
+    """Make data for SCTP user-message reassembly.
+
+    A frame can be reassembled if it contains an SCTP layer
+    (:class:`~pcapkit.protocols.transport.sctp.protocol.SCTP`) bundling a DATA or
+    I-DATA chunk that is a fragment of a user message (:rfc:`9260#section-6.9`,
+    :rfc:`8260#section-2.2.3`). Only the frame's first SCTP layer is read.
+
+    Args:
+        frame: PCAP frame.
+
+    Returns:
+        Data for SCTP reassembly (:term:`reasm.sctp.packet`), one per fragment,
+        if the ``frame`` can be reassembled; otherwise :data:`None`.
+
+    See Also:
+        :class:`pcapkit.foundation.reassembly.sctp.reassembly.SCTP`
+
+    .. versionadded:: 1.9.0
+
+    """
+    return _sctp_fragments(frame, num=frame.info.number, timestamp=float(frame.info.time_epoch))
+
+
+def _tls_segment(packet: 'Optional[TCP_Packet]') -> 'Optional[TCP_Packet]':
+    """Keep a segment's TCP reassembly record if its stream carries TLS.
+
+    The TLS adapters of this module and of the other :mod:`pcapkit.toolkit` modules
+    keep their TCP adapter's record with this.
+
+    Args:
+        packet: Data for TCP reassembly (:term:`reasm.tcp.packet`), or :data:`None`.
+
+    Returns:
+        ``packet`` if the port a frame's TCP layer looks its next layer up by
+        binds TLS in :attr:`TCP.__proto__
+        <pcapkit.protocols.transport.tcp.protocol.TCP.__proto__>`; otherwise
+        :data:`None`.
+
+    .. versionadded:: 1.9.0
+
+    """
+    if packet is None:
+        return None
+    port = TCP._next_layer_port((packet.bufid[1], packet.bufid[3]))  # pylint: disable=protected-access
+    if not issubclass(TCP._lookup_next_layer(TCP.__proto__, port), TLS):  # pylint: disable=protected-access
+        return None
+    return packet
+
+
+def tls_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
+    """Make data for TLS record reassembly.
+
+    A frame can be reassembled if it can be for TCP reassembly (see
+    :func:`tcp_reassembly`) and the port its TCP layer looks the next layer up by
+    binds TLS (see :func:`_tls_segment`), whether its payload opens a record or
+    continues one.
+
+    Args:
+        frame: PCAP frame.
+
+    Returns:
+        Data for TCP reassembly (:term:`reasm.tcp.packet`) if the ``frame`` can be
+        reassembled; otherwise :data:`None`.
+
+    See Also:
+        :class:`pcapkit.foundation.reassembly.tls.reassembly.TLS`
+
+    .. versionadded:: 1.9.0
+
+    """
+    return _tls_segment(tcp_reassembly(frame))
 
 
 def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_TCP_Packet | None':

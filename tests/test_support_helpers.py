@@ -5,9 +5,10 @@ They are pinned here for one reason: they are *machinery* the rest of the
 suite leans on, so a fault in one reports itself as a failure in whichever test
 happened to be running rather than as a fault in the helper. The module opens
 with :func:`~tests._support.close_extractor`; :func:`~tests._support.time_limit`
-is covered by :class:`TimeLimitTests`, :func:`~tests._support.retry_reaped_tshark`
-by :class:`RetryReapedTsharkTests`, and :func:`~tests._support.stand_in_reason`
-by :class:`StandInReasonTests` at the end.
+is covered by :class:`TimeLimitTests`, :func:`~tests._support.load_source` by
+:class:`LoadSourceTests`, :func:`~tests._support.retry_reaped_tshark` by
+:class:`RetryReapedTsharkTests`, and :func:`~tests._support.stand_in_reason` by
+:class:`StandInReasonTests` at the end.
 
 :func:`~tests._support.close_extractor` is teardown machinery: nearly every
 runtime and integration test hands it an extractor from ``addCleanup`` or a
@@ -78,12 +79,13 @@ import weakref
 from typing import TYPE_CHECKING
 from unittest import mock
 
+from tests import _tiers
 from tests._support import (MAX_TIMEOUT, PCAPNG_GENERATOR, TIMEOUT_SCALE_ENV,
                             bootstrap_core_modules, close_extractor, ensure_package,
-                            install_fake_protocol_module, isolate_modules, purge_modules,
-                            restore_modules, restore_modules_after, retry_reaped_tshark,
-                            scale_timeout, skip_if_stand_in, snapshot_modules, stand_in_reason,
-                            time_limit, upstream_digests)
+                            install_fake_protocol_module, isolate_modules, load_source,
+                            purge_modules, restore_modules, restore_modules_after,
+                            retry_reaped_tshark, scale_timeout, skip_if_stand_in,
+                            snapshot_modules, stand_in_reason, time_limit, upstream_digests)
 from tests._tiers import ROOT
 
 if TYPE_CHECKING:
@@ -1274,6 +1276,67 @@ def _method_names(case_class: type) -> 'list[str]':
     """
     return [name for name in dir(case_class)
             if name.startswith('test') and callable(getattr(case_class, name))]
+
+
+class LoadSourceTests(unittest.TestCase):
+    """:func:`~tests._support.load_source`, which the generator and ``util/`` tests load scripts with.
+
+    The probe script records, as it runs, its ``__name__`` and what :data:`sys.modules`
+    binds under it.
+
+    """
+
+    #: The module name every case loads the probe under.
+    NAME = '_pcapkit_load_source_probe'
+
+    def setUp(self) -> None:
+        temp = tempfile.TemporaryDirectory(prefix='pcapkit-load-source-')
+        self.addCleanup(temp.cleanup)
+        self.script = pathlib.Path(temp.name) / 'probe.py'
+        self.script.write_text('import sys\nNAME = __name__\nBOUND = sys.modules.get(__name__)\n',
+                               encoding='utf-8')
+        self.addCleanup(sys.modules.pop, self.NAME, None)
+
+    def test_register_binds_the_module_before_it_runs(self) -> None:
+        module = load_source(self.script, self.NAME, register=True)
+        self.assertIs(sys.modules.get(self.NAME), module)
+        self.assertIs(module.BOUND, module)
+
+    def test_without_register_sys_modules_is_left_alone(self) -> None:
+        module = load_source(self.script, self.NAME)
+        self.assertNotIn(self.NAME, sys.modules)
+        self.assertIsNone(module.BOUND)
+
+    def test_each_call_runs_the_script_into_a_fresh_module(self) -> None:
+        for register in (False, True):
+            with self.subTest(register=register):
+                first = load_source(self.script, self.NAME, register=register)
+                first.MARK = True
+                second = load_source(self.script, self.NAME, register=register)
+                self.assertIsNot(first, second)
+                self.assertFalse(hasattr(second, 'MARK'))
+                if register:
+                    self.assertIs(sys.modules.get(self.NAME), second)
+
+    def test_the_script_runs_under_the_name_and_path_given(self) -> None:
+        module = load_source(self.script, self.NAME)
+        self.assertEqual((module.__name__, module.NAME), (self.NAME, self.NAME))
+        self.assertEqual(pathlib.Path(module.__file__), self.script)
+
+    def test_a_missing_script_raises(self) -> None:
+        with self.assertRaises(FileNotFoundError):
+            load_source(self.script.with_name('missing.py'), self.NAME)
+
+    def test_the_pin_rule_follows_a_call_by_its_name(self) -> None:
+        """#1954: the script a project pin passes counts towards whether it varies."""
+        self.assertIn('load_source', _tiers._RUNNING_CALLS,
+                      "project-pin reach depends on tests._tiers following 'load_source'")
+        probe = self.script.with_name('test_probe.py')
+        probe.write_text('from tests._support import load_source\n'
+                         'def load(name):\n    return load_source(f"util/{name}.py", name)\n',
+                         encoding='utf-8')
+        self.assertTrue(_tiers.varies_by_interpreter(probe),
+                        'a computed script name passed to load_source must count as importing pcapkit')
 
 
 class TSharkCrashException(Exception):

@@ -130,6 +130,8 @@ Link Layer Registries
 
 .. autofunction:: pcapkit.foundation.registry.protocols.link.register_frad
 
+.. autofunction:: pcapkit.foundation.registry.protocols.link.register_lsap
+
 .. autofunction:: pcapkit.foundation.registry.protocols.link.register_netlink
 
 .. autofunction:: pcapkit.foundation.registry.protocols.link.register_ppp
@@ -153,6 +155,8 @@ Internet Layer Registries
 
 .. autofunction:: pcapkit.foundation.registry.protocols.internet.register_icmp_type
 
+.. autofunction:: pcapkit.foundation.registry.protocols.internet.register_icmpv6_option
+
 .. autofunction:: pcapkit.foundation.registry.protocols.internet.register_hip_parameter
 
 .. autofunction:: pcapkit.foundation.registry.protocols.internet.register_hopopt_option
@@ -166,6 +170,10 @@ Internet Layer Registries
 .. autofunction:: pcapkit.foundation.registry.protocols.internet.register_mh_option
 
 .. autofunction:: pcapkit.foundation.registry.protocols.internet.register_mh_extension
+
+.. autofunction:: pcapkit.foundation.registry.protocols.internet.register_mh_selector
+
+.. autofunction:: pcapkit.foundation.registry.protocols.internet.register_mh_multicast
 
 Transport Layer Registries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

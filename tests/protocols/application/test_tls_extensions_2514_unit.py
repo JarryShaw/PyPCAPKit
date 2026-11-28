@@ -240,7 +240,12 @@ class MalformedExtensionTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_malformed_bodies_stay_raw_and_rebuild(self) -> None:
-        """The rest of the list still decodes, here a ``supported_versions`` after it."""
+        """The rest of the list still decodes, here a ``supported_versions`` after it.
+
+        Version detection reads the first ``supported_versions`` only, so it still
+        finds TLS 1.3 unless the malformed one is that extension.
+
+        """
         from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.protocols.application.ssl.data import SupportedVersionsClientHello
         from pcapkit.protocols.application.ssl.data import SupportedVersionsServerHello
@@ -270,10 +275,16 @@ class MalformedExtensionTests(unittest.TestCase):
                 client = hello is _client_hello
                 wire = hello(extension, VERSIONS if client else _ext(43, b'\x03\x04'))
                 parsed = TLS(wire, len(wire))
+                self.assertEqual(parsed.alias, 'TLS 1.2' if name.startswith('supported_versions')
+                                 else 'TLS 1.3')
                 ext, versions = parsed.info.content[0].body.extensions
                 self.assertEqual(ext.data, extension[4:])
-                self.assertIsInstance(versions.data, SupportedVersionsClientHello if client
-                                      else SupportedVersionsServerHello)
+                if client:
+                    self.assertIsInstance(versions.data, SupportedVersionsClientHello)
+                    self.assertEqual(versions.data.versions, (0x0304, 0x0303))
+                else:
+                    self.assertIsInstance(versions.data, SupportedVersionsServerHello)
+                    self.assertEqual(versions.data.selected_version, 0x0304)
                 self.assertEqual(bytes(TLS.from_data(parsed.info)).hex(), wire.hex())
 
     def test_a_structure_the_message_does_not_have_stays_raw(self) -> None:
@@ -286,16 +297,6 @@ class MalformedExtensionTests(unittest.TestCase):
                 ext, = parsed.info.content[0].body.extensions
                 self.assertEqual(ext.data, extension[4:])
                 self.assertEqual(bytes(TLS.from_data(parsed.info)).hex(), wire.hex())
-
-    def test_a_malformed_extension_leaves_version_detection_alone(self) -> None:
-        from pcapkit.protocols.application.tls.protocol import TLS
-
-        wire = _client_hello(_ext(16, b'\x00\x09\x02h2'), VERSIONS)
-        parsed = TLS(wire, len(wire))
-        self.assertEqual(parsed.alias, 'TLS 1.3')
-        alpn, versions = parsed.info.content[0].body.extensions
-        self.assertEqual(alpn.data, b'\x00\x09\x02h2')
-        self.assertEqual(versions.data.versions, (0x0304, 0x0303))
 
     def test_broken_framing_raises(self) -> None:
         from pcapkit.protocols.application.tls.protocol import TLS

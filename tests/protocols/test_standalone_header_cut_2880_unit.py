@@ -293,7 +293,7 @@ class StandaloneHeaderCutTests(unittest.TestCase):
                 self.assertRegex(str(refusal), message)
 
     def test_cut_on_its_own_reads_the_record_and_the_frame(self) -> None:
-        from pcapkit.corekit.schema.shortread import cut_on_its_own
+        from pcapkit.corekit.schema.short_read import cut_on_its_own
         from pcapkit.protocols.internet.ipv6.protocol import IPv6
         from pcapkit.utilities.contextvars import frame_depth
 

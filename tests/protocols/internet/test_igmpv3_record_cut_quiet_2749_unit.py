@@ -25,7 +25,6 @@ The messages are built here; this module is unit-tier and reads no capture file.
 from __future__ import annotations
 
 import contextlib
-import logging
 import unittest
 import warnings
 from typing import TYPE_CHECKING
@@ -33,6 +32,7 @@ from unittest import mock
 
 from tests._support import reimport_once_per_class
 from tests.foundation import _roundtrip as wire
+from tests.protocols._rebuild import Logged
 
 if TYPE_CHECKING:
     from typing import Any, Iterator
@@ -82,29 +82,12 @@ def cuts() -> 'Iterator[tuple[str, str, int]]':
         start += len(item)
 
 
-class _Logged(logging.Handler):
-    """Collect what the ``pcapkit`` logger reports."""
-
-    def __init__(self) -> None:
-        super().__init__(logging.DEBUG)
-        self.messages = []  # type: list[str]
-
-    def emit(self, record: 'logging.LogRecord') -> None:  # pylint: disable=redefined-outer-name
-        self.messages.append(record.getMessage())
-
-
 @contextlib.contextmanager
 def _reported() -> 'Iterator[tuple[list[str], list[warnings.WarningMessage]]]':
-    """Collect what the block reports, on the logger and the :mod:`warnings` channel."""
-    handler = _Logged()
-    logger = logging.getLogger('pcapkit')
-    logger.addHandler(handler)
-    try:
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter('always')
-            yield handler.messages, caught
-    finally:
-        logger.removeHandler(handler)
+    """Collect what the block reports: the logger's records, and the warnings as raised."""
+    with Logged() as handler, warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter('always')
+        yield handler.messages, caught
 
 
 class ReportRecordCutTests(unittest.TestCase):

@@ -30,12 +30,11 @@ import collections
 import importlib
 import importlib.util
 import pkgutil
-import sys
 import types
 import unittest
 from typing import TYPE_CHECKING, NamedTuple
 
-from tests._support import purge_modules, time_limit
+from tests._support import load_source, purge_modules, time_limit
 from tests._tiers import ROOT
 
 if TYPE_CHECKING:
@@ -104,28 +103,13 @@ class Degrade(NamedTuple):
 def _load_generator() -> 'types.ModuleType':
     """Load :file:`examples/generators/dispatch.py` by path.
 
-    Follows :file:`test_option_roundtrip_unit.py`'s
-    :func:`~tests.protocols.test_option_roundtrip_unit._load_generator`: the
-    directory is not a package and its module name is too generic to put on
-    :data:`sys.path`.
-
     Returns:
         The generator module, which exposes ``cases``, ``probe``, ``FAMILIES``
         and ``KNOWN_DEGRADED``.
 
-    Raises:
-        RuntimeError: If the module cannot be found or loaded.
-
     """
-    path = ROOT / 'examples' / 'generators' / 'dispatch.py'
-    spec = importlib.util.spec_from_file_location('pcapkit_samples_dispatch', path)
-    if spec is None or spec.loader is None:  # pragma: no cover
-        raise RuntimeError(f'cannot load the dispatch case table from {path}')
-
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
+    return load_source(ROOT / 'examples' / 'generators' / 'dispatch.py', 'pcapkit_samples_dispatch',
+                       register=True)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

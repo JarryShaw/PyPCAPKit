@@ -10,12 +10,14 @@ reassembly and flow tracing of :mod:`pcapkit.foundation`.
 
 """
 # tools for default engine
-from pcapkit.toolkit.pcap import (dtls_reassembly, ipv4_reassembly, ipv6_reassembly, tcp_reassembly,
-                                  tcp_traceflow)
+from pcapkit.toolkit.pcap import (dtls_reassembly, ipv4_reassembly, ipv6_reassembly, sctp_reassembly,
+                                  tcp_reassembly, tcp_traceflow, tls_reassembly)
 from pcapkit.toolkit.pcapng import ipv4_reassembly as pcapng_ipv4_reassembly
 from pcapkit.toolkit.pcapng import ipv6_reassembly as pcapng_ipv6_reassembly
 from pcapkit.toolkit.pcapng import tcp_reassembly as pcapng_tcp_reassembly
 from pcapkit.toolkit.pcapng import dtls_reassembly as pcapng_dtls_reassembly
+from pcapkit.toolkit.pcapng import sctp_reassembly as pcapng_sctp_reassembly
+from pcapkit.toolkit.pcapng import tls_reassembly as pcapng_tls_reassembly
 from pcapkit.toolkit.pcapng import tcp_traceflow as pcapng_tcp_traceflow
 from pcapkit.toolkit.pcapng import block2frame as pcapng_block2frame
 
@@ -26,6 +28,7 @@ from pcapkit.toolkit.pcapng import block2frame as pcapng_block2frame
 # from pcapkit.toolkit.dpkt import ipv4_reassembly as dpkt_ipv4_reassembly
 # from pcapkit.toolkit.dpkt import ipv6_reassembly as dpkt_ipv6_reassembly
 # from pcapkit.toolkit.dpkt import tcp_reassembly as dpkt_tcp_reassembly
+# from pcapkit.toolkit.dpkt import tls_reassembly as dpkt_tls_reassembly
 # from pcapkit.toolkit.dpkt import tcp_traceflow as dpkt_tcp_traceflow
 
 # # tools for PyShark engine
@@ -38,6 +41,7 @@ from pcapkit.toolkit.pcapng import block2frame as pcapng_block2frame
 # from pcapkit.toolkit.scapy import ipv4_reassembly as scapy_ipv4_reassembly
 # from pcapkit.toolkit.scapy import ipv6_reassembly as scapy_ipv6_reassembly
 # from pcapkit.toolkit.scapy import tcp_reassembly as scapy_tcp_reassembly
+# from pcapkit.toolkit.scapy import tls_reassembly as scapy_tls_reassembly
 # from pcapkit.toolkit.scapy import tcp_traceflow as scapy_tcp_traceflow
 
 # # tools for PyPCAP engine
@@ -55,25 +59,29 @@ from pcapkit.toolkit.pcapng import block2frame as pcapng_block2frame
 # from pcapkit.toolkit.pypcapfile import packet2dict as pypcapfile_packet2dict
 # from pcapkit.toolkit.pypcapfile import ipv4_reassembly as pypcapfile_ipv4_reassembly
 # from pcapkit.toolkit.pypcapfile import tcp_reassembly as pypcapfile_tcp_reassembly
+# from pcapkit.toolkit.pypcapfile import tls_reassembly as pypcapfile_tls_reassembly
 # from pcapkit.toolkit.pypcapfile import tcp_traceflow as pypcapfile_tcp_traceflow
 
 __all__ = [
     # default engine
-    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly', 'tcp_traceflow',
+    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly', 'sctp_reassembly',
+    'tls_reassembly', 'tcp_traceflow',
     'pcapng_ipv4_reassembly', 'pcapng_ipv6_reassembly', 'pcapng_tcp_reassembly', 'pcapng_dtls_reassembly',
-    'pcapng_tcp_traceflow',
+    'pcapng_sctp_reassembly', 'pcapng_tls_reassembly', 'pcapng_tcp_traceflow',
     'pcapng_block2frame',
 
     # # DPKT engine
     # 'dpkt_ipv6_hdr_len', 'dpkt_packet2chain', 'dpkt_packet2dict',
-    # 'dpkt_ipv4_reassembly', 'dpkt_ipv6_reassembly', 'dpkt_tcp_reassembly', 'dpkt_tcp_traceflow',
+    # 'dpkt_ipv4_reassembly', 'dpkt_ipv6_reassembly', 'dpkt_tcp_reassembly', 'dpkt_tls_reassembly',
+    # 'dpkt_tcp_traceflow',
 
     # # PyShark engine
     # 'pyshark_packet2dict', 'pyshark_tcp_traceflow',
 
     # # Scapy engine
     # 'scapy_packet2chain', 'scapy_packet2dict',
-    # 'scapy_ipv4_reassembly', 'scapy_ipv6_reassembly', 'scapy_tcp_reassembly', 'scapy_tcp_traceflow',
+    # 'scapy_ipv4_reassembly', 'scapy_ipv6_reassembly', 'scapy_tcp_reassembly', 'scapy_tls_reassembly',
+    # 'scapy_tcp_traceflow',
 
     # # PyPCAP engine
     # 'pypcap_packet2chain', 'pypcap_packet2dict',
@@ -84,5 +92,6 @@ __all__ = [
     # # PyPCAPFile engine
     # 'pypcapfile_packet2timestamp', 'pypcapfile_ipv4_header',
     # 'pypcapfile_packet2chain', 'pypcapfile_packet2dict',
-    # 'pypcapfile_ipv4_reassembly', 'pypcapfile_tcp_reassembly', 'pypcapfile_tcp_traceflow',
+    # 'pypcapfile_ipv4_reassembly', 'pypcapfile_tcp_reassembly', 'pypcapfile_tls_reassembly',
+    # 'pypcapfile_tcp_traceflow',
 ]
