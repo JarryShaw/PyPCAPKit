@@ -11,6 +11,9 @@ protocol's layer is decided by function rather than encapsulation; see
    :maxdepth: 1
 
    application
+   dhcp
+   bootp
+   dhcpv4
    dns
    http
    httpv1
@@ -36,7 +39,7 @@ protocol's layer is decided by function rather than encapsulation; see
 
 .. todo::
 
-   Implement BFD, BGP, DHCP, DHCPv6, IKE, IMAP, Kerberos, LACP, LDAP, LLDP,
+   Implement BFD, BGP, DHCPv6, IKE, IMAP, Kerberos, LACP, LDAP, LLDP,
    mDNS and LLMNR, MQTT, NetBIOS, NNTP, NTP, ONC/RPC, POP, RADIUS, RIP, RSVP,
    RTP, SIP, SMB, SMTP, SNMP, SSDP, SSH, syslog, Telnet, VRRP and XMPP, and
    decode OSPF's packet bodies; :doc:`/contributing/pep` gives each its issue.

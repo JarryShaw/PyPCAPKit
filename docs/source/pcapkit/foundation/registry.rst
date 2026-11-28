@@ -207,6 +207,8 @@ Application Layer Registries
 
 .. module:: pcapkit.foundation.registry.protocols.application
 
+.. autofunction:: pcapkit.foundation.registry.protocols.application.register_dhcp_option
+
 .. autofunction:: pcapkit.foundation.registry.protocols.application.register_dns_rdata
 
 .. autofunction:: pcapkit.foundation.registry.protocols.application.register_dns_option

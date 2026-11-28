@@ -280,7 +280,7 @@ class DispatchBindingTests(unittest.TestCase):
         from pcapkit.protocols.transport.udp.protocol import UDP
 
         self.assertEqual(sorted(TCP.__proto__), [20, 21, 53, 80, 443, 8080])
-        self.assertEqual(sorted(UDP.__proto__), [53, 80, 1701, 5684, 8080])
+        self.assertEqual(sorted(UDP.__proto__), [53, 67, 68, 80, 1701, 5684, 8080])
 
     def test_port_8443_is_deliberately_not_bound(self) -> None:
         """8443 is IANA's ``pcsync-https``, not an alternate HTTPS port.

@@ -713,6 +713,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         'TCP': ModuleDescriptor('pcapkit.protocols.transport.tcp.protocol', 'TCP'),
         'UDP': ModuleDescriptor('pcapkit.protocols.transport.udp.protocol', 'UDP'),
         # Application Layer
+        'BOOTP': ModuleDescriptor('pcapkit.protocols.application.bootp.protocol', 'BOOTP'),
+        'DHCP': ModuleDescriptor('pcapkit.protocols.application.dhcp.protocol', 'DHCP'),
+        'DHCPV4': ModuleDescriptor('pcapkit.protocols.application.dhcpv4.protocol', 'DHCPv4'),
         'DNS': ModuleDescriptor('pcapkit.protocols.application.dns.protocol', 'DNS'),
         'DRARP': ModuleDescriptor('pcapkit.protocols.application.drarp.protocol', 'DRARP'),
         'DTLS': ModuleDescriptor('pcapkit.protocols.application.dtls.protocol', 'DTLS'),

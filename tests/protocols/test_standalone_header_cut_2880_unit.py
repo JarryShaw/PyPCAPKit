@@ -41,8 +41,10 @@ if TYPE_CHECKING:
 __tier__ = 'LATEST'
 
 #: ``make()`` keywords for a class whose defaults build nothing it reads back: a Query
-#: with a Max Resp Time of zero is IGMPv1's (RFC 3376, section 7.1).
+#: with a Max Resp Time of zero is IGMPv1's (RFC 3376, section 7.1), and a DHCP message
+#: carries its Message Type (RFC 2131, section 3).
 MAKE = {
+    'DHCPV4': {'options': ({'code': 53, 'data': {'type': 1}},)},
     'IGMPV2': {'max_resp_time': 100},
 }
 
@@ -76,6 +78,8 @@ REFUSED = {
                                           r'^DTLS: invalid format: legacy record version 0x0000 ',
                                           r'^DTLS: invalid format: record length 0 runs past '),
              'checks the framing that tells a record from octets that are none'),
+    'DHCPV4': ('DHCPv4.read', (r'^DHCP: invalid format: no magic cookie opens the options field$',),
+               'tells a DHCP message from a BOOTP one by its options, which the cut leaves out'),
     'HEADER': ('magic_number_callback', (r'^PCAP: invalid magic number: ',),
                'cannot tell the byte order of every later field from a cut magic number'),
     'HTTPV2': ('HTTPv2.unpack', (r'^HTTP/2: invalid format, packet \(\d+ octet\(s\)\) shorter than ',),

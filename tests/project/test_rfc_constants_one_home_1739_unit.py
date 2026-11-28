@@ -438,6 +438,12 @@ NOT_A_COPY = {
 UNRELATED = {
     'pcapkit/foundation/engines/pypcapfile.py': ((12,), 'the Python 3.12 version ceiling of '
                                                  'PyPCAPFile, not a length'),
+    'pcapkit/protocols/application/dhcp/const.py': ((16,), 'the length of the chaddr field '
+                                                   '(RFC 2131 section 2)'),
+    'pcapkit/protocols/application/dhcp/protocol.py': ((6, 16, 32),
+                                                      'a MAC address of six octets, the 16-octet '
+                                                      'Client Machine Identifier and the widest '
+                                                      'classless route prefix'),
     'pcapkit/protocols/application/dns/const.py': ((12,), 'the DNS header length'),
     'pcapkit/protocols/application/dns/protocol.py': ((6, 16, 20, 24, 32, 40),
                                                      'DNS RDATA, EDNS(0) option and OPT TTL field '

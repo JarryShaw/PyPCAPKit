@@ -473,6 +473,7 @@ class TestRegistrySymmetry(harness.RoundTripBase):
             'register_protocol_code': 'funnels into ProtocolBase.register, as register_tcp does',
             'register_reassembly_callback': 'append-only, nothing to undo with',
             'register_traceflow_callback': 'append-only, nothing to undo with',
+            'register_dhcp_option': 'no schema argument; override and restore are in test_dhcp_unit',
             'register_dns_option': 'no schema argument; override and restore are in test_dns_unit',
             'register_dns_rdata': 'no schema argument; override and restore are in test_dns_unit',
             'register_icmp_type': 'no schema argument; override and restore are in test_icmp_type_registrar_unit',
