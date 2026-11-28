@@ -35,7 +35,8 @@ House Conventions
      module is named, where a context variable lives, where a schema helper used
      outside the schema layer or outside its own protocol lives, where a format
      constant or a helper referenced beyond its own protocol lives, where a
-     protocol's other constants live, and what reads a capture cut;
+     protocol's other constants live, what reads a capture cut, and how a
+     multi-word module name separates its words;
    * :ref:`reassembly-integration` -- :mod:`pcapkit.foundation.reassembly` and what a
      new engine there needs from :mod:`pcapkit.toolkit` and
      :mod:`pcapkit.foundation.analysis`, how its callbacks and those of

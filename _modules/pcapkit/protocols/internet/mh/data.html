@@ -195,11 +195,11 @@
   <span class="sidebar-brand-text">PyPCAPKit</span>
   
 </a><nav class="sidebar-versions" aria-label="Documentation versions">
-  <p>Version <strong>1.8.1 (stable)</strong></p>
+  <p>Version <strong>1.9.0 (stable)</strong></p>
   <ul>
     <li><span aria-current="page">stable</span></li>
     <li><a href="https://pypcapkit.jarryshaw.me/en/latest/_modules/pcapkit/protocols/internet/mh/data.html">latest (develop)</a></li>
-    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.8.1/_modules/pcapkit/protocols/internet/mh/data.html">v1.8.1</a></li>
+    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.9.0/_modules/pcapkit/protocols/internet/mh/data.html">v1.9.0</a></li>
     <li><a href="../../../../../changelog.html">all releases</a></li>
   </ul>
   <p class="sidebar-versions-note">latest and each release are on Read the Docs</p>
@@ -236,12 +236,16 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/dtls.html">DTLS Handshake-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/sctp.html">SCTP User-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/tls.html">TLS Record Reassembly</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/index.html">Reassembled Payload Analysis</a><input aria-label="Toggle navigation of Reassembled Payload Analysis" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/ip.html">IP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/tcp.html">TCP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/dtls.html">DTLS Handshake-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/sctp.html">SCTP User-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/tls.html">TLS Record Analysis</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -267,11 +271,13 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/llc.html">LLC - Logical Link Control</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/netlink.html">Netlink - Linux Netlink Socket Framing</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/ppp.html">PPP - Point-to-Point Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/pppoe.html">PPPoE - PPP over Ethernet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/radiotap.html">Radiotap - IEEE 802.11 Radiotap Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/snap.html">SNAP - Subnetwork Access Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -331,6 +337,10 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/sslv3.html">SSLv3 - Secure Sockets Layer Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/stp.html">STP - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/stpv0.html">STPv0 - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/rstp.html">RSTP - Rapid Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/mstp.html">MSTP - Multiple Spanning Tree Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -350,6 +360,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/seqnum.html">Sequence Number Arithmetic</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
@@ -373,8 +384,9 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/const/index.html">Shared Format Constants</a><input aria-label="Toggle navigation of Shared Format Constants" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/const/capture.html">Capture-Format Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/const/ipheader.html">IP Header Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/const/tcpheader.html">TCP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/const/domain_name.html">Domain Name Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/const/ip_header.html">IP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/const/tcp_header.html">TCP Header Constants</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/context.html">Parsing Context</a></li>
@@ -389,11 +401,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/domain_name.html">Domain Name Codec</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/ext_len.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/shortread.html">Short-Read Replay</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/short_read.html">Short-Read Replay</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
@@ -418,6 +431,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/linux.html">Linux-Specific Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Constant Enumerations</a></li>
@@ -441,6 +455,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
@@ -452,6 +467,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Vendor Crawlers</a></li>
@@ -475,6 +491,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
 </ul>
@@ -489,6 +506,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.9.0.html">1.9.0 – 2026-11-28</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.8.1.html">1.8.1 – 2026-11-27</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
@@ -664,6 +682,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.mh.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">FastBindingAcknowledgmentStatus</span><span class="p">,</span>
                                                         <span class="n">IPv6AddressPrefixCode</span><span class="p">,</span> <span class="n">LMAAddressCode</span><span class="p">,</span>
                                                         <span class="n">LocalizedRoutingStatus</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'MH'</span><span class="p">,</span>
@@ -2574,19 +2593,29 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.data.TrafficSelectorSuboption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TrafficSelectorSuboption</span><span class="p">(</span><span class="n">FlowIdentificationSuboption</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for MH Flow Identification Traffic Selector sub-option."""</span>
+<span class="w">    </span><span class="sd">"""Data model for MH Flow Identification Traffic Selector sub-option.</span>
+
+<span class="sd">    .. versionchanged:: 1.9.0</span>
+
+<span class="sd">       ``selector`` is parsed as the protocol class</span>
+<span class="sd">       :attr:`MH.__selector__ &lt;pcapkit.protocols.internet.mh.protocol.MH.__selector__&gt;`</span>
+<span class="sd">       holds for ``ts_format``, rather than kept as :obj:`bytes` (:issue:`2937`).</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Traffic selector format.</span>
     <span class="n">ts_format</span><span class="p">:</span> <span class="s1">'Enum_TrafficSelector'</span>
     <span class="c1">#: The reserved octet, as captured.</span>
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
-    <span class="c1">#: Traffic selector. Its interior is :rfc:`6088` territory and belongs to the</span>
-    <span class="c1">#: separate traffic selector format registry, so it is kept opaque.</span>
-    <span class="n">selector</span><span class="p">:</span> <span class="s1">'bytes'</span>
+    <span class="c1">#: Traffic selector, in the :rfc:`6088` format ``ts_format`` names, parsed as</span>
+    <span class="c1">#: :attr:`MH.__selector__ &lt;pcapkit.protocols.internet.mh.protocol.MH.__selector__&gt;`</span>
+    <span class="c1">#: says: :class:`~pcapkit.protocols.misc.raw.protocol.Raw` where no dissector is</span>
+    <span class="c1">#: registered.</span>
+    <span class="n">selector</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_FlowIDSuboption'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">ts_format</span><span class="p">:</span> <span class="s1">'Enum_TrafficSelector'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">selector</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">ts_format</span><span class="p">:</span> <span class="s1">'Enum_TrafficSelector'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">selector</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2934,7 +2963,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.data.DynamicIPMulticastSelectorOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">DynamicIPMulticastSelectorOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for MH Dynamic IP Multicast Selector option."""</span>
+<span class="w">    </span><span class="sd">"""Data model for MH Dynamic IP Multicast Selector option.</span>
+
+<span class="sd">    .. versionchanged:: 1.9.0</span>
+
+<span class="sd">       ``data`` is parsed as the protocol class</span>
+<span class="sd">       :attr:`MH.__multicast__ &lt;pcapkit.protocols.internet.mh.protocol.MH.__multicast__&gt;`</span>
+<span class="sd">       holds for ``protocol``, rather than kept as :obj:`bytes` (:issue:`2937`).</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: MLD or IGMP protocol number identifying the record format.</span>
     <span class="n">protocol</span><span class="p">:</span> <span class="s1">'int'</span>
@@ -2945,14 +2982,15 @@
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Number of multicast address records carried in :attr:`data`.</span>
     <span class="n">records</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Multicast address records. These are MLD or IGMP structures belonging to</span>
-    <span class="c1">#: those protocols rather than to the Mobility Header, so they are kept</span>
-    <span class="c1">#: opaque.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span>
+    <span class="c1">#: Multicast address records, MLD or IGMP structures parsed as</span>
+    <span class="c1">#: :attr:`MH.__multicast__ &lt;pcapkit.protocols.internet.mh.protocol.MH.__multicast__&gt;`</span>
+    <span class="c1">#: says: :class:`~pcapkit.protocols.misc.raw.protocol.Raw` where no dissector is</span>
+    <span class="c1">#: registered.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">records</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">records</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2982,16 +3020,26 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.data.ActiveMulticastSubscriptionIPv4Option">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ActiveMulticastSubscriptionIPv4Option</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for MH Active Multicast Subscription IPv4 option."""</span>
+<span class="w">    </span><span class="sd">"""Data model for MH Active Multicast Subscription IPv4 option.</span>
+
+<span class="sd">    .. versionchanged:: 1.9.0</span>
+
+<span class="sd">       ``context`` is parsed as the protocol class</span>
+<span class="sd">       :attr:`MH.__multicast__ &lt;pcapkit.protocols.internet.mh.protocol.MH.__multicast__&gt;`</span>
+<span class="sd">       holds for ``igmp_type``, rather than kept as :obj:`bytes` (:issue:`2937`).</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: IGMP message type identifying the context format.</span>
     <span class="n">igmp_type</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Multicast membership context, an IGMP structure kept opaque.</span>
-    <span class="n">context</span><span class="p">:</span> <span class="s1">'bytes'</span>
+    <span class="c1">#: Multicast membership context, an IGMP structure parsed as</span>
+    <span class="c1">#: :attr:`MH.__multicast__ &lt;pcapkit.protocols.internet.mh.protocol.MH.__multicast__&gt;`</span>
+    <span class="c1">#: says.</span>
+    <span class="n">context</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">igmp_type</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">context</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">context</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2999,16 +3047,26 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.data.ActiveMulticastSubscriptionIPv6Option">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ActiveMulticastSubscriptionIPv6Option</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for MH Active Multicast Subscription IPv6 option."""</span>
+<span class="w">    </span><span class="sd">"""Data model for MH Active Multicast Subscription IPv6 option.</span>
+
+<span class="sd">    .. versionchanged:: 1.9.0</span>
+
+<span class="sd">       ``context`` is parsed as the protocol class</span>
+<span class="sd">       :attr:`MH.__multicast__ &lt;pcapkit.protocols.internet.mh.protocol.MH.__multicast__&gt;`</span>
+<span class="sd">       holds for ``mld_type``, rather than kept as :obj:`bytes` (:issue:`2937`).</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: MLD message type identifying the context format.</span>
     <span class="n">mld_type</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Multicast membership context, an MLD structure kept opaque.</span>
-    <span class="n">context</span><span class="p">:</span> <span class="s1">'bytes'</span>
+    <span class="c1">#: Multicast membership context, an MLD structure parsed as</span>
+    <span class="c1">#: :attr:`MH.__multicast__ &lt;pcapkit.protocols.internet.mh.protocol.MH.__multicast__&gt;`</span>
+    <span class="c1">#: says.</span>
+    <span class="n">context</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">mld_type</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">context</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">context</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -3101,19 +3159,25 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.data.QoSTrafficSelectorAttribute">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">QoSTrafficSelectorAttribute</span><span class="p">(</span><span class="n">QoSAttribute</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for the MH QoS-Traffic-Selector attribute."""</span>
+<span class="w">    </span><span class="sd">"""Data model for the MH QoS-Traffic-Selector attribute.</span>
+
+<span class="sd">    .. versionchanged:: 1.9.0</span>
+
+<span class="sd">       ``selector`` is parsed as for :class:`TrafficSelectorSuboption`, rather</span>
+<span class="sd">       than kept as :obj:`bytes` (:issue:`2937`).</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: The reserved octet, as captured.</span>
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Traffic selector format.</span>
     <span class="n">ts_format</span><span class="p">:</span> <span class="s1">'Enum_TrafficSelector'</span>
-    <span class="c1">#: Traffic selector, kept opaque as for</span>
-    <span class="c1">#: :class:`TrafficSelectorSuboption`.</span>
-    <span class="n">selector</span><span class="p">:</span> <span class="s1">'bytes'</span>
+    <span class="c1">#: Traffic selector, parsed as for :class:`TrafficSelectorSuboption`.</span>
+    <span class="n">selector</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_QoSAttribute'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">ts_format</span><span class="p">:</span> <span class="s1">'Enum_TrafficSelector'</span><span class="p">,</span> <span class="n">selector</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">ts_format</span><span class="p">:</span> <span class="s1">'Enum_TrafficSelector'</span><span class="p">,</span> <span class="n">selector</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -3196,19 +3260,29 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.data.MulticastMobilityOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MulticastMobilityOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for MH Multicast Mobility option."""</span>
+<span class="w">    </span><span class="sd">"""Data model for MH Multicast Mobility option.</span>
+
+<span class="sd">    .. versionchanged:: 1.9.0</span>
+
+<span class="sd">       ``data`` is parsed as the protocol class</span>
+<span class="sd">       :attr:`MH.__multicast__ &lt;pcapkit.protocols.internet.mh.protocol.MH.__multicast__&gt;`</span>
+<span class="sd">       holds for ``code``, rather than kept as :obj:`bytes` (:issue:`2937`).</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Option code -- ``1`` IGMPv3, ``2`` MLDv2, ``3`` IGMPv3 in IGMPv2</span>
     <span class="c1">#: compatibility mode, ``4`` MLDv2 in MLDv1 compatibility mode.</span>
     <span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: The reserved octet, as captured.</span>
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
-    <span class="c1">#: MLD or IGMP report payload, kept opaque.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span>
+    <span class="c1">#: MLD or IGMP report payload, parsed as</span>
+    <span class="c1">#: :attr:`MH.__multicast__ &lt;pcapkit.protocols.internet.mh.protocol.MH.__multicast__&gt;`</span>
+    <span class="c1">#: says.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -3216,19 +3290,29 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.data.MulticastAcknowledgementOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MulticastAcknowledgementOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for MH Multicast Acknowledgement option."""</span>
+<span class="w">    </span><span class="sd">"""Data model for MH Multicast Acknowledgement option.</span>
+
+<span class="sd">    .. versionchanged:: 1.9.0</span>
+
+<span class="sd">       ``data`` is parsed as the protocol class</span>
+<span class="sd">       :attr:`MH.__multicast__ &lt;pcapkit.protocols.internet.mh.protocol.MH.__multicast__&gt;`</span>
+<span class="sd">       holds for ``code``, rather than kept as :obj:`bytes` (:issue:`2937`).</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Option code; always ``0``.</span>
     <span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Status -- ``1`` report payload type unsupported, ``2`` requested group</span>
     <span class="c1">#: service unsupported, ``3`` administratively prohibited.</span>
     <span class="n">status</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: MLD or IGMP unsupported report payload, kept opaque.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span>
+    <span class="c1">#: MLD or IGMP unsupported report payload, parsed as</span>
+    <span class="c1">#: :attr:`MH.__multicast__ &lt;pcapkit.protocols.internet.mh.protocol.MH.__multicast__&gt;`</span>
+    <span class="c1">#: says.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">data</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -3496,7 +3580,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=77637be2"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=baecdfc0"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

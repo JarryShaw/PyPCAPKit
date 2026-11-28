@@ -994,8 +994,9 @@ one runs everything:
      - skipped
      - skipped
    * - ``unit-tests.yml``: ``project-tests``
-     - :file:`tests/project` and the root-level modules under plain unittest, a part
-       per cell, and the docs readers
+     - :file:`tests/project` under plain unittest, a part per cell, each followed by the
+       root-level modules every ``unittest-ordering`` cell runs and part 1 by all of
+       them, and the docs readers
      - the project pins, a half per cell
    * - ``experimental.yml``: ``experimental``, ``windows``
      - skipped
@@ -1611,7 +1612,9 @@ every capture, as the owner ruled on :issue:`1732` and :issue:`1958` -- and the 
 structure tests. The vendor extra is installed on ``latest`` alone and the crawlers
 are pure Python, so the vendor modules are ``LATEST``, each saying so, but for the
 file-restore and environment-variable tests, which stay on every leg. The tier guard itself is ``ALL``, since :file:`tests/conftest.py`
-runs it at collection on every leg.
+runs it at collection on every leg. The steps that use its answer select by workflow
+text, the same on every interpreter, so a project pin runs them once per push
+(:issue:`1958`, :issue:`3148`).
 
 Which legs run which tier:
 
@@ -1642,9 +1645,10 @@ half, and an ``integration`` or ``pypcap-parity`` leg off ``latest`` runs
 ``fixture_tier_paths('ALL')``, which drops each ``LATEST`` path and node ID and
 replaces a directory holding a ``LATEST`` module by its ``ALL`` ones, since pytest
 applies no ignore to a path it was handed. :file:`tests/test_tier_guard.py` checks
-that every module resolves to exactly one tier and runs the steps to check what each
-does with the answer, and :file:`tests/project/test_sweeps_on_latest_only_1732.py`
-does the same for every leg the tier file gives.
+that every module resolves to exactly one tier,
+:file:`tests/project/test_tier_steps_1958.py` runs the steps to check what each does
+with the answer, and :file:`tests/project/test_sweeps_on_latest_only_1732.py` does
+the same for every leg the tier file gives.
 
 The ``LATEST`` tier is a job of its own, halved at ``LATEST_TIER_BOUNDARY`` in
 :file:`tests/_tiers.py` (:issue:`2751`), as ``project`` was cut for
@@ -1705,8 +1709,9 @@ Every ``test``, ``test-ktlo`` and ``experimental`` leg passes each pin as an
 measures only ``pcapkit``, and each cell of ``project-tests`` runs its half of what
 ``project_pin_paths()`` prints, which ``project_pin_half()`` gives it. Each asks at
 run time, as ``integration`` asks for its selection, so no workflow lists the pins,
-and :file:`tests/test_tier_guard.py` runs the steps to check what each does with the
-answer. Under ``gate-only``, ``gate``'s full suite runs the pins with everything else.
+and :file:`tests/project/test_tier_steps_1958.py`, itself a pin (:issue:`3148`), runs
+the steps to check what each does with the answer. Under ``gate-only``, ``gate``'s
+full suite runs the pins with everything else.
 ``unittest-ordering``'s ``project`` cells keep them, as they ask how a module runs in
 one interpreter, in file order and without xdist, which is a question about the module
 rather than the Python version.
@@ -1916,8 +1921,9 @@ setup-python. :file:`util/release_conda.py` runs ``leg`` and ``downloaded`` on t
 image's ``python3``, in ``conda`` and ``conda-dist``, which have no setup-python,
 and ``build`` on conda's base ``python`` under the login shell, from
 :file:`conda/pypcapkit`. A project
-pin runs each, and the step's inline shell form it must match, on the same cases
-and requires the same status, output and calls.
+pin runs each, and a script whose behaviour no other test pins is also checked
+against the step's inline shell form, on the same cases and for the same status,
+output and calls (:pr:`3174`).
 :file:`util/_actions.py` is standard library only, and keeps to 3.8's syntax,
 since the scripts on ``/usr/bin/python3`` and on every leg's interpreter import it.
 Their project tests parse these scripts and the helper with ``ast.parse(...,
@@ -2438,8 +2444,13 @@ as in ``github-release``. Where ``release-app`` has no key, each of those jobs w
 from its ``Check for the release App's key`` step and skips its other steps.
 :file:`tests/project/test_release_app_environment_2648.py` fails when a job other
 than Create Release's ``github`` names ``github-release``, when ``github`` does
-not name it, or when any other job reading the key, in Create Release or
-elsewhere, names anything but ``release-app``.
+not name it, when any other job reading the key, under its name in any case and
+in Create Release or elsewhere, names anything but ``release-app``, or when a
+workflow passes ``toJSON(secrets)``. It also fails when a reader's ``Mint the
+release App's token`` step stops running the one ``v3`` commit of
+``actions/create-github-app-token`` every reader pins, or changes the App's
+inputs, its step ``id`` or that reader's scopes, and when another step of a
+reader reads a secret, or, in ``github``, the key.
 
 ``ANACONDA_TOKEN`` is a secret of the ``anaconda`` environment, and the
 ``PYPCAPKIT`` token and ``PYPCAPKIT_ACTIONS_DEPLOY_KEY`` are secrets of

@@ -195,11 +195,11 @@
   <span class="sidebar-brand-text">PyPCAPKit</span>
   
 </a><nav class="sidebar-versions" aria-label="Documentation versions">
-  <p>Version <strong>1.8.1 (stable)</strong></p>
+  <p>Version <strong>1.9.0 (stable)</strong></p>
   <ul>
     <li><span aria-current="page">stable</span></li>
     <li><a href="https://pypcapkit.jarryshaw.me/en/latest/_modules/index.html">latest (develop)</a></li>
-    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.8.1/_modules/index.html">v1.8.1</a></li>
+    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.9.0/_modules/index.html">v1.9.0</a></li>
     <li><a href="../changelog.html">all releases</a></li>
   </ul>
   <p class="sidebar-versions-note">latest and each release are on Read the Docs</p>
@@ -236,12 +236,16 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/foundation/reassembly/dtls.html">DTLS Handshake-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/foundation/reassembly/sctp.html">SCTP User-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/foundation/reassembly/tls.html">TLS Record Reassembly</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../pcapkit/foundation/analysis/index.html">Reassembled Payload Analysis</a><input aria-label="Toggle navigation of Reassembled Payload Analysis" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/foundation/analysis/ip.html">IP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/foundation/analysis/tcp.html">TCP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/foundation/analysis/dtls.html">DTLS Handshake-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/foundation/analysis/sctp.html">SCTP User-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/foundation/analysis/tls.html">TLS Record Analysis</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../pcapkit/foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -267,11 +271,13 @@
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/llc.html">LLC - Logical Link Control</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/netlink.html">Netlink - Linux Netlink Socket Framing</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/ppp.html">PPP - Point-to-Point Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/pppoe.html">PPPoE - PPP over Ethernet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/radiotap.html">Radiotap - IEEE 802.11 Radiotap Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/snap.html">SNAP - Subnetwork Access Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -331,6 +337,10 @@
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/sslv3.html">SSLv3 - Secure Sockets Layer Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/stp.html">STP - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/stpv0.html">STPv0 - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/rstp.html">RSTP - Rapid Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/mstp.html">MSTP - Multiple Spanning Tree Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -350,6 +360,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/seqnum.html">Sequence Number Arithmetic</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
@@ -373,8 +384,9 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../pcapkit/corekit/const/index.html">Shared Format Constants</a><input aria-label="Toggle navigation of Shared Format Constants" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/const/capture.html">Capture-Format Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/const/ipheader.html">IP Header Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/const/tcpheader.html">TCP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/const/domain_name.html">Domain Name Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/const/ip_header.html">IP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/const/tcp_header.html">TCP Header Constants</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/context.html">Parsing Context</a></li>
@@ -389,11 +401,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/domain_name.html">Domain Name Codec</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/ext_len.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/shortread.html">Short-Read Replay</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/short_read.html">Short-Read Replay</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
@@ -418,6 +431,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/linux.html">Linux-Specific Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Constant Enumerations</a></li>
@@ -441,6 +455,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
@@ -452,6 +467,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Vendor Crawlers</a></li>
@@ -475,6 +491,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
 </ul>
@@ -489,6 +506,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../changelog/1.9.0.html">1.9.0 – 2026-11-28</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.8.1.html">1.8.1 – 2026-11-27</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
@@ -640,7 +658,9 @@
 <li><a href="pcapkit/const/icmp/time_exceeded_code.html">pcapkit.const.icmp.time_exceeded_code</a></li>
 <li><a href="pcapkit/const/icmp/type.html">pcapkit.const.icmp.type</a></li>
 <li><a href="pcapkit/const/icmpv6/destination_unreachable_code.html">pcapkit.const.icmpv6.destination_unreachable_code</a></li>
+<li><a href="pcapkit/const/icmpv6/nd_option.html">pcapkit.const.icmpv6.nd_option</a></li>
 <li><a href="pcapkit/const/icmpv6/parameter_problem_code.html">pcapkit.const.icmpv6.parameter_problem_code</a></li>
+<li><a href="pcapkit/const/icmpv6/router_preference.html">pcapkit.const.icmpv6.router_preference</a></li>
 <li><a href="pcapkit/const/icmpv6/time_exceeded_code.html">pcapkit.const.icmpv6.time_exceeded_code</a></li>
 <li><a href="pcapkit/const/icmpv6/type.html">pcapkit.const.icmpv6.type</a></li>
 <li><a href="pcapkit/const/ieee802_11/control_subtype.html">pcapkit.const.ieee802_11.control_subtype</a></li>
@@ -675,6 +695,9 @@
 <li><a href="pcapkit/const/ipx/socket.html">pcapkit.const.ipx.socket</a></li>
 <li><a href="pcapkit/const/l2tp/type.html">pcapkit.const.l2tp.type</a></li>
 <li><a href="pcapkit/const/linux/arphrd.html">pcapkit.const.linux.arphrd</a></li>
+<li><a href="pcapkit/const/llc/lsap.html">pcapkit.const.llc.lsap</a></li>
+<li><a href="pcapkit/const/llc/modifier_function.html">pcapkit.const.llc.modifier_function</a></li>
+<li><a href="pcapkit/const/llc/supervisory_function.html">pcapkit.const.llc.supervisory_function</a></li>
 <li><a href="pcapkit/const/mh/access_type.html">pcapkit.const.mh.access_type</a></li>
 <li><a href="pcapkit/const/mh/ack_status_code.html">pcapkit.const.mh.ack_status_code</a></li>
 <li><a href="pcapkit/const/mh/ani_suboption.html">pcapkit.const.mh.ani_suboption</a></li>
@@ -768,6 +791,9 @@
 <li><a href="pcapkit/const/sctp/payload_protocol_identifier.html">pcapkit.const.sctp.payload_protocol_identifier</a></li>
 <li><a href="pcapkit/const/sslv2/handshake_type.html">pcapkit.const.sslv2.handshake_type</a></li>
 <li><a href="pcapkit/const/sslv2/version.html">pcapkit.const.sslv2.version</a></li>
+<li><a href="pcapkit/const/stp/bpdu_type.html">pcapkit.const.stp.bpdu_type</a></li>
+<li><a href="pcapkit/const/stp/port_role.html">pcapkit.const.stp.port_role</a></li>
+<li><a href="pcapkit/const/stp/protocol_version.html">pcapkit.const.stp.protocol_version</a></li>
 <li><a href="pcapkit/const/tcp/checksum.html">pcapkit.const.tcp.checksum</a></li>
 <li><a href="pcapkit/const/tcp/flags.html">pcapkit.const.tcp.flags</a></li>
 <li><a href="pcapkit/const/tcp/mp_tcp_option.html">pcapkit.const.tcp.mp_tcp_option</a></li>
@@ -801,11 +827,12 @@
 <li><a href="pcapkit/corekit/protochain.html">pcapkit.corekit.protochain</a></li>
 <li><a href="pcapkit/corekit/registry.html">pcapkit.corekit.registry</a></li>
 <li><a href="pcapkit/corekit/schema/byteorder.html">pcapkit.corekit.schema.byteorder</a></li>
-<li><a href="pcapkit/corekit/schema/extlen.html">pcapkit.corekit.schema.extlen</a></li>
+<li><a href="pcapkit/corekit/schema/domain_name.html">pcapkit.corekit.schema.domain_name</a></li>
+<li><a href="pcapkit/corekit/schema/ext_len.html">pcapkit.corekit.schema.ext_len</a></li>
 <li><a href="pcapkit/corekit/schema/ipaddress.html">pcapkit.corekit.schema.ipaddress</a></li>
 <li><a href="pcapkit/corekit/schema/jumbogram.html">pcapkit.corekit.schema.jumbogram</a></li>
 <li><a href="pcapkit/corekit/schema/padding.html">pcapkit.corekit.schema.padding</a></li>
-<li><a href="pcapkit/corekit/schema/shortread.html">pcapkit.corekit.schema.shortread</a></li>
+<li><a href="pcapkit/corekit/schema/short_read.html">pcapkit.corekit.schema.short_read</a></li>
 <li><a href="pcapkit/corekit/sentinels.html">pcapkit.corekit.sentinels</a></li>
 <li><a href="pcapkit/corekit/version.html">pcapkit.corekit.version</a></li>
 <li><a href="pcapkit/dumpkit/common.html">pcapkit.dumpkit.common</a></li>
@@ -814,7 +841,9 @@
 <li><a href="pcapkit/dumpkit/pcapng.html">pcapkit.dumpkit.pcapng</a></li>
 <li><a href="pcapkit/foundation/analysis/dtls.html">pcapkit.foundation.analysis.dtls</a></li>
 <li><a href="pcapkit/foundation/analysis/ip.html">pcapkit.foundation.analysis.ip</a></li>
+<li><a href="pcapkit/foundation/analysis/sctp.html">pcapkit.foundation.analysis.sctp</a></li>
 <li><a href="pcapkit/foundation/analysis/tcp.html">pcapkit.foundation.analysis.tcp</a></li>
+<li><a href="pcapkit/foundation/analysis/tls.html">pcapkit.foundation.analysis.tls</a></li>
 <li><a href="pcapkit/foundation/engines/_pcap_backend.html">pcapkit.foundation.engines._pcap_backend</a></li>
 <li><a href="pcapkit/foundation/engines/dpkt.html">pcapkit.foundation.engines.dpkt</a></li>
 <li><a href="pcapkit/foundation/engines/engine.html">pcapkit.foundation.engines.engine</a></li>
@@ -836,8 +865,12 @@
 <li><a href="pcapkit/foundation/reassembly/ipv4/reassembly.html">pcapkit.foundation.reassembly.ipv4.reassembly</a></li>
 <li><a href="pcapkit/foundation/reassembly/ipv6/reassembly.html">pcapkit.foundation.reassembly.ipv6.reassembly</a></li>
 <li><a href="pcapkit/foundation/reassembly/reassembly.html">pcapkit.foundation.reassembly.reassembly</a></li>
+<li><a href="pcapkit/foundation/reassembly/sctp/data.html">pcapkit.foundation.reassembly.sctp.data</a></li>
+<li><a href="pcapkit/foundation/reassembly/sctp/reassembly.html">pcapkit.foundation.reassembly.sctp.reassembly</a></li>
 <li><a href="pcapkit/foundation/reassembly/tcp/data.html">pcapkit.foundation.reassembly.tcp.data</a></li>
 <li><a href="pcapkit/foundation/reassembly/tcp/reassembly.html">pcapkit.foundation.reassembly.tcp.reassembly</a></li>
+<li><a href="pcapkit/foundation/reassembly/tls/data.html">pcapkit.foundation.reassembly.tls.data</a></li>
+<li><a href="pcapkit/foundation/reassembly/tls/reassembly.html">pcapkit.foundation.reassembly.tls.reassembly</a></li>
 </ul><li><a href="pcapkit/foundation/registry/foundation.html">pcapkit.foundation.registry.foundation</a></li>
 <li><a href="pcapkit/foundation/registry/protocols/application.html">pcapkit.foundation.registry.protocols.application</a></li>
 <li><a href="pcapkit/foundation/registry/protocols/internet.html">pcapkit.foundation.registry.protocols.internet</a></li>
@@ -871,6 +904,9 @@
 <li><a href="pcapkit/protocols/application/httpv2/data.html">pcapkit.protocols.application.httpv2.data</a></li>
 <li><a href="pcapkit/protocols/application/httpv2/protocol.html">pcapkit.protocols.application.httpv2.protocol</a></li>
 <li><a href="pcapkit/protocols/application/httpv2/schema.html">pcapkit.protocols.application.httpv2.schema</a></li>
+<li><a href="pcapkit/protocols/application/mstp/data.html">pcapkit.protocols.application.mstp.data</a></li>
+<li><a href="pcapkit/protocols/application/mstp/protocol.html">pcapkit.protocols.application.mstp.protocol</a></li>
+<li><a href="pcapkit/protocols/application/mstp/schema.html">pcapkit.protocols.application.mstp.schema</a></li>
 <li><a href="pcapkit/protocols/application/ngap/data.html">pcapkit.protocols.application.ngap.data</a></li>
 <li><a href="pcapkit/protocols/application/ngap/protocol.html">pcapkit.protocols.application.ngap.protocol</a></li>
 <li><a href="pcapkit/protocols/application/ngap/schema.html">pcapkit.protocols.application.ngap.schema</a></li>
@@ -885,6 +921,9 @@
 <li><a href="pcapkit/protocols/application/ospfv3/protocol.html">pcapkit.protocols.application.ospfv3.protocol</a></li>
 <li><a href="pcapkit/protocols/application/ospfv3/schema.html">pcapkit.protocols.application.ospfv3.schema</a></li>
 <li><a href="pcapkit/protocols/application/rarp/protocol.html">pcapkit.protocols.application.rarp.protocol</a></li>
+<li><a href="pcapkit/protocols/application/rstp/data.html">pcapkit.protocols.application.rstp.data</a></li>
+<li><a href="pcapkit/protocols/application/rstp/protocol.html">pcapkit.protocols.application.rstp.protocol</a></li>
+<li><a href="pcapkit/protocols/application/rstp/schema.html">pcapkit.protocols.application.rstp.schema</a></li>
 <li><a href="pcapkit/protocols/application/ssl/data.html">pcapkit.protocols.application.ssl.data</a></li>
 <li><a href="pcapkit/protocols/application/ssl/protocol.html">pcapkit.protocols.application.ssl.protocol</a></li>
 <li><a href="pcapkit/protocols/application/ssl/schema.html">pcapkit.protocols.application.ssl.schema</a></li>
@@ -892,6 +931,11 @@
 <li><a href="pcapkit/protocols/application/sslv2/protocol.html">pcapkit.protocols.application.sslv2.protocol</a></li>
 <li><a href="pcapkit/protocols/application/sslv2/schema.html">pcapkit.protocols.application.sslv2.schema</a></li>
 <li><a href="pcapkit/protocols/application/sslv3/protocol.html">pcapkit.protocols.application.sslv3.protocol</a></li>
+<li><a href="pcapkit/protocols/application/stp/data.html">pcapkit.protocols.application.stp.data</a></li>
+<li><a href="pcapkit/protocols/application/stp/protocol.html">pcapkit.protocols.application.stp.protocol</a></li>
+<li><a href="pcapkit/protocols/application/stpv0/data.html">pcapkit.protocols.application.stpv0.data</a></li>
+<li><a href="pcapkit/protocols/application/stpv0/protocol.html">pcapkit.protocols.application.stpv0.protocol</a></li>
+<li><a href="pcapkit/protocols/application/stpv0/schema.html">pcapkit.protocols.application.stpv0.schema</a></li>
 <li><a href="pcapkit/protocols/application/tls/data.html">pcapkit.protocols.application.tls.data</a></li>
 <li><a href="pcapkit/protocols/application/tls/protocol.html">pcapkit.protocols.application.tls.protocol</a></li>
 <li><a href="pcapkit/protocols/application/tls/schema.html">pcapkit.protocols.application.tls.schema</a></li>
@@ -979,6 +1023,9 @@
 <li><a href="pcapkit/protocols/link/linux_sll2/data.html">pcapkit.protocols.link.linux_sll2.data</a></li>
 <li><a href="pcapkit/protocols/link/linux_sll2/protocol.html">pcapkit.protocols.link.linux_sll2.protocol</a></li>
 <li><a href="pcapkit/protocols/link/linux_sll2/schema.html">pcapkit.protocols.link.linux_sll2.schema</a></li>
+<li><a href="pcapkit/protocols/link/llc/data.html">pcapkit.protocols.link.llc.data</a></li>
+<li><a href="pcapkit/protocols/link/llc/protocol.html">pcapkit.protocols.link.llc.protocol</a></li>
+<li><a href="pcapkit/protocols/link/llc/schema.html">pcapkit.protocols.link.llc.schema</a></li>
 <li><a href="pcapkit/protocols/link/loopback/data.html">pcapkit.protocols.link.loopback.data</a></li>
 <li><a href="pcapkit/protocols/link/loopback/protocol.html">pcapkit.protocols.link.loopback.protocol</a></li>
 <li><a href="pcapkit/protocols/link/loopback/schema.html">pcapkit.protocols.link.loopback.schema</a></li>
@@ -995,6 +1042,9 @@
 <li><a href="pcapkit/protocols/link/radiotap/protocol.html">pcapkit.protocols.link.radiotap.protocol</a></li>
 <li><a href="pcapkit/protocols/link/radiotap/schema.html">pcapkit.protocols.link.radiotap.schema</a></li>
 <li><a href="pcapkit/protocols/link/s_tag/protocol.html">pcapkit.protocols.link.s_tag.protocol</a></li>
+<li><a href="pcapkit/protocols/link/snap/data.html">pcapkit.protocols.link.snap.data</a></li>
+<li><a href="pcapkit/protocols/link/snap/protocol.html">pcapkit.protocols.link.snap.protocol</a></li>
+<li><a href="pcapkit/protocols/link/snap/schema.html">pcapkit.protocols.link.snap.schema</a></li>
 <li><a href="pcapkit/protocols/link/vlan/data.html">pcapkit.protocols.link.vlan.data</a></li>
 <li><a href="pcapkit/protocols/link/vlan/protocol.html">pcapkit.protocols.link.vlan.protocol</a></li>
 <li><a href="pcapkit/protocols/link/vlan/schema.html">pcapkit.protocols.link.vlan.schema</a></li>
@@ -1048,6 +1098,7 @@
 <li><a href="pcapkit/utilities/inspect.html">pcapkit.utilities.inspect</a></li>
 <li><a href="pcapkit/utilities/logging.html">pcapkit.utilities.logging</a></li>
 <li><a href="pcapkit/utilities/pickle.html">pcapkit.utilities.pickle</a></li>
+<li><a href="pcapkit/utilities/seqnum.html">pcapkit.utilities.seqnum</a></li>
 <li><a href="pcapkit/utilities/warnings.html">pcapkit.utilities.warnings</a></li>
 <li><a href="pcapkit/vendor/arp/hardware.html">pcapkit.vendor.arp.hardware</a></li>
 <li><a href="pcapkit/vendor/arp/operation.html">pcapkit.vendor.arp.operation</a></li>
@@ -1095,7 +1146,9 @@
 <li><a href="pcapkit/vendor/icmp/time_exceeded_code.html">pcapkit.vendor.icmp.time_exceeded_code</a></li>
 <li><a href="pcapkit/vendor/icmp/type.html">pcapkit.vendor.icmp.type</a></li>
 <li><a href="pcapkit/vendor/icmpv6/destination_unreachable_code.html">pcapkit.vendor.icmpv6.destination_unreachable_code</a></li>
+<li><a href="pcapkit/vendor/icmpv6/nd_option.html">pcapkit.vendor.icmpv6.nd_option</a></li>
 <li><a href="pcapkit/vendor/icmpv6/parameter_problem_code.html">pcapkit.vendor.icmpv6.parameter_problem_code</a></li>
+<li><a href="pcapkit/vendor/icmpv6/router_preference.html">pcapkit.vendor.icmpv6.router_preference</a></li>
 <li><a href="pcapkit/vendor/icmpv6/time_exceeded_code.html">pcapkit.vendor.icmpv6.time_exceeded_code</a></li>
 <li><a href="pcapkit/vendor/icmpv6/type.html">pcapkit.vendor.icmpv6.type</a></li>
 <li><a href="pcapkit/vendor/ieee802_11/control_subtype.html">pcapkit.vendor.ieee802_11.control_subtype</a></li>
@@ -1130,6 +1183,9 @@
 <li><a href="pcapkit/vendor/ipx/socket.html">pcapkit.vendor.ipx.socket</a></li>
 <li><a href="pcapkit/vendor/l2tp/type.html">pcapkit.vendor.l2tp.type</a></li>
 <li><a href="pcapkit/vendor/linux/arphrd.html">pcapkit.vendor.linux.arphrd</a></li>
+<li><a href="pcapkit/vendor/llc/lsap.html">pcapkit.vendor.llc.lsap</a></li>
+<li><a href="pcapkit/vendor/llc/modifier_function.html">pcapkit.vendor.llc.modifier_function</a></li>
+<li><a href="pcapkit/vendor/llc/supervisory_function.html">pcapkit.vendor.llc.supervisory_function</a></li>
 <li><a href="pcapkit/vendor/mh/access_type.html">pcapkit.vendor.mh.access_type</a></li>
 <li><a href="pcapkit/vendor/mh/ack_status_code.html">pcapkit.vendor.mh.ack_status_code</a></li>
 <li><a href="pcapkit/vendor/mh/ani_suboption.html">pcapkit.vendor.mh.ani_suboption</a></li>
@@ -1223,6 +1279,9 @@
 <li><a href="pcapkit/vendor/sctp/payload_protocol_identifier.html">pcapkit.vendor.sctp.payload_protocol_identifier</a></li>
 <li><a href="pcapkit/vendor/sslv2/handshake_type.html">pcapkit.vendor.sslv2.handshake_type</a></li>
 <li><a href="pcapkit/vendor/sslv2/version.html">pcapkit.vendor.sslv2.version</a></li>
+<li><a href="pcapkit/vendor/stp/bpdu_type.html">pcapkit.vendor.stp.bpdu_type</a></li>
+<li><a href="pcapkit/vendor/stp/port_role.html">pcapkit.vendor.stp.port_role</a></li>
+<li><a href="pcapkit/vendor/stp/protocol_version.html">pcapkit.vendor.stp.protocol_version</a></li>
 <li><a href="pcapkit/vendor/tcp/checksum.html">pcapkit.vendor.tcp.checksum</a></li>
 <li><a href="pcapkit/vendor/tcp/flags.html">pcapkit.vendor.tcp.flags</a></li>
 <li><a href="pcapkit/vendor/tcp/mp_tcp_option.html">pcapkit.vendor.tcp.mp_tcp_option</a></li>
@@ -1272,7 +1331,7 @@
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=77637be2"></script>
+</div><script src="../_static/documentation_options.js?v=baecdfc0"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

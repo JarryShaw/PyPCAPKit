@@ -16,7 +16,7 @@ Transport Layer
 
 .. todo::
 
-   Implement RSVP.
+   Implement QUIC; :doc:`/contributing/pep` gives its issue.
 
 Protocol Registry
 -----------------

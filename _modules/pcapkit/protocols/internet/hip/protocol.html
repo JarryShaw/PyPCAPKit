@@ -195,11 +195,11 @@
   <span class="sidebar-brand-text">PyPCAPKit</span>
   
 </a><nav class="sidebar-versions" aria-label="Documentation versions">
-  <p>Version <strong>1.8.1 (stable)</strong></p>
+  <p>Version <strong>1.9.0 (stable)</strong></p>
   <ul>
     <li><span aria-current="page">stable</span></li>
     <li><a href="https://pypcapkit.jarryshaw.me/en/latest/_modules/pcapkit/protocols/internet/hip/protocol.html">latest (develop)</a></li>
-    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.8.1/_modules/pcapkit/protocols/internet/hip/protocol.html">v1.8.1</a></li>
+    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.9.0/_modules/pcapkit/protocols/internet/hip/protocol.html">v1.9.0</a></li>
     <li><a href="../../../../../changelog.html">all releases</a></li>
   </ul>
   <p class="sidebar-versions-note">latest and each release are on Read the Docs</p>
@@ -236,12 +236,16 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/dtls.html">DTLS Handshake-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/sctp.html">SCTP User-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/tls.html">TLS Record Reassembly</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/index.html">Reassembled Payload Analysis</a><input aria-label="Toggle navigation of Reassembled Payload Analysis" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/ip.html">IP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/tcp.html">TCP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/dtls.html">DTLS Handshake-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/sctp.html">SCTP User-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/tls.html">TLS Record Analysis</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -267,11 +271,13 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/llc.html">LLC - Logical Link Control</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/netlink.html">Netlink - Linux Netlink Socket Framing</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/ppp.html">PPP - Point-to-Point Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/pppoe.html">PPPoE - PPP over Ethernet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/radiotap.html">Radiotap - IEEE 802.11 Radiotap Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/snap.html">SNAP - Subnetwork Access Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -331,6 +337,10 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/sslv3.html">SSLv3 - Secure Sockets Layer Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/stp.html">STP - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/stpv0.html">STPv0 - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/rstp.html">RSTP - Rapid Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/mstp.html">MSTP - Multiple Spanning Tree Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -350,6 +360,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/seqnum.html">Sequence Number Arithmetic</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
@@ -373,8 +384,9 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/const/index.html">Shared Format Constants</a><input aria-label="Toggle navigation of Shared Format Constants" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/const/capture.html">Capture-Format Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/const/ipheader.html">IP Header Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/const/tcpheader.html">TCP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/const/domain_name.html">Domain Name Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/const/ip_header.html">IP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/const/tcp_header.html">TCP Header Constants</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/context.html">Parsing Context</a></li>
@@ -389,11 +401,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/domain_name.html">Domain Name Codec</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/ext_len.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/shortread.html">Short-Read Replay</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/short_read.html">Short-Read Replay</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
@@ -418,6 +431,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/linux.html">Linux-Specific Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Constant Enumerations</a></li>
@@ -441,6 +455,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
@@ -452,6 +467,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Vendor Crawlers</a></li>
@@ -475,6 +491,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
 </ul>
@@ -489,6 +506,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.9.0.html">1.9.0 – 2026-11-28</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.8.1.html">1.8.1 – 2026-11-27</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
@@ -600,10 +618,10 @@
 <span class="sd">.. module:: pcapkit.protocols.internet.hip.protocol</span>
 
 <span class="sd">:mod:`pcapkit.protocols.internet.hip.protocol` contains</span>
-<span class="sd">:class:`~pcapkit.protocols.internet.hip.protocol.HIP` only,</span>
+<span class="sd">:class:`~pcapkit.protocols.internet.hip.protocol.HIP`,</span>
 <span class="sd">which implements the extractor for Host Identity</span>
-<span class="sd">Protocol (HIP) [*]_, whose structure is described</span>
-<span class="sd">as below:</span>
+<span class="sd">Protocol (HIP) [*]_, and the keys it verifies HMACs</span>
+<span class="sd">and signatures with. The HIP structure:</span>
 
 <span class="sd">======= ========= ====================== ==================================</span>
 <span class="sd">Octets      Bits        Name                    Description</span>
@@ -622,14 +640,40 @@
 <span class="sd">  40        320   ``hip.parameters``        HIP Parameters</span>
 <span class="sd">======= ========= ====================== ==================================</span>
 
+<span class="sd">``HIP_MAC``, ``HIP_MAC_2``, ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2`` are</span>
+<span class="sd">verified with keys the caller supplies through the protocol-keyed context</span>
+<span class="sd">channel of :mod:`pcapkit.corekit.context`, as :class:`HIPContext`; each records</span>
+<span class="sd">the outcome as its ``hmac_status`` or ``signature_status``, and nothing else</span>
+<span class="sd">of the parse changes:</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">   import pcapkit</span>
+<span class="sd">   from pcapkit.const.hip.parameter import Parameter</span>
+<span class="sd">   from pcapkit.protocols.internet.hip.protocol import (HIPAssociation, HIPContext,</span>
+<span class="sd">                                                        HIPIdentity)</span>
+
+<span class="sd">   r1 = ...  # the HIP layer of an R1 packet, parsed without a context</span>
+<span class="sd">   context = HIPContext(</span>
+<span class="sd">       HIPIdentity(r1.info.shit, r1.info.parameters[Parameter.HOST_ID]),</span>
+<span class="sd">       HIPAssociation(initiator_hit, responder_hit,</span>
+<span class="sd">                      integrity_gl=bytes.fromhex('...'), integrity_lg=bytes.fromhex('...')),</span>
+<span class="sd">   )</span>
+<span class="sd">   extraction = pcapkit.extract('hip.pcap', context=context)</span>
+
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/Host_Identity_Protocol</span>
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">types</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">timedelta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hmac</span><span class="w"> </span><span class="kn">import</span> <span class="n">compare_digest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hmac</span><span class="w"> </span><span class="kn">import</span> <span class="n">new</span> <span class="k">as</span> <span class="n">new_hmac</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.hip.certificate</span><span class="w"> </span><span class="kn">import</span> <span class="n">Certificate</span> <span class="k">as</span> <span class="n">Enum_Certificate</span>
@@ -651,12 +695,16 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.hip.suite</span><span class="w"> </span><span class="kn">import</span> <span class="n">Suite</span> <span class="k">as</span> <span class="n">Enum_Suite</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.hip.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transport</span> <span class="k">as</span> <span class="n">Enum_Transport</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.extlen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ext_len_to_octets</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.ext_len</span><span class="w"> </span><span class="kn">import</span> <span class="n">ext_len_to_octets</span><span class="p">,</span> <span class="n">octets_to_ext_len</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_ip_address</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.padding</span><span class="w"> </span><span class="kn">import</span> <span class="n">pad_length</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.shortread</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut_on_its_own</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.short_read</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut_on_its_own</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.hip.const</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">CIPHER_KEY_LEN</span><span class="p">,</span> <span class="n">ECDSA_CURVE_LEN</span><span class="p">,</span> <span class="n">EDDSA_CURVE_LEN</span><span class="p">,</span>
+                                                  <span class="n">HI_ALGORITHM_SUITE</span><span class="p">,</span> <span class="n">HIT_SUITE_HASH</span><span class="p">,</span> <span class="n">ORCHID_PREFIX</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.hip.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">HIP</span> <span class="k">as</span> <span class="n">Data_HIP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.hip.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">AckDataParameter</span> <span class="k">as</span> <span class="n">Data_AckDataParameter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.hip.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">ACKParameter</span> <span class="k">as</span> <span class="n">Data_ACKParameter</span>
@@ -815,7 +863,7 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">timedelta</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6Address</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">mypy_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultArg</span><span class="p">,</span> <span class="n">KwArg</span><span class="p">,</span> <span class="n">NamedArg</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">NotRequired</span>
@@ -831,7 +879,7 @@
     <span class="n">ParameterConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Enum_Parameter</span><span class="p">,</span> <span class="n">DefaultArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Data_Parameter</span><span class="p">]),</span>
                                      <span class="n">NamedArg</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="s1">'version'</span><span class="p">),</span> <span class="n">KwArg</span><span class="p">(</span><span class="n">Any</span><span class="p">)],</span> <span class="n">Schema_Parameter</span><span class="p">]</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'HIP'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'HIP'</span><span class="p">,</span> <span class="s1">'HIPAuthStatus'</span><span class="p">,</span> <span class="s1">'HIPIdentity'</span><span class="p">,</span> <span class="s1">'HIPAssociation'</span><span class="p">,</span> <span class="s1">'HIPContext'</span><span class="p">]</span>
 
 <span class="c1">#: The pseudo-header a checksum is computed and verified over in :class:`HIP`,</span>
 <span class="c1">#: resolved there rather than imported, so its first import holds</span>
@@ -863,6 +911,816 @@
         <span class="c1">#: SPI.</span>
         <span class="n">spi</span><span class="p">:</span> <span class="s1">'NotRequired[int]'</span></div>
 
+
+
+<span class="c1">##############################################################################</span>
+<span class="c1"># Verification.</span>
+<span class="c1">##############################################################################</span>
+
+
+<div class="viewcode-block" id="HIPAuthStatus">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPAuthStatus">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HIPAuthStatus</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Outcome of verifying a HIP HMAC or signature parameter.</span>
+
+<span class="sd">    Recorded as the ``hmac_status`` of a ``HIP_MAC`` or ``HIP_MAC_2``, and the</span>
+<span class="sd">    ``signature_status`` of a ``HIP_SIGNATURE`` or ``HIP_SIGNATURE_2``.</span>
+<span class="sd">    ``get`` / ``get_all`` come from :class:`~pcapkit.corekit.enum.EnumLookup`;</span>
+<span class="sd">    the class defines no ``_missing_``, so an unknown value raises</span>
+<span class="sd">    :exc:`ValueError`.</span>
+
+<span class="sd">    .. versionadded:: 1.9.0</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: The HMAC or signature verifies.</span>
+    <span class="n">VALID</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1">#: It does not, which warns with a</span>
+    <span class="c1">#: :exc:`~pcapkit.utilities.warnings.ProtocolWarning`.</span>
+    <span class="n">INVALID</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="c1">#: The context holds no key for the packet's sender. This is the expected</span>
+    <span class="c1">#: state for a host the caller has no keys for, and is **not** an error.</span>
+    <span class="n">NO_KEY</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="c1">#: The key cannot be applied, as its algorithm is not implemented, the</span>
+    <span class="c1">#: packet is not HIP version 2, or a signature needs the optional</span>
+    <span class="c1">#: |cryptography|_ dependency, which is missing. Warns as :attr:`INVALID` does.</span>
+    <span class="n">UNSUPPORTED</span> <span class="o">=</span> <span class="mi">3</span></div>
+
+
+
+<span class="c1">#: Cached |cryptography|_ primitives, see :func:`_load_cryptography`. It is</span>
+<span class="c1">#: :data:`NotImplemented` before the import is attempted and :data:`None` once</span>
+<span class="c1">#: it has failed, so a missing dependency is not retried on every frame.</span>
+<span class="n">_CRYPTO</span> <span class="o">=</span> <span class="bp">NotImplemented</span>  <span class="c1"># type: Any</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_load_cryptography</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'Optional[types.SimpleNamespace]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Load the optional |cryptography|_ primitives a signature needs.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The modules, by name, with ``pss_auto`` the RSASSA-PSS salt length a</span>
+<span class="sd">        verifier recovers, :data:`None` before |cryptography|_ 37; or</span>
+<span class="sd">        :data:`None` when |cryptography|_ is not installed.</span>
+
+<span class="sd">    """</span>
+    <span class="k">global</span> <span class="n">_CRYPTO</span>  <span class="c1"># pylint: disable=global-statement</span>
+
+    <span class="k">if</span> <span class="n">_CRYPTO</span> <span class="ow">is</span> <span class="bp">NotImplemented</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># pylint: disable=import-outside-toplevel</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">cryptography</span><span class="w"> </span><span class="kn">import</span> <span class="n">exceptions</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">cryptography.hazmat.primitives</span><span class="w"> </span><span class="kn">import</span> <span class="n">hashes</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">cryptography.hazmat.primitives.asymmetric</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">dsa</span><span class="p">,</span> <span class="n">ec</span><span class="p">,</span> <span class="n">ed448</span><span class="p">,</span> <span class="n">ed25519</span><span class="p">,</span> <span class="n">padding</span><span class="p">,</span>
+                                                                   <span class="n">rsa</span><span class="p">,</span> <span class="n">utils</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="n">_CRYPTO</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">pss_auto</span> <span class="o">=</span> <span class="n">padding</span><span class="o">.</span><span class="n">PSS</span><span class="o">.</span><span class="n">AUTO</span>  <span class="c1"># type: Any</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="n">pss_auto</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">_CRYPTO</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">SimpleNamespace</span><span class="p">(</span><span class="n">exceptions</span><span class="o">=</span><span class="n">exceptions</span><span class="p">,</span> <span class="n">hashes</span><span class="o">=</span><span class="n">hashes</span><span class="p">,</span> <span class="n">dsa</span><span class="o">=</span><span class="n">dsa</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="n">ec</span><span class="p">,</span>
+                                            <span class="n">ed448</span><span class="o">=</span><span class="n">ed448</span><span class="p">,</span> <span class="n">ed25519</span><span class="o">=</span><span class="n">ed25519</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="n">padding</span><span class="p">,</span>
+                                            <span class="n">rsa</span><span class="o">=</span><span class="n">rsa</span><span class="p">,</span> <span class="n">utils</span><span class="o">=</span><span class="n">utils</span><span class="p">,</span> <span class="n">pss_auto</span><span class="o">=</span><span class="n">pss_auto</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_CRYPTO</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_hit_value</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'IPv6Address | str | int | bytes'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Read a HIT given as an IPv6 address, its text, an :class:`int` or 16 octets.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: The HIT.</span>
+<span class="sd">        name: The argument's name, for the error.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The HIT, as an :class:`int`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If ``value`` is none of these, or a :obj:`bool`.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="k">pass</span>
+    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIP: invalid </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> is no HIT'</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_enum_value</span><span class="p">(</span><span class="n">registry</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">table</span><span class="p">:</span> <span class="s1">'Mapping[Any, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Resolve a member or an :class:`int` code that ``table`` lists.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        registry: The enumeration.</span>
+<span class="sd">        value: The member or code.</span>
+<span class="sd">        table: The members pcapkit implements.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The member, or :data:`None` if ``value`` is a name, a :obj:`bool`, or a</span>
+<span class="sd">        code ``table`` does not list.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">member</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">member</span> <span class="k">if</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">table</span> <span class="k">else</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="HIPIdentity">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPIdentity">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HIPIdentity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A HIP host's Host Identity, as the ``HOST_ID`` parameter of its R1 or I2 carries it.</span>
+
+<span class="sd">    It verifies the signatures the host sends (:rfc:`7401#section-6.4.2`), and its</span>
+<span class="sd">    ``HIP_MAC_2`` as the Responder, which covers this ``HOST_ID`` exactly as R1</span>
+<span class="sd">    carried it (:rfc:`7401#section-6.4.1`). A signature digests with the hash of</span>
+<span class="sd">    the Host Identity's HIT Suite</span>
+<span class="sd">    (:data:`~pcapkit.protocols.internet.hip.const.HI_ALGORITHM_SUITE`), RSA pads</span>
+<span class="sd">    with RSASSA-PSS (:rfc:`7401#section-5.2.9`), and each algorithm encodes as</span>
+<span class="sd">    :rfc:`7401#section-5.2.14` cites. Verifying one needs the optional</span>
+<span class="sd">    |cryptography|_ dependency, which implements neither ECDSA_LOW's SECP160R1</span>
+<span class="sd">    nor the pre-hashed EdDSA curves.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        hit: The host's HIT, as an IPv6 address, its text, an :class:`int` or</span>
+<span class="sd">            16 octets.</span>
+<span class="sd">        host_id: Its ``HOST_ID`` parameter, as :class:`HIP` parsed it.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If ``hit`` is no HIT, or ``host_id`` no parsed ``HOST_ID``.</span>
+
+<span class="sd">    .. versionadded:: 1.9.0</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Properties.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv6Address'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The host's HIT."""</span>
+        <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__hit__</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">host_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_HostIDParameter'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The host's ``HOST_ID`` parameter."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__host_id__</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Methods.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="HIPIdentity.verify">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPIdentity.verify">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">:</span> <span class="s1">'Enum_HIAlgorithm'</span><span class="p">,</span> <span class="n">signature</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+               <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[HIPAuthStatus, Optional[str]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Verify a signature the host made.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            algorithm: The signature's ``SIG alg``.</span>
+<span class="sd">            signature: The signature.</span>
+<span class="sd">            data: The octets it covers.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The outcome, and why it is not :attr:`~HIPAuthStatus.VALID`, if it is not.</span>
+
+<span class="sd">        """</span>
+        <span class="n">expected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__host_id__</span><span class="o">.</span><span class="n">algorithm</span>
+        <span class="k">if</span> <span class="n">algorithm</span> <span class="o">!=</span> <span class="n">expected</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">algorithm</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)</span> <span class="k">else</span> <span class="n">algorithm</span>
+            <span class="k">return</span> <span class="n">HIPAuthStatus</span><span class="o">.</span><span class="n">INVALID</span><span class="p">,</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'signature algorithm </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> is not the Host '</span>
+                                           <span class="sa">f</span><span class="s1">'Identity</span><span class="se">\'</span><span class="s1">s </span><span class="si">{</span><span class="n">expected</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+        <span class="n">crypto</span> <span class="o">=</span> <span class="n">_load_cryptography</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">crypto</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">HIPAuthStatus</span><span class="o">.</span><span class="n">UNSUPPORTED</span><span class="p">,</span> <span class="p">(</span><span class="s1">'verifying a signature needs the optional '</span>
+                                               <span class="s1">'"cryptography" dependency, which is not '</span>
+                                               <span class="s1">'installed (pip install pypcapkit[crypto])'</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_signature</span><span class="p">(</span><span class="n">crypto</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">crypto</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidSignature</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">HIPAuthStatus</span><span class="o">.</span><span class="n">INVALID</span><span class="p">,</span> <span class="s1">'the signature does not verify'</span>
+        <span class="k">except</span> <span class="n">crypto</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">UnsupportedAlgorithm</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">HIPAuthStatus</span><span class="o">.</span><span class="n">UNSUPPORTED</span><span class="p">,</span> <span class="p">(</span><span class="s1">'"cryptography" cannot apply the Host Identity: '</span>
+                                               <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">HIPAuthStatus</span><span class="o">.</span><span class="n">INVALID</span><span class="p">,</span> <span class="s1">'the Host Identity or the signature is malformed'</span></div>
+
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Data models.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hit</span><span class="p">:</span> <span class="s1">'IPv6Address | str | int | bytes'</span><span class="p">,</span>
+                 <span class="n">host_id</span><span class="p">:</span> <span class="s1">'Data_HostIDParameter'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">host_id</span><span class="p">,</span> <span class="n">Data_HostIDParameter</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIP: invalid host_id: </span><span class="si">{</span><span class="n">host_id</span><span class="si">!r}</span><span class="s1"> is no parsed HOST_ID parameter'</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__hit__</span> <span class="o">=</span> <span class="n">_hit_value</span><span class="p">(</span><span class="n">hit</span><span class="p">,</span> <span class="s1">'hit'</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__host_id__</span> <span class="o">=</span> <span class="n">host_id</span>
+
+<div class="viewcode-block" id="HIPIdentity.__repr__">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPIdentity.__repr__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Representation of the identity."""</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">'&lt;HIPIdentity hit=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">hit</span><span class="si">}</span><span class="s1"> algorithm=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__host_id__</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&gt;'</span></div>
+
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="HIPIdentity._verify_signature">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPIdentity._verify_signature">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_verify_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crypto</span><span class="p">:</span> <span class="s1">'types.SimpleNamespace'</span><span class="p">,</span> <span class="n">signature</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                          <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[HIPAuthStatus, Optional[str]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Verify a signature with |cryptography|_.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            crypto: The primitives :func:`_load_cryptography` loaded.</span>
+<span class="sd">            signature: The signature.</span>
+<span class="sd">            data: The octets it covers.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :attr:`~HIPAuthStatus.VALID`, or :attr:`~HIPAuthStatus.UNSUPPORTED`</span>
+<span class="sd">            and why.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            cryptography.exceptions.InvalidSignature: If the signature does not verify.</span>
+<span class="sd">            ValueError: If the Host Identity or the signature is malformed.</span>
+
+<span class="sd">        """</span>
+        <span class="n">algorithm</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__host_id__</span><span class="o">.</span><span class="n">algorithm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__host_id__</span><span class="o">.</span><span class="n">hi</span>
+        <span class="n">suite</span> <span class="o">=</span> <span class="n">HI_ALGORITHM_SUITE</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+        <span class="n">digest</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">suite</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">crypto</span><span class="o">.</span><span class="n">hashes</span><span class="p">,</span> <span class="n">HIT_SUITE_HASH</span><span class="p">[</span><span class="n">suite</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">())()</span>
+
+        <span class="k">if</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="n">Enum_HIAlgorithm</span><span class="o">.</span><span class="n">RSA</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">crypto</span><span class="o">.</span><span class="n">pss_auto</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">HIPAuthStatus</span><span class="o">.</span><span class="n">UNSUPPORTED</span><span class="p">,</span> <span class="p">(</span><span class="s1">'RSASSA-PSS needs "cryptography" 37 or later, '</span>
+                                                   <span class="s1">'which recovers the salt length'</span><span class="p">)</span>
+            <span class="n">exponent</span><span class="p">,</span> <span class="n">modulus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rsa_numbers</span><span class="p">(</span><span class="n">hi</span><span class="p">)</span>
+            <span class="n">crypto</span><span class="o">.</span><span class="n">rsa</span><span class="o">.</span><span class="n">RSAPublicNumbers</span><span class="p">(</span><span class="n">exponent</span><span class="p">,</span> <span class="n">modulus</span><span class="p">)</span><span class="o">.</span><span class="n">public_key</span><span class="p">()</span><span class="o">.</span><span class="n">verify</span><span class="p">(</span>
+                <span class="n">signature</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">crypto</span><span class="o">.</span><span class="n">padding</span><span class="o">.</span><span class="n">PSS</span><span class="p">(</span><span class="n">mgf</span><span class="o">=</span><span class="n">crypto</span><span class="o">.</span><span class="n">padding</span><span class="o">.</span><span class="n">MGF1</span><span class="p">(</span><span class="n">digest</span><span class="p">),</span>
+                                                    <span class="n">salt_length</span><span class="o">=</span><span class="n">crypto</span><span class="o">.</span><span class="n">pss_auto</span><span class="p">),</span> <span class="n">digest</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="n">Enum_HIAlgorithm</span><span class="o">.</span><span class="n">DSA</span><span class="p">:</span>
+            <span class="c1"># NOTE: A DSA signature is T, R and S (RFC 2536 section 3), R and S 20 octets each.</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">signature</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">41</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'malformed DSA signature'</span><span class="p">)</span>
+            <span class="n">prime</span><span class="p">,</span> <span class="n">subprime</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">public</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dsa_numbers</span><span class="p">(</span><span class="n">hi</span><span class="p">)</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">dsa</span><span class="o">.</span><span class="n">DSAParameterNumbers</span><span class="p">(</span><span class="n">prime</span><span class="p">,</span> <span class="n">subprime</span><span class="p">,</span> <span class="n">base</span><span class="p">)</span>
+            <span class="n">crypto</span><span class="o">.</span><span class="n">dsa</span><span class="o">.</span><span class="n">DSAPublicNumbers</span><span class="p">(</span><span class="n">public</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span><span class="o">.</span><span class="n">public_key</span><span class="p">()</span><span class="o">.</span><span class="n">verify</span><span class="p">(</span>
+                <span class="n">crypto</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">encode_dss_signature</span><span class="p">(</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">signature</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">21</span><span class="p">],</span> <span class="s1">'big'</span><span class="p">),</span>
+                                                  <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">signature</span><span class="p">[</span><span class="mi">21</span><span class="p">:],</span> <span class="s1">'big'</span><span class="p">)),</span>
+                <span class="n">data</span><span class="p">,</span> <span class="n">digest</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_HIAlgorithm</span><span class="o">.</span><span class="n">ECDSA</span><span class="p">,</span> <span class="n">Enum_HIAlgorithm</span><span class="o">.</span><span class="n">EdDSA</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hi</span><span class="p">,</span> <span class="n">Data_HostIdentity</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'malformed Host Identity'</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="n">Enum_HIAlgorithm</span><span class="o">.</span><span class="n">ECDSA</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_ecdsa</span><span class="p">(</span><span class="n">crypto</span><span class="p">,</span> <span class="n">hi</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">digest</span><span class="p">)</span>
+
+            <span class="n">size</span> <span class="o">=</span> <span class="n">EDDSA_CURVE_LEN</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">hi</span><span class="o">.</span><span class="n">curve</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">HIPAuthStatus</span><span class="o">.</span><span class="n">UNSUPPORTED</span><span class="p">,</span> <span class="p">(</span><span class="s1">'EdDSA curves other than EdDSA25519 and '</span>
+                                                   <span class="s1">'EdDSA448 are not implemented'</span><span class="p">)</span>
+            <span class="n">pubkey</span> <span class="o">=</span> <span class="n">hi</span><span class="o">.</span><span class="n">pubkey</span>
+            <span class="c1"># NOTE: RFC 9374 Figure 2 puts a 16-bit NULL field between the curve and the key.</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pubkey</span><span class="p">)</span> <span class="o">==</span> <span class="n">size</span> <span class="o">+</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">pubkey</span><span class="p">[:</span><span class="mi">2</span><span class="p">]):</span>
+                <span class="n">pubkey</span> <span class="o">=</span> <span class="n">pubkey</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">ed25519</span><span class="o">.</span><span class="n">Ed25519PublicKey</span> <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">32</span> <span class="k">else</span> <span class="n">crypto</span><span class="o">.</span><span class="n">ed448</span><span class="o">.</span><span class="n">Ed448PublicKey</span>
+            <span class="n">kind</span><span class="o">.</span><span class="n">from_public_bytes</span><span class="p">(</span><span class="n">pubkey</span><span class="p">)</span><span class="o">.</span><span class="n">verify</span><span class="p">(</span><span class="n">signature</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">HIPAuthStatus</span><span class="o">.</span><span class="n">UNSUPPORTED</span><span class="p">,</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'Host Identity algorithm </span><span class="si">{</span><span class="n">algorithm</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> '</span>
+                                               <span class="s1">'is not implemented'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">HIPAuthStatus</span><span class="o">.</span><span class="n">VALID</span><span class="p">,</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="HIPIdentity._verify_ecdsa">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPIdentity._verify_ecdsa">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_verify_ecdsa</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crypto</span><span class="p">:</span> <span class="s1">'types.SimpleNamespace'</span><span class="p">,</span> <span class="n">hi</span><span class="p">:</span> <span class="s1">'Data_HostIdentity'</span><span class="p">,</span>
+                      <span class="n">signature</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                      <span class="n">digest</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[HIPAuthStatus, Optional[str]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Verify an ECDSA signature with |cryptography|_.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            crypto: The primitives :func:`_load_cryptography` loaded.</span>
+<span class="sd">            hi: The Host Identity.</span>
+<span class="sd">            signature: The signature: R and S, each the curve's coordinate length</span>
+<span class="sd">                (:rfc:`4754#section-7`).</span>
+<span class="sd">            data: The octets it covers.</span>
+<span class="sd">            digest: The hash it digests with.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :attr:`~HIPAuthStatus.VALID`, or :attr:`~HIPAuthStatus.UNSUPPORTED`</span>
+<span class="sd">            and why.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            cryptography.exceptions.InvalidSignature: If the signature does not verify.</span>
+<span class="sd">            ValueError: If the Host Identity or the signature is malformed.</span>
+
+<span class="sd">        """</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">ECDSA_CURVE_LEN</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">hi</span><span class="o">.</span><span class="n">curve</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">HIPAuthStatus</span><span class="o">.</span><span class="n">UNSUPPORTED</span><span class="p">,</span> <span class="p">(</span><span class="s1">'ECDSA curves other than NIST P-256 and P-384 '</span>
+                                               <span class="s1">'are not implemented'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">signature</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">size</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'malformed ECDSA signature'</span><span class="p">)</span>
+
+        <span class="n">curve</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">ec</span><span class="o">.</span><span class="n">SECP256R1</span><span class="p">()</span> <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">32</span> <span class="k">else</span> <span class="n">crypto</span><span class="o">.</span><span class="n">ec</span><span class="o">.</span><span class="n">SECP384R1</span><span class="p">()</span>
+        <span class="n">der</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">encode_dss_signature</span><span class="p">(</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">signature</span><span class="p">[:</span><span class="n">size</span><span class="p">],</span> <span class="s1">'big'</span><span class="p">),</span>
+                                                <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">signature</span><span class="p">[</span><span class="n">size</span><span class="p">:],</span> <span class="s1">'big'</span><span class="p">))</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">crypto</span><span class="o">.</span><span class="n">ec</span><span class="o">.</span><span class="n">EllipticCurvePublicKey</span><span class="o">.</span><span class="n">from_encoded_point</span><span class="p">(</span><span class="n">curve</span><span class="p">,</span> <span class="n">point</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ecdsa_points</span><span class="p">(</span><span class="n">hi</span><span class="o">.</span><span class="n">pubkey</span><span class="p">,</span> <span class="n">size</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">key</span><span class="o">.</span><span class="n">verify</span><span class="p">(</span><span class="n">der</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">crypto</span><span class="o">.</span><span class="n">ec</span><span class="o">.</span><span class="n">ECDSA</span><span class="p">(</span><span class="n">digest</span><span class="p">))</span>
+            <span class="k">except</span> <span class="n">crypto</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidSignature</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">return</span> <span class="n">HIPAuthStatus</span><span class="o">.</span><span class="n">VALID</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="n">keys</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">verify</span><span class="p">(</span><span class="n">der</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">crypto</span><span class="o">.</span><span class="n">ec</span><span class="o">.</span><span class="n">ECDSA</span><span class="p">(</span><span class="n">digest</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">HIPAuthStatus</span><span class="o">.</span><span class="n">VALID</span><span class="p">,</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="HIPIdentity._rsa_numbers">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPIdentity._rsa_numbers">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_rsa_numbers</span><span class="p">(</span><span class="n">hi</span><span class="p">:</span> <span class="s1">'Data_HostIdentity | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[int, int]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read the exponent and the modulus of an RSA Host Identity (:rfc:`3110#section-2`).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            hi: The Host Identity.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The exponent and the modulus.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If ``hi`` is malformed.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hi</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">hi</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'malformed RSA Host Identity'</span><span class="p">)</span>
+        <span class="n">length</span><span class="p">,</span> <span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="n">hi</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">hi</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="p">(</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">hi</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="s1">'big'</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">exponent</span><span class="p">,</span> <span class="n">modulus</span> <span class="o">=</span> <span class="n">hi</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span> <span class="o">+</span> <span class="n">length</span><span class="p">],</span> <span class="n">hi</span><span class="p">[</span><span class="n">start</span> <span class="o">+</span> <span class="n">length</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">length</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">exponent</span><span class="p">)</span> <span class="o">!=</span> <span class="n">length</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">modulus</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'malformed RSA Host Identity'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">exponent</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">),</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">modulus</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="HIPIdentity._dsa_numbers">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPIdentity._dsa_numbers">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_dsa_numbers</span><span class="p">(</span><span class="n">hi</span><span class="p">:</span> <span class="s1">'Data_HostIdentity | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[int, int, int, int]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read P, Q, G and Y of a DSA Host Identity (:rfc:`2536#section-2`).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            hi: The Host Identity: T, then Q of 20 octets and P, G and Y of</span>
+<span class="sd">                ``64 + 8 * T`` octets each.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            P, Q, G and Y.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If ``hi`` is malformed.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hi</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">hi</span> <span class="ow">or</span> <span class="n">hi</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'malformed DSA Host Identity'</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="mi">64</span> <span class="o">+</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">hi</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">hi</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">21</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">size</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'malformed DSA Host Identity'</span><span class="p">)</span>
+        <span class="n">prime</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">public</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">hi</span><span class="p">[</span><span class="mi">21</span> <span class="o">+</span> <span class="n">index</span> <span class="o">*</span> <span class="n">size</span><span class="p">:</span><span class="mi">21</span> <span class="o">+</span> <span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">size</span><span class="p">],</span> <span class="s1">'big'</span><span class="p">)</span>
+                               <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">prime</span><span class="p">,</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">hi</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">21</span><span class="p">],</span> <span class="s1">'big'</span><span class="p">),</span> <span class="n">base</span><span class="p">,</span> <span class="n">public</span></div>
+
+
+<div class="viewcode-block" id="HIPIdentity._ecdsa_points">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPIdentity._ecdsa_points">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ecdsa_points</span><span class="p">(</span><span class="n">pubkey</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[bytes]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Encode an ECDSA public key as the SEC 1 points it may be.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pubkey: The public key, in octet-string format (:rfc:`6090#section-6`):</span>
+<span class="sd">                ``x`` and ``y``, a SEC 1 point, or ``x`` alone in compact</span>
+<span class="sd">                representation (:rfc:`6090#section-4.2`), whose ``y`` is either root.</span>
+<span class="sd">            size: The curve's coordinate length, in octets.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The SEC 1 encodings of the points it may be.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If ``pubkey`` is none of these.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pubkey</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">size</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x04</span><span class="s1">'</span> <span class="o">+</span> <span class="n">pubkey</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pubkey</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">size</span> <span class="o">+</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">pubkey</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">)</span> \
+                <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pubkey</span><span class="p">)</span> <span class="o">==</span> <span class="n">size</span> <span class="o">+</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">pubkey</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">pubkey</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pubkey</span><span class="p">)</span> <span class="o">==</span> <span class="n">size</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x02</span><span class="s1">'</span> <span class="o">+</span> <span class="n">pubkey</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x03</span><span class="s1">'</span> <span class="o">+</span> <span class="n">pubkey</span><span class="p">]</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'malformed ECDSA public key'</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="HIPAssociation">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPAssociation">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HIPAssociation</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The integrity keys of a HIP association (:rfc:`7401#section-6.5`).</span>
+
+<span class="sd">    HOST_g, the host whose HIT is the greater, sends its ``HIP_MAC`` and</span>
+<span class="sd">    ``HIP_MAC_2`` under the HIP-gl integrity key, and HOST_l under HIP-lg, each an</span>
+<span class="sd">    HMAC with RHASH, the hash of the Responder's HIT Suite</span>
+<span class="sd">    (:rfc:`7401#section-6.4.1`). :meth:`from_keymat` derives the keys from the</span>
+<span class="sd">    Diffie-Hellman session key.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        initiator: The Initiator's HIT, as an IPv6 address, its text, an :class:`int`</span>
+<span class="sd">            or 16 octets.</span>
+<span class="sd">        responder: The Responder's HIT, likewise.</span>
+<span class="sd">        integrity_gl: The HIP-gl integrity key, as long as RHASH's output.</span>
+<span class="sd">        integrity_lg: The HIP-lg integrity key, likewise.</span>
+<span class="sd">        suite: The Responder's HIT Suite, as a member or an :class:`int`; by</span>
+<span class="sd">            default, the OGA ID of ``responder``, an ORCHID (:rfc:`7343`).</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If a HIT is no HIT, or both are one; if ``suite`` is a name,</span>
+<span class="sd">            a :obj:`bool`, or none of the HIT Suites</span>
+<span class="sd">            :data:`~pcapkit.protocols.internet.hip.const.HIT_SUITE_HASH` lists, or is</span>
+<span class="sd">            not given and ``responder`` names none; or if a key is not as long as</span>
+<span class="sd">            RHASH's output.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        The keys are held in private attributes, absent from</span>
+<span class="sd">        :meth:`~object.__repr__`, and never copied into the data model, which is</span>
+<span class="sd">        what reaches the output dumpers.</span>
+
+<span class="sd">    .. versionadded:: 1.9.0</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Properties.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initiator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv6Address'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The Initiator's HIT."""</span>
+        <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__initiator__</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">responder</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv6Address'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The Responder's HIT."""</span>
+        <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__responder__</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">suite</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_HITSuite'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The Responder's HIT Suite, whose hash is RHASH."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__suite__</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">integrity_gl</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The HIP-gl integrity key, of HOST_g's packets."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__integrity_gl__</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">integrity_lg</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The HIP-lg integrity key, of HOST_l's packets."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__integrity_lg__</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Methods.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="HIPAssociation.from_keymat">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPAssociation.from_keymat">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_keymat</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">initiator</span><span class="p">:</span> <span class="s1">'IPv6Address | str | int | bytes'</span><span class="p">,</span>
+                    <span class="n">responder</span><span class="p">:</span> <span class="s1">'IPv6Address | str | int | bytes'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                    <span class="n">kij</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">random_i</span><span class="p">:</span> <span class="s1">'bytes | int'</span><span class="p">,</span> <span class="n">random_j</span><span class="p">:</span> <span class="s1">'bytes | int'</span><span class="p">,</span>
+                    <span class="n">cipher</span><span class="p">:</span> <span class="s1">'Enum_Cipher | int'</span><span class="p">,</span>
+                    <span class="n">suite</span><span class="p">:</span> <span class="s1">'Optional[Enum_HITSuite | int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'HIPAssociation'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Derive the integrity keys from the Diffie-Hellman session key Kij.</span>
+
+<span class="sd">        KEYMAT is HKDF (:rfc:`5869`) with RHASH, over the input keying material Kij,</span>
+<span class="sd">        with salt ``#I | #J`` and info ``sort(HIT-I | HIT-R)``, the smaller HIT first.</span>
+<span class="sd">        It is drawn as HIP-gl's encryption and integrity keys, then HIP-lg's, an</span>
+<span class="sd">        encryption key as long as ``cipher`` needs (:rfc:`7401#section-6.5`).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            initiator: As for :class:`HIPAssociation`.</span>
+<span class="sd">            responder: As for :class:`HIPAssociation`.</span>
+<span class="sd">            kij: Kij.</span>
+<span class="sd">            random_i: ``#I``, the Random #I of R1's ``PUZZLE``: RHASH_len / 8</span>
+<span class="sd">                octets, or as an :class:`int`.</span>
+<span class="sd">            random_j: ``#J``, the Puzzle solution #J of I2's ``SOLUTION``, likewise.</span>
+<span class="sd">            cipher: The ``HIP_CIPHER`` the association chose, as a member or an</span>
+<span class="sd">                :class:`int`.</span>
+<span class="sd">            suite: As for :class:`HIPAssociation`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The association.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: As :class:`HIPAssociation` does, if ``cipher`` is a name,</span>
+<span class="sd">                a :obj:`bool`, or none of NULL-ENCRYPT, AES-128-CBC and AES-256-CBC,</span>
+<span class="sd">                or if ``random_i`` or ``random_j`` is none of these.</span>
+
+<span class="sd">        """</span>
+        <span class="n">initiator_hit</span> <span class="o">=</span> <span class="n">_hit_value</span><span class="p">(</span><span class="n">initiator</span><span class="p">,</span> <span class="s1">'initiator'</span><span class="p">)</span>
+        <span class="n">responder_hit</span> <span class="o">=</span> <span class="n">_hit_value</span><span class="p">(</span><span class="n">responder</span><span class="p">,</span> <span class="s1">'responder'</span><span class="p">)</span>
+        <span class="n">member</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_resolve_suite</span><span class="p">(</span><span class="n">responder_hit</span><span class="p">,</span> <span class="n">suite</span><span class="p">)</span>
+        <span class="n">digest</span> <span class="o">=</span> <span class="n">HIT_SUITE_HASH</span><span class="p">[</span><span class="n">member</span><span class="p">]</span>
+        <span class="n">hash_len</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">digest</span><span class="p">)</span><span class="o">.</span><span class="n">digest_size</span>
+
+        <span class="n">cipher_member</span> <span class="o">=</span> <span class="n">_enum_value</span><span class="p">(</span><span class="n">Enum_Cipher</span><span class="p">,</span> <span class="n">cipher</span><span class="p">,</span> <span class="n">CIPHER_KEY_LEN</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cipher_member</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIP: unsupported cipher: </span><span class="si">{</span><span class="n">cipher</span><span class="si">!r}</span><span class="s1">; pcapkit implements '</span>
+                                <span class="s1">'NULL-ENCRYPT, AES-128-CBC and AES-256-CBC'</span><span class="p">)</span>
+        <span class="n">key_len</span> <span class="o">=</span> <span class="n">CIPHER_KEY_LEN</span><span class="p">[</span><span class="n">cipher_member</span><span class="p">]</span>
+
+        <span class="n">salt</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">((</span><span class="s1">'random_i'</span><span class="p">,</span> <span class="n">random_i</span><span class="p">),</span> <span class="p">(</span><span class="s1">'random_j'</span><span class="p">,</span> <span class="n">random_j</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> \
+                    <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">hash_len</span><span class="p">:</span>
+                <span class="n">salt</span> <span class="o">+=</span> <span class="n">value</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="n">hash_len</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                <span class="n">salt</span> <span class="o">+=</span> <span class="n">value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIP: invalid </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> is no </span><span class="si">{</span><span class="n">hash_len</span><span class="si">}</span><span class="s1">-octet value'</span><span class="p">)</span>
+
+        <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">initiator_hit</span><span class="p">,</span> <span class="n">responder_hit</span><span class="p">))</span>
+        <span class="n">keymat</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_hkdf</span><span class="p">(</span><span class="n">digest</span><span class="p">,</span> <span class="n">salt</span><span class="p">,</span> <span class="n">kij</span><span class="p">,</span> <span class="n">low</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span> <span class="o">+</span> <span class="n">high</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">),</span>
+                           <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">key_len</span> <span class="o">+</span> <span class="n">hash_len</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">initiator_hit</span><span class="p">,</span> <span class="n">responder_hit</span><span class="p">,</span> <span class="n">suite</span><span class="o">=</span><span class="n">member</span><span class="p">,</span>
+                   <span class="n">integrity_gl</span><span class="o">=</span><span class="n">keymat</span><span class="p">[</span><span class="n">key_len</span><span class="p">:</span><span class="n">key_len</span> <span class="o">+</span> <span class="n">hash_len</span><span class="p">],</span>
+                   <span class="n">integrity_lg</span><span class="o">=</span><span class="n">keymat</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">key_len</span> <span class="o">+</span> <span class="n">hash_len</span><span class="p">:])</span></div>
+
+
+<div class="viewcode-block" id="HIPAssociation.matches">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPAssociation.matches">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">matches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">:</span> <span class="s1">'IPv6Address | str | int | bytes'</span><span class="p">,</span>
+                <span class="n">receiver</span><span class="p">:</span> <span class="s1">'IPv6Address | str | int | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Whether a packet from ``sender`` to ``receiver`` belongs to the association.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sender: The packet's Sender's HIT.</span>
+<span class="sd">            receiver: Its Receiver's HIT.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Whether the two are the association's HITs, in either order.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">_hit_value</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="s1">'sender'</span><span class="p">),</span> <span class="n">_hit_value</span><span class="p">(</span><span class="n">receiver</span><span class="p">,</span> <span class="s1">'receiver'</span><span class="p">)}</span> \
+            <span class="o">==</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__initiator__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__responder__</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="HIPAssociation.compute_hmac">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPAssociation.compute_hmac">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_hmac</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">:</span> <span class="s1">'IPv6Address | str | int | bytes'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Compute the HMAC ``sender`` sends over ``data``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sender: The Sender's HIT: HOST_g's packets use HIP-gl, HOST_l's HIP-lg.</span>
+<span class="sd">            data: The octets the HMAC covers.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The HMAC, RHASH's output in full.</span>
+
+<span class="sd">        """</span>
+        <span class="n">greater</span> <span class="o">=</span> <span class="n">_hit_value</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="s1">'sender'</span><span class="p">)</span> <span class="o">==</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__initiator__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__responder__</span><span class="p">)</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__integrity_gl__</span> <span class="k">if</span> <span class="n">greater</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">__integrity_lg__</span>
+        <span class="k">return</span> <span class="n">new_hmac</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">HIT_SUITE_HASH</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__suite__</span><span class="p">])</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span></div>
+
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Data models.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initiator</span><span class="p">:</span> <span class="s1">'IPv6Address | str | int | bytes'</span><span class="p">,</span>
+                 <span class="n">responder</span><span class="p">:</span> <span class="s1">'IPv6Address | str | int | bytes'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                 <span class="n">integrity_gl</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">integrity_lg</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                 <span class="n">suite</span><span class="p">:</span> <span class="s1">'Optional[Enum_HITSuite | int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__initiator__</span> <span class="o">=</span> <span class="n">_hit_value</span><span class="p">(</span><span class="n">initiator</span><span class="p">,</span> <span class="s1">'initiator'</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__responder__</span> <span class="o">=</span> <span class="n">_hit_value</span><span class="p">(</span><span class="n">responder</span><span class="p">,</span> <span class="s1">'responder'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__initiator__</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__responder__</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HIP: invalid association: the Initiator and the Responder '</span>
+                                <span class="s1">'have the same HIT'</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__suite__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_suite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__responder__</span><span class="p">,</span> <span class="n">suite</span><span class="p">)</span>
+
+        <span class="n">hash_len</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">HIT_SUITE_HASH</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__suite__</span><span class="p">])</span><span class="o">.</span><span class="n">digest_size</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">((</span><span class="s1">'integrity_gl'</span><span class="p">,</span> <span class="n">integrity_gl</span><span class="p">),</span> <span class="p">(</span><span class="s1">'integrity_lg'</span><span class="p">,</span> <span class="n">integrity_lg</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">!=</span> <span class="n">hash_len</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIP: invalid </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__suite__</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> needs a '</span>
+                                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">hash_len</span><span class="si">}</span><span class="s1">-octet key'</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__integrity_gl__</span> <span class="o">=</span> <span class="n">integrity_gl</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__integrity_lg__</span> <span class="o">=</span> <span class="n">integrity_lg</span>
+
+<div class="viewcode-block" id="HIPAssociation.__repr__">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPAssociation.__repr__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Representation of the association, free of any key material."""</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'&lt;HIPAssociation initiator=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">initiator</span><span class="si">}</span><span class="s1"> responder=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">responder</span><span class="si">}</span><span class="s1"> '</span>
+                <span class="sa">f</span><span class="s1">'suite=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__suite__</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&gt;'</span><span class="p">)</span></div>
+
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="HIPAssociation._resolve_suite">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPAssociation._resolve_suite">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_suite</span><span class="p">(</span><span class="n">responder</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">suite</span><span class="p">:</span> <span class="s1">'Optional[Enum_HITSuite | int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_HITSuite'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Resolve the Responder's HIT Suite.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            responder: The Responder's HIT.</span>
+<span class="sd">            suite: The HIT Suite given, if any.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The HIT Suite, or the one the OGA ID of ``responder`` names.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the HIT Suite is a name, a :obj:`bool`, or one</span>
+<span class="sd">                :data:`~pcapkit.protocols.internet.hip.const.HIT_SUITE_HASH` does</span>
+<span class="sd">                not list, or is not given and ``responder`` is no ORCHID.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">suite</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">responder</span> <span class="o">&gt;&gt;</span> <span class="mi">100</span> <span class="o">!=</span> <span class="n">ORCHID_PREFIX</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HIP: invalid responder: no ORCHID names its HIT Suite; '</span>
+                                    <span class="s1">'give suite'</span><span class="p">)</span>
+            <span class="n">suite</span> <span class="o">=</span> <span class="p">(</span><span class="n">responder</span> <span class="o">&gt;&gt;</span> <span class="mi">96</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xF</span>
+        <span class="n">member</span> <span class="o">=</span> <span class="n">_enum_value</span><span class="p">(</span><span class="n">Enum_HITSuite</span><span class="p">,</span> <span class="n">suite</span><span class="p">,</span> <span class="n">HIT_SUITE_HASH</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">member</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIP: unsupported HIT Suite: </span><span class="si">{</span><span class="n">suite</span><span class="si">!r}</span><span class="s1">; pcapkit implements '</span>
+                                <span class="s1">'RSA,DSA/SHA-256, ECDSA/SHA-384 and ECDSA_LOW/SHA-1'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">member</span></div>
+
+
+<div class="viewcode-block" id="HIPAssociation._hkdf">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPAssociation._hkdf">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_hkdf</span><span class="p">(</span><span class="n">digest</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">salt</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">ikm</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Derive ``length`` octets with HKDF (:rfc:`5869#section-2`).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            digest: The hash, as a :mod:`hashlib` name.</span>
+<span class="sd">            salt: The salt.</span>
+<span class="sd">            ikm: The input keying material.</span>
+<span class="sd">            info: The context information.</span>
+<span class="sd">            length: How many octets to derive.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The output keying material.</span>
+
+<span class="sd">        """</span>
+        <span class="n">prk</span> <span class="o">=</span> <span class="n">new_hmac</span><span class="p">(</span><span class="n">salt</span><span class="p">,</span> <span class="n">ikm</span><span class="p">,</span> <span class="n">digest</span><span class="p">)</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
+        <span class="n">okm</span> <span class="o">=</span> <span class="n">block</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">okm</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+            <span class="n">block</span> <span class="o">=</span> <span class="n">new_hmac</span><span class="p">(</span><span class="n">prk</span><span class="p">,</span> <span class="n">block</span> <span class="o">+</span> <span class="n">info</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">([</span><span class="n">counter</span><span class="p">]),</span> <span class="n">digest</span><span class="p">)</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
+            <span class="n">okm</span> <span class="o">+=</span> <span class="n">block</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">okm</span><span class="p">[:</span><span class="n">length</span><span class="p">]</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="HIPContext">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPContext">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HIPContext</span><span class="p">(</span><span class="n">ProtocolContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Caller supplied keys for verifying HIP's HMACs and signatures (:rfc:`7401#section-6.4`).</span>
+
+<span class="sd">    Given one, :meth:`HIP.read` records the :class:`HIPAuthStatus` of each</span>
+<span class="sd">    ``HIP_MAC`` and ``HIP_MAC_2`` as its ``hmac_status``, and of each</span>
+<span class="sd">    ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2`` as its ``signature_status``, and</span>
+<span class="sd">    parses as it does without one.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        *keys: :class:`HIPIdentity` and :class:`HIPAssociation` instances, the</span>
+<span class="sd">            first matching one used.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If a key is neither.</span>
+
+<span class="sd">    .. versionadded:: 1.9.0</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Properties.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">identities</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[HIPIdentity, ...]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Registered Host Identities."""</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__identities__</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">associations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[HIPAssociation, ...]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Registered associations."""</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__associations__</span><span class="p">)</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Methods.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="HIPContext.protocol">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPContext.protocol">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Literal["HIP"]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Index ID of the protocol this context applies to."""</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s1">'HIP'</span><span class="p">,)</span></div>
+
+
+<div class="viewcode-block" id="HIPContext.register">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPContext.register">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">'HIPIdentity | HIPAssociation'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Add a key to the context.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key: A Host Identity or an association.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``key`` is neither.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">HIPIdentity</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__identities__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">HIPAssociation</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__associations__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIP: not a HIP key: </span><span class="si">{</span><span class="n">key</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="HIPContext.match_identity">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPContext.match_identity">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">match_identity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hit</span><span class="p">:</span> <span class="s1">'IPv6Address | str | int | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[HIPIdentity]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Find the Host Identity of a HIT.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            hit: The HIT.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The first Host Identity registered for ``hit``, or :data:`None`.</span>
+
+<span class="sd">        """</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">_hit_value</span><span class="p">(</span><span class="n">hit</span><span class="p">,</span> <span class="s1">'hit'</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">identity</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__identities__</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">identity</span><span class="o">.</span><span class="n">hit</span><span class="p">)</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">identity</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="HIPContext.match_association">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPContext.match_association">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">match_association</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">:</span> <span class="s1">'IPv6Address | str | int | bytes'</span><span class="p">,</span>
+                          <span class="n">receiver</span><span class="p">:</span> <span class="s1">'IPv6Address | str | int | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[HIPAssociation]'</span><span class="p">:</span>  <span class="c1"># pylint: disable=line-too-long</span>
+<span class="w">        </span><span class="sd">"""Find the association a packet belongs to.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sender: The packet's Sender's HIT.</span>
+<span class="sd">            receiver: Its Receiver's HIT.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The first association :meth:`HIPAssociation.matches` the packet, or</span>
+<span class="sd">            :data:`None`.</span>
+
+<span class="sd">        """</span>
+        <span class="k">for</span> <span class="n">association</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__associations__</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">association</span><span class="o">.</span><span class="n">matches</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">receiver</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">association</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Data models.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">keys</span><span class="p">:</span> <span class="s1">'HIPIdentity | HIPAssociation'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__identities__</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[HIPIdentity]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__associations__</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[HIPAssociation]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+<div class="viewcode-block" id="HIPContext.__repr__">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIPContext.__repr__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Representation of the context, free of any key material."""</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'&lt;HIPContext identities=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__identities__</span><span class="p">)</span><span class="si">}</span><span class="s1"> '</span>
+                <span class="sa">f</span><span class="s1">'associations=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__associations__</span><span class="p">)</span><span class="si">}</span><span class="s1">&gt;'</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="c1">##############################################################################</span>
+<span class="c1"># Protocol.</span>
+<span class="c1">##############################################################################</span>
 
 
 <div class="viewcode-block" id="HIP">
@@ -1080,6 +1938,14 @@
 <span class="sd">       ``checksum_status``, and :meth:`make` computes one it is not given under</span>
 <span class="sd">       :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE` (:issue:`2813`).</span>
 
+<span class="sd">    .. versionchanged:: 1.9.0</span>
+
+<span class="sd">       Given a :class:`HIPContext`, :meth:`read` verifies ``HIP_MAC``,</span>
+<span class="sd">       ``HIP_MAC_2``, ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2``</span>
+<span class="sd">       (:rfc:`7401#section-6.4`) and records each outcome, a</span>
+<span class="sd">       :class:`HIPAuthStatus`, as the parameter's ``hmac_status`` or</span>
+<span class="sd">       ``signature_status`` (:issue:`2939`).</span>
+
 <span class="sd">    """</span>
 
     <span class="c1">##########################################################################</span>
@@ -1247,7 +2113,9 @@
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Parsed packet data.</span>
+<span class="sd">            Parsed packet data. Given a :class:`HIPContext`, each ``HIP_MAC``,</span>
+<span class="sd">            ``HIP_MAC_2``, ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2`` records its</span>
+<span class="sd">            :class:`HIPAuthStatus`, see :meth:`_verify_hip_param`.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the packet is malformed. Parsed on its own, a</span>
@@ -1286,8 +2154,12 @@
         <span class="k">if</span> <span class="n">_prml</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">cut_on_its_own</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="s1">'len'</span><span class="p">):</span>
             <span class="n">_prml</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">_prml</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_hip_param</span><span class="p">(</span><span class="n">_prml</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">hip</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_context</span><span class="p">(</span><span class="n">HIPContext</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_verify_hip_param</span><span class="p">(</span><span class="n">hip</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
             <span class="n">hip</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
-                <span class="p">(</span><span class="s1">'parameters'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_hip_param</span><span class="p">(</span><span class="n">_prml</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">hip</span><span class="o">.</span><span class="n">version</span><span class="p">)),</span>
+                <span class="p">(</span><span class="s1">'parameters'</span><span class="p">,</span> <span class="n">parameters</span><span class="p">),</span>
             <span class="p">])</span>
 
         <span class="k">if</span> <span class="n">extension</span><span class="p">:</span>
@@ -1706,6 +2578,50 @@
             <span class="n">parameters_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
             <span class="n">total_length</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_packed</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">parameters_list</span><span class="p">,</span> <span class="n">total_length</span></div>
+
+
+<div class="viewcode-block" id="HIP._verify_hip_param">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP._verify_hip_param">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_verify_hip_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hip</span><span class="p">:</span> <span class="s1">'Data_HIP'</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Parameter'</span><span class="p">,</span>
+                          <span class="n">context</span><span class="p">:</span> <span class="s1">'HIPContext'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Verify the HMAC and signature parameters (:rfc:`7401#section-6.4`).</span>
+
+<span class="sd">        Each ``HIP_MAC`` and ``HIP_MAC_2`` records its :class:`HIPAuthStatus` as</span>
+<span class="sd">        ``hmac_status``, and each ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2`` as</span>
+<span class="sd">        ``signature_status``. An outcome other than :attr:`~HIPAuthStatus.VALID`</span>
+<span class="sd">        and :attr:`~HIPAuthStatus.NO_KEY` warns with a</span>
+<span class="sd">        :exc:`~pcapkit.utilities.warnings.ProtocolWarning`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            hip: Parsed header.</span>
+<span class="sd">            parameters: Parsed parameters, in the order :meth:`_read_hip_param`</span>
+<span class="sd">                read them.</span>
+<span class="sd">            context: The keys to verify with.</span>
+
+<span class="sd">        """</span>
+        <span class="n">unsupported</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">hip</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="p">(</span>
+            <span class="n">HIPAuthStatus</span><span class="o">.</span><span class="n">UNSUPPORTED</span><span class="p">,</span> <span class="s1">'only HIP version 2 is verified'</span><span class="p">,</span>
+        <span class="p">)</span>  <span class="c1"># type: Optional[tuple[HIPAuthStatus, Optional[str]]]</span>
+
+        <span class="c1"># NOTE: A header cut short of its parameters does not parse, so all they cover is here.</span>
+        <span class="n">offset</span><span class="p">,</span> <span class="n">puzzle</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span> <span class="kc">None</span>  <span class="c1"># type: int, Optional[int]</span>
+        <span class="k">for</span> <span class="n">schema</span><span class="p">,</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">param</span><span class="p">,</span> <span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
+            <span class="n">start</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span><span class="p">,</span> <span class="n">offset</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">Data_PuzzleParameter</span><span class="p">):</span>
+                <span class="n">puzzle</span> <span class="o">=</span> <span class="n">start</span> <span class="k">if</span> <span class="n">puzzle</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">puzzle</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="p">(</span><span class="n">Data_HIPMACParameter</span><span class="p">,</span> <span class="n">Data_HIPMAC2Parameter</span><span class="p">)):</span>
+                <span class="n">field</span> <span class="o">=</span> <span class="s1">'hmac_status'</span>
+                <span class="n">status</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="n">unsupported</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_hip_mac</span><span class="p">(</span><span class="n">hip</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="p">(</span><span class="n">Data_HIPSignatureParameter</span><span class="p">,</span> <span class="n">Data_HIPSignature2Parameter</span><span class="p">)):</span>
+                <span class="n">field</span> <span class="o">=</span> <span class="s1">'signature_status'</span>
+                <span class="n">status</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="n">unsupported</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_hip_signature</span><span class="p">(</span><span class="n">hip</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span>
+                                                                           <span class="n">puzzle</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">param</span><span class="o">.</span><span class="n">__update__</span><span class="p">([(</span><span class="n">field</span><span class="p">,</span> <span class="n">status</span><span class="p">)])</span>
+            <span class="k">if</span> <span class="n">reason</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">hip</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">param</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">reason</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="HIP._read_param_unassigned">
@@ -6675,6 +7591,113 @@
                                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">id_len</span><span class="si">}</span><span class="s1"> octets cannot hold </span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">id_len</span>
 
+<div class="viewcode-block" id="HIP._verify_hip_mac">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP._verify_hip_mac">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_verify_hip_mac</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hip</span><span class="p">:</span> <span class="s1">'Data_HIP'</span><span class="p">,</span>
+                        <span class="n">param</span><span class="p">:</span> <span class="s1">'Data_HIPMACParameter | Data_HIPMAC2Parameter'</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                        <span class="n">context</span><span class="p">:</span> <span class="s1">'HIPContext'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[HIPAuthStatus, Optional[str]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Verify a ``HIP_MAC`` or ``HIP_MAC_2`` parameter (:rfc:`7401#section-6.4.1`).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            hip: Parsed header.</span>
+<span class="sd">            param: The parameter.</span>
+<span class="sd">            offset: Its offset in the header.</span>
+<span class="sd">            context: The keys to verify with: the association of the packet's HITs,</span>
+<span class="sd">                and for ``HIP_MAC_2`` the Host Identity of its sender, the Responder.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The outcome, and why it warns, if it does.</span>
+
+<span class="sd">        """</span>
+        <span class="n">association</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">match_association</span><span class="p">(</span><span class="n">hip</span><span class="o">.</span><span class="n">shit</span><span class="p">,</span> <span class="n">hip</span><span class="o">.</span><span class="n">rhit</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">association</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">HIPAuthStatus</span><span class="o">.</span><span class="n">NO_KEY</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="n">host_id</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">Data_HIPMAC2Parameter</span><span class="p">):</span>
+            <span class="n">identity</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">match_identity</span><span class="p">(</span><span class="n">hip</span><span class="o">.</span><span class="n">shit</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">identity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">HIPAuthStatus</span><span class="o">.</span><span class="n">NO_KEY</span><span class="p">,</span> <span class="kc">None</span>
+            <span class="c1"># NOTE: The HOST_ID as R1 carried it, which a parse rebuilds byte for byte.</span>
+            <span class="n">schemas</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_hip_param</span><span class="p">([(</span><span class="n">identity</span><span class="o">.</span><span class="n">host_id</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">identity</span><span class="o">.</span><span class="n">host_id</span><span class="p">)],</span>
+                                              <span class="n">version</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">host_id</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_HostIDParameter'</span><span class="p">,</span> <span class="n">schemas</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+
+        <span class="n">scope</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auth_scope</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">host_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">scope</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">HIPAuthStatus</span><span class="o">.</span><span class="n">INVALID</span><span class="p">,</span> <span class="s1">'the Header Length cannot count what the HMAC covers'</span>
+        <span class="k">if</span> <span class="n">compare_digest</span><span class="p">(</span><span class="n">association</span><span class="o">.</span><span class="n">compute_hmac</span><span class="p">(</span><span class="n">hip</span><span class="o">.</span><span class="n">shit</span><span class="p">,</span> <span class="n">scope</span><span class="p">),</span> <span class="n">param</span><span class="o">.</span><span class="n">hmac</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">HIPAuthStatus</span><span class="o">.</span><span class="n">VALID</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">HIPAuthStatus</span><span class="o">.</span><span class="n">INVALID</span><span class="p">,</span> <span class="s1">'the HMAC does not verify'</span></div>
+
+
+<div class="viewcode-block" id="HIP._verify_hip_signature">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP._verify_hip_signature">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_verify_hip_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hip</span><span class="p">:</span> <span class="s1">'Data_HIP'</span><span class="p">,</span>
+                              <span class="n">param</span><span class="p">:</span> <span class="s1">'Data_HIPSignatureParameter | Data_HIPSignature2Parameter'</span><span class="p">,</span>
+                              <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">puzzle</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span>
+                              <span class="n">context</span><span class="p">:</span> <span class="s1">'HIPContext'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[HIPAuthStatus, Optional[str]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Verify a ``HIP_SIGNATURE`` or ``HIP_SIGNATURE_2`` parameter (:rfc:`7401#section-6.4.2`).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            hip: Parsed header.</span>
+<span class="sd">            param: The parameter.</span>
+<span class="sd">            offset: Its offset in the header.</span>
+<span class="sd">            puzzle: Offset of the first ``PUZZLE`` before it, if any.</span>
+<span class="sd">            context: The keys to verify with: the Host Identity of the packet's sender.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The outcome, and why it warns, if it does.</span>
+
+<span class="sd">        """</span>
+        <span class="n">identity</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">match_identity</span><span class="p">(</span><span class="n">hip</span><span class="o">.</span><span class="n">shit</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">identity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">HIPAuthStatus</span><span class="o">.</span><span class="n">NO_KEY</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">Data_HIPSignature2Parameter</span><span class="p">):</span>
+            <span class="n">scope</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auth_scope</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">receiver</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">puzzle</span><span class="o">=</span><span class="n">puzzle</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">scope</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auth_scope</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">identity</span><span class="o">.</span><span class="n">verify</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">signature</span><span class="p">,</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">scope</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="HIP._auth_scope">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP._auth_scope">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_auth_scope</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">extra</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">receiver</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="n">puzzle</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[bytes]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Build the octets an HMAC or a signature covers (:rfc:`7401#section-6.4`).</span>
+
+<span class="sd">        They are the header and the parameters before ``end``, then ``extra``,</span>
+<span class="sd">        with the Checksum zeroed and the Header Length counting them.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            end: Offset of the HMAC or signature parameter.</span>
+<span class="sd">            extra: Octets appended, the ``HOST_ID`` of ``HIP_MAC_2``.</span>
+<span class="sd">            receiver: Whether the Receiver's HIT is zeroed, as ``HIP_SIGNATURE_2``</span>
+<span class="sd">                zeroes the Initiator's in R1 (:rfc:`7401#section-5.2.15`).</span>
+<span class="sd">            puzzle: Offset of the ``PUZZLE`` whose Opaque and Random #I are zeroed,</span>
+<span class="sd">                as ``HIP_SIGNATURE_2`` asks, if any.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The octets, or :data:`None` if the Header Length cannot count them.</span>
+
+<span class="sd">        """</span>
+        <span class="n">scope</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[:</span><span class="n">end</span><span class="p">]</span> <span class="o">+</span> <span class="n">extra</span><span class="p">)</span>
+        <span class="n">units</span> <span class="o">=</span> <span class="n">octets_to_ext_len</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scope</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">units</span> <span class="o">&gt;</span> <span class="mh">0xFF</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">scope</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span>
+        <span class="n">scope</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">receiver</span><span class="p">:</span>
+            <span class="n">scope</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">40</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">puzzle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># NOTE: Opaque and Random #I fill the PUZZLE after #K and Lifetime (RFC 7401</span>
+            <span class="c1"># section 5.2.4), the rest of its Length; the PUZZLE parsed, so it is all here.</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">scope</span><span class="p">[</span><span class="n">puzzle</span> <span class="o">+</span> <span class="mi">2</span><span class="p">:</span><span class="n">puzzle</span> <span class="o">+</span> <span class="mi">4</span><span class="p">],</span> <span class="s1">'big'</span><span class="p">)</span>
+            <span class="n">scope</span><span class="p">[</span><span class="n">puzzle</span> <span class="o">+</span> <span class="mi">6</span><span class="p">:</span><span class="n">puzzle</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">length</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">length</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="HIP._verify_pseudo_checksum">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP._verify_pseudo_checksum">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_verify_pseudo_checksum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pseudo</span><span class="p">:</span> <span class="s1">'Optional[IP_Pseudo]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
@@ -6731,7 +7754,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=77637be2"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=baecdfc0"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

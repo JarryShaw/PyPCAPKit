@@ -50,6 +50,12 @@ Octets      Bits        Name                    Description
    .. autoattribute:: __extension__
       :no-value:
 
+   .. autoattribute:: __selector__
+      :no-value:
+
+   .. autoattribute:: __multicast__
+      :no-value:
+
    .. rubric:: Properties
 
    .. autoproperty:: name
@@ -66,6 +72,8 @@ Octets      Bits        Name                    Description
    .. automethod:: register_message
    .. automethod:: register_option
    .. automethod:: register_extension
+   .. automethod:: register_selector
+   .. automethod:: register_multicast
    .. automethod:: id
 
    .. rubric:: Data Models
@@ -291,6 +299,11 @@ Octets      Bits        Name                    Description
    .. automethod:: _seconds
    .. automethod:: _make_lcmp_suboption
    .. automethod:: _make_cga_extensions
+   .. automethod:: _read_selector
+   .. automethod:: _read_multicast
+   .. automethod:: _dispatch_payload
+   .. automethod:: _payload_octets
+   .. automethod:: _register_payload
    .. automethod:: _verify_pseudo_checksum
 
 Auxiliary Data

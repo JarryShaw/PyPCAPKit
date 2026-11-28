@@ -113,8 +113,9 @@ exceptions:
   :class:`~pcapkit.protocols.misc.raw.protocol.Raw` together with everything after it.
 * Octets that open no whole record stay raw, with no error: an unsupported
   content type, a legacy version outside ``0xFExx``, a header cut short, a
-  length past the end of the datagram, or a connection ID whose length is
-  not known, which leaves the record's end unknown.
+  length past the end of the datagram or past the RFCs' bound (``2 ** 14 +
+  2048``, or ``2 ** 14 + 256`` for a unified header), or a connection ID whose
+  length is not known, which leaves the record's end unknown.
 * A parse told to stop at DTLS (``protocol='DTLS'`` or ``layer='Application'``)
   keeps the rest of the datagram raw.
 * Each record is a layer, so :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`

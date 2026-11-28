@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://jarryshaw.github.io/PyPCAPKit/pcapkit/foundation/reassembly/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.foundation.reassembly implements datagram reassembly of IP packets, TCP segments and DTLS handshake messages, based on the algorithms described in RFC 791, RFC 815 and RFC 6347. Reassembly ..." />
-<meta name="description" content="pcapkit.foundation.reassembly implements datagram reassembly of IP packets, TCP segments and DTLS handshake messages, based on the algorithms described in RFC 791, RFC 815 and RFC 6347. Reassembly ..." />
+<meta property="og:description" content="pcapkit.foundation.reassembly implements datagram reassembly of IP packets, TCP segments, DTLS handshake messages, SCTP user messages and TLS records, based on the algorithms described in RFC 791, ..." />
+<meta name="description" content="pcapkit.foundation.reassembly implements datagram reassembly of IP packets, TCP segments, DTLS handshake messages, SCTP user messages and TLS records, based on the algorithms described in RFC 791, ..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Reassembly Base Class" href="reassembly.html"><link rel="prev" title="3rd-Party Engines" href="../engines/3rdparty.html">
         <link rel="canonical" href="https://jarryshaw.github.io/PyPCAPKit/pcapkit/foundation/reassembly/index.html">
 
@@ -202,11 +202,11 @@
   <span class="sidebar-brand-text">PyPCAPKit</span>
   
 </a><nav class="sidebar-versions" aria-label="Documentation versions">
-  <p>Version <strong>1.8.1 (stable)</strong></p>
+  <p>Version <strong>1.9.0 (stable)</strong></p>
   <ul>
     <li><span aria-current="page">stable</span></li>
     <li><a href="https://pypcapkit.jarryshaw.me/en/latest/pcapkit/foundation/reassembly/index.html">latest (develop)</a></li>
-    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.8.1/pcapkit/foundation/reassembly/index.html">v1.8.1</a></li>
+    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.9.0/pcapkit/foundation/reassembly/index.html">v1.9.0</a></li>
     <li><a href="../../../changelog.html">all releases</a></li>
   </ul>
   <p class="sidebar-versions-note">latest and each release are on Read the Docs</p>
@@ -243,12 +243,16 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="tcp.html">TCP Datagram Reassembly</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dtls.html">DTLS Handshake-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sctp.html">SCTP User-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tls.html">TLS Record Reassembly</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../analysis/index.html">Reassembled Payload Analysis</a><input aria-label="Toggle navigation of Reassembled Payload Analysis" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../analysis/ip.html">IP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../analysis/tcp.html">TCP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../analysis/dtls.html">DTLS Handshake-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../analysis/sctp.html">SCTP User-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../analysis/tls.html">TLS Record Analysis</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -274,11 +278,13 @@
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/link/llc.html">LLC - Logical Link Control</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/netlink.html">Netlink - Linux Netlink Socket Framing</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/ppp.html">PPP - Point-to-Point Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/pppoe.html">PPPoE - PPP over Ethernet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/radiotap.html">Radiotap - IEEE 802.11 Radiotap Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/link/snap.html">SNAP - Subnetwork Access Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -338,6 +344,10 @@
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/sslv3.html">SSLv3 - Secure Sockets Layer Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/stp.html">STP - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/stpv0.html">STPv0 - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/rstp.html">RSTP - Rapid Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/mstp.html">MSTP - Multiple Spanning Tree Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -357,6 +367,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/seqnum.html">Sequence Number Arithmetic</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/importlib.html">Lazy Imports</a></li>
@@ -380,8 +391,9 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../corekit/const/index.html">Shared Format Constants</a><input aria-label="Toggle navigation of Shared Format Constants" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/const/capture.html">Capture-Format Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/ipheader.html">IP Header Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/tcpheader.html">TCP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/domain_name.html">Domain Name Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/ip_header.html">IP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/tcp_header.html">TCP Header Constants</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/context.html">Parsing Context</a></li>
@@ -396,11 +408,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/extlen.html">Extension-Header Length</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/domain_name.html">Domain Name Codec</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/ext_len.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/padding.html">Padding Arithmetic</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/shortread.html">Short-Read Replay</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/short_read.html">Short-Read Replay</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/sentinels.html">Sentinel Objects</a></li>
@@ -425,6 +438,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/linux.html">Linux-Specific Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Constant Enumerations</a></li>
@@ -448,6 +462,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
@@ -459,6 +474,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Vendor Crawlers</a></li>
@@ -482,6 +498,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
 </ul>
@@ -496,6 +513,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.9.0.html">1.9.0 – 2026-11-28</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.8.1.html">1.8.1 – 2026-11-27</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
@@ -612,8 +630,9 @@
           <section id="module-pcapkit.foundation.reassembly">
 <span id="packets-reassembly"></span><h1>Packets Reassembly<a class="headerlink" href="#module-pcapkit.foundation.reassembly" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a> implements datagram reassembly
-of IP packets, TCP segments and DTLS handshake messages, based on the
-algorithms described in <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a>, <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a> and <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6347.html"><strong>RFC 6347</strong></a>.</p>
+of IP packets, TCP segments, DTLS handshake messages, SCTP user messages and TLS
+records, based on the algorithms described in <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a>, <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>, <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6347.html"><strong>RFC 6347</strong></a>,
+<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html"><strong>RFC 9260</strong></a>, <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8260.html"><strong>RFC 8260</strong></a> and <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="../../../ext.html"><span class="doc">Customisation &amp; Extensions</span></a>, on customisation and extension.</p>
@@ -646,6 +665,20 @@ algorithms described in <span class="target" id="index-0"></span><a class="rfc r
 <li class="toctree-l2"><a class="reference internal" href="dtls.html#type-variables">Type Variables</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="sctp.html">SCTP User-Message Reassembly</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sctp.html#algorithm">Algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sctp.html#terminology">Terminology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sctp.html#module-pcapkit.foundation.reassembly.sctp.data">Data Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sctp.html#type-variables">Type Variables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tls.html">TLS Record Reassembly</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tls.html#algorithm">Algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tls.html#terminology">Terminology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tls.html#module-pcapkit.foundation.reassembly.tls.data">Data Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tls.html#type-variables">Type Variables</a></li>
+</ul>
+</li>
 </ul>
 </div>
 <p>Every reassembly class subclasses
@@ -655,7 +688,7 @@ extracted fragments into whole datagrams:</p>
         flowchart TD
     A{{ReassemblyMeta}} -.-&gt;|metaclass| B(ReassemblyBase)
 
-    B --&gt; IP &amp; TCP &amp; DTLS
+    B --&gt; IP &amp; TCP &amp; DTLS &amp; SCTP &amp; TLS
     IP --&gt; IPv4 &amp; IPv6
 
     B --&gt; C(Reassembly)
@@ -672,6 +705,8 @@ extracted fragments into whole datagrams:</p>
     click IPv6 &quot;ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.reassembly.IPv6&quot;
     click TCP &quot;tcp.html#pcapkit.foundation.reassembly.tcp.reassembly.TCP&quot;
     click DTLS &quot;dtls.html#pcapkit.foundation.reassembly.dtls.reassembly.DTLS&quot;
+    click SCTP &quot;sctp.html#pcapkit.foundation.reassembly.sctp.reassembly.SCTP&quot;
+    click TLS &quot;tls.html#pcapkit.foundation.reassembly.tls.reassembly.TLS&quot;
     </pre><section id="auxiliary-data">
 <h2>Auxiliary Data<a class="headerlink" href="#auxiliary-data" title="Link to this heading">¶</a></h2>
 <dl class="py class">
@@ -707,7 +742,7 @@ class’s are in the <code class="docutils literal notranslate"><span class="pre
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ReassemblyData">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.</span></span><span class="sig-name descname"><span class="pre">ReassemblyData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ipv4</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ipv6</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tcp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data.html#ReassemblyData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ReassemblyData" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.</span></span><span class="sig-name descname"><span class="pre">ReassemblyData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ipv4</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ipv6</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tcp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sctp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data.html#ReassemblyData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ReassemblyData" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
 <p>Data storage for reassembly.</p>
 <p>Each built-in field is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when its reassembly is disabled. Every
@@ -742,6 +777,24 @@ the built-ins in the order given.</p>
 <dd><p>DTLS reassembled handshake messages.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ReassemblyData.sctp">
+<span class="sig-name descname"><span class="pre">sctp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="sctp.html#pcapkit.foundation.reassembly.sctp.data.Datagram" title="pcapkit.foundation.reassembly.sctp.data.Datagram"><span class="pre">Datagram</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ReassemblyData.sctp" title="Link to this definition">¶</a></dt>
+<dd><p>SCTP reassembled user messages.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.9.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ReassemblyData.tls">
+<span class="sig-name descname"><span class="pre">tls</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tls.html#pcapkit.foundation.reassembly.tls.data.Datagram" title="pcapkit.foundation.reassembly.tls.data.Datagram"><span class="pre">Datagram</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ReassemblyData.tls" title="Link to this definition">¶</a></dt>
+<dd><p>TLS reassembled records.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.9.0.</span></p>
+</div>
+</dd></dl>
+
 </dd></dl>
 
 <p id="reassembly-submissions">What submits a buffer, and how its holes at that point pick the
@@ -750,7 +803,7 @@ the built-ins in the order given.</p>
         flowchart TD
     subgraph trig [&quot;What submits a buffer&quot;]
         direction TB
-        T1[&quot;IP: every octet received&lt;br/&gt;TCP: a FIN and every octet below it&quot;]
+        T1[&quot;IP: every octet received&lt;br/&gt;TCP, TLS: a FIN and every octet below it&quot;]
         T2[&quot;a session torn down: a TCP RST,&lt;br/&gt;a TCP SYN on a buffered 4-tuple,&lt;br/&gt;an unfragmented IPv4 datagram reusing the BUFID&quot;]
         T3[&quot;a TCP segment farther than TCP\_GAP\_LIMIT&lt;br/&gt;from its buffer: the stream splits&quot;]
         T4[&quot;a DTLS fragment whose length or type disagrees&lt;br/&gt;with the message held under its message\_seq&quot;]
@@ -759,7 +812,7 @@ the built-ins in the order given.</p>
         T7[&quot;.datagram or fetch() read outside a callback&lt;br/&gt;while buffers are outstanding&quot;]
         T1 ~~~ T2 ~~~ T3 ~~~ T4 ~~~ T5 ~~~ T6 ~~~ T7
     end
-    T1D[&quot;DTLS: a message whole&quot;]
+    T1D[&quot;DTLS, SCTP: a message whole&lt;br/&gt;TLS: a record whole at the boundary&quot;]
     SUB[&quot;submit(buffer)&quot;]
     Q1{&quot;overlap?&quot;}
     Q2{&quot;no holes left?&quot;}
@@ -800,7 +853,7 @@ contract; the class defines neither <code class="docutils literal notranslate"><
 <a class="reference internal" href="ip/ip.html#pcapkit.foundation.reassembly.ip.data.Datagram.completed" title="pcapkit.foundation.reassembly.ip.data.Datagram.completed"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.completed</span></code></a>,
 which widens a plain <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> rather than adding a second channel beside
 it: reassembly has more outcomes to report than a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> can hold, since
-a buffer abandoned under the <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html"><strong>RFC 1122</strong></a> / <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a> reassembly timeout is
+a buffer abandoned under the <span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html"><strong>RFC 1122</strong></a> / <span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a> reassembly timeout is
 a different event from one that simply had not finished when the capture
 did. An expired datagram says “these fragments are gone”, a partial one says
 “these fragments had not arrived yet”.</p>
@@ -857,7 +910,7 @@ The missing octets may simply not have been captured.</p>
 capture clock advanced past the deadline of
 <a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.timeout" title="pcapkit.foundation.reassembly.reassembly.Reassembly.timeout"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Reassembly.timeout</span></code></a>
 seconds after the first-arriving fragment while the datagram was still
-incomplete. <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> requires the held fragments be
+incomplete. <span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> requires the held fragments be
 discarded, so no further fragment will ever be added to this datagram.</p>
 </dd></dl>
 
@@ -866,7 +919,7 @@ discarded, so no further fragment will ever be added to this datagram.</p>
 <span class="sig-name descname"><span class="pre">OVERLAP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'overlap'</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.Completion.OVERLAP" title="Link to this definition">¶</a></dt>
 <dd><p>Reassembly was <strong>abandoned</strong> because a fragment overlapped another of the
 same datagram without being an exact duplicate of it, which
-<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> discards an IPv6 datagram for. The overlapping
+<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> discards an IPv6 datagram for. The overlapping
 fragment’s octets are not in the payload; <code class="docutils literal notranslate"><span class="pre">conflict</span></code> still lists where
 they disagreed with the octets kept.</p>
 <div class="versionadded">
@@ -899,7 +952,7 @@ renders a member as its value.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.Deferred">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.</span></span><span class="sig-name descname"><span class="pre">Deferred</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">_KT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="p"><span class="pre">(</span></span><span class="n"><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><span class="pre">TransType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><span class="pre">AppType_TCP</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><span class="pre">AppType_TCP</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.handshake_type.HandshakeType" title="pcapkit.const.tls.handshake_type.HandshakeType"><span class="pre">HandshakeType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="p"><span class="pre">)</span></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analyze</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data.html#Deferred"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.Deferred" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.</span></span><span class="sig-name descname"><span class="pre">Deferred</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">_KT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="p"><span class="pre">(</span></span><span class="n"><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><span class="pre">TransType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><span class="pre">AppType_TCP</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><span class="pre">AppType_TCP</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.handshake_type.HandshakeType" title="pcapkit.const.tls.handshake_type.HandshakeType"><span class="pre">HandshakeType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../const/sctp.html#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier" title="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier"><span class="pre">PayloadProtocolIdentifier</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.content_type.ContentType" title="pcapkit.const.tls.content_type.ContentType"><span class="pre">ContentType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="p"><span class="pre">)</span></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analyze</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data.html#Deferred"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.Deferred" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../utilities/pickle.html#pcapkit.utilities.pickle.ReduceAsProtocol2" title="pcapkit.utilities.pickle.ReduceAsProtocol2"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReduceAsProtocol2</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="docutils literal notranslate"><span class="pre">_KT</span></code>]</p>
 <p>A postponed analysis of a reassembled payload.</p>
 <p>A reassembled datagram’s <code class="docutils literal notranslate"><span class="pre">packet</span></code> is a second, full parse of the payload
@@ -949,10 +1002,23 @@ protocol number, so its application protocol is inferred from the ports.</p></li
 <li><p><a class="reference internal" href="dtls.html#pcapkit.foundation.reassembly.dtls.reassembly.DTLS._datagram_from_fragment" title="pcapkit.foundation.reassembly.dtls.reassembly.DTLS._datagram_from_fragment"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DTLS._datagram_from_fragment</span></code></a> builds a
 <code class="docutils literal notranslate"><span class="pre">Deferred[tuple[HandshakeType,</span> <span class="pre">int,</span> <span class="pre">int]]</span></code> for a complete message. It
 passes the message’s <code class="docutils literal notranslate"><span class="pre">(msg_type,</span> <span class="pre">length,</span> <span class="pre">message_seq)</span></code>, its handshake
-header as if unfragmented (<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6347.html#section-4.2.3"><strong>RFC 6347 Section 4.2.3</strong></a>), to the decoder
+header as if unfragmented (<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6347.html#section-4.2.3"><strong>RFC 6347 Section 4.2.3</strong></a>), to the decoder
 <a class="reference internal" href="../analysis/dtls.html#pcapkit.foundation.analysis.dtls.dtls_handshake" title="pcapkit.foundation.analysis.dtls.dtls_handshake"><code class="xref py py-func docutils literal notranslate"><span class="pre">dtls_handshake()</span></code></a> runs,
 <a class="reference internal" href="../../protocols/application/dtls.html#pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake" title="pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DTLS.analyze_handshake</span></code></a>, which reads
 the body by its <a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.handshake_type.HandshakeType" title="pcapkit.const.tls.handshake_type.HandshakeType"><code class="xref py py-class docutils literal notranslate"><span class="pre">HandshakeType</span></code></a>.</p></li>
+<li><p><a class="reference internal" href="sctp.html#pcapkit.foundation.reassembly.sctp.reassembly.SCTP" title="pcapkit.foundation.reassembly.sctp.reassembly.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a> builds a
+<code class="docutils literal notranslate"><span class="pre">Deferred[Optional[PayloadProtocolIdentifier]]</span></code>. It passes the message’s
+payload protocol identifier, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> for an I-DATA message whose
+first fragment is missing, to the parse
+<a class="reference internal" href="../analysis/sctp.html#pcapkit.foundation.analysis.sctp.sctp_message" title="pcapkit.foundation.analysis.sctp.sctp_message"><code class="xref py py-func docutils literal notranslate"><span class="pre">sctp_message()</span></code></a> runs,
+<a class="reference internal" href="../../protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP.analyze" title="pcapkit.protocols.transport.sctp.protocol.SCTP.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SCTP.analyze</span></code></a>,
+which looks the next layer up by that identifier.</p></li>
+<li><p><a class="reference internal" href="tls.html#pcapkit.foundation.reassembly.tls.reassembly.TLS._make_datagram" title="pcapkit.foundation.reassembly.tls.reassembly.TLS._make_datagram"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TLS._make_datagram</span></code></a> builds a
+<code class="docutils literal notranslate"><span class="pre">Deferred[tuple[ContentType,</span> <span class="pre">int]]</span></code> for a complete record. It passes the
+record’s <code class="docutils literal notranslate"><span class="pre">(type,</span> <span class="pre">legacy_record_version)</span></code> (<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html#section-5.1"><strong>RFC 9846 Section 5.1</strong></a>) to the
+decoder <a class="reference internal" href="../analysis/tls.html#pcapkit.foundation.analysis.tls.tls_record" title="pcapkit.foundation.analysis.tls.tls_record"><code class="xref py py-func docutils literal notranslate"><span class="pre">tls_record()</span></code></a> runs,
+<a class="reference internal" href="../../protocols/application/tls.html#pcapkit.protocols.application.tls.protocol.TLS.analyze_record" title="pcapkit.protocols.application.tls.protocol.TLS.analyze_record"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TLS.analyze_record</span></code></a>, which reads
+the fragment by its <a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.content_type.ContentType" title="pcapkit.const.tls.content_type.ContentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentType</span></code></a>.</p></li>
 </ul>
 <p>Those are the cases the type parameter is constrained to. IP’s and TCP’s are
 <em>named registry values</em> rather than one named value and one pair of bare
@@ -987,14 +1053,15 @@ either way.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>analyze</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="docutils literal notranslate"><span class="pre">_KT</span></code>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>], <a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> | <a class="reference internal" href="../../protocols/application/dtls.html#pcapkit.protocols.application.dtls.data.DTLSHandshake" title="pcapkit.protocols.application.dtls.data.DTLSHandshake"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLSHandshake</span></code></a>]</span>) – The analyser to call: the parse
 <a class="reference internal" href="../analysis/index.html#module-pcapkit.foundation.analysis" title="pcapkit.foundation.analysis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.analysis</span></code></a> runs for the engine, bound to
-the reassembly object’s protocol for IP and TCP, whose <code class="docutils literal notranslate"><span class="pre">analyze</span></code>
-it calls, to the stops and context the extraction’s engine
-parses its frames with (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2933">#2933</a>), and for IP to the
+the reassembly object’s protocol for IP, TCP and SCTP, whose
+<code class="docutils literal notranslate"><span class="pre">analyze</span></code> it calls, to the stops and context the extraction’s
+engine parses its frames with (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2933">#2933</a>), and for IP to the
 datagram’s addresses (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2945">#2945</a>); that protocol’s
-<code class="docutils literal notranslate"><span class="pre">analyze_handshake</span></code> for DTLS.</p></li>
+<code class="docutils literal notranslate"><span class="pre">analyze_handshake</span></code> for DTLS, and <code class="docutils literal notranslate"><span class="pre">analyze_record</span></code> for TLS.</p></li>
 <li><p><strong>proto</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_KT</span></code></span>) – What the analyser dispatches the payload on – the payload
 protocol type for IP, the port pair for TCP, the handshake header
-for DTLS, as above.</p></li>
+for DTLS, the payload protocol identifier for SCTP, the record’s type and
+version for TLS, as above.</p></li>
 <li><p><strong>payload</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Reassembled payload to parse.</p></li>
 </ul>
 </dd>
@@ -1012,6 +1079,11 @@ reassembly’s protocol, rather than that protocol’s bound <code class="docuti
 <a class="reference internal" href="../../utilities/pickle.html#pcapkit.utilities.pickle.ReduceAsProtocol2" title="pcapkit.utilities.pickle.ReduceAsProtocol2"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReduceAsProtocol2</span></code></a>, which carries the
 slots in Python’s own default state, in place of a reduction and a
 <code class="docutils literal notranslate"><span class="pre">__getstate__</span></code> of its own (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2714">#2714</a>).</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.9.0: </span>Also constrained to the payload protocol identifier SCTP reassembly
+dispatches on (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2935">#2935</a>), and to the TLS record header
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2938">#2938</a>).</p>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.Deferred.__call__">
@@ -1113,7 +1185,7 @@ pickled (<a class="extlink-issue reference external" href="https://github.com/Ja
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=77637be2"></script>
+</div><script src="../../../_static/documentation_options.js?v=baecdfc0"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

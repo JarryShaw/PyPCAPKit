@@ -5,12 +5,12 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta property="og:title" content="Extension-Header Length" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://jarryshaw.github.io/PyPCAPKit/pcapkit/corekit/schema/extlen.html" />
+<meta property="og:url" content="https://jarryshaw.github.io/PyPCAPKit/pcapkit/corekit/schema/ext_len.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.corekit.schema.extlen converts between octets and the length field of an IPv6-extension-style header, which counts 8-octet units not including the first 8 octets [ RFC 6564 Section 4], for ..." />
-<meta name="description" content="pcapkit.corekit.schema.extlen converts between octets and the length field of an IPv6-extension-style header, which counts 8-octet units not including the first 8 octets [ RFC 6564 Section 4], for ..." />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="IP Address Conversion" href="ipaddress.html"><link rel="prev" title="Byte-Order Helpers" href="byteorder.html">
-        <link rel="canonical" href="https://jarryshaw.github.io/PyPCAPKit/pcapkit/corekit/schema/extlen.html">
+<meta property="og:description" content="pcapkit.corekit.schema.ext_len converts between octets and the length field of an IPv6-extension-style header, which counts 8-octet units not including the first 8 octets [ RFC 6564 Section 4], for..." />
+<meta name="description" content="pcapkit.corekit.schema.ext_len converts between octets and the length field of an IPv6-extension-style header, which counts 8-octet units not including the first 8 octets [ RFC 6564 Section 4], for..." />
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="IP Address Conversion" href="ipaddress.html"><link rel="prev" title="Domain Name Codec" href="domain_name.html">
+        <link rel="canonical" href="https://jarryshaw.github.io/PyPCAPKit/pcapkit/corekit/schema/ext_len.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>Extension-Header Length - PyPCAPKit</title>
@@ -202,11 +202,11 @@
   <span class="sidebar-brand-text">PyPCAPKit</span>
   
 </a><nav class="sidebar-versions" aria-label="Documentation versions">
-  <p>Version <strong>1.8.1 (stable)</strong></p>
+  <p>Version <strong>1.9.0 (stable)</strong></p>
   <ul>
     <li><span aria-current="page">stable</span></li>
-    <li><a href="https://pypcapkit.jarryshaw.me/en/latest/pcapkit/corekit/schema/extlen.html">latest (develop)</a></li>
-    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.8.1/pcapkit/corekit/schema/extlen.html">v1.8.1</a></li>
+    <li><a href="https://pypcapkit.jarryshaw.me/en/latest/pcapkit/corekit/schema/ext_len.html">latest (develop)</a></li>
+    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.9.0/pcapkit/corekit/schema/ext_len.html">v1.9.0</a></li>
     <li><a href="../../../changelog.html">all releases</a></li>
   </ul>
   <p class="sidebar-versions-note">latest and each release are on Read the Docs</p>
@@ -243,12 +243,16 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/dtls.html">DTLS Handshake-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/sctp.html">SCTP User-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/tls.html">TLS Record Reassembly</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/analysis/index.html">Reassembled Payload Analysis</a><input aria-label="Toggle navigation of Reassembled Payload Analysis" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/ip.html">IP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/tcp.html">TCP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/dtls.html">DTLS Handshake-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/sctp.html">SCTP User-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/tls.html">TLS Record Analysis</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -274,11 +278,13 @@
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/link/llc.html">LLC - Logical Link Control</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/netlink.html">Netlink - Linux Netlink Socket Framing</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/ppp.html">PPP - Point-to-Point Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/pppoe.html">PPPoE - PPP over Ethernet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/radiotap.html">Radiotap - IEEE 802.11 Radiotap Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/link/snap.html">SNAP - Subnetwork Access Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -338,6 +344,10 @@
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/sslv3.html">SSLv3 - Secure Sockets Layer Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/stp.html">STP - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/stpv0.html">STPv0 - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/rstp.html">RSTP - Rapid Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/mstp.html">MSTP - Multiple Spanning Tree Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -357,6 +367,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/seqnum.html">Sequence Number Arithmetic</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/importlib.html">Lazy Imports</a></li>
@@ -380,8 +391,9 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../const/index.html">Shared Format Constants</a><input aria-label="Toggle navigation of Shared Format Constants" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../const/capture.html">Capture-Format Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../const/ipheader.html">IP Header Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../const/tcpheader.html">TCP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../const/domain_name.html">Domain Name Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../const/ip_header.html">IP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../const/tcp_header.html">TCP Header Constants</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../context.html">Parsing Context</a></li>
@@ -396,11 +408,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" checked="" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="domain_name.html">Domain Name Codec</a></li>
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="padding.html">Padding Arithmetic</a></li>
-<li class="toctree-l4"><a class="reference internal" href="shortread.html">Short-Read Replay</a></li>
+<li class="toctree-l4"><a class="reference internal" href="short_read.html">Short-Read Replay</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../sentinels.html">Sentinel Objects</a></li>
@@ -425,6 +438,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/linux.html">Linux-Specific Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Constant Enumerations</a></li>
@@ -448,6 +462,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
@@ -459,6 +474,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Vendor Crawlers</a></li>
@@ -482,6 +498,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
 </ul>
@@ -496,6 +513,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.9.0.html">1.9.0 – 2026-11-28</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.8.1.html">1.8.1 – 2026-11-27</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
@@ -587,12 +605,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/pcapkit/corekit/schema/extlen.rst?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/pcapkit/corekit/schema/ext_len.rst?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/pcapkit/corekit/schema/extlen.rst" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/pcapkit/corekit/schema/ext_len.rst" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -609,18 +627,25 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="module-pcapkit.corekit.schema.extlen">
-<span id="extension-header-length"></span><h1>Extension-Header Length<a class="headerlink" href="#module-pcapkit.corekit.schema.extlen" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.corekit.schema.extlen" title="pcapkit.corekit.schema.extlen"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.extlen</span></code></a> converts between octets and the length
+          <section id="module-pcapkit.corekit.schema.ext_len">
+<span id="extension-header-length"></span><h1>Extension-Header Length<a class="headerlink" href="#module-pcapkit.corekit.schema.ext_len" title="Link to this heading">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.corekit.schema.ext_len" title="pcapkit.corekit.schema.ext_len"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.ext_len</span></code></a> converts between octets and the length
 field of an IPv6-extension-style header, which counts 8-octet units not
 including the first 8 octets [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6564.html#section-4"><strong>RFC 6564 Section 4</strong></a>], for the extension headers,
 the Mobility Header, HIP, the jumbogram lookup and IPv6 reassembly alike.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.7.0.</span></p>
 </div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.9.0: </span>Renamed from <code class="docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.extlen</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3153">#3153</a>).</p>
+</div>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.9.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.extlen</span></code>, now
+<a class="reference internal" href="#module-pcapkit.corekit.schema.ext_len" title="pcapkit.corekit.schema.ext_len"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.ext_len</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3153">#3153</a>).</p>
+</div>
 <dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.corekit.schema.extlen.ext_len_to_octets">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.schema.extlen.</span></span><span class="sig-name descname"><span class="pre">ext_len_to_octets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ext_len</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/schema/extlen.html#ext_len_to_octets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.schema.extlen.ext_len_to_octets" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.corekit.schema.ext_len.ext_len_to_octets">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.schema.ext_len.</span></span><span class="sig-name descname"><span class="pre">ext_len_to_octets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ext_len</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/schema/ext_len.html#ext_len_to_octets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.schema.ext_len.ext_len_to_octets" title="Link to this definition">¶</a></dt>
 <dd><p>Octets of a header whose length field is <code class="docutils literal notranslate"><span class="pre">ext_len</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -642,9 +667,9 @@ octets, as <code class="docutils literal notranslate"><span class="pre">Hdr</spa
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.corekit.schema.extlen.octets_to_ext_len">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.schema.extlen.</span></span><span class="sig-name descname"><span class="pre">octets_to_ext_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/schema/extlen.html#octets_to_ext_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.schema.extlen.octets_to_ext_len" title="Link to this definition">¶</a></dt>
-<dd><p>Length field of a header of <code class="docutils literal notranslate"><span class="pre">length</span></code> octets, the inverse of <a class="reference internal" href="#pcapkit.corekit.schema.extlen.ext_len_to_octets" title="pcapkit.corekit.schema.extlen.ext_len_to_octets"><code class="xref py py-func docutils literal notranslate"><span class="pre">ext_len_to_octets()</span></code></a>.</p>
+<dt class="sig sig-object py" id="pcapkit.corekit.schema.ext_len.octets_to_ext_len">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.schema.ext_len.</span></span><span class="sig-name descname"><span class="pre">octets_to_ext_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/schema/ext_len.html#octets_to_ext_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.schema.ext_len.octets_to_ext_len" title="Link to this definition">¶</a></dt>
+<dd><p>Length field of a header of <code class="docutils literal notranslate"><span class="pre">length</span></code> octets, the inverse of <a class="reference internal" href="#pcapkit.corekit.schema.ext_len.ext_len_to_octets" title="pcapkit.corekit.schema.ext_len.ext_len_to_octets"><code class="xref py py-func docutils literal notranslate"><span class="pre">ext_len_to_octets()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Octets of the header, the first 8 included.</p>
@@ -679,14 +704,14 @@ octets, as <code class="docutils literal notranslate"><span class="pre">Hdr</spa
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="byteorder.html">
+          <a class="prev-page" href="domain_name.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Byte-Order Helpers</div>
+                <div class="title">Domain Name Codec</div>
                 
               </div>
             </a>
@@ -714,7 +739,7 @@ octets, as <code class="docutils literal notranslate"><span class="pre">Hdr</spa
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=77637be2"></script>
+</div><script src="../../../_static/documentation_options.js?v=baecdfc0"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

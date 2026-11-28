@@ -202,11 +202,11 @@
   <span class="sidebar-brand-text">PyPCAPKit</span>
   
 </a><nav class="sidebar-versions" aria-label="Documentation versions">
-  <p>Version <strong>1.8.1 (stable)</strong></p>
+  <p>Version <strong>1.9.0 (stable)</strong></p>
   <ul>
     <li><span aria-current="page">stable</span></li>
     <li><a href="https://pypcapkit.jarryshaw.me/en/latest/pcapkit/protocols/application/tls.html">latest (develop)</a></li>
-    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.8.1/pcapkit/protocols/application/tls.html">v1.8.1</a></li>
+    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.9.0/pcapkit/protocols/application/tls.html">v1.9.0</a></li>
     <li><a href="../../../changelog.html">all releases</a></li>
   </ul>
   <p class="sidebar-versions-note">latest and each release are on Read the Docs</p>
@@ -243,12 +243,16 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/dtls.html">DTLS Handshake-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/sctp.html">SCTP User-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/tls.html">TLS Record Reassembly</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/analysis/index.html">Reassembled Payload Analysis</a><input aria-label="Toggle navigation of Reassembled Payload Analysis" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/ip.html">IP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/tcp.html">TCP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/dtls.html">DTLS Handshake-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/sctp.html">SCTP User-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/tls.html">TLS Record Analysis</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -274,11 +278,13 @@
 <li class="toctree-l4"><a class="reference internal" href="../link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/llc.html">LLC - Logical Link Control</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/netlink.html">Netlink - Linux Netlink Socket Framing</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/ppp.html">PPP - Point-to-Point Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/pppoe.html">PPPoE - PPP over Ethernet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/radiotap.html">Radiotap - IEEE 802.11 Radiotap Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/snap.html">SNAP - Subnetwork Access Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -338,6 +344,10 @@
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">TLS/SSL - Transport Layer Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="sslv3.html">SSLv3 - Secure Sockets Layer Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dtls.html">DTLS - Datagram Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stp.html">STP - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stpv0.html">STPv0 - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rstp.html">RSTP - Rapid Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mstp.html">MSTP - Multiple Spanning Tree Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -357,6 +367,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/seqnum.html">Sequence Number Arithmetic</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/importlib.html">Lazy Imports</a></li>
@@ -380,8 +391,9 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../corekit/const/index.html">Shared Format Constants</a><input aria-label="Toggle navigation of Shared Format Constants" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/const/capture.html">Capture-Format Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/ipheader.html">IP Header Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/tcpheader.html">TCP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/domain_name.html">Domain Name Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/ip_header.html">IP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/tcp_header.html">TCP Header Constants</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/context.html">Parsing Context</a></li>
@@ -396,11 +408,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/extlen.html">Extension-Header Length</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/domain_name.html">Domain Name Codec</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/ext_len.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/padding.html">Padding Arithmetic</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/shortread.html">Short-Read Replay</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/short_read.html">Short-Read Replay</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/sentinels.html">Sentinel Objects</a></li>
@@ -425,6 +438,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/linux.html">Linux-Specific Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Constant Enumerations</a></li>
@@ -448,6 +462,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
@@ -459,6 +474,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Vendor Crawlers</a></li>
@@ -482,6 +498,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
 </ul>
@@ -496,6 +513,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.9.0.html">1.9.0 – 2026-11-28</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.8.1.html">1.8.1 – 2026-11-27</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
@@ -713,7 +731,8 @@ reads <code class="docutils literal notranslate"><span class="pre">TCP:TLS</span
 <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> together with everything after it,
 with no SSLv2 trial.</p></li>
 <li><p>Octets that open no record – an unsupported content type, a legacy
-version outside <code class="docutils literal notranslate"><span class="pre">0x03xx</span></code>, or a header cut short – stay raw, with no error.</p></li>
+version outside <code class="docutils literal notranslate"><span class="pre">0x03xx</span></code>, a length past the <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">14</span> <span class="pre">+</span> <span class="pre">2048</span></code> of
+<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5246.html#section-6.2.3"><strong>RFC 5246 Section 6.2.3</strong></a>, or a header cut short – stay raw, with no error.</p></li>
 <li><p>A parse told to stop at TLS (<code class="docutils literal notranslate"><span class="pre">protocol='TLS'</span></code> or <code class="docutils literal notranslate"><span class="pre">layer='Application'</span></code>)
 keeps the rest of the segment raw.</p></li>
 <li><p>Each record is a layer, so <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a>
@@ -722,10 +741,15 @@ bounds how many are dissected.</p></li>
 </section>
 <section id="known-limitation">
 <h2>Known Limitation<a class="headerlink" href="#known-limitation" title="Link to this heading">¶</a></h2>
-<p><strong>A record split across two TCP segments is not reassembled</strong>, and decodes as
+<p><strong>A record split across TCP segments is not reassembled here</strong>, and decodes as
 <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, as does the partial record a segment
 ends inside. A record may be up to 16 KiB against a typical 1460-octet MSS, so
-this is routine.</p>
+this is routine. <code class="docutils literal notranslate"><span class="pre">Extractor(fin,</span> <span class="pre">reassembly=['tls'])</span></code> reassembles every record of
+the stream (<a class="reference internal" href="../../foundation/reassembly/tls.html#pcapkit.foundation.reassembly.tls.reassembly.TLS" title="pcapkit.foundation.reassembly.tls.reassembly.TLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS</span></code></a>), framing it with
+<a class="reference internal" href="#pcapkit.protocols.application.tls.protocol.TLS.record_header" title="pcapkit.protocols.application.tls.protocol.TLS.record_header"><code class="xref py py-meth docutils literal notranslate"><span class="pre">record_header()</span></code></a>, and
+<a class="reference internal" href="../../foundation/analysis/tls.html#pcapkit.foundation.analysis.tls.tls_record" title="pcapkit.foundation.analysis.tls.tls_record"><code class="xref py py-func docutils literal notranslate"><span class="pre">tls_record()</span></code></a> decodes it with
+<a class="reference internal" href="#pcapkit.protocols.application.tls.protocol.TLS.analyze_record" title="pcapkit.protocols.application.tls.protocol.TLS.analyze_record"><code class="xref py py-meth docutils literal notranslate"><span class="pre">analyze_record()</span></code></a>, as a segment’s
+first record is decoded.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.6.0.</span></p>
 </div>
@@ -736,10 +760,10 @@ this is routine.</p>
 <p>This class implements all protocols in the TLS/SSLv3+ record-layer family.</p>
 <ul class="simple">
 <li><p>Secure Sockets Layer version 3 (<a class="reference internal" href="sslv3.html#pcapkit.protocols.application.sslv3.protocol.SSLv3" title="pcapkit.protocols.application.sslv3.protocol.SSLv3"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv3</span></code></a>)</p></li>
-<li><p>Transport Layer Security 1.0 [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2246.html"><strong>RFC 2246</strong></a>]</p></li>
-<li><p>Transport Layer Security 1.1 [<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4346.html"><strong>RFC 4346</strong></a>]</p></li>
-<li><p>Transport Layer Security 1.2 [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5246.html"><strong>RFC 5246</strong></a>]</p></li>
-<li><p>Transport Layer Security 1.3 [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p></li>
+<li><p>Transport Layer Security 1.0 [<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2246.html"><strong>RFC 2246</strong></a>]</p></li>
+<li><p>Transport Layer Security 1.1 [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4346.html"><strong>RFC 4346</strong></a>]</p></li>
+<li><p>Transport Layer Security 1.2 [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5246.html"><strong>RFC 5246</strong></a>]</p></li>
+<li><p>Transport Layer Security 1.3 [<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p></li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -848,7 +872,9 @@ coalesced in the same buffer.</p></li>
 <li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">content_type</span></code> is a name, a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, or a
     member or code the 8-bit content type field cannot carry, or
     an extension of <code class="docutils literal notranslate"><span class="pre">content</span></code> given as a <code class="docutils literal notranslate"><span class="pre">(type,</span> <span class="pre">kwargs)</span></code> pair
-    has such a type for its 16-bit field.</p></li>
+    has such a type for its 16-bit field; or if the fragment is
+    longer than <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">14</span> <span class="pre">+</span> <span class="pre">2048</span></code> octets, which no version allows
+    (<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5246.html#section-6.2.3"><strong>RFC 5246 Section 6.2.3</strong></a>).</p></li>
 <li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.StructError" title="pcapkit.utilities.exceptions.StructError"><strong>StructError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">version</span></code> or the record length, or a field of
     <code class="docutils literal notranslate"><span class="pre">content</span></code>, does not fit its width.</p></li>
 </ul>
@@ -891,6 +917,74 @@ connection (<a class="extlink-issue reference external" href="https://github.com
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2525">#2525</a>), and the SSLv2 trial’s when it fails. When the record
 is not parsed, the TLS trial’s are dropped only under
 <a class="reference internal" href="../../corekit/decorators.html#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2308">#2308</a>).</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.tls.protocol.TLS.record_header">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">record_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/tls/protocol.html#TLS.record_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.tls.protocol.TLS.record_header" title="Link to this definition">¶</a></dt>
+<dd><p>Read the header of the record <code class="docutils literal notranslate"><span class="pre">data</span></code> opens, as a stream delimits it.</p>
+<p>A record over TCP is delimited by its header alone
+[<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html#section-5.1"><strong>RFC 9846 Section 5.1</strong></a>], read against the checks of
+<a class="reference internal" href="ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._validate_tls_record" title="pcapkit.protocols.application.ssl.protocol.SSL._validate_tls_record"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SSL._validate_tls_record</span></code></a>: a
+content type a genuine record carries and a <code class="docutils literal notranslate"><span class="pre">0x03xx</span></code> legacy version. Its
+length may not exceed <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">14</span> <span class="pre">+</span> <span class="pre">2048</span></code>, the longest TLSCiphertext of
+SSLv3 to TLS 1.2 [<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6101.html#section-5.2.3"><strong>RFC 6101 Section 5.2.3</strong></a>, <span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5246.html#section-6.2.3"><strong>RFC 5246 Section 6.2.3</strong></a>];
+TLS 1.3’s <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">14</span> <span class="pre">+</span> <span class="pre">256</span></code> [<span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html#section-5.2"><strong>RFC 9846 Section 5.2</strong></a>] is within it, and
+the record header does not tell the two apart.
+<a class="reference internal" href="../../foundation/reassembly/tls.html#pcapkit.foundation.reassembly.tls.reassembly.TLS" title="pcapkit.foundation.reassembly.tls.reassembly.TLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS</span></code></a> frames a stream
+with this.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Octets from a record boundary on.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.content_type.ContentType" title="pcapkit.const.tls.content_type.ContentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentType</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The record’s content type, legacy version, header length and
+fragment length; <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> if <code class="docutils literal notranslate"><span class="pre">data</span></code> is shorter than a record
+header.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the header opens no TLS record, a length past
+    that bound included.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.9.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.tls.protocol.TLS.analyze_record">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">analyze_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fragment</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/tls/protocol.html#TLS.analyze_record"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.tls.protocol.TLS.analyze_record" title="Link to this definition">¶</a></dt>
+<dd><p>Analyse a record reassembled from a TCP stream, from its header and fragment.</p>
+<p><a class="reference internal" href="../../foundation/analysis/tls.html#pcapkit.foundation.analysis.tls.tls_record" title="pcapkit.foundation.analysis.tls.tls_record"><code class="xref py py-func docutils literal notranslate"><span class="pre">tls_record()</span></code></a> runs this, and so does
+the <a class="reference internal" href="../../foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.Deferred" title="pcapkit.foundation.reassembly.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> that
+<a class="reference internal" href="../../foundation/reassembly/tls.html#pcapkit.foundation.reassembly.tls.reassembly.TLS" title="pcapkit.foundation.reassembly.tls.reassembly.TLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS</span></code></a> stores as a
+complete record’s <code class="docutils literal notranslate"><span class="pre">packet</span></code>.</p>
+<p>The record is parsed as a segment’s first record is, without the SSLv2
+trial, since its header is a TLS one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>header</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.content_type.ContentType" title="pcapkit.const.tls.content_type.ContentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentType</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – The record’s <code class="docutils literal notranslate"><span class="pre">(type,</span> <span class="pre">legacy_record_version)</span></code>.</p></li>
+<li><p><strong>fragment</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – The record’s fragment, its <code class="docutils literal notranslate"><span class="pre">length</span></code> octets.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The record, as an instance of this class. A record that fails to
+decode is kept as <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>,
+as <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.analyze" title="pcapkit.protocols.protocol.Protocol.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.analyze</span></code></a>
+keeps a payload, its <code class="docutils literal notranslate"><span class="pre">protocol</span></code> this class’s <a class="reference internal" href="#pcapkit.protocols.application.tls.protocol.TLS.__index__" title="pcapkit.protocols.application.tls.protocol.TLS.__index__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__index__()</span></code></a>.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.9.0.</span></p>
 </div>
 </dd></dl>
 
@@ -955,7 +1049,7 @@ dispatches here (<a class="reference internal" href="../../../contributing/conve
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
 <p>Header schema for TLS record layer packet.</p>
 <p>The record header has <a class="reference internal" href="dtls.html#pcapkit.protocols.application.dtls.schema.DTLS" title="pcapkit.protocols.application.dtls.schema.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code></a>’s fields minus the epoch
-and sequence number (<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html#section-5.1"><strong>RFC 9846 Section 5.1</strong></a>). <a class="reference internal" href="#pcapkit.protocols.application.tls.schema.TLS.fragment" title="pcapkit.protocols.application.tls.schema.TLS.fragment"><code class="xref py py-attr docutils literal notranslate"><span class="pre">fragment</span></code></a> is decoded
+and sequence number (<span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html#section-5.1"><strong>RFC 9846 Section 5.1</strong></a>). <a class="reference internal" href="#pcapkit.protocols.application.tls.schema.TLS.fragment" title="pcapkit.protocols.application.tls.schema.TLS.fragment"><code class="xref py py-attr docutils literal notranslate"><span class="pre">fragment</span></code></a> is decoded
 by <a class="reference internal" href="ssl.html#pcapkit.protocols.application.ssl.protocol.SSL" title="pcapkit.protocols.application.ssl.protocol.SSL"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code></a>, which DTLS shares.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.tls.schema.TLS.content_type">
@@ -1124,7 +1218,7 @@ any other record is raw <a class="reference external" href="https://docs.python.
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=77637be2"></script>
+</div><script src="../../../_static/documentation_options.js?v=baecdfc0"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

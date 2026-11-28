@@ -195,11 +195,11 @@
   <span class="sidebar-brand-text">PyPCAPKit</span>
   
 </a><nav class="sidebar-versions" aria-label="Documentation versions">
-  <p>Version <strong>1.8.1 (stable)</strong></p>
+  <p>Version <strong>1.9.0 (stable)</strong></p>
   <ul>
     <li><span aria-current="page">stable</span></li>
     <li><a href="https://pypcapkit.jarryshaw.me/en/latest/_modules/pcapkit/protocols/internet/mh/protocol.html">latest (develop)</a></li>
-    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.8.1/_modules/pcapkit/protocols/internet/mh/protocol.html">v1.8.1</a></li>
+    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.9.0/_modules/pcapkit/protocols/internet/mh/protocol.html">v1.9.0</a></li>
     <li><a href="../../../../../changelog.html">all releases</a></li>
   </ul>
   <p class="sidebar-versions-note">latest and each release are on Read the Docs</p>
@@ -236,12 +236,16 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/dtls.html">DTLS Handshake-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/sctp.html">SCTP User-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/tls.html">TLS Record Reassembly</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/index.html">Reassembled Payload Analysis</a><input aria-label="Toggle navigation of Reassembled Payload Analysis" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/ip.html">IP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/tcp.html">TCP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/dtls.html">DTLS Handshake-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/sctp.html">SCTP User-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/tls.html">TLS Record Analysis</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -267,11 +271,13 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/llc.html">LLC - Logical Link Control</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/netlink.html">Netlink - Linux Netlink Socket Framing</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/ppp.html">PPP - Point-to-Point Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/pppoe.html">PPPoE - PPP over Ethernet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/radiotap.html">Radiotap - IEEE 802.11 Radiotap Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/snap.html">SNAP - Subnetwork Access Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -331,6 +337,10 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/sslv3.html">SSLv3 - Secure Sockets Layer Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/stp.html">STP - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/stpv0.html">STPv0 - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/rstp.html">RSTP - Rapid Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/mstp.html">MSTP - Multiple Spanning Tree Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -350,6 +360,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/seqnum.html">Sequence Number Arithmetic</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
@@ -373,8 +384,9 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/const/index.html">Shared Format Constants</a><input aria-label="Toggle navigation of Shared Format Constants" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/const/capture.html">Capture-Format Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/const/ipheader.html">IP Header Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/const/tcpheader.html">TCP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/const/domain_name.html">Domain Name Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/const/ip_header.html">IP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/const/tcp_header.html">TCP Header Constants</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/context.html">Parsing Context</a></li>
@@ -389,11 +401,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/domain_name.html">Domain Name Codec</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/ext_len.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/shortread.html">Short-Read Replay</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/short_read.html">Short-Read Replay</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
@@ -418,6 +431,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/linux.html">Linux-Specific Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Constant Enumerations</a></li>
@@ -441,6 +455,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
@@ -452,6 +467,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Vendor Crawlers</a></li>
@@ -475,6 +491,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
 </ul>
@@ -489,6 +506,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.9.0.html">1.9.0 – 2026-11-28</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.8.1.html">1.8.1 – 2026-11-27</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
@@ -684,7 +702,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.extlen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ext_len_to_octets</span><span class="p">,</span> <span class="n">octets_to_ext_len</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.ext_len</span><span class="w"> </span><span class="kn">import</span> <span class="n">ext_len_to_octets</span><span class="p">,</span> <span class="n">octets_to_ext_len</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_ip_address</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.padding</span><span class="w"> </span><span class="kn">import</span> <span class="n">pad_length</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_ext.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span>
@@ -1097,18 +1115,19 @@
     <span class="n">UpdateNotificationMessage</span> <span class="k">as</span> <span class="n">Schema_UpdateNotificationMessage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.mh.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">VendorSpecificOption</span> <span class="k">as</span> <span class="n">Schema_VendorSpecificOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">fromtimestamp</span><span class="p">,</span> <span class="n">totimestamp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="n">CaughtByCaller</span><span class="p">,</span> <span class="n">EnumValueError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span>
-                                          <span class="n">UnsupportedCall</span><span class="p">)</span>
+                                          <span class="n">RegistryError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span> <span class="k">as</span> <span class="n">dt_type</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">timedelta</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span><span class="p">,</span> <span class="n">IPv6Network</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">mypy_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultArg</span><span class="p">,</span> <span class="n">KwArg</span><span class="p">,</span> <span class="n">NamedArg</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
@@ -1119,7 +1138,6 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.mh.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_Option</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.mh.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Schema_Packet</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.checksum.ip_pseudo.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP_Pseudo</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 
     <span class="n">Option</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">Enum_Option</span><span class="p">,</span> <span class="n">Data_Option</span><span class="p">]</span>
@@ -1151,6 +1169,10 @@
 <span class="c1">#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
 <span class="n">_PSEUDO_HEADER</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Any]'</span> <span class="o">=</span> \
     <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.checksum.ip_pseudo.protocol'</span><span class="p">,</span> <span class="s1">'pseudo_header'</span><span class="p">)</span>
+
+<span class="c1">#: The class an option payload is parsed as where :attr:`MH.__selector__` or</span>
+<span class="c1">#: :attr:`MH.__multicast__` holds no dissector for its format.</span>
+<span class="n">_RAW</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase]'</span> <span class="o">=</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw.protocol'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="FastBindingAcknowledgmentStatus">
@@ -1763,6 +1785,16 @@
 <span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.protocol.MH._read_ext_exp`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.protocol.MH._make_ext_exp`</span>
 
+<span class="sd">    The payloads that belong to other protocols are parsed as the protocol class</span>
+<span class="sd">    a registry holds for the octet naming their format, and are</span>
+<span class="sd">    :class:`~pcapkit.protocols.misc.raw.protocol.Raw` where none is registered:</span>
+<span class="sd">    the :rfc:`6088` traffic selectors through</span>
+<span class="sd">    :attr:`self.__selector__ &lt;pcapkit.protocols.internet.mh.protocol.MH.__selector__&gt;`,</span>
+<span class="sd">    and the MLD and IGMP records of the multicast options through</span>
+<span class="sd">    :attr:`self.__multicast__ &lt;pcapkit.protocols.internet.mh.protocol.MH.__multicast__&gt;`.</span>
+<span class="sd">    A payload is parsed apart from the frame, so it joins no protocol chain, and</span>
+<span class="sd">    a format octet its RFC rules out warns and keeps the payload raw.</span>
+
 <span class="sd">    .. versionchanged:: 1.5.0</span>
 
 <span class="sd">       * The FBU and FBack Lifetime is read and built as plain seconds, per</span>
@@ -1829,6 +1861,13 @@
 <span class="sd">       records ``checksum_status``, and :meth:`make` computes one it is not</span>
 <span class="sd">       given under :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE`, taking</span>
 <span class="sd">       it as ``checksum`` rather than ``chksum`` (:issue:`2813`).</span>
+
+<span class="sd">    .. versionchanged:: 1.9.0</span>
+
+<span class="sd">       The traffic selectors and the multicast options' payloads are parsed</span>
+<span class="sd">       through :attr:`__selector__` and :attr:`__multicast__`, rather than kept</span>
+<span class="sd">       as :obj:`bytes`, and a format octet their RFCs rule out warns</span>
+<span class="sd">       (:issue:`2937`).</span>
 
 <span class="sd">    """</span>
 
@@ -1964,6 +2003,50 @@
             <span class="n">Enum_CGAExtension</span><span class="o">.</span><span class="n">Exp_FFFF</span><span class="p">:</span> <span class="s1">'exp'</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_CGAExtension | int, str | tuple[ExtensionParser, ExtensionConstructor]]</span>
+
+    <span class="c1">#: Traffic selector format to the protocol class the traffic selector of a</span>
+    <span class="c1">#: flow identification sub-option [:rfc:`6089#section-4.2.1.4`] or a QoS</span>
+    <span class="c1">#: attribute [:rfc:`7222#section-4.2.10`] is parsed as: a</span>
+    <span class="c1">#: :class:`~pcapkit.corekit.module.ModuleDescriptor` naming it, or the class.</span>
+    <span class="c1">#: A format with no entry is :class:`~pcapkit.protocols.misc.raw.protocol.Raw`,</span>
+    <span class="c1">#: as are the :rfc:`6088` formats until a dissector registers. Format ``0``</span>
+    <span class="c1">#: is reserved, so it is never registered and its selector warns.</span>
+    <span class="n">__selector__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="n">_RAW</span><span class="p">,</span>
+        <span class="p">{</span>
+            <span class="n">Enum_TrafficSelector</span><span class="o">.</span><span class="n">IPv4_Binary_Traffic_Selector</span><span class="p">:</span> <span class="n">_RAW</span><span class="p">,</span>
+            <span class="n">Enum_TrafficSelector</span><span class="o">.</span><span class="n">IPv6_Binary_Traffic_Selector</span><span class="p">:</span> <span class="n">_RAW</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_TrafficSelector | int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]</span>
+
+    <span class="c1">#: Multicast option type and the octet naming its payload's format, to the</span>
+    <span class="c1">#: protocol class that payload is parsed as: ``protocol`` of option 54</span>
+    <span class="c1">#: [:rfc:`7028#section-5.1.2`, :rfc:`7028#section-8`], ``igmp_type`` of 56 and</span>
+    <span class="c1">#: ``mld_type`` of 57 [:rfc:`7161#section-6.1`, :rfc:`7161#section-4.1.2`,</span>
+    <span class="c1">#: :rfc:`7161#section-4.1.3`], and ``code`` of 60 and 61</span>
+    <span class="c1">#: [:rfc:`7411#section-5.3`, :rfc:`7411#section-5.4`]. Its keys are the pairs</span>
+    <span class="c1">#: those RFCs define, each :class:`~pcapkit.protocols.misc.raw.protocol.Raw`</span>
+    <span class="c1">#: until a dissector registers, so a pair it lacks is one they rule out.</span>
+    <span class="n">__multicast__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="n">_RAW</span><span class="p">,</span>
+        <span class="p">{</span>
+            <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Dynamic_IP_Multicast_Selector</span><span class="p">,</span> <span class="mh">0x12</span><span class="p">):</span> <span class="n">_RAW</span><span class="p">,</span>  <span class="c1"># IGMPv1</span>
+            <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Dynamic_IP_Multicast_Selector</span><span class="p">,</span> <span class="mh">0x16</span><span class="p">):</span> <span class="n">_RAW</span><span class="p">,</span>  <span class="c1"># IGMPv2</span>
+            <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Dynamic_IP_Multicast_Selector</span><span class="p">,</span> <span class="mh">0x22</span><span class="p">):</span> <span class="n">_RAW</span><span class="p">,</span>  <span class="c1"># IGMPv3</span>
+            <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Dynamic_IP_Multicast_Selector</span><span class="p">,</span> <span class="mi">131</span><span class="p">):</span> <span class="n">_RAW</span><span class="p">,</span>   <span class="c1"># MLDv1</span>
+            <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Dynamic_IP_Multicast_Selector</span><span class="p">,</span> <span class="mi">143</span><span class="p">):</span> <span class="n">_RAW</span><span class="p">,</span>   <span class="c1"># MLDv2</span>
+            <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Active_Multicast_Subscription_IPv4</span><span class="p">,</span> <span class="mh">0x12</span><span class="p">):</span> <span class="n">_RAW</span><span class="p">,</span>  <span class="c1"># IGMPv1</span>
+            <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Active_Multicast_Subscription_IPv4</span><span class="p">,</span> <span class="mh">0x16</span><span class="p">):</span> <span class="n">_RAW</span><span class="p">,</span>  <span class="c1"># IGMPv2</span>
+            <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Active_Multicast_Subscription_IPv4</span><span class="p">,</span> <span class="mh">0x22</span><span class="p">):</span> <span class="n">_RAW</span><span class="p">,</span>  <span class="c1"># IGMPv3</span>
+            <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Active_Multicast_Subscription_IPv6</span><span class="p">,</span> <span class="mi">131</span><span class="p">):</span> <span class="n">_RAW</span><span class="p">,</span>   <span class="c1"># MLDv1</span>
+            <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Active_Multicast_Subscription_IPv6</span><span class="p">,</span> <span class="mi">143</span><span class="p">):</span> <span class="n">_RAW</span><span class="p">,</span>   <span class="c1"># MLDv2</span>
+            <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multicast_Mobility_Option</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="n">_RAW</span><span class="p">,</span>  <span class="c1"># IGMPv3</span>
+            <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multicast_Mobility_Option</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="n">_RAW</span><span class="p">,</span>  <span class="c1"># MLDv2</span>
+            <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multicast_Mobility_Option</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span> <span class="n">_RAW</span><span class="p">,</span>  <span class="c1"># IGMPv3, IGMPv2 compatibility mode</span>
+            <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multicast_Mobility_Option</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span> <span class="n">_RAW</span><span class="p">,</span>  <span class="c1"># MLDv2, MLDv1 compatibility mode</span>
+            <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multicast_Acknowledgement_Option</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="n">_RAW</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>  <span class="c1"># type: DefaultDict[tuple[Enum_Option | int, int], ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]</span>
 
     <span class="c1">#: Whether :meth:`make` left the checksum for the enclosing IPv6 layer to</span>
     <span class="c1">#: compute, see :mod:`pcapkit.protocols.misc.checksum.ip_pseudo.protocol`.</span>
@@ -2309,6 +2392,69 @@
         <span class="bp">cls</span><span class="o">.</span><span class="n">__extension__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">meth</span></div>
 
 
+<div class="viewcode-block" id="MH.register_selector">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.MH.register_selector">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register_selector</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_TrafficSelector'</span><span class="p">,</span>
+                          <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Register the protocol class a traffic selector format is parsed as.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code: Traffic selector format, see :attr:`__selector__`.</span>
+<span class="sd">            protocol: Module descriptor or a</span>
+<span class="sd">                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RegistryError: If ``code`` is ``0``, which is reserved and must not be</span>
+<span class="sd">                used [:rfc:`6089#section-4.2.1.4`], or ``protocol`` is not a</span>
+<span class="sd">                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.</span>
+
+<span class="sd">        Warns:</span>
+<span class="sd">            RegistryWarning: If a different entry is already registered for</span>
+<span class="sd">                ``code``; it is overwritten. Handing back the entry already</span>
+<span class="sd">                stored, or one equal to it, is a silent no-op.</span>
+
+<span class="sd">        .. versionadded:: 1.9.0</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_TrafficSelector</span><span class="o">.</span><span class="n">Reserved_0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: TS format </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> is reserved and must not be used'</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_register_payload</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__selector__</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'TS format </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MH.register_multicast">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.MH.register_multicast">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register_multicast</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                           <span class="n">option</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Register the protocol class a multicast option's payload format is parsed as.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code: Octet of ``option`` naming the payload's format, see</span>
+<span class="sd">                :attr:`__multicast__`.</span>
+<span class="sd">            protocol: Module descriptor or a</span>
+<span class="sd">                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.</span>
+<span class="sd">            option: Multicast option type carrying the payload.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RegistryError: If :attr:`__multicast__` holds no entry for ``option``</span>
+<span class="sd">                and ``code``, which its RFC then does not define, or ``protocol``</span>
+<span class="sd">                is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`</span>
+<span class="sd">                subclass.</span>
+
+<span class="sd">        Warns:</span>
+<span class="sd">            RegistryWarning: If a different entry is already registered for</span>
+<span class="sd">                ``option`` and ``code``; it is overwritten. Handing back the entry</span>
+<span class="sd">                already stored, or one equal to it, is a silent no-op.</span>
+
+<span class="sd">        .. versionadded:: 1.9.0</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__multicast__</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: option </span><span class="si">{</span><span class="n">option</span><span class="si">!r}</span><span class="s1"> defines no payload format </span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_register_payload</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__multicast__</span><span class="p">,</span> <span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">code</span><span class="p">),</span> <span class="n">protocol</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'option </span><span class="si">{</span><span class="n">option</span><span class="si">}</span><span class="s1"> format </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="MH.id">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.MH.id">[docs]</a>
     <span class="nd">@classmethod</span>
@@ -2428,7 +2574,7 @@
 <span class="sd">            :class:`~pcapkit.utilities.warnings.ProtocolWarning` says so.</span>
 
 <span class="sd">            Appending is necessary rather than optional: ``length`` is</span>
-<span class="sd">            :func:`~pcapkit.corekit.schema.extlen.octets_to_ext_len` of</span>
+<span class="sd">            :func:`~pcapkit.corekit.schema.ext_len.octets_to_ext_len` of</span>
 <span class="sd">            ``len(data) + 6``, which floors, so leaving an opaque body</span>
 <span class="sd">            short would emit 10, 12 or 14 octets while declaring 8, and a parser reads</span>
 <span class="sd">            8 and misinterprets the remainder. Since the caller asked for a packet</span>
@@ -6203,12 +6349,12 @@
 <span class="sd">            The address records are :rfc:`3810#section-5.2` MLD or</span>
 <span class="sd">            :rfc:`3376#section-4.2` IGMP structures. They belong to those protocols</span>
 <span class="sd">            rather than to the mobility header, and each is self-describing through</span>
-<span class="sd">            its own auxiliary-data length and source count, so they are recorded</span>
-<span class="sd">            opaquely here rather than half-decoded.</span>
+<span class="sd">            its own auxiliary-data length and source count, so they are parsed</span>
+<span class="sd">            through :attr:`__multicast__` rather than half-decoded here.</span>
 <span class="sd">            :attr:`~pcapkit.protocols.internet.mh.data.DynamicIPMulticastSelectorOption.protocol`</span>
 <span class="sd">            says which of the two they are: ``143`` for MLDv2 and ``131`` for MLDv1,</span>
 <span class="sd">            or ``0x12``, ``0x16`` and ``0x22`` for IGMPv1 to IGMPv3</span>
-<span class="sd">            [:rfc:`7028#section-8`].</span>
+<span class="sd">            [:rfc:`7028#section-8`]; any other value warns.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            schema: Parsed option schema.</span>
@@ -6228,7 +6374,7 @@
             <span class="n">mode</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'M'</span><span class="p">]),</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="n">records</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">records</span><span class="p">,</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_multicast</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -6314,10 +6460,10 @@
 <span class="sd">            The membership context is an IGMP group address (:rfc:`1112`,</span>
 <span class="sd">            :rfc:`2236`) or an IGMPv3 group record (:rfc:`3376#section-4.2`),</span>
 <span class="sd">            which belong to IGMP rather than to the mobility header, so they are</span>
-<span class="sd">            recorded opaquely.</span>
+<span class="sd">            parsed through :attr:`__multicast__`.</span>
 <span class="sd">            :attr:`~pcapkit.protocols.internet.mh.data.ActiveMulticastSubscriptionIPv4Option.igmp_type`</span>
 <span class="sd">            says which: ``0x12`` IGMPv1,</span>
-<span class="sd">            ``0x16`` IGMPv2, ``0x22`` IGMPv3.</span>
+<span class="sd">            ``0x16`` IGMPv2, ``0x22`` IGMPv3; any other value warns.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            schema: Parsed option schema.</span>
@@ -6334,7 +6480,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">igmp_type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">igmp_type</span><span class="p">,</span>
-            <span class="n">context</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">context</span><span class="p">,</span>
+            <span class="n">context</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_multicast</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">igmp_type</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">context</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -6364,9 +6510,9 @@
 <span class="sd">            For MLDv2 the context is an :rfc:`3810#section-5.2` multicast address</span>
 <span class="sd">            record; for MLDv1 it is a reserved word followed by a multicast address</span>
 <span class="sd">            [:rfc:`7161#section-4.1.3`]. Both belong to MLD, so the context is</span>
-<span class="sd">            recorded opaquely and</span>
+<span class="sd">            parsed through :attr:`__multicast__` and</span>
 <span class="sd">            :attr:`~pcapkit.protocols.internet.mh.data.ActiveMulticastSubscriptionIPv6Option.mld_type`</span>
-<span class="sd">            says which form it is in.</span>
+<span class="sd">            says which form it is in: ``143`` or ``131``, and any other value warns.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            schema: Parsed option schema.</span>
@@ -6383,7 +6529,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">mld_type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">mld_type</span><span class="p">,</span>
-            <span class="n">context</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">context</span><span class="p">,</span>
+            <span class="n">context</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_multicast</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">mld_type</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">context</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -6541,7 +6687,7 @@
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span>
             <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_multicast</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -6585,7 +6731,7 @@
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span>
             <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
             <span class="n">status</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_multicast</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -10804,7 +10950,7 @@
                             <span class="n">protocol</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">143</span><span class="p">,</span>
                             <span class="n">mode</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                             <span class="n">records</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                            <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                            <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                             <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_DynamicIPMulticastSelectorOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH dynamic IP multicast selector option.</span>
@@ -10815,7 +10961,8 @@
 <span class="sd">            protocol: MLD or IGMP protocol number identifying the record format.</span>
 <span class="sd">            mode: Selector mode flag.</span>
 <span class="sd">            records: Number of multicast address records in ``data``.</span>
-<span class="sd">            data: Multicast address records, opaque to this module.</span>
+<span class="sd">            data: Multicast address records, as octets or as the protocol</span>
+<span class="sd">                :meth:`_read_multicast` parsed them as.</span>
 <span class="sd">            reserved: Reserved bits, i.e. the seven bits after the ``M`` flag.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -10834,6 +10981,7 @@
             <span class="n">reserved</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">records</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">records</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_payload_octets</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_DynamicIPMulticastSelectorOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
@@ -10911,7 +11059,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_ams4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span>
                                                   <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_ActiveMulticastSubscriptionIPv4Option]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                        <span class="n">igmp_type</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mh">0x22</span><span class="p">,</span>
-                       <span class="n">context</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                       <span class="n">context</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ActiveMulticastSubscriptionIPv4Option'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH active multicast subscription IPv4 option.</span>
 
@@ -10919,7 +11067,8 @@
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
 <span class="sd">            igmp_type: IGMP message type identifying the context format.</span>
-<span class="sd">            context: Multicast membership context, opaque to this module.</span>
+<span class="sd">            context: Multicast membership context, as octets or as the protocol</span>
+<span class="sd">                :meth:`_read_multicast` parsed it as.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -10933,6 +11082,7 @@
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">igmp_type</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">igmp_type</span>
             <span class="n">context</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">context</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_payload_octets</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_ActiveMulticastSubscriptionIPv4Option</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
@@ -10947,7 +11097,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_ams6</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span>
                                                   <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_ActiveMulticastSubscriptionIPv6Option]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                        <span class="n">mld_type</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">143</span><span class="p">,</span>
-                       <span class="n">context</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                       <span class="n">context</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ActiveMulticastSubscriptionIPv6Option'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH active multicast subscription IPv6 option.</span>
 
@@ -10955,7 +11105,8 @@
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
 <span class="sd">            mld_type: MLD message type identifying the context format.</span>
-<span class="sd">            context: Multicast membership context, opaque to this module.</span>
+<span class="sd">            context: Multicast membership context, as octets or as the protocol</span>
+<span class="sd">                :meth:`_read_multicast` parsed it as.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -10969,6 +11120,7 @@
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">mld_type</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">mld_type</span>
             <span class="n">context</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">context</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_payload_octets</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_ActiveMulticastSubscriptionIPv6Option</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
@@ -11093,7 +11245,7 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.MH._make_opt_mcast">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_mcast</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_MulticastMobilityOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                         <span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-                        <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                        <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                         <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_MulticastMobilityOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH multicast mobility option.</span>
@@ -11102,7 +11254,8 @@
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
 <span class="sd">            code: Option code.</span>
-<span class="sd">            data: MLD or IGMP report payload, opaque to this module.</span>
+<span class="sd">            data: MLD or IGMP report payload, as octets or as the protocol</span>
+<span class="sd">                :meth:`_read_multicast` parsed it as.</span>
 <span class="sd">            reserved: The reserved octet as captured.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -11122,6 +11275,7 @@
             <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">code</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">code</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_payload_octets</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] payload of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets is '</span>
@@ -11142,7 +11296,7 @@
                                                        <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_MulticastAcknowledgementOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                             <span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                             <span class="n">status</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-                            <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                            <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_MulticastAcknowledgementOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH multicast acknowledgement option.</span>
 
@@ -11151,7 +11305,8 @@
 <span class="sd">            option: Option data model.</span>
 <span class="sd">            code: Option code; always ``0``.</span>
 <span class="sd">            status: Status.</span>
-<span class="sd">            data: MLD or IGMP unsupported report payload, opaque to this module.</span>
+<span class="sd">            data: MLD or IGMP unsupported report payload, as octets or as the</span>
+<span class="sd">                protocol :meth:`_read_multicast` parsed it as.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -11167,6 +11322,7 @@
             <span class="n">code</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">code</span>
             <span class="n">status</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">status</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_payload_octets</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] payload of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets is '</span>
@@ -11847,7 +12003,7 @@
                     <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">selector</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">ts_format</span><span class="o">=</span><span class="n">selector</span><span class="o">.</span><span class="n">ts_format</span><span class="p">,</span>
                     <span class="n">reserved</span><span class="o">=</span><span class="n">selector</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
-                    <span class="n">selector</span><span class="o">=</span><span class="n">selector</span><span class="o">.</span><span class="n">selector</span><span class="p">,</span>
+                    <span class="n">selector</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_selector</span><span class="p">(</span><span class="n">selector</span><span class="o">.</span><span class="n">ts_format</span><span class="p">,</span> <span class="n">selector</span><span class="o">.</span><span class="n">selector</span><span class="p">),</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_FlowIDSuboption</span><span class="o">.</span><span class="n">Flow_Binding_Action</span><span class="p">:</span>
                 <span class="n">action</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_FlowBindingActionSuboption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
@@ -12089,7 +12245,7 @@
                     <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">selector</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">reserved</span><span class="o">=</span><span class="n">selector</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
                     <span class="n">ts_format</span><span class="o">=</span><span class="n">selector</span><span class="o">.</span><span class="n">ts_format</span><span class="p">,</span>
-                    <span class="n">selector</span><span class="o">=</span><span class="n">selector</span><span class="o">.</span><span class="n">selector</span><span class="p">,</span>
+                    <span class="n">selector</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_selector</span><span class="p">(</span><span class="n">selector</span><span class="o">.</span><span class="n">ts_format</span><span class="p">,</span> <span class="n">selector</span><span class="o">.</span><span class="n">selector</span><span class="p">),</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_QoSAttribute</span><span class="o">.</span><span class="n">QoS_Vendor_Specific_Attribute</span><span class="p">:</span>
                 <span class="n">vendor</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_QoSVendorSpecificAttribute'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
@@ -12492,13 +12648,13 @@
             <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">selector_opt</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_TrafficSelectorSuboption'</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
                 <span class="n">ts_format</span> <span class="o">=</span> <span class="n">selector_opt</span><span class="o">.</span><span class="n">ts_format</span>  <span class="c1"># type: Enum_TrafficSelector | int</span>
-                <span class="n">selector</span> <span class="o">=</span> <span class="n">selector_opt</span><span class="o">.</span><span class="n">selector</span>
+                <span class="n">selector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_payload_octets</span><span class="p">(</span><span class="n">selector_opt</span><span class="o">.</span><span class="n">selector</span><span class="p">)</span>
                 <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">selector_opt</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ts_format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span>
                     <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'ts_format'</span><span class="p">,</span> <span class="n">Enum_TrafficSelector</span><span class="o">.</span><span class="n">IPv6_Binary_Traffic_Selector</span><span class="p">),</span>
                     <span class="n">Enum_TrafficSelector</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'TS format'</span><span class="p">)</span>
-                <span class="n">selector</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'selector'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">))</span>
+                <span class="n">selector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_payload_octets</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'bytes | ProtocolBase'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'selector'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)))</span>
                 <span class="n">reserved</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">Schema_TrafficSelectorSuboption</span><span class="p">(</span>
                 <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">2</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">selector</span><span class="p">),</span>
@@ -12835,13 +12991,13 @@
             <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">ts_attr</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_QoSTrafficSelectorAttribute'</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
                 <span class="n">ts_format</span> <span class="o">=</span> <span class="n">ts_attr</span><span class="o">.</span><span class="n">ts_format</span>  <span class="c1"># type: Enum_TrafficSelector | int</span>
-                <span class="n">selector</span> <span class="o">=</span> <span class="n">ts_attr</span><span class="o">.</span><span class="n">selector</span>
+                <span class="n">selector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_payload_octets</span><span class="p">(</span><span class="n">ts_attr</span><span class="o">.</span><span class="n">selector</span><span class="p">)</span>
                 <span class="n">octets</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ts_attr</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ts_format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span>
                     <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'ts_format'</span><span class="p">,</span> <span class="n">Enum_TrafficSelector</span><span class="o">.</span><span class="n">IPv6_Binary_Traffic_Selector</span><span class="p">),</span>
                     <span class="n">Enum_TrafficSelector</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'TS format'</span><span class="p">)</span>
-                <span class="n">selector</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'selector'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">))</span>
+                <span class="n">selector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_payload_octets</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'bytes | ProtocolBase'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'selector'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)))</span>
                 <span class="n">octets</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">Schema_QoSTrafficSelectorAttribute</span><span class="p">(</span>
                 <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">2</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">selector</span><span class="p">),</span>
@@ -13073,6 +13229,150 @@
         <span class="k">return</span> <span class="n">extensions_list</span><span class="p">,</span> <span class="n">total_length</span></div>
 
 
+<div class="viewcode-block" id="MH._read_selector">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.MH._read_selector">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_selector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_TrafficSelector'</span><span class="p">,</span> <span class="n">selector</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read a traffic selector as the class :attr:`__selector__` holds for its format.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code: Traffic selector format.</span>
+<span class="sd">            selector: Traffic selector octets.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The parsed selector, as :meth:`_dispatch_payload` returns it.</span>
+
+<span class="sd">        Warns:</span>
+<span class="sd">            ProtocolWarning: If ``code`` is ``0``, which is reserved and must not be</span>
+<span class="sd">                used [:rfc:`6089#section-4.2.1.4`, :rfc:`7222#section-4.2.10`]; the</span>
+<span class="sd">                selector is then kept raw.</span>
+
+<span class="sd">        .. versionadded:: 1.9.0</span>
+
+<span class="sd">        """</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_TrafficSelector</span><span class="o">.</span><span class="n">Reserved_0</span><span class="p">:</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: TS format </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> is reserved and must not be used'</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dispatch_payload</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__selector__</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MH._read_multicast">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.MH._read_multicast">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_multicast</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read a multicast option's payload as the class :attr:`__multicast__` holds for it.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            option: Multicast option type.</span>
+<span class="sd">            code: Octet of the option naming the payload's format.</span>
+<span class="sd">            payload: Payload octets.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The parsed payload, as :meth:`_dispatch_payload` returns it.</span>
+
+<span class="sd">        Warns:</span>
+<span class="sd">            ProtocolWarning: If :attr:`__multicast__` holds no entry for ``option``</span>
+<span class="sd">                and ``code``, a format the option's RFC does not define</span>
+<span class="sd">                [:rfc:`7028#section-5.1.2`, :rfc:`7161#section-4.1.2`,</span>
+<span class="sd">                :rfc:`7411#section-5.3`]; the payload is then kept raw.</span>
+
+<span class="sd">        .. versionadded:: 1.9.0</span>
+
+<span class="sd">        """</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__multicast__</span><span class="p">:</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Opt </span><span class="si">{</span><span class="n">option</span><span class="si">}</span><span class="s1">] payload format </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> is not one its RFC defines'</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dispatch_payload</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__multicast__</span><span class="p">,</span> <span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">code</span><span class="p">),</span> <span class="n">code</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MH._dispatch_payload">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.MH._dispatch_payload">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_dispatch_payload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">registry</span><span class="p">:</span> <span class="s1">'DefaultDict[Any, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]'</span><span class="p">,</span>
+                          <span class="n">key</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Parse an option payload as the class ``registry`` holds for ``key``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            registry: :attr:`__selector__` or :attr:`__multicast__`.</span>
+<span class="sd">            key: Registry key of the payload.</span>
+<span class="sd">            code: Octet naming the payload's format, the parsed payload's ``alias``.</span>
+<span class="sd">            payload: Payload octets.</span>
+<span class="sd">            error: Why the payload's format is not one its RFC defines, if so.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The parsed payload, as</span>
+<span class="sd">            :meth:`~pcapkit.protocols.protocol.ProtocolBase._analyze_next_layer`</span>
+<span class="sd">            keeps it: :class:`~pcapkit.protocols.misc.raw.protocol.Raw` where no</span>
+<span class="sd">            dissector is registered or the one registered refuses it, and</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` if empty.</span>
+<span class="sd">            It is parsed apart from the frame, so it joins no protocol chain.</span>
+
+<span class="sd">        Warns:</span>
+<span class="sd">            ProtocolWarning: With ``error``, which the raw payload keeps too.</span>
+
+<span class="sd">        """</span>
+        <span class="n">klass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="n">registry</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_analyze_next_layer</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+        <span class="n">warn</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_analyze_next_layer</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">error</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MH._payload_octets">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.MH._payload_octets">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_payload_octets</span><span class="p">(</span><span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The octets of an option payload, given as :obj:`bytes` or as a parsed protocol.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            payload: Payload, as a maker takes it.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ``payload`` itself, or its :attr:`~pcapkit.protocols.protocol.ProtocolBase.data`.</span>
+
+<span class="sd">        .. versionadded:: 1.9.0</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">payload</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">return</span> <span class="n">payload</span></div>
+
+
+<div class="viewcode-block" id="MH._register_payload">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.MH._register_payload">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_register_payload</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">registry</span><span class="p">:</span> <span class="s1">'DefaultDict[Any, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]'</span><span class="p">,</span>
+                          <span class="n">key</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
+                          <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Write the class a payload is parsed as, for :meth:`register_selector`</span>
+<span class="sd">        and :meth:`register_multicast`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            registry: :attr:`__selector__` or :attr:`__multicast__`.</span>
+<span class="sd">            key: Registry key.</span>
+<span class="sd">            protocol: Module descriptor or a</span>
+<span class="sd">                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.</span>
+<span class="sd">            name: How the warning names ``key``.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RegistryError: If ``protocol`` is not a</span>
+<span class="sd">                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.</span>
+
+<span class="sd">        Warns:</span>
+<span class="sd">            RegistryWarning: If a different entry is already registered for</span>
+<span class="sd">                ``key``; it is overwritten.</span>
+
+<span class="sd">        .. versionadded:: 1.9.0</span>
+
+<span class="sd">        """</span>
+        <span class="n">klass</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">)</span> <span class="k">else</span> <span class="n">protocol</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: protocol must be a Protocol subclass, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="n">protocol</span> <span class="ow">or</span> <span class="n">incumbent</span> <span class="o">==</span> <span class="n">protocol</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> already registered, overwriting </span><span class="si">{</span><span class="n">incumbent</span><span class="si">!r}</span><span class="s1"> with </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+        <span class="n">registry</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span></div>
+
+
 <div class="viewcode-block" id="MH._verify_pseudo_checksum">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.MH._verify_pseudo_checksum">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_verify_pseudo_checksum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pseudo</span><span class="p">:</span> <span class="s1">'Optional[IP_Pseudo]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
@@ -13130,7 +13430,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=77637be2"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=baecdfc0"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

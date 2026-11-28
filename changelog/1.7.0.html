@@ -202,11 +202,11 @@
   <span class="sidebar-brand-text">PyPCAPKit</span>
   
 </a><nav class="sidebar-versions" aria-label="Documentation versions">
-  <p>Version <strong>1.8.1 (stable)</strong></p>
+  <p>Version <strong>1.9.0 (stable)</strong></p>
   <ul>
     <li><span aria-current="page">stable</span></li>
     <li><a href="https://pypcapkit.jarryshaw.me/en/latest/changelog/1.7.0.html">latest (develop)</a></li>
-    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.8.1/changelog/1.7.0.html">v1.8.1</a></li>
+    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.9.0/changelog/1.7.0.html">v1.9.0</a></li>
     <li><a href="../changelog.html">all releases</a></li>
   </ul>
   <p class="sidebar-versions-note">latest and each release are on Read the Docs</p>
@@ -243,12 +243,16 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/foundation/reassembly/dtls.html">DTLS Handshake-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/foundation/reassembly/sctp.html">SCTP User-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/foundation/reassembly/tls.html">TLS Record Reassembly</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../pcapkit/foundation/analysis/index.html">Reassembled Payload Analysis</a><input aria-label="Toggle navigation of Reassembled Payload Analysis" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/foundation/analysis/ip.html">IP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/foundation/analysis/tcp.html">TCP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/foundation/analysis/dtls.html">DTLS Handshake-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/foundation/analysis/sctp.html">SCTP User-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/foundation/analysis/tls.html">TLS Record Analysis</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../pcapkit/foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -274,11 +278,13 @@
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/llc.html">LLC - Logical Link Control</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/netlink.html">Netlink - Linux Netlink Socket Framing</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/ppp.html">PPP - Point-to-Point Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/pppoe.html">PPPoE - PPP over Ethernet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/radiotap.html">Radiotap - IEEE 802.11 Radiotap Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/snap.html">SNAP - Subnetwork Access Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -338,6 +344,10 @@
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/sslv3.html">SSLv3 - Secure Sockets Layer Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/stp.html">STP - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/stpv0.html">STPv0 - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/rstp.html">RSTP - Rapid Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/mstp.html">MSTP - Multiple Spanning Tree Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -357,6 +367,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/seqnum.html">Sequence Number Arithmetic</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
@@ -380,8 +391,9 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../pcapkit/corekit/const/index.html">Shared Format Constants</a><input aria-label="Toggle navigation of Shared Format Constants" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/const/capture.html">Capture-Format Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/const/ipheader.html">IP Header Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/const/tcpheader.html">TCP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/const/domain_name.html">Domain Name Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/const/ip_header.html">IP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/const/tcp_header.html">TCP Header Constants</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/context.html">Parsing Context</a></li>
@@ -396,11 +408,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/domain_name.html">Domain Name Codec</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/ext_len.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/shortread.html">Short-Read Replay</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/short_read.html">Short-Read Replay</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
@@ -425,6 +438,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/linux.html">Linux-Specific Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Constant Enumerations</a></li>
@@ -448,6 +462,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
@@ -459,6 +474,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Vendor Crawlers</a></li>
@@ -482,6 +498,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
 </ul>
@@ -496,6 +513,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" checked="" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="1.9.0.html">1.9.0 – 2026-11-28</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1.8.1.html">1.8.1 – 2026-11-27</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">1.7.0 – 2026-11-25</a></li>
@@ -624,9 +642,9 @@ and registry interfaces take keyword-only parameters, one name per concept.</p>
 <section id="added">
 <h3>Added<a class="headerlink" href="#added" title="Link to this heading">¶</a></h3>
 <ul class="simple">
-<li><p><a class="reference internal" href="../pcapkit/corekit/schema/extlen.html#module-pcapkit.corekit.schema.extlen" title="pcapkit.corekit.schema.extlen"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.extlen</span></code></a>, whose
-<a class="reference internal" href="../pcapkit/corekit/schema/extlen.html#pcapkit.corekit.schema.extlen.ext_len_to_octets" title="pcapkit.corekit.schema.extlen.ext_len_to_octets"><code class="xref py py-func docutils literal notranslate"><span class="pre">ext_len_to_octets()</span></code></a> and
-<a class="reference internal" href="../pcapkit/corekit/schema/extlen.html#pcapkit.corekit.schema.extlen.octets_to_ext_len" title="pcapkit.corekit.schema.extlen.octets_to_ext_len"><code class="xref py py-func docutils literal notranslate"><span class="pre">octets_to_ext_len()</span></code></a> convert a length field
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.extlen</span></code>, whose
+<code class="xref py py-func docutils literal notranslate"><span class="pre">ext_len_to_octets()</span></code> and
+<code class="xref py py-func docutils literal notranslate"><span class="pre">octets_to_ext_len()</span></code> convert a length field
 counting 8-octet units past the first 8 (<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6564.html#section-4"><strong>RFC 6564 Section 4</strong></a>) – the IPv6
 extension headers’ Hdr Ext Len, MH’s Header Len and HIP’s Header Length – to a
 header’s octets and back, rounding down (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2854">#2854</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2871">#2871</a>). Those
@@ -643,8 +661,8 @@ moved with no re-export at its old path (<a class="extlink-issue reference exter
 code outside its own protocol or family reads moves to a topic module of
 <a class="reference internal" href="../pcapkit/corekit/const/index.html#module-pcapkit.corekit.const" title="pcapkit.corekit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.const</span></code></a>, a package that exports nothing itself:
 <a class="reference internal" href="../pcapkit/corekit/const/capture.html#module-pcapkit.corekit.const.capture" title="pcapkit.corekit.const.capture"><code class="xref py py-mod docutils literal notranslate"><span class="pre">capture</span></code></a> for the PCAP and PCAP-NG ones,
-<a class="reference internal" href="../pcapkit/corekit/const/ipheader.html#module-pcapkit.corekit.const.ipheader" title="pcapkit.corekit.const.ipheader"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ipheader</span></code></a> for the IPv4, IPv6 and AH ones, and
-<a class="reference internal" href="../pcapkit/corekit/const/tcpheader.html#module-pcapkit.corekit.const.tcpheader" title="pcapkit.corekit.const.tcpheader"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tcpheader</span></code></a> for TCP’s. A constant only a protocol
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">ipheader</span></code> for the IPv4, IPv6 and AH ones, and
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">tcpheader</span></code> for TCP’s. A constant only a protocol
 package’s own modules read moves to a <code class="docutils literal notranslate"><span class="pre">const</span></code> module in that package, and
 one a family shares to its base package’s, as
 <a class="reference internal" href="../pcapkit/protocols/application/ssl.html#module-pcapkit.protocols.application.ssl.const" title="pcapkit.protocols.application.ssl.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ssl.const</span></code></a> holds those of TLS and DTLS.
@@ -986,7 +1004,7 @@ Report’s records as <a class="reference internal" href="../pcapkit/protocols/i
 with IGMPv3’s record types, and rebuild byte-exact, whole or cut
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2812">#2812</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2818">#2818</a>). A Query of 28 octets or more is MLDv2’s;
 <code class="docutils literal notranslate"><span class="pre">make()</span></code> takes a Query’s <code class="docutils literal notranslate"><span class="pre">version</span></code> and refuses MLDv2’s fields in an MLDv1
-Query. <a class="reference internal" href="../pcapkit/corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.hoist_short_read" title="pcapkit.corekit.schema.shortread.hoist_short_read"><code class="xref py py-func docutils literal notranslate"><span class="pre">hoist_short_read()</span></code></a> records on
+Query. <code class="xref py py-func docutils literal notranslate"><span class="pre">hoist_short_read()</span></code> records on
 the header a cut inside an MLDv2 or IGMPv3 body.</p></li>
 <li><p><a class="reference internal" href="../pcapkit/protocols/misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.protocol.compute_upper" title="pcapkit.protocols.misc.checksum.ip_pseudo.protocol.compute_upper"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_upper()</span></code></a>,
 through which <a class="reference internal" href="../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6.make" title="pcapkit.protocols.internet.ipv6.protocol.IPv6.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6.make</span></code></a>
@@ -1144,7 +1162,7 @@ then refused it: in 1.6.x, TCP from 3 octets raised
 and ICMPv6 raised too, while UDP parsed. Every protocol now reads such a cut
 as a quiet short read and rebuilds it as captured, as inside a frame, its
 checks of a header length, version or length leaving a zero the cut left to
-the short read, as <a class="reference internal" href="../pcapkit/corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.cut_on_its_own" title="pcapkit.corekit.schema.shortread.cut_on_its_own"><code class="xref py py-func docutils literal notranslate"><span class="pre">cut_on_its_own()</span></code></a>
+the short read, as <code class="xref py py-func docutils literal notranslate"><span class="pre">cut_on_its_own()</span></code>
 tells them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2887">#2887</a>). ICMP and ICMPv6 messages cut inside
 their fixed fields, which raised <code class="docutils literal notranslate"><span class="pre">Field</span> <span class="pre">data</span> <span class="pre">resolved</span> <span class="pre">to</span> <span class="pre">a</span> <span class="pre">negative</span> <span class="pre">length</span></code>,
 read the same way (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2848">#2848</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2876">#2876</a>). A cut inside a TCP or IPv4
@@ -1328,7 +1346,7 @@ list in step with the tier file (<a class="extlink-issue reference external" hre
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=77637be2"></script>
+</div><script src="../_static/documentation_options.js?v=baecdfc0"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

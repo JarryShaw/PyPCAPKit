@@ -9,7 +9,7 @@ Help Wanted
    raised; here an implemented proposal is described as implemented, and only open
    work is asked for. Leave notes in the thread rather than against this page.
 
-Pull requests for anything still open, and new ideas of your own, are very
+Pull requests for any open item, and new ideas of your own, are very
 welcome. For questions, leave a note in the `discussion thread
 <https://github.com/JarryShaw/PyPCAPKit/discussions/106>`__ or under the `Q&A
 category <https://github.com/JarryShaw/PyPCAPKit/discussions/categories/q-a>`__.
@@ -34,20 +34,23 @@ as sketched in
 whose reply is the closest thing to a step-by-step guide. Outstanding, by TCP/IP
 layer and alphabetically, each with its issue:
 
-* Link Layer: EAPOL (:issue:`2974`), FDDI (:issue:`3005`), LLC/SNAP
-  (:issue:`2936`)
-* Internet Layer: Neighbor Discovery, in ICMPv6 (:issue:`2934`); Shim6
-  (:issue:`3014`), which
+* Link Layer: EAPOL (:issue:`2974`), FDDI (:issue:`3005`), Geneve (:issue:`3113`),
+  VXLAN (:issue:`3112`)
+* Internet Layer: Shim6 (:issue:`3014`), which
   :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext` frames without
   decoding its message bodies
 * Transport Layer: QUIC (:issue:`3001`)
-* Application Layer: BGP (:issue:`2981`), DHCP (:issue:`2959`), DHCPv6
-  (:issue:`2973`), IMAP (:issue:`2972`), LDAP (:issue:`2988`), MQTT
-  (:issue:`2977`), NNTP (:issue:`2980`), NTP (:issue:`2968`), ONC/RPC
-  (:issue:`2992`), POP (:issue:`2964`), RIP (:issue:`2982`), RSVP
-  (:issue:`2985`), RTP (:issue:`2995`), SIP (:issue:`2998`), SMTP
-  (:issue:`2960`), SNMP (:issue:`2979`), SSH (:issue:`2967`), Telnet
-  (:issue:`3004`), XMPP (:issue:`3020`)
+* Application Layer: BFD (:issue:`3118`), BGP (:issue:`2981`), DHCP
+  (:issue:`2959`), DHCPv6 (:issue:`2973`), IKE (:issue:`3125`), IMAP
+  (:issue:`2972`), Kerberos (:issue:`3122`), LACP (:issue:`3116`), LDAP
+  (:issue:`2988`), LLDP (:issue:`3114`), mDNS and LLMNR (:issue:`3128`), MQTT
+  (:issue:`2977`), NetBIOS (:issue:`3120`), NNTP (:issue:`2980`), NTP
+  (:issue:`2968`), ONC/RPC (:issue:`2992`), OSPF's packet bodies and LSAs
+  (:issue:`3119`), POP (:issue:`2964`), RADIUS (:issue:`3123`), RIP
+  (:issue:`2982`), RSVP (:issue:`2985`), RTP (:issue:`2995`), SIP (:issue:`2998`),
+  SMB (:issue:`3121`), SMTP (:issue:`2960`), SNMP (:issue:`2979`), SSDP
+  (:issue:`3129`), SSH (:issue:`2967`), syslog (:issue:`3127`), Telnet
+  (:issue:`3004`), VRRP (:issue:`3117`), XMPP (:issue:`3020`)
 
 QUIC and RSVP sit where :issue:`2805` placed them: QUIC in transport, and RSVP in
 application beside OSPF.
@@ -62,12 +65,17 @@ itself, and ASN.1 or XML payloads go through |pycrate|_ or another parser, as
 MLDv1 and MLDv2 in :class:`~pcapkit.protocols.internet.icmpv6.protocol.ICMPv6`
 (:issue:`2812`).
 
-Neighbor Discovery (:issue:`2934`) is still open. Its messages (:rfc:`4861`),
-ICMPv6 types 133 to 137, belong to ICMPv6 rather than to a protocol of their own;
-like any type
-:attr:`ICMPv6.__type__ <pcapkit.protocols.internet.icmpv6.protocol.ICMPv6.__type__>`
-does not register, each is read today down to its type, code and checksum, with
-its body kept raw.
+**Done** in 1.9.0:
+
+* Neighbor Discovery in ICMPv6 (:issue:`2934`): types 133 to 137 (:rfc:`4861`),
+  and their options through
+  :attr:`ICMPv6.__option__ <pcapkit.protocols.internet.icmpv6.protocol.ICMPv6.__option__>`;
+  an option with no entry there keeps its octets.
+* :class:`~pcapkit.protocols.link.llc.protocol.LLC` and
+  :class:`~pcapkit.protocols.link.snap.protocol.SNAP` (:issue:`2936`), behind an
+  802.3 length field, an 802.11 data frame carrying an MSDU, and ``ATM_RFC1483``.
+* STP, RSTP and MSTP behind LLC address ``0x42``, as the members of
+  :class:`~pcapkit.protocols.application.stp.protocol.STP` (:issue:`3115`).
 
 ECN is decoded where its bits are a field of their own: IPv4's as ``tos.ecn``, a
 :class:`~pcapkit.const.ipv4.tos_ecn.ToSECN`, beside its precedence and
@@ -120,7 +128,7 @@ identifier* of the first DATA or I-DATA chunk through
 numbers, so :func:`~pcapkit.foundation.registry.protocols.transport.register_apptype`
 deliberately does not fan out to it.
 
-Still wanted are the registered-but-unimplemented type codes. IANA registers
+The registered-but-unimplemented type codes are wanted. IANA registers
 more chunk types, chunk parameters and error causes than these
 (:doc:`/pcapkit/const/sctp` lists them), and the surplus falls through to the
 generic handlers: a capture using one parses, but yields an opaque chunk
@@ -128,9 +136,9 @@ instead of its fields. AUTH, ASCONF, ASCONF-ACK, RE-CONFIG and the DTLS chunk,
 with their parameters and error causes, and the Zero Checksum Acceptable
 parameter, are :issue:`2989`.
 
-SCTP also wants its user messages reassembled (:issue:`2935`) and every DATA or
-I-DATA chunk of a bundle dispatched, not only the first (:issue:`2993`) -- see
-`Reassembly Beyond IP and TCP`_ below.
+**Done** in 1.9.0: its user messages are reassembled (:issue:`2935`), as
+`Reassembly Beyond IP and TCP`_ below describes. Dispatching every DATA or
+I-DATA chunk of a bundle, not only the first, is :issue:`2993`.
 
 ESP
 ~~~
@@ -139,7 +147,7 @@ ESP
 decrypts when a Security Association is supplied through the protocol keyed
 :mod:`pcapkit.corekit.context` channel.
 
-Still wanted is wider algorithm coverage. The enumerations
+Wider algorithm coverage is wanted. The enumerations
 under :doc:`/pcapkit/const/esp` --
 :class:`~pcapkit.const.esp.cipher.Cipher` and
 :class:`~pcapkit.const.esp.integrity.Integrity` -- carry every transform IANA has
@@ -205,49 +213,31 @@ mobility anchor address option codes of :rfc:`5949#section-6.2.2`
 (:class:`~pcapkit.protocols.internet.mh.protocol.LMAAddressCode`). Sets from :rfc:`5568`
 live there alongside them.
 
-What is left, and why:
+**Done** in 1.9.0 (:issue:`2937`): **the payloads that belong to another
+protocol** -- the :rfc:`3810` MLD or :rfc:`3376` IGMP address records of the
+multicast options (54, 56, 57, 60 and 61), and the :rfc:`6088` range lists of the
+traffic selectors of :rfc:`6089` and :rfc:`7222` -- are parsed as the protocol class
+a **per-payload registry** holds, and are
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw` where none is registered, as an
+unregistered dispatch is everywhere else in the package.
+:attr:`MH.__selector__ <pcapkit.protocols.internet.mh.protocol.MH.__selector__>` is
+keyed on
+:attr:`~pcapkit.protocols.internet.mh.schema.TrafficSelectorSuboption.ts_format`,
+and :attr:`MH.__multicast__ <pcapkit.protocols.internet.mh.protocol.MH.__multicast__>`
+on the option and the octet naming its payload's format: ``protocol`` on option 54,
+``igmp_type`` and ``mld_type`` on 56 and 57, and ``code`` on 60 and 61. Not the
+``M`` flag on option 54, which selects the routing mode rather than the record
+format [:rfc:`7028#section-5.1.2`]. A format octet its RFC rules out warns and
+keeps the payload raw.
 
-* **Payloads that belong to another protocol** are carried opaquely. The
-  multicast options (54, 56, 57, 60 and 61) embed :rfc:`3810` MLD or :rfc:`3376`
-  IGMP address records, and the traffic selectors of :rfc:`6089` and :rfc:`7222`
-  embed the flag-driven range lists of :rfc:`6088`. Each is a separate registry
-  with its own dissector's worth of structure; the mobility options around them
-  are fully decoded, and each records which format its payload is in.
+A payload is parsed apart from the frame rather than through
+:meth:`~pcapkit.protocols.protocol.Protocol._decode_next_layer`, which appends to
+the frame's protocol chain: an MLD address record inside a mobility option does not
+follow MH on the wire, so in that chain ``layer=`` and ``protocol=`` limits would
+behave wrongly.
 
-  What is wanted is to carry these as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
-  rather than as bare :obj:`bytes`, dispatched through a **per-payload registry**
-  in the style of :attr:`MH.__option__ <pcapkit.protocols.internet.mh.protocol.MH.__option__>`,
-  keyed on the field that already names the format --
-  :attr:`~pcapkit.protocols.internet.mh.schema.TrafficSelectorSuboption.ts_format`
-  for the traffic selectors, and on the multicast options the message-type octet
-  each carries: ``protocol`` on option 54, ``igmp_type`` and ``mld_type`` on 56
-  and 57, and ``code`` on 60. Not the ``M`` flag on option 54, which selects the
-  routing mode rather than the record format [:rfc:`7028#section-5.1.2`].
-  :class:`~pcapkit.protocols.misc.raw.protocol.Raw` is already what an unregistered dispatch falls back
-  to everywhere else in the package, so this makes the mobility header consistent
-  with the rest rather than inventing a convention; and once a dissector for one
-  of these formats exists, registering it needs no change at the option site.
-  The registry is :issue:`2937`; the dissectors it would register are
-  :issue:`2994` for the MLD and IGMPv3 records and :issue:`2990` for the
-  :rfc:`6088` traffic selectors.
-
-  None of those keys is checked against the values its RFC allows, on
-  either side. :rfc:`7028` says ``protocol`` MUST be 143 or 131 for MLD, or
-  ``0x12``, ``0x16`` or ``0x22`` for IGMP, yet
-  :meth:`~pcapkit.protocols.internet.mh.protocol.MH._make_opt_mcast_sel` builds and
-  :meth:`~pcapkit.protocols.internet.mh.protocol.MH._read_opt_mcast_sel` parses any octet
-  without a warning, and the other keys behave the same. The registry is
-  where an unknown key would first be noticed, so the check belongs there rather
-  than in each maker separately, and :issue:`2937` carries it.
-
-  It wants a registry of its own rather than
-  :meth:`~pcapkit.protocols.protocol.Protocol._decode_next_layer`, which is
-  only ever called at a layer boundary and appends to the frame's protocol chain.
-  An MLD address record inside a mobility option does not follow MH on the wire,
-  so putting it in that chain would make ``layer=`` and ``protocol=`` limits
-  behave wrongly. Changing the parsed shape from :obj:`bytes` to
-  :class:`~pcapkit.protocols.misc.raw.protocol.Raw` also changes what existing captures dump to, so
-  it is its own change.
+What is left is the dissectors to register: :issue:`2994` for the MLD and IGMPv3
+records and :issue:`2990` for the :rfc:`6088` traffic selectors.
 
 Wire-format traps are worth knowing before touching this code, since each
 looks like an ordinary field and is not:
@@ -289,9 +279,14 @@ Every other handshake message is message-TYPE-level framing only; decoding their
 bodies, and heartbeat and ACK records, is :issue:`2969`. Decryption is a
 separate question and is not needed to make the record structure legible, in
 the same way :class:`ESP <pcapkit.protocols.internet.esp.protocol.ESP>` parses
-without keys. **Still open:** a TLS record split across TCP segments is not
-reassembled, and stays :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
-(:issue:`2938`).
+without keys.
+
+**Done** in 1.9.0: reassembling the TLS records of a TCP stream, a record split
+across segments included (:issue:`2938`), via
+:class:`~pcapkit.foundation.reassembly.tls.reassembly.TLS`. ``reassembly=['tls']``
+opts in, on every engine with a TCP adapter, and
+:func:`~pcapkit.foundation.analysis.tls.tls_record` decodes each record. In the
+frame itself a split record stays :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
 
 **Done** for SSLv2 too (draft-hickman-netscape-ssl-00, :issue:`2457`):
 :class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2` shares
@@ -341,9 +336,9 @@ each is bound to a dissector; everything else resolves to
 complaint and yields nothing useful.
 
 * :class:`~pcapkit.const.reg.linktype.LinkType` --
-  ``NULL``, ``ETHERNET``, ``PPP``, ``PPP_HDLC``, ``PPP_ETHER``, ``IEEE802_11``,
-  ``FRELAY``, ``LOOP``, ``LINUX_SLL``, ``IEEE802_11_RADIOTAP``, ``IPV4``, ``IPV6``
-  and ``LINUX_SLL2``, declared identically
+  ``NULL``, ``ETHERNET``, ``PPP``, ``PPP_HDLC``, ``PPP_ETHER``, ``ATM_RFC1483``,
+  ``IEEE802_11``, ``FRELAY``, ``LOOP``, ``LINUX_SLL``, ``IEEE802_11_RADIOTAP``,
+  ``IPV4``, ``IPV6`` and ``LINUX_SLL2``, declared identically
   in :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame` and
   :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`, which also read ``RAW`` as
   ``IPV4`` or ``IPV6`` by its version nibble.
@@ -352,13 +347,21 @@ complaint and yields nothing useful.
   <pcapkit.protocols.internet.internet.Internet.__proto__>`.
 * :class:`~pcapkit.const.reg.ethertype.EtherType` -- the values in
   :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`: ARP,
-  RARP, IPv4, IPv6, IPX, PPP, both PPPoE stages and both VLAN tags.
+  RARP, IPv4, IPv6, IPX, PPP, both PPPoE stages and both VLAN tags. Handing
+  Transparent Ethernet Bridging, ``0x6558``, and IP protocol 143 on to Ethernet is
+  :issue:`3111`.
+* :class:`~pcapkit.const.llc.lsap.LSAP` -- the values in :attr:`LLC.__proto__
+  <pcapkit.protocols.link.llc.protocol.LLC.__proto__>`: ``0x42`` to STP and ``0xAA``
+  to SNAP, each as DSAP and SSAP both. Behind SNAP, the OUI ``00-00-00`` hands its
+  protocol identifier on as an EtherType, and any other OUI is
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
 * :class:`~pcapkit.const.reg.apptype.apptype.AppType` -- the ports bound in
   :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.protocol.TCP.__proto__>` and
   :attr:`UDP.__proto__ <pcapkit.protocols.transport.udp.protocol.UDP.__proto__>`, out of
   a registry carrying every IANA service name: TCP 20 to FTP-DATA, 21 to FTP and
   443 to TLS, ports 53 to DNS and 80 and 8080 to HTTP on both TCP and UDP, and UDP
-  1701 to L2TPv2 and 5684 to DTLS. :attr:`DCCP.__proto__
+  1701 to L2TPv2 and 5684 to DTLS. Demultiplexing UDP 4500 into ESP, IKE and
+  NAT-keepalive is :issue:`3124`. :attr:`DCCP.__proto__
   <pcapkit.protocols.transport.dccp.protocol.DCCP.__proto__>`, keyed by the same
   registry, binds no port, so every DCCP payload is
   :class:`~pcapkit.protocols.misc.raw.protocol.Raw` until something calls
@@ -370,8 +373,9 @@ complaint and yields nothing useful.
   (:issue:`2460`): ``NETLINK``, ``IPGRE``, ``IP6GRE``, ``FRAD`` and
   ``IEEE80211_RADIOTAP``. Behind radiotap,
   :class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11` dissects the MAC header
-  and keeps the frame body :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
-  (:issue:`2575`): a data frame's LLC/SNAP is :issue:`2936`, and management frame
+  (:issue:`2575`), and the body of a data frame carrying an MSDU as
+  :class:`~pcapkit.protocols.link.llc.protocol.LLC` (:issue:`2936`); any other frame
+  body stays :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, and management frame
   bodies are :issue:`2975`.
 * :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
   -- the values in :attr:`SCTP.__proto__
@@ -415,7 +419,8 @@ Some wanted only a table entry, because the dissector was already there:
   is unbound: IANA registers it as ``pcsync-https``, not as an HTTP alternate, so
   binding it to HTTP would feed a TLS record to an HTTP parser. Binding TCP 8443
   to TLS, and leaving UDP 8443 unbound, is :issue:`3017`, as the owner ruled on
-  :issue:`2805`.
+  :issue:`2805`; binding TLS to the other TCP ports IANA registers as over TLS, and
+  HTTP to 5985 and 11371, is :issue:`3126`.
 * **Done.** The service VLAN tag identifier (S-Tag), ``0x88A8``, is bound to
   :class:`~pcapkit.protocols.link.s_tag.protocol.S_Tag`, and the customer tag ``0x8100``
   to :class:`~pcapkit.protocols.link.c_tag.protocol.C_Tag`. Both subclass the abstract
@@ -470,8 +475,8 @@ Ethernet CFM, the quoted invoking packet and the 802.11 protected-frame headers 
 need a ruling before they are filed. An EtherType marked IEEE is assigned by the
 IEEE but missing from IANA's list, which
 :class:`~pcapkit.const.reg.ethertype.EtherType` follows. Every one of them waits on
-the same ruling: whether to crawl the IEEE Registration Authority's list as a
-second source (:issue:`3106`, question 5).
+crawling the IEEE Registration Authority's list as a second source, as the owner
+ruled on :issue:`3106`, which is :issue:`3132`.
 
 **Next**:
 
@@ -521,7 +526,6 @@ second source (:issue:`3106`, question 5).
 
 * Link Layer:
 
-  * ATM AAL5 with LLC/SNAP -- LinkTypes 100, 106 and 123
   * CAPWAP's control message elements -- UDP port 5246
   * Cisco HDLC and SLARP -- LinkTypes 104 and 112
   * EFM OAM -- Slow Protocols subtype 3, at EtherType 0x8809
@@ -529,6 +533,7 @@ second source (:issue:`3106`, question 5).
   * EPON's preamble and 802.3br's mPacket -- LinkTypes 259 and 274
   * EtherIP -- IP protocol 97
   * Ethernet CFM -- EtherType IEEE 0x8902
+  * Linux Classical IP over ATM and SunATM captures -- LinkTypes 106 and 123
   * MVRP and MMRP -- EtherTypes 0x88F5 and 0x88F6
   * Netlink's route and netfilter payloads -- Netlink protocols 0 and 12
   * NSH -- EtherType 0x894F and IP protocol 145
@@ -1120,7 +1125,7 @@ both of the following are worth knowing before reaching for them:
   says so, rather than one ``engine=`` string silently meaning two different
   implementations.
 
-  Caveats remain. Both distributions are still beta releases, and ``pcap-ct``
+  Caveats remain. Both distributions are beta releases, and ``pcap-ct``
   targets the ``pypcap`` 1.2.3 API -- within what this engine uses, but worth
   knowing. And despite the `libpcap <https://pypi.org/project/libpcap/>`__ wheel
   bundling prebuilt binaries, a runtime ``libpcap`` shared library is still
@@ -1131,14 +1136,14 @@ both of the following are worth knowing before reaching for them:
 Both engines support less than the ``default`` engine does, deliberately:
 `pypcap`_ performs no protocol dissection, so it disables reassembly *and* flow
 tracing; `pypcapfile`_ has no IPv6 decoder, so it disables IPv6 reassembly while
-keeping IPv4 and TCP, and it disables DTLS reassembly, which reads :mod:`pcapkit`'s
-own DTLS layer. Each gap is announced through an
+keeping IPv4, TCP and TLS, and it disables DTLS and SCTP reassembly, which read
+:mod:`pcapkit`'s own DTLS and SCTP layers. Each gap is announced through an
 :class:`~pcapkit.utilities.warnings.AttributeWarning` or an outright exception
 rather than by silently returning nothing, save that `pypcapfile`_ leaves TCP
 behind a VLAN tag, in a tunnel or behind an extension header (an IPv6 one, or AH
 in IPv4) out of TCP reassembly and flow tracing without a warning --
 :doc:`/pcapkit/foundation/engines/index` tabulates them, and `Not Planned`_ gives
-each gap's issue.
+each gap's issue but SCTP's, which is :issue:`3188`.
 
 Adding a further engine does not mean adding handler methods to
 :class:`~pcapkit.foundation.extraction.Extractor`, as the thread describes. A new engine subclasses
@@ -1204,41 +1209,33 @@ wheel, runnable from an install, is :issue:`3022`, as the owner ruled on
 Reassembly Beyond IP and TCP
 ----------------------------
 
-**Still open.**
-:doc:`/pcapkit/foundation/reassembly/index` covers IPv4, IPv6, TCP and DTLS
-handshake messages (see `DTLS`_ above), and no more.
+**Partly done.**
+:doc:`/pcapkit/foundation/reassembly/index` covers IPv4, IPv6, TCP, SCTP user
+messages, and the DTLS handshake messages and TLS records `DTLS`_ above
+describes.
 IPv4 and IPv6 share the :rfc:`791` procedure, except that a fragment overlapping
 another abandons an IPv6 datagram, as :rfc:`8200#section-4.5` requires, where IPv4
 overwrites the octets it overlaps (:issue:`2547`). TCP uses the :rfc:`815`
 hole-descriptor algorithm, which does handle out-of-order and overlapping
-segments. SCTP has nothing: a user message split across DATA or I-DATA chunks is
-never put back together, and :mod:`pcapkit.foundation.reassembly` has no SCTP
-reassembler (:issue:`2935`).
+segments.
 
-What that costs is concrete. The dissector already exposes everything a
-reassembler needs, on
-:class:`~pcapkit.protocols.transport.sctp.data.DATAChunk` -- ``tsn``,
-``stream_id``, ``stream_seq``, ``ppid``, ``data``, and ``flags.B`` and
-``flags.E`` for the beginning and ending fragment bits -- and on
-:class:`~pcapkit.protocols.transport.sctp.data.IDATAChunk`, whose ``mid`` and
-``fsn`` exist to make interleaved reassembly tractable (:issue:`2811`). The
-dispatch reads none of the fragment fields: a packet's first DATA or I-DATA
-chunk is dispatched on its PPID as though it were a whole PDU, so a registered
-upper layer can be handed part of a message. Only that chunk of a bundle is
-dispatched at all; dispatching every whole message is :issue:`2993`.
+**Done** in 1.9.0: reassembling an SCTP user message split across DATA chunks
+(:rfc:`9260#section-6.9`) or I-DATA chunks (:rfc:`8260#section-2.2.3`)
+(:issue:`2935`), via :class:`~pcapkit.foundation.reassembly.sctp.reassembly.SCTP`,
+keyed on the ports and verification tag. ``reassembly=['sctp']`` opts in, on the
+default engine alone, and :func:`~pcapkit.foundation.analysis.sctp.sctp_message`
+dispatches each message's user data on its PPID. The frame itself dispatches a
+packet's first DATA or I-DATA chunk on its PPID as though it were a
+whole PDU, so a registered upper layer can be handed part of a message, and no
+other chunk of a bundle; dispatching every whole message is :issue:`2993`.
 
-The reassembler would be a package at ``pcapkit/foundation/reassembly/sctp/``,
-whose class subclasses
-:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` and implements
-:meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly` and
-:meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.submit`. The wiring
-already takes it: a reassembler registered in :attr:`Extractor.__reassembly__
+A further protocol costs one class plus one adapter per engine: a reassembler
+registered in :attr:`Extractor.__reassembly__
 <pcapkit.foundation.extraction.Extractor.__reassembly__>` is enabled by name, made
 by :meth:`~pcapkit.foundation.extraction.Extractor.make_reassembly`, held by
 :class:`~pcapkit.foundation.reassembly.ReassemblyManager` and fed through each
 engine's adapter in :attr:`EngineBase.__reassembly__
-<pcapkit.foundation.engines.engine.EngineBase.__reassembly__>`, so a further
-protocol costs one class plus one adapter per engine (:issue:`2814`).
+<pcapkit.foundation.engines.engine.EngineBase.__reassembly__>` (:issue:`2814`).
 
 Smaller items in the same subsystem:
 
@@ -1342,12 +1339,12 @@ Smaller items in the same subsystem:
   ("The reassembly timeout value SHOULD be a fixed value, not set from the
   remaining TTL... between 60 seconds and 120 seconds"), so IPv4 uses 60
   seconds, agreeing with the 60 :rfc:`8200#section-4.5` mandates for IPv6.
-  **TCP and DTLS are left with no timeout at all**, since no specification gives
-  their reassembly a deadline, and an idle TCP connection is ordinary rather than
-  pathological; ``timeout`` enables one on request.
+  **TCP, DTLS, SCTP and TLS are left with no timeout at all**, since no
+  specification gives their reassembly a deadline, and an idle TCP connection is
+  ordinary rather than pathological; ``timeout`` enables one on request.
 
   The memory motive is narrowed rather than removed: an in-flight IP datagram
-  identifier still holds a fixed 72 KiB of preallocated space, but for at most
+  identifier holds a fixed 72 KiB of preallocated space, but for at most
   the timeout's worth of capture time rather than for the life of the
   :class:`~pcapkit.foundation.extraction.Extractor`. Sizing each buffer to the
   fragments it holds is :issue:`2957`. :rfc:`8200#section-4.5` and
@@ -1357,16 +1354,17 @@ Smaller items in the same subsystem:
 
 Reassembly is also unavailable on some engines rather than merely slower, which
 is worth knowing before benchmarking against them: ``pyshark``, ``pypcap`` and
-``pcap_ct`` disable it entirely, ``pypcapfile`` disables IPv6 and DTLS
-reassembly, and the ``dpkt`` and ``scapy`` engines disable DTLS reassembly.
+``pcap_ct`` disable it entirely, ``pypcapfile`` disables IPv6, DTLS and SCTP
+reassembly, and the ``dpkt`` and ``scapy`` engines disable DTLS and SCTP
+reassembly.
 :doc:`/pcapkit/foundation/engines/index` tabulates that.
 
 Checksum and Integrity Verification
 -----------------------------------
 
 **Partly done.** The one's-complement checksums are done, and CALIPSO's CRC-16 is
-:issue:`2970`; of the cryptographic half, ESP's is done and AH's (:issue:`2965`)
-and HIP's (:issue:`2939`) are open.
+:issue:`2970`; of the cryptographic half, ESP's and HIP's are done and AH's
+(:issue:`2965`) is open.
 
 These protocols parse a checksum or CRC field —
 :class:`~pcapkit.protocols.link.gre.protocol.GRE`,
@@ -1414,17 +1412,22 @@ precedent for a dependency either.
 dependency — introduced for ESP — genuinely buys something new, and half of that
 is already done. :class:`~pcapkit.protocols.internet.esp.protocol.ESP` **already verifies
 its ICV** when a Security Association is supplied, and deliberately reports a
-failure rather than raising, so a forged packet still parses and says so. What is
-*not* done is **HIP**: its ``HIP_MAC``, ``HIP_MAC_2``, ``RVS_HMAC`` and
-``RELAY_HMAC`` parameters, and its ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2``
-parameters, are parsed into their data models and never checked against the
-packet (:issue:`2939`). Verifying them needs a keying context in the shape ESP
-already established through :mod:`pcapkit.corekit.context`, which is the reusable
-part of the design rather than something to invent. Nor is
-:class:`~pcapkit.protocols.internet.ah.protocol.AH`'s ICV checked: it is parsed as
-octets, and verifying it needs that keying context plus the enclosing IP header,
-whose immutable fields it covers (:rfc:`4302#section-3.3.3`), which is
-:issue:`2965`.
+failure rather than raising, so a forged packet still parses and says so.
+
+**Done** in 1.9.0 (:issue:`2939`): :class:`~pcapkit.protocols.internet.hip.protocol.HIP`
+verifies its ``HIP_MAC``, ``HIP_MAC_2``, ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2``
+parameters with keys supplied through :mod:`pcapkit.corekit.context`, as a
+:class:`~pcapkit.protocols.internet.hip.protocol.HIPContext`, in the shape ESP
+established, and records a
+:class:`~pcapkit.protocols.internet.hip.protocol.HIPAuthStatus` as each one's
+``hmac_status`` or ``signature_status``. Its ``RVS_HMAC`` and ``RELAY_HMAC``
+parameters are unchecked (:issue:`3187`);
+:doc:`/pcapkit/protocols/internet/hip` gives the algorithms a signature can use.
+
+Nor is :class:`~pcapkit.protocols.internet.ah.protocol.AH`'s ICV checked: it is
+parsed as octets, and verifying it needs a keying context in that shape plus the
+enclosing IP header, whose immutable fields it covers (:rfc:`4302#section-3.3.3`),
+which is :issue:`2965`.
 
 The policy questions this raised have all been settled by the repo
 owner, and each lands on a precedent the library already has:
@@ -1673,33 +1676,34 @@ an item, say so on its issue.
 
 * **The remaining protocols**, each with its issue under
   `More Protocols, More!!!`_.
-* **SCTP**, under `SCTP`_ and `Reassembly Beyond IP and TCP`_: the remaining
-  chunk codes (:issue:`2989`), every DATA and I-DATA chunk of a bundle dispatched
-  (:issue:`2993`), and its user messages reassembled (:issue:`2935`). Its payload
-  protocols are under `Registered, but Not Dissected`_.
+* **SCTP**, under `SCTP`_, `Reassembly Beyond IP and TCP`_ and `New Engines`_: the
+  remaining chunk codes (:issue:`2989`), every DATA and I-DATA chunk of a bundle
+  dispatched (:issue:`2993`), and user-message reassembly on DPKT and Scapy
+  (:issue:`3188`). Its payload protocols are under `Registered, but Not Dissected`_.
 * **ESP's algorithm coverage**, under `ESP`_: the registered transforms beyond
   AES-CBC, AES-GCM and the HMAC-SHA1 and HMAC-SHA2 truncations (:issue:`2958`,
   :issue:`3009`), and Extended Sequence Numbers with the implicit-IV transforms
   (:issue:`2963`).
 * **Integrity verification**, under `Checksum and Integrity Verification`_: AH's
-  ICV (:issue:`2965`), HIP's MAC and signature parameters (:issue:`2939`), and
-  the CALIPSO option's CRC-16 (:issue:`2970`).
-* **TLS and DTLS**, under `DTLS`_: records split across TCP segments
-  (:issue:`2938`), the remaining extensions (:issue:`2966`), handshake bodies
-  beyond the hellos and the heartbeat and ACK records (:issue:`2969`), and
-  NGAP's and the other PPIDs carried over DTLS (:issue:`2971`).
+  ICV (:issue:`2965`), the CALIPSO option's CRC-16 (:issue:`2970`), and HIP's
+  ``RVS_HMAC`` and ``RELAY_HMAC`` (:issue:`3187`).
+* **TLS and DTLS**, under `DTLS`_: the remaining extensions (:issue:`2966`),
+  handshake bodies beyond the hellos and the heartbeat and ACK records
+  (:issue:`2969`), and NGAP's and the other PPIDs carried over DTLS
+  (:issue:`2971`).
 * **Flow tracing beyond TCP** (:issue:`2956`) and the mid-connection reuse case
   (:issue:`2962`), under `Reassembly Beyond IP and TCP`_.
 * **IP reassembly**: unfragmented IPv4 datagrams, which want a ruling first
   (:issue:`2961`), under `Maybe Even Faster?`_; and buffers sized to the
   fragments they hold (:issue:`2957`), under `Reassembly Beyond IP and TCP`_.
-* **The Mobility Header option-payload registry**, under `Mobility Header`_
-  (:issue:`2937`), and the dissectors it would register: the MLD and IGMPv3
-  records of the multicast options (:issue:`2994`) and the :rfc:`6088` traffic
-  selectors (:issue:`2990`).
-* **Bindings**, under `Registered, but Not Dissected`_: the 802.11 frame body
-  (:issue:`2936`, :issue:`2975`), L2TPv3 (:issue:`2976`) and L2F
-  (:issue:`3011`), TCP 8443 (:issue:`3017`), and DCCP's ports (:issue:`2999`).
+* **The Mobility Header's payload dissectors**, under `Mobility Header`_: the MLD
+  and IGMPv3 records of the multicast options (:issue:`2994`) and the :rfc:`6088`
+  traffic selectors (:issue:`2990`).
+* **Bindings**, under `Registered, but Not Dissected`_: 802.11 management frame
+  bodies (:issue:`2975`), L2TPv3 (:issue:`2976`) and L2F (:issue:`3011`),
+  Transparent Ethernet Bridging (:issue:`3111`), TCP 8443 (:issue:`3017`) and the
+  other ports over TLS (:issue:`3126`), UDP 4500 (:issue:`3124`), and DCCP's ports
+  (:issue:`2999`).
 * **IPv6's Traffic Class**, split into DSCP and ECN (:issue:`3000`), under
   `More Protocols, More!!!`_.
 * **Per-entry coverage of the option and parameter registries**, below.
@@ -1708,7 +1712,8 @@ an item, say so on its issue.
 * **Iterative dissection**, under `Recursive Dissection, With a Depth Limit`_,
   whose issue is not filed yet.
 * **The 2.x protocols**, under `Planned for 2.x`_, whose issues are not filed
-  yet.
+  yet, and the IEEE Registration Authority's EtherType list as a second source
+  (:issue:`3132`).
 
 **Per-entry coverage of the option and parameter registries.** The option,
 parameter, block and frame registries are *enumerated* but not *implemented*

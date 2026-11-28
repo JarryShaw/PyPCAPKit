@@ -99,7 +99,8 @@ reads ``TCP:TLS 1.3:TLS 1.2``. The exceptions:
   :class:`~pcapkit.protocols.misc.raw.protocol.Raw` together with everything after it,
   with no SSLv2 trial.
 * Octets that open no record -- an unsupported content type, a legacy
-  version outside ``0x03xx``, or a header cut short -- stay raw, with no error.
+  version outside ``0x03xx``, a length past the ``2 ** 14 + 2048`` of
+  :rfc:`5246#section-6.2.3`, or a header cut short -- stay raw, with no error.
 * A parse told to stop at TLS (``protocol='TLS'`` or ``layer='Application'``)
   keeps the rest of the segment raw.
 * Each record is a layer, so :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`
@@ -108,10 +109,15 @@ reads ``TCP:TLS 1.3:TLS 1.2``. The exceptions:
 Known Limitation
 ----------------
 
-**A record split across two TCP segments is not reassembled**, and decodes as
+**A record split across TCP segments is not reassembled here**, and decodes as
 :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, as does the partial record a segment
 ends inside. A record may be up to 16 KiB against a typical 1460-octet MSS, so
-this is routine.
+this is routine. ``Extractor(fin, reassembly=['tls'])`` reassembles every record of
+the stream (:class:`~pcapkit.foundation.reassembly.tls.reassembly.TLS`), framing it with
+:meth:`~pcapkit.protocols.application.tls.protocol.TLS.record_header`, and
+:func:`~pcapkit.foundation.analysis.tls.tls_record` decodes it with
+:meth:`~pcapkit.protocols.application.tls.protocol.TLS.analyze_record`, as a segment's
+first record is decoded.
 
 .. versionadded:: 1.6.0
 
@@ -136,6 +142,8 @@ this is routine.
    .. automethod:: read
    .. automethod:: make
    .. automethod:: unpack
+   .. automethod:: record_header
+   .. automethod:: analyze_record
 
    .. rubric:: Data Models
 

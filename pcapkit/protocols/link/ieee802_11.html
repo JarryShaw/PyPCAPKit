@@ -202,11 +202,11 @@
   <span class="sidebar-brand-text">PyPCAPKit</span>
   
 </a><nav class="sidebar-versions" aria-label="Documentation versions">
-  <p>Version <strong>1.8.1 (stable)</strong></p>
+  <p>Version <strong>1.9.0 (stable)</strong></p>
   <ul>
     <li><span aria-current="page">stable</span></li>
     <li><a href="https://pypcapkit.jarryshaw.me/en/latest/pcapkit/protocols/link/ieee802_11.html">latest (develop)</a></li>
-    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.8.1/pcapkit/protocols/link/ieee802_11.html">v1.8.1</a></li>
+    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.9.0/pcapkit/protocols/link/ieee802_11.html">v1.9.0</a></li>
     <li><a href="../../../changelog.html">all releases</a></li>
   </ul>
   <p class="sidebar-versions-note">latest and each release are on Read the Docs</p>
@@ -243,12 +243,16 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/dtls.html">DTLS Handshake-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/sctp.html">SCTP User-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/tls.html">TLS Record Reassembly</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/analysis/index.html">Reassembled Payload Analysis</a><input aria-label="Toggle navigation of Reassembled Payload Analysis" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/ip.html">IP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/tcp.html">TCP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/dtls.html">DTLS Handshake-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/sctp.html">SCTP User-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/tls.html">TLS Record Analysis</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -274,11 +278,13 @@
 <li class="toctree-l4"><a class="reference internal" href="linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
 <li class="toctree-l4"><a class="reference internal" href="linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="llc.html">LLC - Logical Link Control</a></li>
 <li class="toctree-l4"><a class="reference internal" href="loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="netlink.html">Netlink - Linux Netlink Socket Framing</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ppp.html">PPP - Point-to-Point Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pppoe.html">PPPoE - PPP over Ethernet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="radiotap.html">Radiotap - IEEE 802.11 Radiotap Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="snap.html">SNAP - Subnetwork Access Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -338,6 +344,10 @@
 <li class="toctree-l4"><a class="reference internal" href="../application/tls.html">TLS/SSL - Transport Layer Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/sslv3.html">SSLv3 - Secure Sockets Layer Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/stp.html">STP - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/stpv0.html">STPv0 - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/rstp.html">RSTP - Rapid Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/mstp.html">MSTP - Multiple Spanning Tree Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -357,6 +367,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/seqnum.html">Sequence Number Arithmetic</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/importlib.html">Lazy Imports</a></li>
@@ -380,8 +391,9 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../corekit/const/index.html">Shared Format Constants</a><input aria-label="Toggle navigation of Shared Format Constants" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/const/capture.html">Capture-Format Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/ipheader.html">IP Header Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/tcpheader.html">TCP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/domain_name.html">Domain Name Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/ip_header.html">IP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/tcp_header.html">TCP Header Constants</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/context.html">Parsing Context</a></li>
@@ -396,11 +408,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/extlen.html">Extension-Header Length</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/domain_name.html">Domain Name Codec</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/ext_len.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/padding.html">Padding Arithmetic</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/shortread.html">Short-Read Replay</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/short_read.html">Short-Read Replay</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/sentinels.html">Sentinel Objects</a></li>
@@ -425,6 +438,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/linux.html">Linux-Specific Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Constant Enumerations</a></li>
@@ -448,6 +462,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
@@ -459,6 +474,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Vendor Crawlers</a></li>
@@ -482,6 +498,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
 </ul>
@@ -496,6 +513,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.9.0.html">1.9.0 – 2026-11-28</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.8.1.html">1.8.1 – 2026-11-27</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
@@ -680,8 +698,12 @@ S1G Beacon lay out B8-B15 of Frame Control differently; see
 <section id="scope">
 <h2>Scope<a class="headerlink" href="#scope" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p><strong>The frame body</strong> (§9.2.4.7) is kept as
-<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, protected or not.</p></li>
+<li><p><strong>The frame body</strong> (§9.2.4.7) of a data frame of a subtype carrying one,
+unprotected and holding an MSDU rather than an A-MSDU, is an IEEE 802.2
+<a class="reference internal" href="llc.html#pcapkit.protocols.link.llc.protocol.LLC" title="pcapkit.protocols.link.llc.protocol.LLC"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code></a> PDU; any other is kept as
+<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>. A mesh STA’s Mesh Control
+field ahead of the MSDU is not read: bit 8 of QoS Control announces it only
+in a mesh BSS, which the header does not tell.</p></li>
 <li><p><strong>The FCS</strong> (§9.2.4.8), where one was captured, stays at the end of the
 body: this class does not decide whether a capture carries one, which
 behind radiotap is a Flags bit
@@ -698,8 +720,13 @@ and versions 2 and 3 are reserved.</p></li>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ieee802_11.protocol.</span></span><span class="sig-name descname"><span class="pre">IEEE802_11</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protocol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ieee802_11/protocol.html#IEEE802_11"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.link.ieee802_11.data.IEEE802_11" title="pcapkit.protocols.link.ieee802_11.data.IEEE802_11"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.link.ieee802_11.schema.IEEE802_11" title="pcapkit.protocols.link.ieee802_11.schema.IEEE802_11"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code></a>]</p>
 <p>This class implements the IEEE 802.11 MAC header.</p>
-<p>The frame body is kept as <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>; see
-the module docstring.</p>
+<p>The frame body of a data frame carrying an MSDU is dissected as
+<a class="reference internal" href="llc.html#pcapkit.protocols.link.llc.protocol.LLC" title="pcapkit.protocols.link.llc.protocol.LLC"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code></a>, and any other is kept as
+<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>; see the module docstring.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.9.0: </span>The frame body of a data frame carrying an MSDU is dissected as LLC,
+where it was kept raw (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2936">#2936</a>).</p>
+</div>
 <p class="rubric">Properties</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11.name">
@@ -735,8 +762,8 @@ the module docstring.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11.read">
 <span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ieee802_11/protocol.html#IEEE802_11.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11.read" title="Link to this definition">¶</a></dt>
 <dd><p>Read IEEE 802.11 MAC header.</p>
-<p>Structure of the MAC header with every field present (IEEE Std
-802.11-2020 §9.2.3, <em>General frame format</em>), in octets:</p>
+<p>Structure of the MAC header with every field present
+(<span class="target" id="index-0"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a> §9.2.3, <em>General frame format</em>), in octets:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>+-------+--------+------+------+------+------+------+-----+-----+------+-----+
 | Frame | Dura-  | Addr | Addr | Addr | Seq  | Addr | QoS | HT  | Body | FCS |
 | Ctrl  | tion/ID|  1   |  2   |  3   | Ctrl |  4   | Ctl | Ctl |      |     |
@@ -874,7 +901,7 @@ is keyed by too.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._read_frame_control">
 <span class="sig-name descname"><span class="pre">_read_frame_control</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ieee802_11/protocol.html#IEEE802_11._read_frame_control"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._read_frame_control" title="Link to this definition">¶</a></dt>
-<dd><p>Read the Frame Control field (IEEE Std 802.11-2020 §9.2.4.1).</p>
+<dd><p>Read the Frame Control field (<span class="target" id="index-1"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a> §9.2.4.1).</p>
 <p>In a Control Frame Extension frame, B8-B11 are the Control Frame
 Extension subfield rather than To DS, From DS, More Fragments and
 Retry (§9.2.4.1.1). In an S1G Beacon, B8-B15 are the subfields
@@ -896,7 +923,7 @@ of the eight flags is read there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._make_frame_control">
 <span class="sig-name descname"><span class="pre">_make_frame_control</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">more_fragments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_frame_extension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power_management</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">more_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protected</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1g_beacon_flags</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ieee802_11/protocol.html#IEEE802_11._make_frame_control"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._make_frame_control" title="Link to this definition">¶</a></dt>
-<dd><p>Make the Frame Control field (IEEE Std 802.11-2020 §9.2.4.1).</p>
+<dd><p>Make the Frame Control field (<span class="target" id="index-2"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a> §9.2.4.1).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -935,7 +962,7 @@ of the eight flags is read there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._read_seq_ctrl">
 <span class="sig-name descname"><span class="pre">_read_seq_ctrl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ieee802_11/protocol.html#IEEE802_11._read_seq_ctrl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._read_seq_ctrl" title="Link to this definition">¶</a></dt>
-<dd><p>Read the Sequence Control field (IEEE Std 802.11-2020 §9.2.4.4).</p>
+<dd><p>Read the Sequence Control field (<span class="target" id="index-3"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a> §9.2.4.4).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Sequence Control field, as a little-endian integer.</p>
@@ -952,7 +979,7 @@ of the eight flags is read there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._make_seq_ctrl">
 <span class="sig-name descname"><span class="pre">_make_seq_ctrl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq_ctrl</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ieee802_11/protocol.html#IEEE802_11._make_seq_ctrl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._make_seq_ctrl" title="Link to this definition">¶</a></dt>
-<dd><p>Make the Sequence Control field (IEEE Std 802.11-2020 §9.2.4.4).</p>
+<dd><p>Make the Sequence Control field (<span class="target" id="index-4"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a> §9.2.4.4).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>seq_ctrl</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.link.ieee802_11.data.SequenceControl" title="pcapkit.protocols.link.ieee802_11.data.SequenceControl"><code class="xref py py-class docutils literal notranslate"><span class="pre">SequenceControl</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Sequence Control field; <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> makes zeros.</p>
@@ -972,7 +999,7 @@ of the eight flags is read there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._read_qos_control">
 <span class="sig-name descname"><span class="pre">_read_qos_control</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ieee802_11/protocol.html#IEEE802_11._read_qos_control"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._read_qos_control" title="Link to this definition">¶</a></dt>
-<dd><p>Read the QoS Control field (IEEE Std 802.11-2020 §9.2.4.5).</p>
+<dd><p>Read the QoS Control field (<span class="target" id="index-5"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a> §9.2.4.5).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – QoS Control field, as a little-endian integer.</p>
@@ -989,7 +1016,7 @@ of the eight flags is read there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._make_qos_control">
 <span class="sig-name descname"><span class="pre">_make_qos_control</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qos_control</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ieee802_11/protocol.html#IEEE802_11._make_qos_control"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._make_qos_control" title="Link to this definition">¶</a></dt>
-<dd><p>Make the QoS Control field (IEEE Std 802.11-2020 §9.2.4.5).</p>
+<dd><p>Make the QoS Control field (<span class="target" id="index-6"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a> §9.2.4.5).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>qos_control</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.link.ieee802_11.data.QoSControl" title="pcapkit.protocols.link.ieee802_11.data.QoSControl"><code class="xref py py-class docutils literal notranslate"><span class="pre">QoSControl</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – QoS Control field; <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> makes zeros.</p>
@@ -1009,7 +1036,7 @@ of the eight flags is read there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._read_ht_control">
 <span class="sig-name descname"><span class="pre">_read_ht_control</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ieee802_11/protocol.html#IEEE802_11._read_ht_control"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._read_ht_control" title="Link to this definition">¶</a></dt>
-<dd><p>Read the HT Control field (IEEE Std 802.11-2020 §9.2.4.6).</p>
+<dd><p>Read the HT Control field (<span class="target" id="index-7"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a> §9.2.4.6).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – HT Control field, as a little-endian integer.</p>
@@ -1026,7 +1053,7 @@ of the eight flags is read there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._make_ht_control">
 <span class="sig-name descname"><span class="pre">_make_ht_control</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ieee802_11/protocol.html#IEEE802_11._make_ht_control"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._make_ht_control" title="Link to this definition">¶</a></dt>
-<dd><p>Make the HT Control field (IEEE Std 802.11-2020 §9.2.4.6).</p>
+<dd><p>Make the HT Control field (<span class="target" id="index-8"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a> §9.2.4.6).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – HT Control field, as an integer; <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> makes zeros.</p>
@@ -1069,6 +1096,30 @@ of the eight flags is read there.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._import_next_layer">
+<span class="sig-name descname"><span class="pre">_import_next_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ieee802_11/protocol.html#IEEE802_11._import_next_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._import_next_layer" title="Link to this definition">¶</a></dt>
+<dd><p>Import next layer extractor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>proto</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – next layer protocol index: the Data type where <a class="reference internal" href="#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11.read" title="pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>
+found the frame body an MSDU, and <code class="docutils literal notranslate"><span class="pre">-1</span></code> otherwise</p></li>
+<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – valid (<em>non-padding</em>) length</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – packet info (passed from <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.unpack</span></code></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="llc.html#pcapkit.protocols.link.llc.protocol.LLC" title="pcapkit.protocols.link.llc.protocol.LLC"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code></a>
+for an MSDU, and <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>
+otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -1078,7 +1129,7 @@ of the eight flags is read there.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.schema.IEEE802_11">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ieee802_11.schema.</span></span><span class="sig-name descname"><span class="pre">IEEE802_11</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_control</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_ctrl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr4</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qos_control</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ht_control</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ieee802_11/schema.html#IEEE802_11"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.schema.IEEE802_11" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
-<p>Header schema for an IEEE 802.11 MAC header (IEEE Std 802.11-2020 §9.2).</p>
+<p>Header schema for an IEEE 802.11 MAC header (<span class="target" id="index-9"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a> §9.2).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.schema.IEEE802_11.frame_control">
 <span class="sig-name descname"><span class="pre">frame_control</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">frame_control&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.schema.IEEE802_11.frame_control" title="Link to this definition">¶</a></dt>
@@ -1147,9 +1198,9 @@ of the eight flags is read there.</p>
 <dd><p>Decide which fields a protocol version 0 MAC header carries.</p>
 <ul class="simple">
 <li><p>A Management frame carries Address 2, Address 3 and Sequence Control
-whatever its subtype, and HT Control when +HTC/Order is set (IEEE Std
-802.11-2020 §9.3.3, <em>Management frames</em>; §9.2.4.1.10, <em>+HTC/Order
-subfield</em>).</p></li>
+whatever its subtype, and HT Control when +HTC/Order is set
+(<span class="target" id="index-10"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a> §9.3.3, <em>Management frames</em>; §9.2.4.1.10,
+<em>+HTC/Order subfield</em>).</p></li>
 <li><p>A Data frame carries the same three, Address 4 when To DS and From DS are
 both set, QoS Control when the QoS bit (B7) of its subtype is set, and HT
 Control when that bit and +HTC/Order are both set (§9.3.2, <em>Data frames</em>).</p></li>
@@ -1230,7 +1281,7 @@ off the wire.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.data.IEEE802_11">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ieee802_11.data.</span></span><span class="sig-name descname"><span class="pre">IEEE802_11</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_control</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_ctrl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qos_control</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ht_control</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ieee802_11/data.html#IEEE802_11"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.data.IEEE802_11" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.data.Protocol" title="pcapkit.protocols.data.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
-<p>Data model for an IEEE 802.11 MAC header (IEEE Std 802.11-2020 §9.2).</p>
+<p>Data model for an IEEE 802.11 MAC header (<span class="target" id="index-11"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a> §9.2).</p>
 <p>A field the header does not carry is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>; see
 <a class="reference internal" href="#pcapkit.protocols.link.ieee802_11.schema.layout" title="pcapkit.protocols.link.ieee802_11.schema.layout"><code class="xref py py-func docutils literal notranslate"><span class="pre">layout()</span></code></a>.</p>
 <dl class="py attribute">
@@ -1293,7 +1344,7 @@ off the wire.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.data.FrameControl">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ieee802_11.data.</span></span><span class="sig-name descname"><span class="pre">FrameControl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">more_fragments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_frame_extension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power_management</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">more_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protected</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1g_beacon_flags</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ieee802_11/data.html#FrameControl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.data.FrameControl" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
-<p>Data model for the Frame Control field (IEEE Std 802.11-2020 §9.2.4.1).</p>
+<p>Data model for the Frame Control field (<span class="target" id="index-12"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a> §9.2.4.1).</p>
 <p>Two frames lay out B8-B15 differently, and the flags they replace are
 <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> there: a Control Frame Extension frame carries
 <a class="reference internal" href="#pcapkit.protocols.link.ieee802_11.data.FrameControl.control_frame_extension" title="pcapkit.protocols.link.ieee802_11.data.FrameControl.control_frame_extension"><code class="xref py py-attr docutils literal notranslate"><span class="pre">control_frame_extension</span></code></a> in B8-B11, and an S1G Beacon carries
@@ -1385,7 +1436,7 @@ Present, ANO Present, BSS BW, Security and AP PM, as Wireshark’s
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.data.SequenceControl">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ieee802_11.data.</span></span><span class="sig-name descname"><span class="pre">SequenceControl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fragment_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ieee802_11/data.html#SequenceControl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.data.SequenceControl" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
-<p>Data model for the Sequence Control field (IEEE Std 802.11-2020 §9.2.4.4).</p>
+<p>Data model for the Sequence Control field (<span class="target" id="index-13"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a> §9.2.4.4).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.data.SequenceControl.fragment_number">
 <span class="sig-name descname"><span class="pre">fragment_number</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.data.SequenceControl.fragment_number" title="Link to this definition">¶</a></dt>
@@ -1404,7 +1455,7 @@ Present, ANO Present, BSS BW, Security and AP PM, as Wireshark’s
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.data.QoSControl">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ieee802_11.data.</span></span><span class="sig-name descname"><span class="pre">QoSControl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eosp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ack_policy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amsdu_present</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bits_8_15</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ieee802_11/data.html#QoSControl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.data.QoSControl" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
-<p>Data model for the QoS Control field (IEEE Std 802.11-2020 §9.2.4.5).</p>
+<p>Data model for the QoS Control field (<span class="target" id="index-14"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a> §9.2.4.5).</p>
 <p>Only the subfields every QoS Data subtype places alike are decoded. What
 bits 8-15 carry depends on the subtype and on the kind of station that
 sent the frame, which the MAC header does not say, so they are kept
@@ -1447,14 +1498,14 @@ AP PS Buffer State, or the mesh subfields, by subtype and sender.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.data.HTControl">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ieee802_11.data.</span></span><span class="sig-name descname"><span class="pre">HTControl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ieee802_11/data.html#HTControl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.data.HTControl" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
-<p>Data model for the HT Control field (IEEE Std 802.11-2020 §9.2.4.6).</p>
+<p>Data model for the HT Control field (<span class="target" id="index-15"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a> §9.2.4.6).</p>
 <p>Its first bits name the variant the rest of the field takes; the
 variants’ own subfields are not decoded.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.data.HTControl.variant">
 <span class="sig-name descname"><span class="pre">variant</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'HT'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'VHT'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'HE'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.data.HTControl.variant" title="Link to this definition">¶</a></dt>
 <dd><p>The variant, <code class="docutils literal notranslate"><span class="pre">'HT'</span></code> when bit 0 is clear, <code class="docutils literal notranslate"><span class="pre">'VHT'</span></code> when bit 0 is set
-and bit 1 clear, and <code class="docutils literal notranslate"><span class="pre">'HE'</span></code> when both are set (IEEE Std 802.11ax-2021).</p>
+and bit 1 clear, and <code class="docutils literal notranslate"><span class="pre">'HE'</span></code> when both are set (<span class="target" id="index-16"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11ax/7180/"><strong>IEEE Std 802.11ax-2021</strong></a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1474,25 +1525,35 @@ and bit 1 clear, and <code class="docutils literal notranslate"><span class="pre
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.const.SUBTYPE">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ieee802_11.const.</span></span><span class="sig-name descname"><span class="pre">SUBTYPE</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/ieee802_11.html#pcapkit.const.ieee802_11.management_subtype.ManagementSubtype" title="pcapkit.const.ieee802_11.management_subtype.ManagementSubtype"><span class="pre">ManagementSubtype</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../const/ieee802_11.html#pcapkit.const.ieee802_11.control_subtype.ControlSubtype" title="pcapkit.const.ieee802_11.control_subtype.ControlSubtype"><span class="pre">ControlSubtype</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../const/ieee802_11.html#pcapkit.const.ieee802_11.data_subtype.DataSubtype" title="pcapkit.const.ieee802_11.data_subtype.DataSubtype"><span class="pre">DataSubtype</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../const/ieee802_11.html#pcapkit.const.ieee802_11.extension_subtype.ExtensionSubtype" title="pcapkit.const.ieee802_11.extension_subtype.ExtensionSubtype"><span class="pre">ExtensionSubtype</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.const.SUBTYPE" title="Link to this definition">¶</a></dt>
-<dd><p>Subtype registry of each frame type (IEEE Std 802.11-2020, Table 9-1).</p>
+<dd><p>Subtype registry of each frame type (<span class="target" id="index-17"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a>, Table 9-1).</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.const.CONTROL_WITH_ADDR2">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ieee802_11.const.</span></span><span class="sig-name descname"><span class="pre">CONTROL_WITH_ADDR2</span></span><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.const.CONTROL_WITH_ADDR2" title="Link to this definition">¶</a></dt>
 <dd><p>Control frame subtypes whose MAC header carries a TA (or BSSID) as
-Address 2 after the RA; IEEE Std 802.11-2020 §9.3.1, <em>Control frames</em>, and
-IEEE Std 802.11ax-2021 for <code class="docutils literal notranslate"><span class="pre">Trigger</span></code>. CTS and Ack carry the RA alone. A
+Address 2 after the RA; <span class="target" id="index-18"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a> §9.3.1, <em>Control frames</em>, and
+<span class="target" id="index-19"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11ax/7180/"><strong>IEEE Std 802.11ax-2021</strong></a> for <code class="docutils literal notranslate"><span class="pre">Trigger</span></code>. CTS and Ack carry the RA alone. A
 Control Frame Extension frame takes the six octets after the RA as Address 2,
 as the Linux kernel’s <code class="docutils literal notranslate"><span class="pre">ieee80211_hdrlen()</span></code> reads it; in a DMG DTS
 (extension 6) they are NAV-SA rather than a TA, and NAV-DA stays in the body.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.const.DATA_WITH_BODY">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ieee802_11.const.</span></span><span class="sig-name descname"><span class="pre">DATA_WITH_BODY</span></span><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.const.DATA_WITH_BODY" title="Link to this definition">¶</a></dt>
+<dd><p>Data frame subtypes that carry a frame body, an MSDU or an A-MSDU
+(<span class="target" id="index-20"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a>, Table 9-1): those not marked <em>(no data)</em> nor reserved.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.9.0.</span></p>
+</div>
 </dd></dl>
 
 <p class="rubric">Footnotes</p>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id2" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
-<p>IEEE Std 802.11-2020, clause 9, <em>Frame formats</em>. The clause numbers
+<p><span class="target" id="index-21"></span><a class="ieee reference external" href="https://standards.ieee.org/ieee/802.11/7028/"><strong>IEEE Std 802.11-2020</strong></a>, clause 9, <em>Frame formats</em>. The clause numbers
 above are its own, checked against Wireshark’s <code class="docutils literal notranslate"><span class="pre">packet-ieee80211.c</span></code> where
 it cites one: §9.2.4.1.10, §9.2.4.6, §9.2.4.7 and §9.8.</p>
 </aside>
@@ -1571,7 +1632,7 @@ it cites one: §9.2.4.1.10, §9.2.4.6, §9.2.4.7 and §9.8.</p>
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=77637be2"></script>
+</div><script src="../../../_static/documentation_options.js?v=baecdfc0"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

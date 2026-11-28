@@ -34,7 +34,8 @@ Internet Layer
 
 .. todo::
 
-   Implement ECN, Shim6.
+   Implement Shim6, and split IPv6's Traffic Class into DSCP and ECN;
+   :doc:`/contributing/pep` gives each its issue.
 
 Protocol Registry
 -----------------

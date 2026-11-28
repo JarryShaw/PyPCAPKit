@@ -127,10 +127,12 @@ Known Limitations
   :class:`~pcapkit.const.ngap.protocol_ie.ProtocolIE` do not name. Such a
   value resolves to a non-registering member called ``Unassigned`` rather than
   failing or adding a member to either enumeration.
-* **NGAP over a fragmented SCTP association is not reassembled.** A DATA or
+* **NGAP over a fragmented SCTP association is not reassembled here.** A DATA or
   I-DATA chunk is decoded on its own, so an ``NGAP-PDU`` split across chunks by
-  SCTP fragmentation fails to decode rather than being reassembled first, and a
-  later I-DATA fragment, which carries no PPID, is kept raw.
+  SCTP fragmentation fails to decode, and a later I-DATA fragment, which carries
+  no PPID, is kept raw. ``Extractor(fin, reassembly=['sctp'])`` reassembles the
+  message (:class:`~pcapkit.foundation.reassembly.sctp.reassembly.SCTP`), and
+  :func:`~pcapkit.foundation.analysis.sctp.sctp_message` decodes it.
 * **Private IEs** (``PrivateMessage``) **carry no schema.** Their contents are
   vendor defined, so the generic conversion reports whatever ASN.1 shape the
   encoding declares and cannot name the fields.

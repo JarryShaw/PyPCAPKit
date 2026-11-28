@@ -3,17 +3,17 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta property="og:title" content="IP Header Constants" />
+<meta property="og:title" content="Short-Read Replay" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://jarryshaw.github.io/PyPCAPKit/pcapkit/corekit/const/ipheader.html" />
+<meta property="og:url" content="https://jarryshaw.github.io/PyPCAPKit/pcapkit/corekit/schema/short_read.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.corekit.const.ipheader holds the IPv4, IPv6 and IP Authentication Header lengths and offsets the RFCs fix and that code beyond their own protocols reads: other protocols, IP reassembly and ..." />
-<meta name="description" content="pcapkit.corekit.const.ipheader holds the IPv4, IPv6 and IP Authentication Header lengths and offsets the RFCs fix and that code beyond their own protocols reads: other protocols, IP reassembly and ..." />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="TCP Header Constants" href="tcpheader.html"><link rel="prev" title="Capture-Format Constants" href="capture.html">
-        <link rel="canonical" href="https://jarryshaw.github.io/PyPCAPKit/pcapkit/corekit/const/ipheader.html">
+<meta property="og:description" content="pcapkit.corekit.schema.short_read carries a header cut short by the end of the capture through to the protocol’s info, by which a protocol rebuilt from that info is cut back to the octets its heade..." />
+<meta name="description" content="pcapkit.corekit.schema.short_read carries a header cut short by the end of the capture through to the protocol’s info, by which a protocol rebuilt from that info is cut back to the octets its heade..." />
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Sentinel Objects" href="../sentinels.html"><link rel="prev" title="Padding Arithmetic" href="padding.html">
+        <link rel="canonical" href="https://jarryshaw.github.io/PyPCAPKit/pcapkit/corekit/schema/short_read.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
-        <title>IP Header Constants - PyPCAPKit</title>
+        <title>Short-Read Replay - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
@@ -202,11 +202,11 @@
   <span class="sidebar-brand-text">PyPCAPKit</span>
   
 </a><nav class="sidebar-versions" aria-label="Documentation versions">
-  <p>Version <strong>1.8.1 (stable)</strong></p>
+  <p>Version <strong>1.9.0 (stable)</strong></p>
   <ul>
     <li><span aria-current="page">stable</span></li>
-    <li><a href="https://pypcapkit.jarryshaw.me/en/latest/pcapkit/corekit/const/ipheader.html">latest (develop)</a></li>
-    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.8.1/pcapkit/corekit/const/ipheader.html">v1.8.1</a></li>
+    <li><a href="https://pypcapkit.jarryshaw.me/en/latest/pcapkit/corekit/schema/short_read.html">latest (develop)</a></li>
+    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.9.0/pcapkit/corekit/schema/short_read.html">v1.9.0</a></li>
     <li><a href="../../../changelog.html">all releases</a></li>
   </ul>
   <p class="sidebar-versions-note">latest and each release are on Read the Docs</p>
@@ -243,12 +243,16 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/dtls.html">DTLS Handshake-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/sctp.html">SCTP User-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/tls.html">TLS Record Reassembly</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/analysis/index.html">Reassembled Payload Analysis</a><input aria-label="Toggle navigation of Reassembled Payload Analysis" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/ip.html">IP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/tcp.html">TCP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/dtls.html">DTLS Handshake-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/sctp.html">SCTP User-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/tls.html">TLS Record Analysis</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -274,11 +278,13 @@
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/link/llc.html">LLC - Logical Link Control</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/netlink.html">Netlink - Linux Netlink Socket Framing</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/ppp.html">PPP - Point-to-Point Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/pppoe.html">PPPoE - PPP over Ethernet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/radiotap.html">Radiotap - IEEE 802.11 Radiotap Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/link/snap.html">SNAP - Subnetwork Access Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -338,6 +344,10 @@
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/sslv3.html">SSLv3 - Secure Sockets Layer Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/stp.html">STP - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/stpv0.html">STPv0 - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/rstp.html">RSTP - Rapid Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/mstp.html">MSTP - Multiple Spanning Tree Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -357,6 +367,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/seqnum.html">Sequence Number Arithmetic</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/importlib.html">Lazy Imports</a></li>
@@ -378,10 +389,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../checksum/internet.html">Internet Checksum</a></li>
 </ul>
 </li>
-<li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">Shared Format Constants</a><input aria-label="Toggle navigation of Shared Format Constants" checked="" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="capture.html">Capture-Format Constants</a></li>
-<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">IP Header Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="tcpheader.html">TCP Header Constants</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../const/index.html">Shared Format Constants</a><input aria-label="Toggle navigation of Shared Format Constants" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../const/capture.html">Capture-Format Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../const/domain_name.html">Domain Name Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../const/ip_header.html">IP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../const/tcp_header.html">TCP Header Constants</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../context.html">Parsing Context</a></li>
@@ -394,13 +406,14 @@
 <li class="toctree-l3"><a class="reference internal" href="../packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../registry.html">Registry Helpers</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../schema/byteorder.html">Byte-Order Helpers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../schema/extlen.html">Extension-Header Length</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../schema/ipaddress.html">IP Address Conversion</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../schema/jumbogram.html">Jumbo Payload Lookup</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../schema/padding.html">Padding Arithmetic</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../schema/shortread.html">Short-Read Replay</a></li>
+<li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" checked="" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="domain_name.html">Domain Name Codec</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ext_len.html">Extension-Header Length</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipaddress.html">IP Address Conversion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jumbogram.html">Jumbo Payload Lookup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="padding.html">Padding Arithmetic</a></li>
+<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">Short-Read Replay</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../sentinels.html">Sentinel Objects</a></li>
@@ -425,6 +438,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/linux.html">Linux-Specific Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Constant Enumerations</a></li>
@@ -448,6 +462,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
@@ -459,6 +474,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Vendor Crawlers</a></li>
@@ -482,6 +498,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
 </ul>
@@ -496,6 +513,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.9.0.html">1.9.0 – 2026-11-28</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.8.1.html">1.8.1 – 2026-11-27</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
@@ -587,12 +605,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/pcapkit/corekit/const/ipheader.rst?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/pcapkit/corekit/schema/short_read.rst?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/pcapkit/corekit/const/ipheader.rst" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/pcapkit/corekit/schema/short_read.rst" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -609,52 +627,222 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="module-pcapkit.corekit.const.ipheader">
-<span id="ip-header-constants"></span><h1>IP Header Constants<a class="headerlink" href="#module-pcapkit.corekit.const.ipheader" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.corekit.const.ipheader" title="pcapkit.corekit.const.ipheader"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.const.ipheader</span></code></a> holds the IPv4, IPv6 and IP
-Authentication Header lengths and offsets the RFCs fix and that code beyond their
-own protocols reads: other protocols, IP reassembly and the toolkit. Each is the
-one home of its value (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1739">#1739</a>), and none is configurable.</p>
+          <section id="module-pcapkit.corekit.schema.short_read">
+<span id="short-read-replay"></span><h1>Short-Read Replay<a class="headerlink" href="#module-pcapkit.corekit.schema.short_read" title="Link to this heading">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.corekit.schema.short_read" title="pcapkit.corekit.schema.short_read"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.short_read</span></code></a> carries a header cut short by the end of the
+capture through to the protocol’s info, by which a protocol rebuilt from that info
+is cut back to the octets its header had (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1458">#1458</a>), for the layer base classes
+and the PCAP global header alike, and tells a protocol’s checks of a header parsed on
+its own where the cut fell (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>). It names the protocol and schema classes
+for type checking only, since those import it.</p>
 <div class="versionadded">
-<p><span class="versionmodified added">Added in version 1.7.0: </span>Moved here from <code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv4.schema</span></code>,
-<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6.protocol</span></code>,
-<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6.schema</span></code> and
-<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ah.schema</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2883">#2883</a>).</p>
+<p><span class="versionmodified added">Added in version 1.6.0: </span>Moved here from <code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.schema</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2674">#2674</a>).</p>
 </div>
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.corekit.const.ipheader.IP_MAX_LENGTH">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.const.ipheader.</span></span><span class="sig-name descname"><span class="pre">IP_MAX_LENGTH</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65535</span></span><a class="headerlink" href="#pcapkit.corekit.const.ipheader.IP_MAX_LENGTH" title="Link to this definition">¶</a></dt>
-<dd><p>The most octets a 16-bit IP length field declares, for IPv4’s Total Length
-the header included (<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html#section-3.1"><strong>RFC 791 Section 3.1</strong></a>) and for IPv6’s Payload Length
-the fixed header excluded (<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-3"><strong>RFC 8200 Section 3</strong></a>); a longer IPv6 payload is
-a jumbogram, whose Jumbo Payload Length must exceed it (<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2675.html#section-2"><strong>RFC 2675 Section 2</strong></a>).</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.9.0: </span>Renamed from <code class="docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.shortread</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3153">#3153</a>).</p>
+</div>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.9.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.shortread</span></code>, now
+<a class="reference internal" href="#module-pcapkit.corekit.schema.short_read" title="pcapkit.corekit.schema.short_read"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.short_read</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3153">#3153</a>).</p>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.corekit.schema.short_read.keep_short_read">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.schema.short_read.</span></span><span class="sig-name descname"><span class="pre">keep_short_read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/schema/short_read.html#keep_short_read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.schema.short_read.keep_short_read" title="Link to this definition">¶</a></dt>
+<dd><p>Carry a parsed header’s short read into the protocol’s info.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a></span>) – Protocol instance, just parsed.</p></li>
+<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Length of data the parse was given, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> for the octets
+it holds.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Called by the layer base classes, and by the PCAP global
+<a class="reference internal" href="../../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.protocol.Header" title="pcapkit.protocols.misc.pcap.header.protocol.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">Header</span></code></a>, once a parse is done.
+When the data ended inside one of the header’s fields, <code class="docutils literal notranslate"><span class="pre">info</span></code> gains the <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code>
+record <a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.Schema.unpack" title="pcapkit.protocols.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a>
+made, so that <a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_data</span></code></a> hands it to the rebuild,
+whose <a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.pack" title="pcapkit.protocols.protocol.Protocol.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.pack</span></code></a> cuts
+the header back to what was captured before it is read (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1458">#1458</a>,
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2703">#2703</a>). Beside it, <code class="docutils literal notranslate"><span class="pre">__short_width__</span></code> records the length the parse
+read the header at, which the rebuild is read at in turn, so that it holds
+the values its parse read (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>). Both keys are listed
+in <a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.data.Data.__included__" title="pcapkit.protocols.data.Data.__included__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Data.__included__</span></code></a>,
+so <a class="reference internal" href="../infoclass.html#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Info.to_dict</span></code></a> carries them
+and <code class="docutils literal notranslate"><span class="pre">from_data(info.to_dict())</span></code> cuts its rebuild back too; they are absent
+for a header that was captured whole.</p>
+<p>Where the capture cut the frame short, as
+<a class="reference internal" href="../../utilities/contextvars.html#pcapkit.utilities.contextvars.frame_length" title="pcapkit.utilities.contextvars.frame_length"><code class="xref py py-data docutils literal notranslate"><span class="pre">frame_length</span></code></a> gives its lengths, a
+layer whose message runs to the end of the frame records the cut too, on the
+field it runs to the end in, through <code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema._note_short_read</span></code>, so its rebuild
+reads as cut, as the layer did inside the frame (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>). A layer
+whose own header declares where its message ends records none, whether the
+cut falls at that end or past it; see <code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema._frame_end_field</span></code>.</p>
 </dd></dl>
 
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.corekit.const.ipheader.IPV4_HEADER_LEN">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.const.ipheader.</span></span><span class="sig-name descname"><span class="pre">IPV4_HEADER_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></span><a class="headerlink" href="#pcapkit.corekit.const.ipheader.IPV4_HEADER_LEN" title="Link to this definition">¶</a></dt>
-<dd><p>Length of the fixed IPv4 header, i.e. with no options, <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html#section-3.1"><strong>RFC 791 Section 3.1</strong></a>.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.corekit.schema.short_read.replay_short_read">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.schema.short_read.</span></span><span class="sig-name descname"><span class="pre">replay_short_read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/schema/short_read.html#replay_short_read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.schema.short_read.replay_short_read" title="Link to this definition">¶</a></dt>
+<dd><p>Hold a protocol rebuilt by <code class="docutils literal notranslate"><span class="pre">from_data</span></code> to the octets its header had.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_PB</span></code></span>) – Protocol instance, just built by <code class="docutils literal notranslate"><span class="pre">from_data</span></code>.</p></li>
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – The info it was built from.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_PB</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">protocol</span></code> itself.</p>
+</dd>
+</dl>
+<p>The layer base classes and the PCAP global
+<a class="reference internal" href="../../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.protocol.Header" title="pcapkit.protocols.misc.pcap.header.protocol.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">Header</span></code></a> call it on what
+<a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_data</span></code></a>
+returns, which is cut back before it gets here: <code class="docutils literal notranslate"><span class="pre">from_data</span></code> hands the
+construction the <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> record that <a class="reference internal" href="#pcapkit.corekit.schema.short_read.keep_short_read" title="pcapkit.corekit.schema.short_read.keep_short_read"><code class="xref py py-func docutils literal notranslate"><span class="pre">keep_short_read()</span></code></a>
+left in <code class="docutils literal notranslate"><span class="pre">data</span></code>, <a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.pack" title="pcapkit.protocols.protocol.Protocol.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.pack</span></code></a> cuts the header it makes back
+to the octets captured through <a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.Schema._cut_short_read" title="pcapkit.protocols.schema.Schema._cut_short_read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema._cut_short_read</span></code></a>, and
+<a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__post_init__</span></code></a> has
+<a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> parse those octets at the
+width <code class="docutils literal notranslate"><span class="pre">__short_width__</span></code> records, the one its parse read them at, so the
+rebuild is read and verified as its capture was (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2703">#2703</a>,
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>).</p>
+<p>The record names the field the capture ended inside and how much of it
+there was. Everything in the rebuild from that point on is dropped, which
+on a rebuild cut back as above is nothing, and the header and the info
+keep the record (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1458">#1458</a>). A header cut short has no payload past
+it, so that point ends the rebuilt data, and what the protocol writes
+ahead of the header is kept: the HTTP/2 connection preface <code class="docutils literal notranslate"><span class="pre">HTTP.pack</span></code>
+writes (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2665">#2665</a>). This holds while <code class="docutils literal notranslate"><span class="pre">pack</span></code> writes nothing after the
+header schema, as no protocol rebuilt here does; a trailer would keep as
+many of the cut octets.</p>
 </dd></dl>
 
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.corekit.const.ipheader.IPV6_HEADER_LEN">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.const.ipheader.</span></span><span class="sig-name descname"><span class="pre">IPV6_HEADER_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">40</span></span><a class="headerlink" href="#pcapkit.corekit.const.ipheader.IPV6_HEADER_LEN" title="Link to this definition">¶</a></dt>
-<dd><p>Length of the fixed IPv6 header, i.e. the offset of the first extension
-header, <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-3"><strong>RFC 8200 Section 3</strong></a>.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.corekit.schema.short_read.hoist_short_read">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.schema.short_read.</span></span><span class="sig-name descname"><span class="pre">hoist_short_read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parts</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/schema/short_read.html#hoist_short_read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.schema.short_read.hoist_short_read" title="Link to this definition">¶</a></dt>
+<dd><p>Record on <code class="docutils literal notranslate"><span class="pre">schema</span></code> a short read only the schemas in its field <code class="docutils literal notranslate"><span class="pre">name</span></code> recorded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></span>) – The header just parsed.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Its field holding <code class="docutils literal notranslate"><span class="pre">parts</span></code>.</p></li>
+<li><p><strong>parts</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code></a>[<a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span>]</span>) – The schemas read in that field, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> for one absent.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Each of <code class="docutils literal notranslate"><span class="pre">parts</span></code> must read to the end of the data, so a field there that reads
+short has reached it, and the record names <code class="docutils literal notranslate"><span class="pre">name</span></code> with every octet of it
+read. Elsewhere a nested record need not mean that: hoisting one in
+<a class="reference internal" href="#pcapkit.corekit.schema.short_read.keep_short_read" title="pcapkit.corekit.schema.short_read.keep_short_read"><code class="xref py py-func docutils literal notranslate"><span class="pre">keep_short_read()</span></code></a> marks a complete TCP segment with a malformed MPTCP DSS
+option as cut (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2660">#2660</a>). IGMPv3 and ICMPv6 hoist the record of a message
+body counting records the data ends before.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
 </dd></dl>
 
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.corekit.const.ipheader.IPV6_NEXT_HEADER_OFFSET">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.const.ipheader.</span></span><span class="sig-name descname"><span class="pre">IPV6_NEXT_HEADER_OFFSET</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></span><a class="headerlink" href="#pcapkit.corekit.const.ipheader.IPV6_NEXT_HEADER_OFFSET" title="Link to this definition">¶</a></dt>
-<dd><p>Offset of the Next Header field within the fixed IPv6 header,
-<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-3"><strong>RFC 8200 Section 3</strong></a>.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.corekit.schema.short_read.cut_on_its_own">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.schema.short_read.</span></span><span class="sig-name descname"><span class="pre">cut_on_its_own</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/schema/short_read.html#cut_on_its_own"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.schema.short_read.cut_on_its_own" title="Link to this definition">¶</a></dt>
+<dd><p>Tell a check of a header parsed on its own whether the data ended before what it reads.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>header</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></span>) – The header just parsed.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Its field the check reads; <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> for the whole header.</p></li>
+<li><p><strong>end</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – How many octets of <code class="docutils literal notranslate"><span class="pre">name</span></code>, from its start, the check reads;
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> for all of them.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether <code class="docutils literal notranslate"><span class="pre">header</span></code> was parsed with no layer before it, as
+<a class="reference internal" href="../../utilities/contextvars.html#pcapkit.utilities.contextvars.frame_depth" title="pcapkit.utilities.contextvars.frame_depth"><code class="xref py py-data docutils literal notranslate"><span class="pre">frame_depth</span></code></a> tells, and the short
+read it records ends the data before those octets of <code class="docutils literal notranslate"><span class="pre">name</span></code>, or
+anywhere in it without a <code class="docutils literal notranslate"><span class="pre">name</span></code>.</p>
+</dd>
+</dl>
+<p>On its own the end of the data is a cut (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>), so a value past it is a
+zero the cut left, not one read. A check that would refuse such a value leaves it
+to the short read, as a field callback does (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2727">#2727</a>), and so does one refusing
+a header length the data ends inside, refused on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1404">#1404</a> because the rebuild
+filled the zeros in, which the short read now cuts back. Inside a frame its lengths
+say where the message ends, so such a check refuses as before.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
 </dd></dl>
 
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.corekit.const.ipheader.AH_HEADER_LEN">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.const.ipheader.</span></span><span class="sig-name descname"><span class="pre">AH_HEADER_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></span><a class="headerlink" href="#pcapkit.corekit.const.ipheader.AH_HEADER_LEN" title="Link to this definition">¶</a></dt>
-<dd><p>Length of the fixed part of an IP Authentication Header (AH), before its
-Integrity Check Value, <span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html#section-2"><strong>RFC 4302 Section 2</strong></a>.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.corekit.schema.short_read.fill_short_options">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.schema.short_read.</span></span><span class="sig-name descname"><span class="pre">fill_short_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/schema/short_read.html#fill_short_options"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.schema.short_read.fill_short_options" title="Link to this definition">¶</a></dt>
+<dd><p>Fill out an options area a short read ended inside, so a rebuild writes its length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – The data model a protocol is rebuilt from.</p></li>
+<li><p><strong>options</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Its options, keyed by code, as the protocol’s <code class="docutils literal notranslate"><span class="pre">read</span></code> gives them, or
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> for none.</p></li>
+<li><p><strong>size</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Octets its header length gives the options area.</p></li>
+<li><p><strong>zero</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – The code and data model of the one-octet option a zero octet reads as.</p></li>
+<li><p><strong>padding</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Octets it records after an End of Option List, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> where
+the protocol records none.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">options</span></code> and <code class="docutils literal notranslate"><span class="pre">padding</span></code> to <code class="docutils literal notranslate"><span class="pre">size</span></code> octets where <code class="docutils literal notranslate"><span class="pre">data</span></code> records a short
+read: past <code class="docutils literal notranslate"><span class="pre">size</span></code>, trailing <code class="docutils literal notranslate"><span class="pre">zero</span></code> options dropped; short of it, filled out
+with zero octets, after <code class="docutils literal notranslate"><span class="pre">padding</span></code> where the options end with <code class="docutils literal notranslate"><span class="pre">zero</span></code>, else
+as that many <code class="docutils literal notranslate"><span class="pre">zero</span></code> options.</p>
+</dd>
+</dl>
+<p>A header length the data ends before is read as parsed on its own
+(<a class="reference internal" href="#pcapkit.corekit.schema.short_read.cut_on_its_own" title="pcapkit.corekit.schema.short_read.cut_on_its_own"><code class="xref py py-func docutils literal notranslate"><span class="pre">cut_on_its_own()</span></code></a>), but <code class="docutils literal notranslate"><span class="pre">make</span></code> writes the length of the options it is
+given, which past the cut are a cut option’s whole length and the end of the
+list its zeros read as. Whatever is filled or dropped lies past the cut, so the
+rebuild’s cut back leaves the octets and the header length its parse read
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>).</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.corekit.schema.short_read.ends_inside_option">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.schema.short_read.</span></span><span class="sig-name descname"><span class="pre">ends_inside_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/schema/short_read.html#ends_inside_option"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.schema.short_read.ends_inside_option" title="Link to this definition">¶</a></dt>
+<dd><p>Tell whether the first <code class="docutils literal notranslate"><span class="pre">count</span></code> octets of an options area end inside one of its options.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>options</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – The options read from the area, keyed by code, each with the
+<code class="docutils literal notranslate"><span class="pre">length</span></code> it declares.</p></li>
+<li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Octets of the area the data holds.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether an option starts before <code class="docutils literal notranslate"><span class="pre">count</span></code> octets and declares more than them.</p>
+</dd>
+</dl>
+<p>Such an option rebuilds by the values it holds rather than by the length it
+declares, so neither its own length nor the header length before it would
+rebuild as parsed: a header the data ends inside an option of stays refused
+on its own too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1404">#1404</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>).</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
 </dd></dl>
 
 </section>
@@ -664,23 +852,23 @@ Integrity Check Value, <span class="target" id="index-6"></span><a class="rfc re
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="tcpheader.html">
+          <a class="next-page" href="../sentinels.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">TCP Header Constants</div>
+                <div class="title">Sentinel Objects</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="capture.html">
+          <a class="prev-page" href="padding.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Capture-Format Constants</div>
+                <div class="title">Padding Arithmetic</div>
                 
               </div>
             </a>
@@ -708,7 +896,7 @@ Integrity Check Value, <span class="target" id="index-6"></span><a class="rfc re
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=77637be2"></script>
+</div><script src="../../../_static/documentation_options.js?v=baecdfc0"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

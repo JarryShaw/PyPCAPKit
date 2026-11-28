@@ -202,11 +202,11 @@
   <span class="sidebar-brand-text">PyPCAPKit</span>
   
 </a><nav class="sidebar-versions" aria-label="Documentation versions">
-  <p>Version <strong>1.8.1 (stable)</strong></p>
+  <p>Version <strong>1.9.0 (stable)</strong></p>
   <ul>
     <li><span aria-current="page">stable</span></li>
     <li><a href="https://pypcapkit.jarryshaw.me/en/latest/pcapkit/protocols/application/dns.html">latest (develop)</a></li>
-    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.8.1/pcapkit/protocols/application/dns.html">v1.8.1</a></li>
+    <li><a href="https://pypcapkit.jarryshaw.me/en/v1.9.0/pcapkit/protocols/application/dns.html">v1.9.0</a></li>
     <li><a href="../../../changelog.html">all releases</a></li>
   </ul>
   <p class="sidebar-versions-note">latest and each release are on Read the Docs</p>
@@ -243,12 +243,16 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/dtls.html">DTLS Handshake-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/sctp.html">SCTP User-Message Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/tls.html">TLS Record Reassembly</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/analysis/index.html">Reassembled Payload Analysis</a><input aria-label="Toggle navigation of Reassembled Payload Analysis" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/ip.html">IP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/tcp.html">TCP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/dtls.html">DTLS Handshake-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/sctp.html">SCTP User-Message Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/tls.html">TLS Record Analysis</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -274,11 +278,13 @@
 <li class="toctree-l4"><a class="reference internal" href="../link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/llc.html">LLC - Logical Link Control</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/netlink.html">Netlink - Linux Netlink Socket Framing</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/ppp.html">PPP - Point-to-Point Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/pppoe.html">PPPoE - PPP over Ethernet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/radiotap.html">Radiotap - IEEE 802.11 Radiotap Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/snap.html">SNAP - Subnetwork Access Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -338,6 +344,10 @@
 <li class="toctree-l4"><a class="reference internal" href="tls.html">TLS/SSL - Transport Layer Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="sslv3.html">SSLv3 - Secure Sockets Layer Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dtls.html">DTLS - Datagram Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stp.html">STP - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stpv0.html">STPv0 - Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rstp.html">RSTP - Rapid Spanning Tree Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mstp.html">MSTP - Multiple Spanning Tree Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -357,6 +367,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/seqnum.html">Sequence Number Arithmetic</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/importlib.html">Lazy Imports</a></li>
@@ -380,8 +391,9 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../corekit/const/index.html">Shared Format Constants</a><input aria-label="Toggle navigation of Shared Format Constants" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/const/capture.html">Capture-Format Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/ipheader.html">IP Header Constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/tcpheader.html">TCP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/domain_name.html">Domain Name Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/ip_header.html">IP Header Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/const/tcp_header.html">TCP Header Constants</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/context.html">Parsing Context</a></li>
@@ -396,11 +408,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/extlen.html">Extension-Header Length</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/domain_name.html">Domain Name Codec</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/ext_len.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/padding.html">Padding Arithmetic</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/shortread.html">Short-Read Replay</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/short_read.html">Short-Read Replay</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/sentinels.html">Sentinel Objects</a></li>
@@ -425,6 +438,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/linux.html">Linux-Specific Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Constant Enumerations</a></li>
@@ -448,6 +462,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
@@ -459,6 +474,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/llc.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLC</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Vendor Crawlers</a></li>
@@ -482,6 +498,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospfv1.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPFv1</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/stp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">STP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
 </ul>
@@ -496,6 +513,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.9.0.html">1.9.0 – 2026-11-28</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.8.1.html">1.8.1 – 2026-11-27</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.8.0.html">1.8.0 – 2026-11-26</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
@@ -1026,9 +1044,6 @@ field that reads better than the octets as a plain one, which
 is how a TCP segment carries one.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
 </dd>
 </dl>
 <div class="admonition seealso">
@@ -1926,7 +1941,7 @@ Issuer Critical flag is the high bit of <code class="docutils literal notranslat
 <dd class="field-odd"><p>The name, and the offset just past it.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – As <a class="reference internal" href="#pcapkit.protocols.application.dns.schema.read_name" title="pcapkit.protocols.application.dns.schema.read_name"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_name()</span></code></a>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – As <a class="reference internal" href="../../corekit/schema/domain_name.html#pcapkit.corekit.schema.domain_name.read_name" title="pcapkit.corekit.schema.domain_name.read_name"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_name()</span></code></a>
     raises it, or if the name ends past <code class="docutils literal notranslate"><span class="pre">limit</span></code>.</p>
 </dd>
 </dl>
@@ -2376,71 +2391,18 @@ says when unpacking; packing, a <a class="reference internal" href="#pcapkit.pro
 </dd></dl>
 
 </section>
-<section id="domain-name-codec">
-<h2>Domain Name Codec<a class="headerlink" href="#domain-name-codec" title="Link to this heading">¶</a></h2>
-<p>The codec works on octets and labels, with no protocol state, so another
-protocol carrying domain names can call it.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.schema.read_name">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.schema.</span></span><span class="sig-name descname"><span class="pre">read_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'DNS'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/schema.html#read_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.read_name" title="Link to this definition">¶</a></dt>
-<dd><p>Read the domain name at <code class="docutils literal notranslate"><span class="pre">pos</span></code> in <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – The octets compression pointers are offsets into, i.e. the whole
-DNS message for DNS.</p></li>
-<li><p><strong>pos</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Offset of the name in <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p></li>
-<li><p><strong>compression</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether a compression pointer may end the name.</p></li>
-<li><p><strong>alias</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Prefix of the error message.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>], <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Every label of the name, the root’s left out; how many of them are
-written in full at <code class="docutils literal notranslate"><span class="pre">pos</span></code>; the offset the pointer ending the name
-there points to, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> where the root label ends it; and the
-offset just past the name at <code class="docutils literal notranslate"><span class="pre">pos</span></code>.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the name runs past the end of <code class="docutils literal notranslate"><span class="pre">data</span></code>, holds a
-    label type other than a plain label or, where <code class="docutils literal notranslate"><span class="pre">compression</span></code>
-    allows one, a pointer (<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6891.html#section-5"><strong>RFC 6891 Section 5</strong></a>), or its pointers
-    loop.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.schema.make_name">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.schema.</span></span><span class="sig-name descname"><span class="pre">make_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">literal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'DNS'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/schema.html#make_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.make_name" title="Link to this definition">¶</a></dt>
-<dd><p>Write a domain name, the inverse of <a class="reference internal" href="#pcapkit.protocols.application.dns.schema.read_name" title="pcapkit.protocols.application.dns.schema.read_name"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_name()</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>labels</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span>) – Every label of the name, the root’s left out.</p></li>
-<li><p><strong>literal</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – How many of <code class="docutils literal notranslate"><span class="pre">labels</span></code> to write in full; all of them if
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
-<li><p><strong>pointer</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Offset a compression pointer after them points to, or
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> to end the name with the root label.</p></li>
-<li><p><strong>alias</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Prefix of the error message.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The name’s octets.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If a label written is empty or longer than 63 octets,
-    <code class="docutils literal notranslate"><span class="pre">literal</span></code> is not a count of <code class="docutils literal notranslate"><span class="pre">labels</span></code>, or <code class="docutils literal notranslate"><span class="pre">pointer</span></code> does not
-    fit in 14 bits.</p>
-</dd>
-</dl>
-</dd></dl>
-
+<section id="id1">
+<h2>Auxiliary Functions<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="#pcapkit.protocols.application.dns.schema.compress_name" title="pcapkit.protocols.application.dns.schema.compress_name"><code class="xref py py-func docutils literal notranslate"><span class="pre">compress_name()</span></code></a> and
+<a class="reference internal" href="#pcapkit.protocols.application.dns.schema.record_name" title="pcapkit.protocols.application.dns.schema.record_name"><code class="xref py py-func docutils literal notranslate"><span class="pre">record_name()</span></code></a> lay a message’s names
+out for the codec of <a class="reference internal" href="../../corekit/schema/domain_name.html#module-pcapkit.corekit.schema.domain_name" title="pcapkit.corekit.schema.domain_name"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.domain_name</span></code></a>.</p>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.9.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.dns.schema.read_name</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.dns.schema.make_name</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.dns.schema.name_to_text</span></code> and
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.dns.schema.text_to_labels</span></code>, now in
+<a class="reference internal" href="../../corekit/schema/domain_name.html#module-pcapkit.corekit.schema.domain_name" title="pcapkit.corekit.schema.domain_name"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.domain_name</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2934">#2934</a>).</p>
+</div>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.schema.compress_name">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.schema.</span></span><span class="sig-name descname"><span class="pre">compress_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/schema.html#compress_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.compress_name" title="Link to this definition">¶</a></dt>
@@ -2454,12 +2416,13 @@ this name writes in full are added to it.</p></li>
 <li><p><strong>offset</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Offset the name is written at.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>the longest
-suffix in <code class="docutils literal notranslate"><span class="pre">table</span></code> is pointed to, and the labels before it written.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span>]</span></p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span>]</span></p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The <code class="docutils literal notranslate"><span class="pre">literal</span></code> and <code class="docutils literal notranslate"><span class="pre">pointer</span></code> for
+<a class="reference internal" href="../../corekit/schema/domain_name.html#pcapkit.corekit.schema.domain_name.make_name" title="pcapkit.corekit.schema.domain_name.make_name"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_name()</span></code></a>: the longest
+suffix in <code class="docutils literal notranslate"><span class="pre">table</span></code> is pointed to, and the labels before it written.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2476,50 +2439,6 @@ suffix in <code class="docutils literal notranslate"><span class="pre">table</sp
 <li><p><strong>table</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>], <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – Each label suffix already written, by its offset.</p></li>
 <li><p><strong>offset</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Offset the name is written at.</p></li>
 </ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.schema.name_to_text">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.schema.</span></span><span class="sig-name descname"><span class="pre">name_to_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/schema.html#name_to_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.name_to_text" title="Link to this definition">¶</a></dt>
-<dd><p>Render labels in presentation form (<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-5.1"><strong>RFC 1035 Section 5.1</strong></a>).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>labels</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span>) – Every label of the name, the root’s left out.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The absolute name, e.g. <code class="docutils literal notranslate"><span class="pre">www.example.com.</span></code>, with <code class="docutils literal notranslate"><span class="pre">.</span></code> and <code class="docutils literal notranslate"><span class="pre">\</span></code>
-escaped by a backslash, and any octet outside printable ASCII or a
-space as <code class="docutils literal notranslate"><span class="pre">\DDD</span></code>; the root is <code class="docutils literal notranslate"><span class="pre">.</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.schema.text_to_labels">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.schema.</span></span><span class="sig-name descname"><span class="pre">text_to_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">alias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'DNS'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/schema.html#text_to_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.text_to_labels" title="Link to this definition">¶</a></dt>
-<dd><p>Read a name in presentation form into labels, the inverse of <a class="reference internal" href="#pcapkit.protocols.application.dns.schema.name_to_text" title="pcapkit.protocols.application.dns.schema.name_to_text"><code class="xref py py-func docutils literal notranslate"><span class="pre">name_to_text()</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>text</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The name; the trailing <code class="docutils literal notranslate"><span class="pre">.</span></code> is optional, and <code class="docutils literal notranslate"><span class="pre">''</span></code> or <code class="docutils literal notranslate"><span class="pre">.</span></code>
-is the root.</p></li>
-<li><p><strong>alias</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Prefix of the error message.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Every label of the name, the root’s left out.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">text</span></code> holds an empty label, or a backslash not
-    followed by a character or by three decimal digits up to 255.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2549,7 +2468,7 @@ body as given.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.DNS">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">DNS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flags</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qdcount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ancount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nscount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arcount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">question</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">answer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">authority</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#DNS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.DNS" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.data.Protocol" title="pcapkit.protocols.data.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
-<p>Data model for a DNS message (<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-4.1"><strong>RFC 1035 Section 4.1</strong></a>).</p>
+<p>Data model for a DNS message (<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-4.1"><strong>RFC 1035 Section 4.1</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.DNS.id">
 <span class="sig-name descname"><span class="pre">id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.DNS.id" title="Link to this definition">¶</a></dt>
@@ -2614,7 +2533,7 @@ body as given.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.DNS.length">
 <span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.DNS.length" title="Link to this definition">¶</a></dt>
 <dd><p>Message length, the two-octet field preceding the message over TCP
-(<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-4.2.2"><strong>RFC 1035 Section 4.2.2</strong></a>); present only for such a message.</p>
+(<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-4.2.2"><strong>RFC 1035 Section 4.2.2</strong></a>); present only for such a message.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2630,7 +2549,7 @@ are any.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.Flags">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">Flags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opcode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aa</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rcode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#Flags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.Flags" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
-<p>Data model for the DNS header flags (<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-4.1.1"><strong>RFC 1035 Section 4.1.1</strong></a>).</p>
+<p>Data model for the DNS header flags (<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-4.1.1"><strong>RFC 1035 Section 4.1.1</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.Flags.qr">
 <span class="sig-name descname"><span class="pre">qr</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.Flags.qr" title="Link to this definition">¶</a></dt>
@@ -2676,20 +2595,20 @@ are any.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.Flags.ad">
 <span class="sig-name descname"><span class="pre">ad</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.Flags.ad" title="Link to this definition">¶</a></dt>
-<dd><p>Authentic data (<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4035.html#section-3.2.3"><strong>RFC 4035 Section 3.2.3</strong></a>).</p>
+<dd><p>Authentic data (<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4035.html#section-3.2.3"><strong>RFC 4035 Section 3.2.3</strong></a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.Flags.cd">
 <span class="sig-name descname"><span class="pre">cd</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.Flags.cd" title="Link to this definition">¶</a></dt>
-<dd><p>Checking disabled (<span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4035.html#section-3.2.2"><strong>RFC 4035 Section 3.2.2</strong></a>).</p>
+<dd><p>Checking disabled (<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4035.html#section-3.2.2"><strong>RFC 4035 Section 3.2.2</strong></a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.Flags.rcode">
 <span class="sig-name descname"><span class="pre">rcode</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/dns.html#pcapkit.const.dns.rcode.RCode" title="pcapkit.const.dns.rcode.RCode"><span class="pre">RCode</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.Flags.rcode" title="Link to this definition">¶</a></dt>
 <dd><p>Response code, the low four bits of an extended one
-(<span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6891.html#section-6.1.3"><strong>RFC 6891 Section 6.1.3</strong></a>).</p>
+(<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6891.html#section-6.1.3"><strong>RFC 6891 Section 6.1.3</strong></a>).</p>
 </dd></dl>
 
 </dd></dl>
@@ -2698,10 +2617,10 @@ are any.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.Name">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">Name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">literal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#Name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.Name" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
-<p>Data model for a domain name (<span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-3.1"><strong>RFC 1035 Section 3.1</strong></a>).</p>
+<p>Data model for a domain name (<span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-3.1"><strong>RFC 1035 Section 3.1</strong></a>).</p>
 <p><a class="reference internal" href="#pcapkit.protocols.application.dns.data.Name.literal" title="pcapkit.protocols.application.dns.data.Name.literal"><code class="xref py py-attr docutils literal notranslate"><span class="pre">literal</span></code></a> and <a class="reference internal" href="#pcapkit.protocols.application.dns.data.Name.pointer" title="pcapkit.protocols.application.dns.data.Name.pointer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pointer</span></code></a> record how the name was written, so
 that it is rebuilt with the compression it was read with
-(<span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-4.1.4"><strong>RFC 1035 Section 4.1.4</strong></a>).</p>
+(<span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-4.1.4"><strong>RFC 1035 Section 4.1.4</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.Name.name">
 <span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.Name.name" title="Link to this definition">¶</a></dt>
@@ -2734,7 +2653,7 @@ root is <code class="docutils literal notranslate"><span class="pre">.</span></c
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.Question">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">Question</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#Question"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.Question" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
-<p>Data model for a question section entry (<span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-4.1.2"><strong>RFC 1035 Section 4.1.2</strong></a>).</p>
+<p>Data model for a question section entry (<span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-4.1.2"><strong>RFC 1035 Section 4.1.2</strong></a>).</p>
 <p>Its <code class="docutils literal notranslate"><span class="pre">class</span></code> key, a keyword in Python, holds the <a class="reference internal" href="../../const/dns.html#pcapkit.const.dns.rr_class.RRClass" title="pcapkit.const.dns.rr_class.RRClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">RRClass</span></code></a>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.Question.name">
@@ -2754,7 +2673,7 @@ root is <code class="docutils literal notranslate"><span class="pre">.</span></c
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.ResourceRecord">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">ResourceRecord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rdlength</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#ResourceRecord"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.ResourceRecord" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
-<p>Data model for a resource record (<span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-4.1.3"><strong>RFC 1035 Section 4.1.3</strong></a>).</p>
+<p>Data model for a resource record (<span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-4.1.3"><strong>RFC 1035 Section 4.1.3</strong></a>).</p>
 <p>Its <code class="docutils literal notranslate"><span class="pre">class</span></code> key, a keyword in Python, holds the <a class="reference internal" href="../../const/dns.html#pcapkit.const.dns.rr_class.RRClass" title="pcapkit.const.dns.rr_class.RRClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">RRClass</span></code></a>.
 <a class="reference internal" href="#pcapkit.protocols.application.dns.data.ResourceRecord.rdata" title="pcapkit.protocols.application.dns.data.ResourceRecord.rdata"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rdata</span></code></a> holds the decoded RDATA where
 <a class="reference internal" href="#pcapkit.protocols.application.dns.protocol.DNS.__rdata__" title="pcapkit.protocols.application.dns.protocol.DNS.__rdata__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">DNS.__rdata__</span></code></a>
@@ -2796,7 +2715,7 @@ including RDATA its decoder cannot read exactly.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.OPT">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">OPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">udp_payload_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extended_rcode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rdlength</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#OPT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.OPT" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
-<p>Data model for the OPT pseudo-record of EDNS(0) (<span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6891.html#section-6.1.2"><strong>RFC 6891 Section 6.1.2</strong></a>).</p>
+<p>Data model for the OPT pseudo-record of EDNS(0) (<span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6891.html#section-6.1.2"><strong>RFC 6891 Section 6.1.2</strong></a>).</p>
 <p>The CLASS and TTL fields of a resource record are redefined for it, and
 each of their parts has a field here.</p>
 <dl class="py attribute">
@@ -2832,7 +2751,7 @@ each of their parts has a field here.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.OPT.do">
 <span class="sig-name descname"><span class="pre">do</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.OPT.do" title="Link to this definition">¶</a></dt>
-<dd><p>DNSSEC OK bit (<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3225.html#section-3"><strong>RFC 3225 Section 3</strong></a>).</p>
+<dd><p>DNSSEC OK bit (<span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3225.html#section-3"><strong>RFC 3225 Section 3</strong></a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2859,7 +2778,7 @@ each of their parts has a field here.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.Option">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">Option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#Option"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.Option" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
-<p>Data model for an EDNS(0) option (<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6891.html#section-6.1.2"><strong>RFC 6891 Section 6.1.2</strong></a>).</p>
+<p>Data model for an EDNS(0) option (<span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6891.html#section-6.1.2"><strong>RFC 6891 Section 6.1.2</strong></a>).</p>
 <p><a class="reference internal" href="#pcapkit.protocols.application.dns.data.Option.data" title="pcapkit.protocols.application.dns.data.Option.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a> holds the decoded OPTION-DATA where
 <a class="reference internal" href="#pcapkit.protocols.application.dns.protocol.DNS.__option__" title="pcapkit.protocols.application.dns.protocol.DNS.__option__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">DNS.__option__</span></code></a>
 registers a decoder for <a class="reference internal" href="#pcapkit.protocols.application.dns.data.Option.code" title="pcapkit.protocols.application.dns.data.Option.code"><code class="xref py py-attr docutils literal notranslate"><span class="pre">code</span></code></a>, and the raw octets otherwise.</p>
@@ -2900,7 +2819,7 @@ carries, its fields named as its specification names them.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.A">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">A</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#A"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.A" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.application.dns.data.RData" title="pcapkit.protocols.application.dns.data.RData"><code class="xref py py-class docutils literal notranslate"><span class="pre">RData</span></code></a></p>
-<p>Data model for the <code class="docutils literal notranslate"><span class="pre">A</span></code> RDATA (<span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-3.4.1"><strong>RFC 1035 Section 3.4.1</strong></a>).</p>
+<p>Data model for the <code class="docutils literal notranslate"><span class="pre">A</span></code> RDATA (<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-3.4.1"><strong>RFC 1035 Section 3.4.1</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.A.address">
 <span class="sig-name descname"><span class="pre">address</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><span class="pre">IPv4Address</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.A.address" title="Link to this definition">¶</a></dt>
@@ -2913,7 +2832,7 @@ carries, its fields named as its specification names them.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.NS">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">NS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nsdname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#NS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.NS" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.application.dns.data.RData" title="pcapkit.protocols.application.dns.data.RData"><code class="xref py py-class docutils literal notranslate"><span class="pre">RData</span></code></a></p>
-<p>Data model for the <code class="docutils literal notranslate"><span class="pre">NS</span></code> RDATA (<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-3.3.11"><strong>RFC 1035 Section 3.3.11</strong></a>).</p>
+<p>Data model for the <code class="docutils literal notranslate"><span class="pre">NS</span></code> RDATA (<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-3.3.11"><strong>RFC 1035 Section 3.3.11</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.NS.nsdname">
 <span class="sig-name descname"><span class="pre">nsdname</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.dns.data.Name" title="pcapkit.protocols.application.dns.data.Name"><span class="pre">Name</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.NS.nsdname" title="Link to this definition">¶</a></dt>
@@ -2926,7 +2845,7 @@ carries, its fields named as its specification names them.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.CNAME">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">CNAME</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#CNAME"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.CNAME" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.application.dns.data.RData" title="pcapkit.protocols.application.dns.data.RData"><code class="xref py py-class docutils literal notranslate"><span class="pre">RData</span></code></a></p>
-<p>Data model for the <code class="docutils literal notranslate"><span class="pre">CNAME</span></code> RDATA (<span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-3.3.1"><strong>RFC 1035 Section 3.3.1</strong></a>).</p>
+<p>Data model for the <code class="docutils literal notranslate"><span class="pre">CNAME</span></code> RDATA (<span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-3.3.1"><strong>RFC 1035 Section 3.3.1</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.CNAME.cname">
 <span class="sig-name descname"><span class="pre">cname</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.dns.data.Name" title="pcapkit.protocols.application.dns.data.Name"><span class="pre">Name</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.CNAME.cname" title="Link to this definition">¶</a></dt>
@@ -2939,7 +2858,7 @@ carries, its fields named as its specification names them.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.SOA">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">SOA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refresh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expire</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#SOA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.SOA" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.application.dns.data.RData" title="pcapkit.protocols.application.dns.data.RData"><code class="xref py py-class docutils literal notranslate"><span class="pre">RData</span></code></a></p>
-<p>Data model for the <code class="docutils literal notranslate"><span class="pre">SOA</span></code> RDATA (<span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-3.3.13"><strong>RFC 1035 Section 3.3.13</strong></a>).</p>
+<p>Data model for the <code class="docutils literal notranslate"><span class="pre">SOA</span></code> RDATA (<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-3.3.13"><strong>RFC 1035 Section 3.3.13</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.SOA.mname">
 <span class="sig-name descname"><span class="pre">mname</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.dns.data.Name" title="pcapkit.protocols.application.dns.data.Name"><span class="pre">Name</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.SOA.mname" title="Link to this definition">¶</a></dt>
@@ -2979,7 +2898,7 @@ carries, its fields named as its specification names them.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.SOA.minimum">
 <span class="sig-name descname"><span class="pre">minimum</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.SOA.minimum" title="Link to this definition">¶</a></dt>
-<dd><p>Minimum TTL, in seconds; the negative-caching TTL (<span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2308.html#section-4"><strong>RFC 2308 Section 4</strong></a>).</p>
+<dd><p>Minimum TTL, in seconds; the negative-caching TTL (<span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2308.html#section-4"><strong>RFC 2308 Section 4</strong></a>).</p>
 </dd></dl>
 
 </dd></dl>
@@ -2988,7 +2907,7 @@ carries, its fields named as its specification names them.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.PTR">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">PTR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ptrdname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#PTR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.PTR" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.application.dns.data.RData" title="pcapkit.protocols.application.dns.data.RData"><code class="xref py py-class docutils literal notranslate"><span class="pre">RData</span></code></a></p>
-<p>Data model for the <code class="docutils literal notranslate"><span class="pre">PTR</span></code> RDATA (<span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-3.3.12"><strong>RFC 1035 Section 3.3.12</strong></a>).</p>
+<p>Data model for the <code class="docutils literal notranslate"><span class="pre">PTR</span></code> RDATA (<span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-3.3.12"><strong>RFC 1035 Section 3.3.12</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.PTR.ptrdname">
 <span class="sig-name descname"><span class="pre">ptrdname</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.dns.data.Name" title="pcapkit.protocols.application.dns.data.Name"><span class="pre">Name</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.PTR.ptrdname" title="Link to this definition">¶</a></dt>
@@ -3001,7 +2920,7 @@ carries, its fields named as its specification names them.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.MX">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">MX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preference</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exchange</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#MX"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.MX" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.application.dns.data.RData" title="pcapkit.protocols.application.dns.data.RData"><code class="xref py py-class docutils literal notranslate"><span class="pre">RData</span></code></a></p>
-<p>Data model for the <code class="docutils literal notranslate"><span class="pre">MX</span></code> RDATA (<span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-3.3.9"><strong>RFC 1035 Section 3.3.9</strong></a>).</p>
+<p>Data model for the <code class="docutils literal notranslate"><span class="pre">MX</span></code> RDATA (<span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-3.3.9"><strong>RFC 1035 Section 3.3.9</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.MX.preference">
 <span class="sig-name descname"><span class="pre">preference</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.MX.preference" title="Link to this definition">¶</a></dt>
@@ -3020,7 +2939,7 @@ carries, its fields named as its specification names them.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.TXT">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">TXT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#TXT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.TXT" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.application.dns.data.RData" title="pcapkit.protocols.application.dns.data.RData"><code class="xref py py-class docutils literal notranslate"><span class="pre">RData</span></code></a></p>
-<p>Data model for the <code class="docutils literal notranslate"><span class="pre">TXT</span></code> RDATA (<span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-3.3.14"><strong>RFC 1035 Section 3.3.14</strong></a>).</p>
+<p>Data model for the <code class="docutils literal notranslate"><span class="pre">TXT</span></code> RDATA (<span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-3.3.14"><strong>RFC 1035 Section 3.3.14</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.TXT.strings">
 <span class="sig-name descname"><span class="pre">strings</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.TXT.strings" title="Link to this definition">¶</a></dt>
@@ -3033,7 +2952,7 @@ carries, its fields named as its specification names them.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.AAAA">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">AAAA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#AAAA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.AAAA" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.application.dns.data.RData" title="pcapkit.protocols.application.dns.data.RData"><code class="xref py py-class docutils literal notranslate"><span class="pre">RData</span></code></a></p>
-<p>Data model for the <code class="docutils literal notranslate"><span class="pre">AAAA</span></code> RDATA (<span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3596.html#section-2.2"><strong>RFC 3596 Section 2.2</strong></a>).</p>
+<p>Data model for the <code class="docutils literal notranslate"><span class="pre">AAAA</span></code> RDATA (<span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3596.html#section-2.2"><strong>RFC 3596 Section 2.2</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.AAAA.address">
 <span class="sig-name descname"><span class="pre">address</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><span class="pre">IPv6Address</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.AAAA.address" title="Link to this definition">¶</a></dt>
@@ -3046,7 +2965,7 @@ carries, its fields named as its specification names them.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.SRV">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">SRV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priority</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#SRV"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.SRV" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.application.dns.data.RData" title="pcapkit.protocols.application.dns.data.RData"><code class="xref py py-class docutils literal notranslate"><span class="pre">RData</span></code></a></p>
-<p>Data model for the <code class="docutils literal notranslate"><span class="pre">SRV</span></code> RDATA (<span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2782.html"><strong>RFC 2782</strong></a>).</p>
+<p>Data model for the <code class="docutils literal notranslate"><span class="pre">SRV</span></code> RDATA (<span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2782.html"><strong>RFC 2782</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.SRV.priority">
 <span class="sig-name descname"><span class="pre">priority</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.SRV.priority" title="Link to this definition">¶</a></dt>
@@ -3077,7 +2996,7 @@ carries, its fields named as its specification names them.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.CAA">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">CAA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flags</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">critical</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#CAA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.CAA" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.application.dns.data.RData" title="pcapkit.protocols.application.dns.data.RData"><code class="xref py py-class docutils literal notranslate"><span class="pre">RData</span></code></a></p>
-<p>Data model for the <code class="docutils literal notranslate"><span class="pre">CAA</span></code> RDATA (<span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8659.html#section-4.1"><strong>RFC 8659 Section 4.1</strong></a>).</p>
+<p>Data model for the <code class="docutils literal notranslate"><span class="pre">CAA</span></code> RDATA (<span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8659.html#section-4.1"><strong>RFC 8659 Section 4.1</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.CAA.flags">
 <span class="sig-name descname"><span class="pre">flags</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.CAA.flags" title="Link to this definition">¶</a></dt>
@@ -3120,7 +3039,7 @@ carries, its fields named as its specification names them.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.ClientSubnet">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">ClientSubnet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">family</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scope_prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#ClientSubnet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.ClientSubnet" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.application.dns.data.OptionData" title="pcapkit.protocols.application.dns.data.OptionData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionData</span></code></a></p>
-<p>Data model for the <code class="docutils literal notranslate"><span class="pre">edns-client-subnet</span></code> option (<span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7871.html#section-6"><strong>RFC 7871 Section 6</strong></a>).</p>
+<p>Data model for the <code class="docutils literal notranslate"><span class="pre">edns-client-subnet</span></code> option (<span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7871.html#section-6"><strong>RFC 7871 Section 6</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.ClientSubnet.family">
 <span class="sig-name descname"><span class="pre">family</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.ClientSubnet.family" title="Link to this definition">¶</a></dt>
@@ -3151,7 +3070,7 @@ carries, its fields named as its specification names them.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.Cookie">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">Cookie</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#Cookie"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.Cookie" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.application.dns.data.OptionData" title="pcapkit.protocols.application.dns.data.OptionData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionData</span></code></a></p>
-<p>Data model for the <code class="docutils literal notranslate"><span class="pre">COOKIE</span></code> option (<span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7873.html#section-4"><strong>RFC 7873 Section 4</strong></a>).</p>
+<p>Data model for the <code class="docutils literal notranslate"><span class="pre">COOKIE</span></code> option (<span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7873.html#section-4"><strong>RFC 7873 Section 4</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.Cookie.client">
 <span class="sig-name descname"><span class="pre">client</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.Cookie.client" title="Link to this definition">¶</a></dt>
@@ -3170,7 +3089,7 @@ carries, its fields named as its specification names them.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.TCPKeepalive">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">TCPKeepalive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#TCPKeepalive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.TCPKeepalive" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.application.dns.data.OptionData" title="pcapkit.protocols.application.dns.data.OptionData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionData</span></code></a></p>
-<p>Data model for the <code class="docutils literal notranslate"><span class="pre">edns-tcp-keepalive</span></code> option (<span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7828.html#section-3.1"><strong>RFC 7828 Section 3.1</strong></a>).</p>
+<p>Data model for the <code class="docutils literal notranslate"><span class="pre">edns-tcp-keepalive</span></code> option (<span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7828.html#section-3.1"><strong>RFC 7828 Section 3.1</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.TCPKeepalive.timeout">
 <span class="sig-name descname"><span class="pre">timeout</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.TCPKeepalive.timeout" title="Link to this definition">¶</a></dt>
@@ -3183,7 +3102,7 @@ carries, its fields named as its specification names them.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.ExtendedError">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.data.</span></span><span class="sig-name descname"><span class="pre">ExtendedError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/data.html#ExtendedError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.data.ExtendedError" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.application.dns.data.OptionData" title="pcapkit.protocols.application.dns.data.OptionData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionData</span></code></a></p>
-<p>Data model for the <code class="docutils literal notranslate"><span class="pre">Extended</span> <span class="pre">DNS</span> <span class="pre">Error</span></code> option (<span class="target" id="index-56"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8914.html#section-2"><strong>RFC 8914 Section 2</strong></a>).</p>
+<p>Data model for the <code class="docutils literal notranslate"><span class="pre">Extended</span> <span class="pre">DNS</span> <span class="pre">Error</span></code> option (<span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8914.html#section-2"><strong>RFC 8914 Section 2</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.data.ExtendedError.info_code">
 <span class="sig-name descname"><span class="pre">info_code</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.data.ExtendedError.info_code" title="Link to this definition">¶</a></dt>
@@ -3200,16 +3119,14 @@ carries, its fields named as its specification names them.</p>
 
 <section id="module-pcapkit.protocols.application.dns.const">
 <span id="constants"></span><h3>Constants<a class="headerlink" href="#module-pcapkit.protocols.application.dns.const" title="Link to this heading">¶</a></h3>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.9.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.dns.const.POINTER_LIMIT</span></code>, now
+<a class="reference internal" href="../../corekit/const/domain_name.html#pcapkit.corekit.const.domain_name.POINTER_LIMIT" title="pcapkit.corekit.const.domain_name.POINTER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.corekit.const.domain_name.POINTER_LIMIT</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2934">#2934</a>).</p>
+</div>
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.const.HEADER_LENGTH">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.const.</span></span><span class="sig-name descname"><span class="pre">HEADER_LENGTH</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></span><a class="headerlink" href="#pcapkit.protocols.application.dns.const.HEADER_LENGTH" title="Link to this definition">¶</a></dt>
-<dd><p>Length of the fixed header, before the sections (<span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-4.1.1"><strong>RFC 1035 Section 4.1.1</strong></a>).</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.const.POINTER_LIMIT">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.const.</span></span><span class="sig-name descname"><span class="pre">POINTER_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16383</span></span><a class="headerlink" href="#pcapkit.protocols.application.dns.const.POINTER_LIMIT" title="Link to this definition">¶</a></dt>
-<dd><p>Largest offset a compression pointer can carry, in its 14 bits.</p>
+<dd><p>Length of the fixed header, before the sections (<span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-4.1.1"><strong>RFC 1035 Section 4.1.1</strong></a>).</p>
 </dd></dl>
 
 </section>
@@ -3277,7 +3194,7 @@ carries, its fields named as its specification names them.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#type-stubs">Type Stubs</a></li>
-<li><a class="reference internal" href="#domain-name-codec">Domain Name Codec</a><ul>
+<li><a class="reference internal" href="#id1">Auxiliary Functions</a><ul>
 <li><a class="reference internal" href="#module-pcapkit.protocols.application.dns.data">Data Models</a></li>
 </ul>
 </li>
@@ -3297,7 +3214,7 @@ carries, its fields named as its specification names them.</p>
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=77637be2"></script>
+</div><script src="../../../_static/documentation_options.js?v=baecdfc0"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

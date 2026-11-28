@@ -1,0 +1,248 @@
+1.9.0 -- 2026-11-28
+===================
+
+1.9.0 decodes Neighbor Discovery in ICMPv6, adds dissectors for IEEE 802.2 LLC and
+SNAP and for the Spanning Tree Protocol family LLC carries, reassembles SCTP user
+messages and TLS records split across TCP segments, and verifies HIP's HMAC and
+signature parameters given the keys. Its breaking changes, each marked **a breaking
+change to** and ending with how to migrate, are to where :mod:`pcapkit.corekit`'s
+multi-word modules and DNS's name codec live, to the Mobility Header's option
+payloads, which parse as protocols rather than stay octets, and to the conda
+package, which no longer bundles the optional dependencies.
+
+:mod:`pcapkit.corekit`
+----------------------
+
+Changed
+~~~~~~~
+
+* **a breaking change to** the names of the :mod:`pcapkit.corekit` modules that
+  follow, whose words an underscore now separates, ruled in review of :pr:`3142`
+  (:issue:`2934`), with the list taken on :issue:`3153` (:pr:`3172`):
+  ``pcapkit.corekit.schema.shortread`` is :mod:`pcapkit.corekit.schema.short_read`,
+  ``pcapkit.corekit.schema.extlen`` is :mod:`pcapkit.corekit.schema.ext_len`,
+  ``pcapkit.corekit.const.ipheader`` is :mod:`pcapkit.corekit.const.ip_header` and
+  ``pcapkit.corekit.const.tcpheader`` is :mod:`pcapkit.corekit.const.tcp_header`.
+  A common joined name, as :mod:`pcapkit.corekit.schema.byteorder`, keeps its form.
+  The old paths raise :exc:`ImportError`, with no alias. To migrate, import from the
+  new path, as ``from pcapkit.corekit.schema.short_read import hoist_short_read``.
+* **a breaking change to** where DNS's name codec lives, now that ICMPv6's DNS
+  Search List option reads names too (:issue:`2934`, :pr:`3142`). ``read_name``,
+  ``make_name``, ``name_to_text`` and ``text_to_labels`` move from
+  ``pcapkit.protocols.application.dns.schema`` to the new
+  :mod:`pcapkit.corekit.schema.domain_name`, and ``POINTER_LIMIT`` from
+  ``pcapkit.protocols.application.dns.const`` to
+  :data:`pcapkit.corekit.const.domain_name.POINTER_LIMIT`, with no re-export, so
+  the old paths raise :exc:`ImportError`. DNS reads and writes names as before. To
+  migrate, ``from pcapkit.protocols.application.dns.schema import read_name``
+  becomes ``from pcapkit.corekit.schema.domain_name import read_name``.
+
+:mod:`pcapkit.foundation`
+-------------------------
+
+Added
+~~~~~
+
+* SCTP user-message reassembly, ``'sctp'`` in an extraction's ``reassembly``, by
+  :class:`~pcapkit.foundation.reassembly.sctp.reassembly.SCTP`, which
+  :mod:`pcapkit.foundation.reassembly` exports as ``SCTP_Reassembly``, under the
+  PCAP and PCAP-NG engines (:issue:`2935`, :pr:`3137`). It joins a message's DATA
+  chunks, a run of consecutive TSNs from the ``B`` bit to the ``E`` bit on one
+  stream (:rfc:`9260#section-6.9`), or its I-DATA chunks by message ID, in FSN
+  order (:rfc:`8260`). A buffer is keyed by the ports and verification tag, so the
+  fragments sent on any path of a multi-homed association join, and of a TSN or FSN
+  received twice the first copy is kept; there is no timeout unless one is given.
+  The messages are
+  :attr:`ReassemblyData.sctp <pcapkit.foundation.reassembly.data.ReassemblyData.sctp>`,
+  each one's ``packet`` its user data dispatched on its PPID by
+  :meth:`SCTP.analyze <pcapkit.protocols.transport.sctp.protocol.SCTP.analyze>`, as
+  the new :func:`~pcapkit.foundation.analysis.sctp.sctp_message` parses it. An
+  incomplete message is reported as its received runs under ``strict=True`` and as
+  its octets up to the first hole otherwise.
+* TLS record reassembly, ``'tls'`` in an extraction's ``reassembly``, by
+  :class:`~pcapkit.foundation.reassembly.tls.reassembly.TLS`, which
+  :mod:`pcapkit.foundation.reassembly` exports as ``TLS_Reassembly``, under the
+  PCAP, PCAP-NG, DPKT, Scapy and PyPCAPFile engines (:issue:`2938`, :pr:`3138`), so
+  a record split across TCP segments, which no segment's TLS layer can parse, is
+  parsed whole. Each direction of a connection on a port TCP binds to TLS is one
+  octet stream in sequence order, from its SYN or a segment opening a record
+  header to its FIN or RST, a segment ahead of the octets held waiting for them and
+  the first copy of octets received twice kept. The new
+  :meth:`TLS.record_header <pcapkit.protocols.application.tls.protocol.TLS.record_header>`
+  cuts it into records, and every record is reported, as
+  :attr:`ReassemblyData.tls <pcapkit.foundation.reassembly.data.ReassemblyData.tls>`,
+  one a single segment holds included, since a boundary is known only from the
+  record before it. A complete record's ``packet`` is the record parsed by the new
+  :meth:`TLS.analyze_record <pcapkit.protocols.application.tls.protocol.TLS.analyze_record>`,
+  as :func:`~pcapkit.foundation.analysis.tls.tls_record` parses it, and an
+  incomplete one's is :data:`None`, as DTLS reassembly leaves it. TCP reassembly's
+  sequence-number arithmetic moves to the new
+  :func:`pcapkit.utilities.seqnum.unwrap`, which both read.
+
+:mod:`pcapkit.protocols`
+------------------------
+
+Added
+~~~~~
+
+* Neighbor Discovery (:rfc:`4861`) in
+  :class:`~pcapkit.protocols.internet.icmpv6.protocol.ICMPv6`: types 133 to 137
+  decode into :class:`~pcapkit.protocols.internet.icmpv6.data.RouterSolicitation`,
+  :class:`~pcapkit.protocols.internet.icmpv6.data.RouterAdvertisement`,
+  :class:`~pcapkit.protocols.internet.icmpv6.data.NeighborSolicitation`,
+  :class:`~pcapkit.protocols.internet.icmpv6.data.NeighborAdvertisement` and
+  :class:`~pcapkit.protocols.internet.icmpv6.data.Redirect`, where 1.8.x kept their
+  bodies as octets, with the flags IANA's registries assign and a router preference
+  as the new :class:`~pcapkit.const.icmpv6.router_preference.RouterPreference`
+  (:rfc:`4191`), and rebuild byte-exact, whole or cut (:issue:`2934`, :pr:`3142`).
+  Their options decode through the new
+  :attr:`ICMPv6.__option__ <pcapkit.protocols.internet.icmpv6.protocol.ICMPv6.__option__>`:
+  those of :rfc:`4861#section-4.6`, Route Information (:rfc:`4191`), RDNSS and DNSSL
+  (:rfc:`8106`), RA Flags Extension (:rfc:`5175`), Captive-Portal (:rfc:`8910`),
+  PREF64 (:rfc:`8781`), Advertisement Interval and Home Agent Information
+  (:rfc:`6275`), and Nonce (:rfc:`3971`). Any other option keeps its octets as
+  :class:`~pcapkit.protocols.internet.icmpv6.data.UnknownOption`, and a Length of
+  zero, or one the option's layout does not fill, raises
+  :exc:`~pcapkit.utilities.exceptions.ProtocolError`.
+  :func:`~pcapkit.foundation.registry.protocols.internet.register_icmpv6_option`
+  registers a parser for a further option. The option types are the new
+  :class:`~pcapkit.const.icmpv6.nd_option.NDOption`, crawled from IANA; it and
+  ``RouterPreference`` are exported as ``ICMPv6_NDOption`` and
+  ``ICMPv6_RouterPreference``.
+* :class:`~pcapkit.protocols.link.llc.protocol.LLC` (IEEE Std 802.2) and
+  :class:`~pcapkit.protocols.link.snap.protocol.SNAP` (:rfc:`1042`), dissectors for
+  Logical Link Control and the Subnetwork Access Protocol (:issue:`2936`,
+  :pr:`3143`). An Ethernet frame whose Length/Type field is a length, up to
+  ``0x05DC``, the body of an IEEE 802.11 data frame carrying an MSDU, and a PCAP or
+  PCAP-NG frame of ``LINKTYPE_ATM_RFC1483``, whose payloads 1.8.x kept as
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, dispatch to LLC; a protected,
+  A-MSDU, reserved or no-data 802.11 body stays ``Raw``. LLC reads the DSAP, the
+  SSAP with its C/R bit and the I, S or U control field, and hands an I or UI PDU's
+  information field on by its DSAP through
+  :attr:`LLC.__proto__ <pcapkit.protocols.link.llc.protocol.LLC.__proto__>`; a
+  DSAP :attr:`LLC.__paired__ <pcapkit.protocols.link.llc.protocol.LLC.__paired__>`
+  flags, as SNAP's and STP's are, is handed on only when the SSAP, less its C/R
+  bit, is the same.
+  :func:`~pcapkit.foundation.registry.protocols.link.register_lsap` registers a
+  protocol for a further DSAP, its ``paired`` setting the flag. SNAP hands its
+  payload on by its protocol identifier as an EtherType under the OUI ``00-00-00``
+  (:rfc:`9542#section-3`), and keeps it ``Raw`` under any other.
+  :class:`~pcapkit.protocols.link.ethernet.protocol.Ethernet` keeps the octets past
+  a length, its pad among them, as ``trailer``, and its ``make()`` takes
+  ``trailer`` and refuses a length or trailer it would not read back. The SAPs and
+  the S and U functions are :mod:`pcapkit.const.llc`, generated by
+  :mod:`pcapkit.vendor.llc` and exported as ``LLC_LSAP``,
+  ``LLC_SupervisoryFunction`` and ``LLC_ModifierFunction``.
+* :class:`~pcapkit.protocols.application.stp.protocol.STP`, the abstract base of a
+  versioned family, and its members
+  :class:`~pcapkit.protocols.application.stpv0.protocol.STPv0` (IEEE Std
+  802.1D-2004), :class:`~pcapkit.protocols.application.rstp.protocol.RSTP` and
+  :class:`~pcapkit.protocols.application.mstp.protocol.MSTP` (IEEE Std
+  802.1Q-2022), dissectors for the Spanning Tree Protocol's BPDUs, carried by an LLC
+  PDU whose DSAP and SSAP are both ``0x42`` (:issue:`3115`, :pr:`3156`). A parse
+  gives STPv0 for a Configuration or Topology Change Notification BPDU whatever its
+  version, MSTP for a version 3 BPDU that passes MST's length checks, and RSTP for
+  an RST BPDU or a later-version one those checks reject; any other BPDU, Shortest
+  Path Bridging's SPT BPDU included, is kept as ``Raw`` with the reason as its
+  error. ``version`` 0, 2 or 3 names the member on a parse or a build, and
+  ``protocol_version`` keeps the octet as captured. The protocol versions, BPDU
+  types and port roles are :mod:`pcapkit.const.stp`, generated by
+  :mod:`pcapkit.vendor.stp` and exported as ``STP_ProtocolVersion``,
+  ``STP_BPDUType`` and ``STP_PortRole``.
+* verification of HIP's ``HIP_MAC``, ``HIP_MAC_2``, ``HIP_SIGNATURE`` and
+  ``HIP_SIGNATURE_2`` parameters, over the scope :rfc:`7401#section-6.4` gives
+  (:issue:`2939`, :pr:`3140`). Given a
+  :class:`~pcapkit.protocols.internet.hip.protocol.HIPContext` as ``context``,
+  :class:`~pcapkit.protocols.internet.hip.protocol.HIP` records each outcome, a
+  :class:`~pcapkit.protocols.internet.hip.protocol.HIPAuthStatus`, as the
+  parameter's ``hmac_status`` or ``signature_status``, warning with a
+  :exc:`~pcapkit.utilities.warnings.ProtocolWarning` on one that fails or whose key
+  cannot be applied; a parse with no context records nothing, and a parse and a
+  rebuild are otherwise unchanged. The context holds
+  :class:`~pcapkit.protocols.internet.hip.protocol.HIPAssociation` instances, an
+  association's HIP-gl and HIP-lg integrity keys, given or derived by
+  :meth:`HIPAssociation.from_keymat <pcapkit.protocols.internet.hip.protocol.HIPAssociation.from_keymat>`
+  (:rfc:`7401#section-6.5`), for the HMACs, which need only the standard library;
+  and :class:`~pcapkit.protocols.internet.hip.protocol.HIPIdentity` instances, a
+  host's HIT and parsed ``HOST_ID``, for the RSA, DSA, ECDSA and EdDSA signatures,
+  which need the ``crypto`` extra. ECDSA_LOW, pre-hashed EdDSA and HIP version 1
+  are reported as ``UNSUPPORTED``. An association's keys stay out of its
+  :meth:`~object.__repr__` and of the data model, so no dump carries them.
+
+Changed
+~~~~~~~
+
+* **a breaking change to** the Mobility Header's option payloads that belong to
+  other protocols, which :class:`~pcapkit.protocols.internet.mh.protocol.MH` parses
+  as the protocol class its new registries hold, where 1.8.x kept their octets
+  (:issue:`2937`, :pr:`3136`). The ``selector`` of
+  :class:`~pcapkit.protocols.internet.mh.data.TrafficSelectorSuboption` and
+  :class:`~pcapkit.protocols.internet.mh.data.QoSTrafficSelectorAttribute` is parsed
+  as
+  :attr:`MH.__selector__ <pcapkit.protocols.internet.mh.protocol.MH.__selector__>`
+  holds for its ``ts_format`` (:rfc:`6088`). The ``data`` of options 54, 60 and 61
+  and the ``context`` of options 56 and 57, the multicast options of :rfc:`7028`,
+  :rfc:`7161` and :rfc:`7411`, are parsed as
+  :attr:`MH.__multicast__ <pcapkit.protocols.internet.mh.protocol.MH.__multicast__>`
+  holds for the option and the octet naming the payload's format. Each field holds
+  a :class:`~pcapkit.protocols.protocol.ProtocolBase`, a
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw` where no dissector is
+  registered, as every key is by default, and a dump nests it.
+  :meth:`MH.register_selector <pcapkit.protocols.internet.mh.protocol.MH.register_selector>`,
+  :meth:`MH.register_multicast <pcapkit.protocols.internet.mh.protocol.MH.register_multicast>`,
+  :func:`~pcapkit.foundation.registry.protocols.internet.register_mh_selector` and
+  :func:`~pcapkit.foundation.registry.protocols.internet.register_mh_multicast`
+  register a dissector, refusing TS format 0 and a pair the RFCs do not define. A
+  parse given one warns with a :exc:`~pcapkit.utilities.warnings.ProtocolWarning`
+  and keeps the payload ``Raw``, its reason as the error. The makers take
+  :class:`bytes` or a parsed protocol. To migrate, read the octets one level down,
+  as ``option.selector.data`` where it was ``option.selector``, and likewise
+  ``option.data.data`` for options 54, 60 and 61 and ``option.context.data`` for
+  options 56 and 57.
+
+:mod:`pcapkit.vendor`
+---------------------
+
+Changed
+~~~~~~~
+
+* :meth:`Vendor.split_references <pcapkit.vendor.default.Vendor.split_references>`
+  writes a registry's citation of a dated IEEE standard, such as
+  ``IEEE Std 802.1Q-2014``, as the documentation's new ``ieee`` role, which links
+  the standard's IEEE SA page as the ``rfc`` role links an RFC; an undated one, such
+  as ``IEEE Std 802.3``, stays text (:issue:`3168`, :pr:`3173`). The generated
+  enumerations' docstrings cite them that way, as do the docstrings and pages
+  citing a dated IEEE standard.
+
+Project infrastructure
+----------------------
+
+Changed
+~~~~~~~
+
+* **a breaking change to** the conda package: a release is published to Anaconda as
+  one ``noarch: python`` package, carrying the core functionality alone, where each
+  release had a package per platform and Python that vendored every optional
+  dependency, and outgrew the storage quota, so 1.8.1's uploads failed
+  (:issue:`3133`, :pr:`3145`). It takes ``aenum``, ``chardet`` and
+  ``typing_extensions`` from conda-forge and vendors ``dictdumper`` and ``tbtrim``,
+  so it no longer carries the ``cryptography``, ``emoji`` and ``pycrate`` that
+  1.8.1's bundled. Without them an encrypted ESP payload is not decrypted, a HIP
+  signature is reported as ``UNSUPPORTED``, NGAP is kept as ``Raw``, and the command
+  line prints plain text. To migrate, install them from ``pip`` in the environment,
+  as ``pip install pycrate cryptography emoji``.
+* every build of the documentation, on GitHub Pages and on Read the Docs, names its
+  version in the sidebar and opens the same page in ``stable``, ``latest``
+  (``develop``) or its own release on Read the Docs, and the changelog's index and
+  each entry link that release's documentation, unless Read the Docs holds no build
+  of it (:issue:`3134`, :issue:`3144`, :pr:`3139`, :pr:`3155`). The documentation's
+  front page has a table of the versions, which the README links.
+* the ``docs`` extra pins ``sphinx-autodoc-typehints`` 3.17.7, where 1.8.1 pinned
+  3.17.6 (:pr:`3169`).
+
+Fixed
+~~~~~
+
+* GitHub Pages' ``404.html`` sent a path under a release Read the Docs holds no
+  build of to Read the Docs' own 404 page. ``versions.json`` leaves those releases
+  out, so such a path gets the plain not-found page (:issue:`3135`, :pr:`3141`).

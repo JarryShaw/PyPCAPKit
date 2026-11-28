@@ -168,10 +168,10 @@ The optional engines and addons install as extras:
    pip install pypcapkit[PyPCAP]
    # for pcap-ct only -- pure Python, works on 3.12+; never alongside PyPCAP
    pip install pypcapkit[PCAP_CT]
-   # for ESP payload decryption
+   # for ESP decryption and HIP signature verification
    pip install pypcapkit[crypto]
-   # every core addon -- CLI display, ESP decryption and NGAP decoding;
-   # no engine above is included
+   # every core addon -- CLI display, ESP decryption, HIP signatures and
+   # NGAP decoding; no engine above is included
    pip install pypcapkit[all]
    # or explicitly
    pip install pypcapkit emoji cryptography pycrate
@@ -229,7 +229,7 @@ alone; an extra, such as ``pypcapkit[crypto]``, also installs the vendored
 
 .. code-block:: shell
 
-   # NGAP decoding, ESP decryption and the CLI display
+   # NGAP decoding, ESP decryption, HIP signatures and the CLI display
    pip install pycrate cryptography emoji
    # an engine, such as DPKT
    pip install dpkt
