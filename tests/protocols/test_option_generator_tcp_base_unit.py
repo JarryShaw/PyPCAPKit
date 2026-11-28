@@ -62,12 +62,12 @@ from __future__ import annotations
 
 import importlib.util
 import inspect
-import sys
 import types
 import unittest
 import warnings
 from typing import TYPE_CHECKING
 
+from tests._support import load_source
 from tests._tiers import ROOT
 
 if TYPE_CHECKING:
@@ -136,31 +136,17 @@ DATA_MODEL_NAMES = {
 
 
 def _load_generator() -> 'types.ModuleType':
-    """Load :file:`examples/generators/options.py` by path.
+    """Load :file:`examples/generators/options.py` by path, under a name of its own.
 
-    That directory is not a package and its module names are too generic to put
-    on :data:`sys.path`, which is why :file:`examples/generators/make_samples.py`
-    and :file:`tests/protocols/test_option_roundtrip_unit.py` both load it by
-    path. This follows them, under a module name of its own so that loading it
-    here does not displace the copy either of those holds.
+    The name keeps this copy from displacing the one
+    :file:`tests/protocols/test_option_roundtrip_unit.py` holds.
 
     Returns:
         The generator module, which exposes ``TCP_BASE``.
 
-    Raises:
-        RuntimeError: If the module cannot be found or loaded.
-
     """
-    path = ROOT / 'examples' / 'generators' / 'options.py'
-    spec = importlib.util.spec_from_file_location(
-        'pcapkit_samples_options_tcp_base', path)
-    if spec is None or spec.loader is None:  # pragma: no cover
-        raise RuntimeError(f'cannot load the option generator from {path}')
-
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
+    return load_source(ROOT / 'examples' / 'generators' / 'options.py',
+                       'pcapkit_samples_options_tcp_base', register=True)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

@@ -47,6 +47,7 @@ import tempfile
 import unittest
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from tests._support import load_source
 
 #: Test tier (#1958): drives util/pyshark_encap_map.py, which runs on one interpreter.
 __tier__ = 'LATEST'
@@ -54,23 +55,7 @@ __tier__ = 'LATEST'
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 
-def _load_generator():
-    """Load :file:`util/pyshark_encap_map.py` as a module.
-
-    ``util/`` is a directory of scripts rather than a package, so there is no
-    import path to it -- the same reason :file:`test_changelog_md.py` loads
-    :file:`util/changelog_md.py` this way.
-
-    """
-    path = ROOT / 'util' / 'pyshark_encap_map.py'
-    spec = importlib.util.spec_from_file_location('pyshark_encap_map', path)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-encap_map = _load_generator()
+encap_map = load_source(ROOT / 'util' / 'pyshark_encap_map.py', 'pyshark_encap_map')
 
 #: The real :program:`editcap`/:program:`tshark` paths, resolved once, which
 #: :func:`~pyshark_encap_map.list_encap_types` and

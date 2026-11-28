@@ -62,6 +62,7 @@ from unittest import mock
 import requests
 
 from tests import _tiers, _workflows
+from tests._support import load_source
 from tests.project.test_job_summary_tables_3054 import problems
 from tests.project.test_ktlo_legs_stay_green_1672 import interpolate
 from tests.project.test_python_versions_1660 import NO_TOMLLIB
@@ -104,16 +105,7 @@ JUNIT_ARTIFACT_ID = 11648726901
 SLICES = [f'2026-10-{day:02d}T00:00:00Z..2026-10-{day:02d}T23:59:59Z' for day in range(9, 2, -1)]
 
 
-def _load_script():
-    """Load :file:`util/ci_timing.py`, which is a script and not a package."""
-    spec = importlib.util.spec_from_file_location('ci_timing', ROOT / 'util' / 'ci_timing.py')
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-ci_timing = _load_script()
+ci_timing = load_source(ROOT / 'util' / 'ci_timing.py', 'ci_timing')
 
 
 def fixture(name: 'str') -> 'bytes':

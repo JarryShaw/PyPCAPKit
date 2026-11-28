@@ -30,7 +30,6 @@ it imports no :mod:`pcapkit` and reads no capture.
 from __future__ import annotations
 
 import dis
-import importlib.util
 import os
 import signal
 import sys
@@ -42,6 +41,7 @@ import warnings
 from typing import TYPE_CHECKING
 from unittest import mock
 
+from tests._support import load_source
 from tests._tiers import ROOT
 
 if TYPE_CHECKING:
@@ -70,25 +70,9 @@ _ALARM = getattr(signal, 'alarm', None)
 
 
 def _load_generator() -> 'types.ModuleType':
-    """Load :file:`examples/generators/options.py` by path, under a name of its own.
-
-    Returns:
-        The generator module.
-
-    Raises:
-        RuntimeError: If the module cannot be found or loaded.
-
-    """
-    path = ROOT / 'examples' / 'generators' / 'options.py'
-    spec = importlib.util.spec_from_file_location(
-        'pcapkit_samples_options_deadline_scale', path)
-    if spec is None or spec.loader is None:  # pragma: no cover
-        raise RuntimeError(f'cannot load the option generator from {path}')
-
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
+    """Load :file:`examples/generators/options.py` by path, under a name of its own."""
+    return load_source(ROOT / 'examples' / 'generators' / 'options.py',
+                       'pcapkit_samples_options_deadline_scale', register=True)
 
 
 class _SpinGaveUp(Exception):

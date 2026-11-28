@@ -26,7 +26,6 @@
 from __future__ import annotations
 
 import contextlib
-import importlib.util
 import io
 import os
 import pathlib
@@ -38,7 +37,7 @@ import unittest
 from unittest import mock
 from typing import TYPE_CHECKING
 
-from tests._support import bash_argv
+from tests._support import bash_argv, load_source
 from tests._workflows import job, load, pinned, steps
 from tests.project.test_project_status import (evaluate_expression, expression_spliced, payload_outside_env,
                                                scan, strip_comments, yaml_pairs)
@@ -59,16 +58,7 @@ REPO = 'JarryShaw/PyPCAPKit'
 PIN_COMMENT = re.compile(r'(?m)^(\s*(?:- )?uses: \S+@[0-9a-f]{40}) # v\S+$')
 
 
-def _load_script():
-    """Load :file:`util/milestone.py`, which is a script and not a package."""
-    spec = importlib.util.spec_from_file_location('milestone', ROOT / 'util' / 'milestone.py')
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-milestone = _load_script()
+milestone = load_source(ROOT / 'util' / 'milestone.py', 'milestone')
 
 
 class TestTitle(unittest.TestCase):

@@ -443,6 +443,41 @@ def load_module(module_name: str, relative_path: str,
     return module
 
 
+def load_source(path: pathlib.Path, name: str, *, register: bool = False) -> types.ModuleType:
+    """Execute a script of :file:`util/` or :file:`examples/generators/` by path.
+
+    Neither directory is a package, and their module names are too generic to put
+    on :data:`sys.path`, so the file runs under a ``name`` of the caller's. Each
+    call runs it afresh, and :data:`sys.path` is left as the script leaves it.
+
+    :func:`tests._tiers.varies_by_interpreter` reads a call by this name as running
+    its arguments, so the script a caller passes still decides whether the caller
+    is a project pin (#1954). Nothing in this module calls it: an argument passed
+    here would count for every caller.
+
+    Args:
+        path: The script.
+        name: The module's ``__name__``.
+        register: Bind the module in :data:`sys.modules` as ``name`` before it
+            runs, and leave it bound.
+
+    Returns:
+        The executed module.
+
+    Raises:
+        RuntimeError: If no loader handles ``path``.
+
+    """
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:  # pragma: no cover
+        raise RuntimeError(f'cannot load {name!r} from {path}')
+    module = importlib.util.module_from_spec(spec)
+    if register:
+        sys.modules[name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
 def bootstrap_core_modules(test: 'Optional[unittest.TestCase]' = None) -> dict[str, object]:
     """Execute the core :mod:`pcapkit` modules from source, in dependency order.
 
