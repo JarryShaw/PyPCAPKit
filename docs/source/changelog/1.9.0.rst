@@ -1,4 +1,4 @@
-1.9.0 -- unreleased
+1.9.0 -- 2026-11-28
 ===================
 
 1.9.0 decodes Neighbor Discovery in ICMPv6, adds dissectors for IEEE 802.2 LLC and
