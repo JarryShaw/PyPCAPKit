@@ -242,7 +242,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
                   is provided, as the PyPCAPFile engine does not parse with :mod:`pcapkit`'s
                   own protocol implementations.
                 * if a reassembler with no adapter in :attr:`__reassembly__` is
-                  enabled, as IPv6's and DTLS's are not, or a flow tracer with
+                  enabled, as IPv6's, DTLS's and SCTP's are not, or a flow tracer with
                   none in :attr:`__traceflow__`.
                 * if |pcapfile|_ has no decoder for the savefile's link layer
                   type, in which case frames are left undecoded.

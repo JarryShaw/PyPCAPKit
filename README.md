@@ -36,7 +36,7 @@ The extraction engines and plug-ins are optional extras:
 
 ```shell
 pip install pypcapkit[DPKT]         # or Scapy, PyShark, PyPCAPFile, PyPCAP, PCAP_CT
-pip install pypcapkit[crypto]       # ESP payload decryption
+pip install pypcapkit[crypto]       # ESP decryption, HIP signature verification
 pip install pypcapkit[cli]          # command line interface
 pip install pypcapkit[all]          # core addons only: cli + crypto + NGAP (pycrate)
 ```
@@ -54,7 +54,8 @@ conda install -c jarryshaw -c conda-forge pypcapkit
 ```
 
 An optional feature takes its package from `pip` in that environment, such as `pip install pycrate`
-for NGAP, `cryptography` for ESP decryption or `emoji` for the command line interface.
+for NGAP, `cryptography` for ESP decryption and HIP signatures, or `emoji` for the command line
+interface.
 
 ## Usage
 

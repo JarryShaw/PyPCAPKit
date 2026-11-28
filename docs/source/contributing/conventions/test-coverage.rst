@@ -192,10 +192,11 @@ Running the Tests
    root-level modules a purge before them can desync, in one plain-unittest process,
    which is what CI's ``unittest-ordering`` job does per leg. Those import
    :mod:`pcapkit` at their top level, as :file:`tests/test_base_class_contract.py`,
-   :issue:`981`'s reproduction, does, or read :data:`sys.modules` or call ``import_module``
-   or ``reload``; the other root-level modules run once, after the first part of
-   :file:`tests/project`, as the owner ruled on :issue:`3148`. Run it on the directory
-   a change touches when the change moves imports or module state:
+   :issue:`981`'s reproduction, does, or read :data:`sys.modules` or call
+   ``import_module``, ``reload`` or ``__import__``; the other root-level modules run
+   once, after the first part of :file:`tests/project`, as the owner ruled on
+   :issue:`3148`. Run it on the directory a change touches when the change moves
+   imports or module state:
 
    .. code-block:: shell
 

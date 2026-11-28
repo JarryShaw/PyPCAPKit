@@ -357,7 +357,7 @@ class Scapy(EngineBase['ScapyPacket']):
                 or if :attr:`self.extractor._exctx <pcapkit.foundation.extraction.Extractor._exctx>`
                 is provided, as the Scapy engine does not parse with :mod:`pcapkit`'s own
                 protocol implementations; or if a reassembler with no adapter in
-                :attr:`__reassembly__` is enabled, as DTLS's is not, for the same
+                :attr:`__reassembly__` is enabled, as DTLS's and SCTP's are not, for the same
                 reason, or a flow tracer with none in :attr:`__traceflow__`.
 
         """
