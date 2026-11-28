@@ -28,7 +28,6 @@ tests pass on a source tarball, where :file:`docs/` is pruned.
 from __future__ import annotations
 
 import contextlib
-import importlib.util
 import io
 import pathlib
 import re
@@ -38,26 +37,13 @@ import textwrap
 import unittest
 from unittest import mock
 
+from tests._support import load_source
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 
-def _load_generator():
-    """Load :file:`util/changelog_md.py` as a module.
-
-    ``util/`` is a directory of scripts rather than a package, so there is no
-    import path to it. The script has no import-time side effects, which is what
-    makes loading it by location safe.
-
-    """
-    path = ROOT / 'util' / 'changelog_md.py'
-    spec = importlib.util.spec_from_file_location('changelog_md', path)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-changelog_md = _load_generator()
+#: :file:`util/changelog_md.py`, which has no import-time side effects.
+changelog_md = load_source(ROOT / 'util' / 'changelog_md.py', 'changelog_md')
 
 
 #: One entry exercising every rule at once: a setext heading, a wrapped

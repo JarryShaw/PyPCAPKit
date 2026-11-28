@@ -29,7 +29,7 @@ import warnings
 from typing import TYPE_CHECKING
 from unittest import mock
 
-from tests._support import time_limit
+from tests._support import load_source, time_limit
 from tests._tiers import ROOT
 
 if TYPE_CHECKING:
@@ -54,24 +54,9 @@ PORTS = (50000, 9)
 
 
 def _load_generator() -> 'types.ModuleType':
-    """Load :file:`examples/generators/options.py` by path, under a name of its own.
-
-    Returns:
-        The generator module.
-
-    Raises:
-        RuntimeError: If the module cannot be found or loaded.
-
-    """
-    path = ROOT / 'examples' / 'generators' / 'options.py'
-    spec = importlib.util.spec_from_file_location('pcapkit_samples_options_jumbogram', path)
-    if spec is None or spec.loader is None:  # pragma: no cover
-        raise RuntimeError(f'cannot load the option generator from {path}')
-
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
+    """Load :file:`examples/generators/options.py` by path, under a name of its own."""
+    return load_source(ROOT / 'examples' / 'generators' / 'options.py',
+                       'pcapkit_samples_options_jumbogram', register=True)
 
 
 def _ones_sum(data: 'bytes') -> 'int':
