@@ -177,32 +177,47 @@ Octets      Bits        Name                    Description
 Verifying HMACs and Signatures
 ------------------------------
 
-``HIP_MAC``, ``HIP_MAC_2``, ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2`` are verified
-with keys the caller supplies through the protocol-keyed context channel of
-:mod:`pcapkit.corekit.context` (:rfc:`7401#section-6.4`). Each records the outcome as
-its ``hmac_status`` or ``signature_status``, and nothing else of the parse changes:
+``HIP_MAC``, ``HIP_MAC_2``, ``RVS_HMAC``, ``RELAY_HMAC``, ``HIP_SIGNATURE`` and
+``HIP_SIGNATURE_2`` are verified with keys the caller supplies through the
+protocol-keyed context channel of :mod:`pcapkit.corekit.context`
+(:rfc:`7401#section-6.4`). Each records the outcome as its ``hmac_status`` or
+``signature_status``, and nothing else of the parse changes:
 
 .. code-block:: python
 
    import pcapkit
    from pcapkit.const.hip.parameter import Parameter
+   from pcapkit.const.hip.registration import Registration
    from pcapkit.protocols.internet.hip.protocol import (HIPAssociation, HIPContext,
-                                                        HIPIdentity)
+                                                        HIPIdentity, HIPRegistration)
 
    r1 = ...  # the HIP layer of an R1 packet, parsed without a context
+   rendezvous = HIPAssociation(responder_hit, rvs_hit,  # the Responder's, with its RVS
+                               integrity_gl=bytes.fromhex('...'),
+                               integrity_lg=bytes.fromhex('...'))
    context = HIPContext(
        HIPIdentity(r1.info.shit, r1.info.parameters[Parameter.HOST_ID]),
        HIPAssociation(initiator_hit, responder_hit,
                       integrity_gl=bytes.fromhex('...'), integrity_lg=bytes.fromhex('...')),
+       HIPRegistration(rendezvous, registrar=rvs_hit, reg_type=[Registration.RENDEZVOUS]),
    )
    extraction = pcapkit.extract('hip.pcap', context=context)
 
 An HMAC needs the association's integrity keys, or the Diffie-Hellman session key
 they derive from (:meth:`HIPAssociation.from_keymat
 <pcapkit.protocols.internet.hip.protocol.HIPAssociation.from_keymat>`), and uses only
-the standard library. ``HIP_MAC_2`` also needs the Responder's ``HOST_ID``, and a
-signature its sender's. Verifying a signature needs the optional |cryptography|_
-dependency:
+the standard library. ``RVS_HMAC`` (:rfc:`8004#section-4.2.1`) and ``RELAY_HMAC``
+(:rfc:`9028#section-5.8`) cover what ``HIP_MAC`` does, under the association a host
+holds with its rendezvous server or relay rather than with its peer: its registration
+(:rfc:`8003`), a :class:`HIPRegistration
+<pcapkit.protocols.internet.hip.protocol.HIPRegistration>`. Each side sends under its
+own key, so what the server relays to its client is under the server's. A packet's
+HITs need not name the registration, as when one server serves both hosts or one host
+holds several servers, so each registration it may flow through is tried, and the
+HMAC is valid if any verifies it.
+
+``HIP_MAC_2`` also needs the Responder's ``HOST_ID``, and a signature its sender's.
+Verifying a signature needs the optional |cryptography|_ dependency:
 
 ============== ================================ ============ ====================================
 Algorithm      Hash                             Implemented  Encoding
@@ -227,6 +242,7 @@ Only HIP version 2 is verified.
 
    .. autoproperty:: identities
    .. autoproperty:: associations
+   .. autoproperty:: registrations
 
    .. rubric:: Methods
 
@@ -234,6 +250,7 @@ Only HIP version 2 is verified.
    .. automethod:: register
    .. automethod:: match_identity
    .. automethod:: match_association
+   .. automethod:: match_registrations
 
    .. rubric:: Data Models
 
@@ -290,6 +307,26 @@ Only HIP version 2 is verified.
 
    .. automethod:: _resolve_suite
    .. automethod:: _hkdf
+
+.. autoclass:: pcapkit.protocols.internet.hip.protocol.HIPRegistration
+   :no-members:
+   :show-inheritance:
+
+   .. rubric:: Properties
+
+   .. autoproperty:: association
+   .. autoproperty:: requester
+   .. autoproperty:: registrar
+   .. autoproperty:: reg_type
+
+   .. rubric:: Methods
+
+   .. automethod:: matches
+   .. automethod:: compute_hmac
+
+   .. rubric:: Data Models
+
+   .. automethod:: __repr__
 
 .. autoclass:: pcapkit.protocols.internet.hip.protocol.HIPAuthStatus
    :members:
@@ -834,6 +871,7 @@ Constants
 .. autodata:: pcapkit.protocols.internet.hip.const.CIPHER_KEY_LEN
 .. autodata:: pcapkit.protocols.internet.hip.const.ECDSA_CURVE_LEN
 .. autodata:: pcapkit.protocols.internet.hip.const.EDDSA_CURVE_LEN
+.. autodata:: pcapkit.protocols.internet.hip.const.REGISTRATION_HMAC
 
 .. rubric:: Footnotes
 

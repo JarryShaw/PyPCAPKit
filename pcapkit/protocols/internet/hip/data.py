@@ -1128,12 +1128,22 @@ class FromParameter(Parameter):
 
 @info_final
 class RVSHMACParameter(Parameter):
-    """Data model for HIP ``RVS_HMAC`` parameter."""
+    """Data model for HIP ``RVS_HMAC`` parameter.
+
+    .. versionchanged:: 1.10.0
+
+       New optional field ``hmac_status`` (:issue:`3187`).
+
+    """
 
     #: HMAC value.
     hmac: 'bytes'
 
     if TYPE_CHECKING:
+        #: Outcome of verifying :attr:`hmac`, present only when a
+        #: :class:`~pcapkit.protocols.internet.hip.protocol.HIPContext` was supplied.
+        hmac_status: 'HIPAuthStatus'
+
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
@@ -1150,10 +1160,20 @@ class ViaRVSParameter(Parameter):
 
 @info_final
 class RelayHMACParameter(Parameter):
-    """Data model for HIP ``RELAY_HMAC`` parameter."""
+    """Data model for HIP ``RELAY_HMAC`` parameter.
+
+    .. versionchanged:: 1.10.0
+
+       New optional field ``hmac_status`` (:issue:`3187`).
+
+    """
 
     #: HMAC value.
     hmac: 'bytes'
 
     if TYPE_CHECKING:
+        #: Outcome of verifying :attr:`hmac`, present only when a
+        #: :class:`~pcapkit.protocols.internet.hip.protocol.HIPContext` was supplied.
+        hmac_status: 'HIPAuthStatus'
+
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
