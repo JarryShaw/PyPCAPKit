@@ -206,7 +206,8 @@ class TestTheVersions(unittest.TestCase):
         self.assertEqual(list(self.module.versions(['v1.3.5.post40', 'v1.3.5.post41', 'v1.4.0', 'v1.4.1'])),
                          [*BRANCHES, 'v1.3.5.post41', 'v1.4.1'])
         self.assertEqual(self.module.UNBUILT, UNBUILT)
-        for tag in sorted(UNBUILT):
+        # The script's own set, which the redirects and the changelog links read.
+        for tag in sorted(self.module.UNBUILT):
             with self.subTest(tag=tag):
                 self.assertTrue(self.module.RELEASE.fullmatch(tag))
 
