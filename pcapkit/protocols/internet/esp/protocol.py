@@ -81,52 +81,69 @@ anything outside them rather than half-working:
      ...
    pcapkit.utilities.exceptions.ProtocolError: ESP: unsupported encryption
    algorithm: 'ENCR_3DES'; pcapkit implements ENCR_NULL, ENCR_AES_CBC,
-   ENCR_AES_GCM_8, ENCR_AES_GCM_12, ENCR_AES_GCM_16
+   ENCR_AES_CTR, ENCR_AES_CCM_8, ENCR_AES_CCM_12, ENCR_AES_CCM_16,
+   ENCR_AES_GCM_8, ENCR_AES_GCM_12, ENCR_AES_GCM_16, ENCR_NULL_AUTH_AES_GMAC,
+   ENCR_CAMELLIA_CBC, ENCR_CHACHA20_POLY1305
 
-Decryption requires the optional |cryptography|_ dependency
-(``pip install pypcapkit[crypto]``). :mod:`pcapkit` imports and works
-without it; an SA that names an AES suite simply degrades to the opaque
-payload path, with a warning.
+Every algorithm but ``ENCR_NULL`` and the HMACs requires the optional
+|cryptography|_ dependency (``pip install pypcapkit[crypto]``). :mod:`pcapkit`
+imports and works without it; an SA that names such a suite simply degrades
+to the opaque payload path, with a warning.
 
-The supported set is anchored on the *mandatory to implement* algorithms of
-:rfc:`8221`. The rows marked ``yes`` are exactly the keys of
-:data:`CIPHER_SUITES`; everything else the registry lists is enumerated and
-rejected.
+The rows marked ``yes`` are exactly the keys of :data:`CIPHER_SUITES`; a
+``no`` row's note says why, and everything else the registry lists is
+enumerated and rejected. :mod:`pcapkit` applies a transform only through a
+|cryptography|_ primitive, so a mode |cryptography|_ lacks is left out.
 
-============================ =================== ============ ==================================
+============================ =================== ============ ===================================================
 Encryption                   :rfc:`8221` status   Implemented  Notes
-============================ =================== ============ ==================================
+============================ =================== ============ ===================================================
 ``ENCR_NULL``                MUST                yes          :rfc:`2410`; needs no |cryptography|_
 ``ENCR_AES_CBC``             MUST                yes          :rfc:`3602`; 128/192/256-bit keys
 ``ENCR_AES_GCM_16``          MUST                yes          :rfc:`4106`; 8-octet explicit IV
 ``ENCR_AES_GCM_8``           --                  yes          :rfc:`4106`, 8-octet ICV
 ``ENCR_AES_GCM_12``          --                  yes          :rfc:`4106`, 12-octet ICV
-``ENCR_AES_CCM_8``           SHOULD              **no**       registered, not implemented
-``ENCR_CHACHA20_POLY1305``   SHOULD              **no**       registered, not implemented
+``ENCR_AES_CCM_8``           SHOULD              yes          :rfc:`4309`; 3-octet salt
+``ENCR_AES_CCM_12``          --                  yes          :rfc:`4309`, 12-octet ICV
+``ENCR_AES_CCM_16``          --                  yes          :rfc:`4309`, 16-octet ICV
+``ENCR_CHACHA20_POLY1305``   SHOULD              yes          :rfc:`7634`; 256-bit key
+``ENCR_AES_CTR``             --                  yes          :rfc:`3686`; needs an integrity algorithm
+``ENCR_NULL_AUTH_AES_GMAC``  --                  yes          :rfc:`4543`; authenticates, never encrypts
+``ENCR_CAMELLIA_CBC``        --                  yes          :rfc:`5529`; 128/192/256-bit keys
+``ENCR_CAMELLIA_CTR``        --                  **no**       |cryptography|_ cannot run Camellia in CTR mode
+``ENCR_CAMELLIA_CCM_*``      --                  **no**       |cryptography|_ has CCM for AES alone
+``ENCR_*_IIV``               --                  **no**       :rfc:`8750`; with ESN, :issue:`2963`
+``ENCR_*_MGM_*``             --                  **no**       :rfc:`9227`; no GOST primitive, :issue:`3009`
 ``ENCR_3DES``                SHOULD NOT          **no**       registered, deliberately omitted
 DES, Blowfish, 3IDEA         MUST NOT            **no**       registered, deliberately omitted
-============================ =================== ============ ==================================
+============================ =================== ============ ===================================================
 
 "DES, Blowfish, 3IDEA" above covers ``ENCR_DES``, ``ENCR_DES_IV64``,
-``ENCR_DES_IV32``, ``ENCR_BLOWFISH`` and ``ENCR_3IDEA``.
+``ENCR_DES_IV32``, ``ENCR_BLOWFISH`` and ``ENCR_3IDEA``;
+``ENCR_CAMELLIA_CCM_*`` covers the 8-, 12- and 16-octet ICV suites,
+``ENCR_*_IIV`` the implicit IV suites of :rfc:`8750`, and ``ENCR_*_MGM_*``
+the Kuznyechik and Magma suites of :rfc:`9227`.
 
 Likewise, the rows marked ``yes`` below are exactly the keys of
 :data:`INTEGRITY_SUITES`:
 
-============================ =================== ============ ==================================
+============================ =================== ============ ===================================================
 Integrity                    :rfc:`8221` status   Implemented  Notes
-============================ =================== ============ ==================================
+============================ =================== ============ ===================================================
 ``NONE``                     MUST (AEAD only)    yes          for AEAD suites
 ``AUTH_HMAC_SHA2_256_128``   MUST                yes          :rfc:`4868`
 ``AUTH_HMAC_SHA2_512_256``   SHOULD              yes          :rfc:`4868`
 ``AUTH_HMAC_SHA2_384_192``   --                  yes          :rfc:`4868`
 ``AUTH_HMAC_SHA1_96``        MUST-               yes          :rfc:`2404`; still widely captured
-``AUTH_AES_XCBC_96``         SHOULD / MAY        **no**       registered, not implemented
-``AUTH_AES_*_GMAC``          MAY                 **no**       registered, not implemented
+``AUTH_AES_CMAC_96``         --                  yes          :rfc:`4494`; 128-bit key
+``AUTH_AES_XCBC_96``         SHOULD / MAY        **no**       :rfc:`3566`; |cryptography|_ has no AES-XCBC-MAC
+``AUTH_AES_*_GMAC``          MAY                 **no**       AH only (:rfc:`4543` §5.3)
 MD5, DES-MAC, KPDK-MD5       MUST NOT            **no**       registered, deliberately omitted
-============================ =================== ============ ==================================
+============================ =================== ============ ===================================================
 
-"MD5, DES-MAC, KPDK-MD5" above covers ``AUTH_HMAC_MD5_96``,
+``AUTH_AES_*_GMAC`` above covers the 128-, 192- and 256-bit key transforms,
+which :rfc:`4543` §5.3 keeps to AH; ESP's GMAC is the combined mode
+``ENCR_NULL_AUTH_AES_GMAC``. "MD5, DES-MAC, KPDK-MD5" covers ``AUTH_HMAC_MD5_96``,
 ``AUTH_HMAC_MD5_128``, ``AUTH_DES_MAC`` and ``AUTH_KPDK_MD5``. The registry
 spells the "no integrity algorithm" transform ``NONE`` rather than
 ``AUTH_NONE``, and :attr:`Integrity.NONE
@@ -200,19 +217,28 @@ if TYPE_CHECKING:
 _CRYPTO = NotImplemented  # type: Any
 
 
-def load_cryptography() -> 'Optional[tuple[Any, Any, Any, Type[Exception]]]':
+def load_cryptography() -> 'Optional[tuple[Any, Any, Any, Type[Exception], Any, Any, Any]]':
     """Load the optional |cryptography|_ primitives.
 
     Returns:
-        A 4-tuple of ``(Cipher, algorithms, modes, InvalidTag)``, the first
-        three taken from :mod:`cryptography.hazmat.primitives.ciphers` and the
-        last being :exc:`cryptography.exceptions.InvalidTag`, or :data:`None`
-        when |cryptography|_ is not installed.
+        A 7-tuple of ``(Cipher, algorithms, modes, InvalidTag, aead, cmac,
+        Camellia)``: the first three taken from
+        :mod:`cryptography.hazmat.primitives.ciphers`,
+        :exc:`cryptography.exceptions.InvalidTag`, the
+        :mod:`cryptography.hazmat.primitives.ciphers.aead` and
+        :mod:`cryptography.hazmat.primitives.cmac` modules, and the Camellia
+        block cipher, from :mod:`cryptography.hazmat.decrepit.ciphers.algorithms`
+        where the installed release keeps it there; or :data:`None` when
+        |cryptography|_ is not installed.
 
     Notes:
         The import is attempted at most once and the outcome is cached, so
         that a capture full of ESP packets does not pay for a failing import
         on every frame.
+
+    .. versionchanged:: 1.10.0
+
+       The tuple gains ``aead``, ``cmac`` and ``Camellia`` (:issue:`2958`).
 
     """
     global _CRYPTO  # pylint: disable=global-statement
@@ -221,8 +247,12 @@ def load_cryptography() -> 'Optional[tuple[Any, Any, Any, Type[Exception]]]':
         try:
             from cryptography.exceptions import \
                 InvalidTag as _InvalidTag  # pylint: disable=import-outside-toplevel
+            from cryptography.hazmat.primitives import \
+                cmac as _crypto_cmac  # pylint: disable=import-outside-toplevel
             from cryptography.hazmat.primitives.ciphers import \
                 Cipher as _CryptoCipher  # pylint: disable=import-outside-toplevel
+            from cryptography.hazmat.primitives.ciphers import \
+                aead as _crypto_aead  # pylint: disable=import-outside-toplevel
             from cryptography.hazmat.primitives.ciphers import \
                 algorithms as _crypto_algorithms  # pylint: disable=import-outside-toplevel
             from cryptography.hazmat.primitives.ciphers import \
@@ -230,7 +260,15 @@ def load_cryptography() -> 'Optional[tuple[Any, Any, Any, Type[Exception]]]':
         except ImportError:
             _CRYPTO = None
         else:
-            _CRYPTO = (_CryptoCipher, _crypto_algorithms, _crypto_modes, _InvalidTag)
+            try:
+                from cryptography.hazmat.decrepit.ciphers.algorithms import \
+                    Camellia as _Camellia  # pylint: disable=import-outside-toplevel
+            except ImportError:
+                # NOTE: releases before 47.0.0 keep Camellia beside AES, and later ones warn
+                # on that spelling, so it is only the fallback.
+                _Camellia = _crypto_algorithms.Camellia
+            _CRYPTO = (_CryptoCipher, _crypto_algorithms, _crypto_modes, _InvalidTag,
+                       _crypto_aead, _crypto_cmac, _Camellia)
     return _CRYPTO
 
 
@@ -312,7 +350,9 @@ class CipherSuite(Info):
     icv_length: 'int'
     #: Permitted lengths of the key, in octets, excluding any salt.
     key_sizes: 'tuple[int, ...]'
-    #: Length of the salt taken from the keying material [:rfc:`4106` §8.1].
+    #: Length of the salt taken from the end of the keying material
+    #: [:rfc:`4106` §8.1]; for AES-CTR, the counter block's nonce
+    #: [:rfc:`3686` §5.1].
     salt_length: 'int'
     #: Whether the algorithm needs the optional |cryptography|_ dependency.
     requires_cryptography: 'bool'
@@ -352,17 +392,28 @@ class IntegritySuite(Info):
     not membership of the IANA registry -- is what makes an algorithm
     supported.
 
+    .. versionchanged:: 1.10.0
+
+       New fields ``mac`` and ``requires_cryptography``; ``digest`` is
+       :data:`None` for a MAC that is not an HMAC (:issue:`2958`).
+
     """
 
     #: Integrity algorithm the suite describes.
     integrity: 'Integrity'
-    #: Name of the underlying hash, for :func:`hmac.new`, or :data:`None` when
-    #: the algorithm computes no ICV of its own.
+    #: Hash the HMAC runs, named for :mod:`hashlib`, or :data:`None` when
+    #: :attr:`mac` is not ``'hmac'``.
     digest: 'Optional[str]'
     #: Length of the truncated ICV, in octets.
     icv_length: 'int'
     #: Key length required by the specification, in octets.
     key_size: 'int'
+    #: MAC the ICV truncates, ``'hmac'`` [:rfc:`2104`] or ``'cmac'``
+    #: [:rfc:`4493`], or :data:`None` when the algorithm computes no ICV of
+    #: its own.
+    mac: 'Optional[Literal["hmac", "cmac"]]'
+    #: Whether the algorithm needs the optional |cryptography|_ dependency.
+    requires_cryptography: 'bool'
 
     @classmethod
     def get(cls, value: 'Integrity | str | int') -> 'IntegritySuite':
@@ -411,6 +462,22 @@ CIPHER_SUITES = {
         cipher=Cipher.ENCR_AES_CBC, is_aead=False, iv_length=16, block_size=16, icv_length=0,
         key_sizes=(16, 24, 32), salt_length=0, requires_cryptography=True,
     ),
+    Cipher.ENCR_AES_CTR: CipherSuite(
+        cipher=Cipher.ENCR_AES_CTR, is_aead=False, iv_length=8, block_size=1, icv_length=0,
+        key_sizes=(16, 24, 32), salt_length=4, requires_cryptography=True,
+    ),
+    Cipher.ENCR_AES_CCM_8: CipherSuite(
+        cipher=Cipher.ENCR_AES_CCM_8, is_aead=True, iv_length=8, block_size=1, icv_length=8,
+        key_sizes=(16, 24, 32), salt_length=3, requires_cryptography=True,
+    ),
+    Cipher.ENCR_AES_CCM_12: CipherSuite(
+        cipher=Cipher.ENCR_AES_CCM_12, is_aead=True, iv_length=8, block_size=1, icv_length=12,
+        key_sizes=(16, 24, 32), salt_length=3, requires_cryptography=True,
+    ),
+    Cipher.ENCR_AES_CCM_16: CipherSuite(
+        cipher=Cipher.ENCR_AES_CCM_16, is_aead=True, iv_length=8, block_size=1, icv_length=16,
+        key_sizes=(16, 24, 32), salt_length=3, requires_cryptography=True,
+    ),
     Cipher.ENCR_AES_GCM_8: CipherSuite(
         cipher=Cipher.ENCR_AES_GCM_8, is_aead=True, iv_length=8, block_size=1, icv_length=8,
         key_sizes=(16, 24, 32), salt_length=4, requires_cryptography=True,
@@ -423,6 +490,18 @@ CIPHER_SUITES = {
         cipher=Cipher.ENCR_AES_GCM_16, is_aead=True, iv_length=8, block_size=1, icv_length=16,
         key_sizes=(16, 24, 32), salt_length=4, requires_cryptography=True,
     ),
+    Cipher.ENCR_NULL_AUTH_AES_GMAC: CipherSuite(
+        cipher=Cipher.ENCR_NULL_AUTH_AES_GMAC, is_aead=True, iv_length=8, block_size=1,
+        icv_length=16, key_sizes=(16, 24, 32), salt_length=4, requires_cryptography=True,
+    ),
+    Cipher.ENCR_CAMELLIA_CBC: CipherSuite(
+        cipher=Cipher.ENCR_CAMELLIA_CBC, is_aead=False, iv_length=16, block_size=16,
+        icv_length=0, key_sizes=(16, 24, 32), salt_length=0, requires_cryptography=True,
+    ),
+    Cipher.ENCR_CHACHA20_POLY1305: CipherSuite(
+        cipher=Cipher.ENCR_CHACHA20_POLY1305, is_aead=True, iv_length=8, block_size=1,
+        icv_length=16, key_sizes=(32,), salt_length=4, requires_cryptography=True,
+    ),
 }  # type: dict[Cipher, CipherSuite]
 
 #: Integrity algorithms :mod:`pcapkit` implements, keyed by IKEv2 transform.
@@ -432,18 +511,27 @@ CIPHER_SUITES = {
 INTEGRITY_SUITES = {
     Integrity.NONE: IntegritySuite(
         integrity=Integrity.NONE, digest=None, icv_length=0, key_size=0,
+        mac=None, requires_cryptography=False,
     ),
     Integrity.AUTH_HMAC_SHA1_96: IntegritySuite(
         integrity=Integrity.AUTH_HMAC_SHA1_96, digest='sha1', icv_length=12, key_size=20,
+        mac='hmac', requires_cryptography=False,
+    ),
+    Integrity.AUTH_AES_CMAC_96: IntegritySuite(
+        integrity=Integrity.AUTH_AES_CMAC_96, digest=None, icv_length=12, key_size=16,
+        mac='cmac', requires_cryptography=True,
     ),
     Integrity.AUTH_HMAC_SHA2_256_128: IntegritySuite(
         integrity=Integrity.AUTH_HMAC_SHA2_256_128, digest='sha256', icv_length=16, key_size=32,
+        mac='hmac', requires_cryptography=False,
     ),
     Integrity.AUTH_HMAC_SHA2_384_192: IntegritySuite(
         integrity=Integrity.AUTH_HMAC_SHA2_384_192, digest='sha384', icv_length=24, key_size=48,
+        mac='hmac', requires_cryptography=False,
     ),
     Integrity.AUTH_HMAC_SHA2_512_256: IntegritySuite(
         integrity=Integrity.AUTH_HMAC_SHA2_512_256, digest='sha512', icv_length=32, key_size=64,
+        mac='hmac', requires_cryptography=False,
     ),
 }  # type: dict[Integrity, IntegritySuite]
 
@@ -496,14 +584,21 @@ class SecurityAssociation:
         encryption: Encryption algorithm, see :meth:`CipherSuite.get`. Must
             be one :mod:`pcapkit` implements; being in the IANA registry is
             not enough.
-        encryption_key: Encryption keying material. For an AEAD suite this
-            is the AES key followed by the 4-octet salt [:rfc:`4106` §8.1],
+        encryption_key: Encryption keying material. For a suite with a
+            :attr:`~CipherSuite.salt_length`, this is the key followed by the
+            salt, as IKEv2 splits its KEYMAT [:rfc:`4106` §8.1, :rfc:`4309`
+            §7.1, :rfc:`4543` §5.4, :rfc:`3686` §5.1, :rfc:`7634` §2],
             unless ``salt`` is given separately.
-        salt: AEAD salt, when not appended to ``encryption_key``.
+        salt: Salt, or AES-CTR's nonce, when not appended to
+            ``encryption_key``.
         integrity: Integrity algorithm, see :meth:`IntegritySuite.get`. Must
             be :attr:`Integrity.NONE <pcapkit.const.esp.integrity.Integrity.NONE>`
-            for an AEAD suite, which provides its own.
-        integrity_key: Integrity key.
+            for an AEAD suite, which provides its own, and must not be for
+            ``ENCR_AES_CTR`` [:rfc:`3686` §3.3].
+        integrity_key: Integrity key. ``AUTH_AES_CMAC_96`` refuses one of the
+            wrong length with :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+            since AES rejects any length but its own, where an HMAC takes a key
+            of any length and so only warns.
         icv_length: Override for the ICV length, in octets. Needed for the
             long standing implementation bug noted in :rfc:`8221` §6, where
             ``AUTH_HMAC_SHA2_256_128`` is truncated to 96 rather than 128
@@ -551,7 +646,7 @@ class SecurityAssociation:
 
     @property
     def salt(self) -> 'bytes':
-        """AEAD salt."""
+        """Salt, or AES-CTR's counter block nonce."""
         return self.__salt__
 
     @property
@@ -620,9 +715,9 @@ class SecurityAssociation:
 
         """
         if self.cipher_suite.requires_cryptography and load_cryptography() is None:
-            return (f'ESP: unavailable encryption algorithm: {self.encryption.name!r} needs the '
-                    f'optional "cryptography" dependency, which is not installed '
-                    f'(pip install pypcapkit[crypto])')
+            return f'{self._missing_cryptography("encryption")} (pip install pypcapkit[crypto])'
+        if self.integrity_suite.requires_cryptography and load_cryptography() is None:
+            return f'{self._missing_cryptography("integrity")} (pip install pypcapkit[crypto])'
         return None
 
     def compute_icv(self, spi: 'int', seq: 'int', body: 'bytes') -> 'bytes':
@@ -642,18 +737,24 @@ class SecurityAssociation:
             The truncated ICV.
 
         Raises:
-            ProtocolError: If the SA has no separate integrity algorithm.
+            ProtocolError: If the SA has no separate integrity algorithm, or
+                if |cryptography|_ is needed and unavailable.
 
         """
-        digest = self.integrity_suite.digest
-        if digest is None:
+        suite = self.integrity_suite
+        message = spi.to_bytes(4, 'big') + seq.to_bytes(4, 'big') + body
+        if suite.mac == 'cmac':
+            _, algorithms, _, _, _, cmac, _ = self._cryptography('integrity')
+            mac = cmac.CMAC(algorithms.AES(self.__integrity_key__))
+            mac.update(message)
+            return mac.finalize()[:self.icv_length]
+
+        digest = suite.digest
+        if suite.mac is None or digest is None:
             raise ProtocolError(f'ESP: integrity algorithm computes no ICV: '
                                 f'{self.integrity.name!r}')
-
-        mac = hmac.new(self.__integrity_key__,
-                       spi.to_bytes(4, 'big') + seq.to_bytes(4, 'big') + body,
-                       getattr(hashlib, digest))
-        return mac.digest()[:self.icv_length]
+        return hmac.new(self.__integrity_key__, message,
+                        getattr(hashlib, digest)).digest()[:self.icv_length]
 
     def decrypt(self, spi: 'int', seq: 'int', body: 'bytes', icv: 'bytes') -> 'bytes':
         """Decrypt the payload data of an ESP packet.
@@ -662,7 +763,8 @@ class SecurityAssociation:
             spi: Security Parameters Index.
             seq: Sequence number.
             body: Payload data as transmitted, i.e. the explicit IV (if the
-                algorithm uses one) followed by the ciphertext.
+                algorithm uses one) followed by the ciphertext, which
+                ``ENCR_NULL_AUTH_AES_GMAC`` leaves in clear.
             icv: ICV as transmitted; for an AEAD algorithm this is the
                 authentication tag and is an input to the decryption.
 
@@ -681,13 +783,7 @@ class SecurityAssociation:
         suite = self.cipher_suite
         if cipher is Cipher.ENCR_NULL:
             return body
-
-        crypto = load_cryptography()
-        if crypto is None:
-            raise ProtocolError(f'ESP: unavailable encryption algorithm: {cipher.name!r} needs '
-                                f'the optional "cryptography" dependency, which is not '
-                                f'installed')
-        crypto_cipher, algorithms, modes, _ = crypto
+        crypto = self._cryptography('encryption')
 
         iv_length = suite.iv_length
         if len(body) < iv_length:
@@ -695,28 +791,28 @@ class SecurityAssociation:
                                 f'{iv_length}-octet {cipher.name} IV')
         iv, ciphertext = body[:iv_length], body[iv_length:]
 
-        if cipher is Cipher.ENCR_AES_CBC:
-            if not ciphertext or len(ciphertext) % suite.block_size:
+        if not suite.is_aead:
+            if suite.block_size > 1 and (not ciphertext or len(ciphertext) % suite.block_size):
                 raise ProtocolError(f'ESP: invalid ciphertext length: {len(ciphertext)!r} '
                                     f'octets is not a positive multiple of the '
                                     f'{suite.block_size}-octet {cipher.name} block size')
-            decryptor = crypto_cipher(algorithms.AES(self.__key__), modes.CBC(iv)).decryptor()
+            decryptor = self._cipher(crypto, iv).decryptor()
             return decryptor.update(ciphertext) + decryptor.finalize()
 
-        # AEAD, i.e. AES-GCM [RFC 4106]: the nonce is the salt from the
-        # keying material followed by the explicit IV, and the associated
-        # data is the SPI and the sequence number.
         if not icv:
             raise ProtocolError(f'ESP: missing authentication tag: {cipher.name} requires '
                                 f'one, but the packet carries no ICV')
+        # RFC 4106 s4, RFC 4309 s4, RFC 4543 s3.2 and RFC 7634 s2: the nonce
+        # is the salt followed by the explicit IV; the associated data is the
+        # SPI and the sequence number.
         nonce = self.__salt__ + iv
         aad = spi.to_bytes(4, 'big') + seq.to_bytes(4, 'big')
-        decryptor = crypto_cipher(
-            algorithms.AES(self.__key__),
-            modes.GCM(nonce, icv, min_tag_length=len(icv)),
-        ).decryptor()
-        decryptor.authenticate_additional_data(aad)
-        return decryptor.update(ciphertext) + decryptor.finalize()
+        if cipher is Cipher.ENCR_NULL_AUTH_AES_GMAC:
+            # RFC 4543 Figure 4, as erratum 62 confirms: GMAC authenticates the
+            # IV and the cleartext payload as associated data, encrypting nothing.
+            self._open(crypto, nonce, aad + body, b'', icv)
+            return ciphertext
+        return self._open(crypto, nonce, aad, ciphertext, icv)
 
     def encrypt(self, spi: 'int', seq: 'int', plaintext: 'bytes',
                 iv: 'Optional[bytes]' = None) -> 'tuple[bytes, bytes]':
@@ -744,13 +840,7 @@ class SecurityAssociation:
         suite = self.cipher_suite
         if cipher is Cipher.ENCR_NULL:
             return plaintext, b''
-
-        crypto = load_cryptography()
-        if crypto is None:
-            raise ProtocolError(f'ESP: unavailable encryption algorithm: {cipher.name!r} needs '
-                                f'the optional "cryptography" dependency, which is not '
-                                f'installed')
-        crypto_cipher, algorithms, modes, _ = crypto
+        crypto = self._cryptography('encryption')
 
         iv_length = suite.iv_length
         if iv is None:
@@ -759,16 +849,17 @@ class SecurityAssociation:
             raise ProtocolError(f'ESP: invalid IV: {cipher.name} needs a {iv_length}-octet IV, '
                                 f'got {len(iv)!r} octets')
 
-        if cipher is Cipher.ENCR_AES_CBC:
-            encryptor = crypto_cipher(algorithms.AES(self.__key__), modes.CBC(iv)).encryptor()
+        if not suite.is_aead:
+            encryptor = self._cipher(crypto, iv).encryptor()
             return iv + encryptor.update(plaintext) + encryptor.finalize(), b''
 
         nonce = self.__salt__ + iv
         aad = spi.to_bytes(4, 'big') + seq.to_bytes(4, 'big')
-        encryptor = crypto_cipher(algorithms.AES(self.__key__), modes.GCM(nonce)).encryptor()
-        encryptor.authenticate_additional_data(aad)
-        ciphertext = encryptor.update(plaintext) + encryptor.finalize()
-        return iv + ciphertext, encryptor.tag[:self.icv_length]
+        if cipher is Cipher.ENCR_NULL_AUTH_AES_GMAC:
+            _, tag = self._seal(crypto, nonce, aad + iv + plaintext, b'')
+            return iv + plaintext, tag
+        ciphertext, tag = self._seal(crypto, nonce, aad, plaintext)
+        return iv + ciphertext, tag
 
     ##########################################################################
     # Data models.
@@ -814,12 +905,22 @@ class SecurityAssociation:
                 f'algorithm and provides its own integrity, so {self.integrity.name!r} must '
                 f'not be configured alongside it'
             )
+        if self.encryption is Cipher.ENCR_AES_CTR and self.integrity is Integrity.NONE:
+            raise ProtocolError(f'ESP: invalid integrity algorithm: {self.encryption.name} must '
+                                f'be used with an integrity algorithm (RFC 3686 s3.3), not '
+                                f'{self.integrity.name!r}')
 
         key, self.__salt__ = self._split_key(self.cipher_suite, encryption_key, salt)
         self.__key__ = key
         self.__integrity_key__ = bytes(integrity_key)
 
-        if self.integrity is not Integrity.NONE:
+        if self.integrity_suite.mac == 'cmac':
+            expected = self.integrity_suite.key_size
+            if len(self.__integrity_key__) != expected:
+                raise ProtocolError(f'ESP: invalid integrity key: {self.integrity.name} needs a '
+                                    f'{expected}-octet key, got {len(self.__integrity_key__)!r} '
+                                    f'octets')
+        elif self.integrity is not Integrity.NONE:
             expected = self.integrity_suite.key_size
             if len(self.__integrity_key__) != expected:
                 # NOTE: #2411 -- ``warn`` reports the caller's frame, so here, more than on the
@@ -887,6 +988,117 @@ class SecurityAssociation:
                                 f'{" or ".join(map(str, suite.key_sizes))} octets, '
                                 f'got {len(material)!r}')
         return material, salt
+
+    def _missing_cryptography(self, kind: 'Literal["encryption", "integrity"]') -> 'str':
+        """Say that one of the SA's algorithms needs the missing |cryptography|_.
+
+        Args:
+            kind: Which algorithm needs it.
+
+        Returns:
+            The reason, as :meth:`unavailable` and :meth:`_cryptography` give it.
+
+        """
+        algorithm = self.encryption if kind == 'encryption' else self.integrity
+        return (f'ESP: unavailable {kind} algorithm: {algorithm.name!r} needs the optional '
+                f'"cryptography" dependency, which is not installed')
+
+    def _cryptography(self, kind: 'Literal["encryption", "integrity"]') -> 'tuple[Any, ...]':
+        """Load |cryptography|_ for one of the SA's algorithms.
+
+        Args:
+            kind: Which algorithm needs it.
+
+        Returns:
+            The primitives :func:`load_cryptography` returns.
+
+        Raises:
+            ProtocolError: If |cryptography|_ is not installed.
+
+        """
+        crypto = load_cryptography()
+        if crypto is None:
+            raise ProtocolError(self._missing_cryptography(kind))
+        return crypto
+
+    def _cipher(self, crypto: 'tuple[Any, ...]', iv: 'bytes') -> 'Any':
+        """Build the |cryptography|_ cipher of a suite that is not AEAD.
+
+        Args:
+            crypto: The primitives :func:`load_cryptography` returns.
+            iv: Explicit IV.
+
+        Returns:
+            A :class:`cryptography.hazmat.primitives.ciphers.Cipher`.
+
+        """
+        crypto_cipher, algorithms, modes, _, _, _, camellia = crypto
+        if self.encryption is Cipher.ENCR_AES_CTR:
+            # RFC 3686 s4: the nonce, the IV, then a block counter from one.
+            counter = self.__salt__ + iv + (1).to_bytes(4, 'big')
+            return crypto_cipher(algorithms.AES(self.__key__), modes.CTR(counter))
+        algorithm = camellia if self.encryption is Cipher.ENCR_CAMELLIA_CBC else algorithms.AES
+        return crypto_cipher(algorithm(self.__key__), modes.CBC(iv))
+
+    def _seal(self, crypto: 'tuple[Any, ...]', nonce: 'bytes', aad: 'bytes',
+              plaintext: 'bytes') -> 'tuple[bytes, bytes]':
+        """Encrypt and authenticate under the SA's AEAD suite.
+
+        Args:
+            crypto: The primitives :func:`load_cryptography` returns.
+            nonce: Nonce.
+            aad: Associated data.
+            plaintext: Plaintext.
+
+        Returns:
+            A 2-tuple of the ciphertext and the tag.
+
+        """
+        crypto_cipher, algorithms, modes, _, aead, _, _ = crypto
+        cipher = self.encryption
+        icv_length = self.cipher_suite.icv_length
+        if cipher in (Cipher.ENCR_AES_CCM_8, Cipher.ENCR_AES_CCM_12, Cipher.ENCR_AES_CCM_16):
+            sealed = aead.AESCCM(self.__key__, tag_length=icv_length).encrypt(nonce, plaintext, aad)
+        elif cipher is Cipher.ENCR_CHACHA20_POLY1305:
+            sealed = aead.ChaCha20Poly1305(self.__key__).encrypt(nonce, plaintext, aad)
+        else:
+            encryptor = crypto_cipher(algorithms.AES(self.__key__), modes.GCM(nonce)).encryptor()
+            encryptor.authenticate_additional_data(aad)
+            ciphertext = encryptor.update(plaintext) + encryptor.finalize()
+            return ciphertext, encryptor.tag[:self.icv_length]
+        return sealed[:-icv_length], sealed[-icv_length:]
+
+    def _open(self, crypto: 'tuple[Any, ...]', nonce: 'bytes', aad: 'bytes',
+              ciphertext: 'bytes', tag: 'bytes') -> 'bytes':
+        """Verify and decrypt under the SA's AEAD suite; the inverse of :meth:`_seal`.
+
+        Args:
+            crypto: The primitives :func:`load_cryptography` returns.
+            nonce: Nonce.
+            aad: Associated data.
+            ciphertext: Ciphertext.
+            tag: Authentication tag.
+
+        Returns:
+            The plaintext.
+
+        Raises:
+            cryptography.exceptions.InvalidTag: If the tag does not verify.
+
+        """
+        crypto_cipher, algorithms, modes, _, aead, _, _ = crypto
+        cipher = self.encryption
+        if cipher in (Cipher.ENCR_AES_CCM_8, Cipher.ENCR_AES_CCM_12, Cipher.ENCR_AES_CCM_16):
+            ccm = aead.AESCCM(self.__key__, tag_length=self.cipher_suite.icv_length)
+            return ccm.decrypt(nonce, ciphertext + tag, aad)
+        if cipher is Cipher.ENCR_CHACHA20_POLY1305:
+            return aead.ChaCha20Poly1305(self.__key__).decrypt(nonce, ciphertext + tag, aad)
+        decryptor = crypto_cipher(
+            algorithms.AES(self.__key__),
+            modes.GCM(nonce, tag, min_tag_length=len(tag)),
+        ).decryptor()
+        decryptor.authenticate_additional_data(aad)
+        return decryptor.update(ciphertext) + decryptor.finalize()
 
 
 class ESPContext(ProtocolContext):

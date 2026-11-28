@@ -2462,11 +2462,13 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         # the second: one AEAD-tag case needs `cryptography`, the rest reach the same
         # read paths through an ENCR_NULL SA on hmac and hashlib alone. #2939's module
         # is the third: its signature class needs `cryptography`, while its HMAC, KEYMAT
-        # and status cases run on hmac and hashlib alone.
+        # and status cases run on hmac and hashlib alone. #2958's is the fourth: its
+        # known answers and round trips need it, its table and degrade cases do not.
         self.assertEqual({gate.module for gate in gap.gates},
                          {'tests/protocols/internet/test_esp_unit.py',
                           'tests/protocols/internet/test_esp_message_prefix_2411_unit.py',
-                          'tests/protocols/internet/test_hip_auth_2939_unit.py'})
+                          'tests/protocols/internet/test_hip_auth_2939_unit.py',
+                          'tests/protocols/internet/test_esp_transforms_2958_unit.py'})
 
         message = _dependency_gates.describe_gap(gap)
         self.assertIn("the 'test' job", message)
