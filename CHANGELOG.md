@@ -1,4 +1,4 @@
-## 1.9.0 -- unreleased
+## 1.9.0 -- 2026-11-28
 
 1.9.0 decodes Neighbor Discovery in ICMPv6, adds dissectors for IEEE 802.2 LLC and SNAP and for the Spanning Tree Protocol family LLC carries, reassembles SCTP user messages and TLS records split across TCP segments, and verifies HIP's HMAC and signature parameters given the keys. Its breaking changes, each marked **a breaking change to** and ending with how to migrate, are to where `pcapkit.corekit`'s multi-word modules and DNS's name codec live, to the Mobility Header's option payloads, which parse as protocols rather than stay octets, and to the conda package, which no longer bundles the optional dependencies.
 
