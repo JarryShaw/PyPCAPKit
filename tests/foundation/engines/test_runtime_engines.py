@@ -449,7 +449,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
                 self.closed = False
                 # a packet record: its frame layer carries frame.encap_type (#1515)
                 frame = types.SimpleNamespace(layer_name='frame', field_names=['encap_type'],
-                                              protocols='eth:ip:tcp')
+                                              protocols='eth:ip:tcp', time_epoch='1500000000.5')
                 self.packet = types.SimpleNamespace(number='7', frame_info=frame, layers=[])
 
             def next(self):

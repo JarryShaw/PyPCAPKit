@@ -312,6 +312,8 @@ class Scapy(EngineBase['ScapyPacket']):
     #: Scapy packet and its frame number.
     __traceflow__ = {
         'tcp': ModuleDescriptor('pcapkit.toolkit.scapy', 'tcp_traceflow'),
+        'udp': ModuleDescriptor('pcapkit.toolkit.scapy', 'udp_traceflow'),
+        'ip': ModuleDescriptor('pcapkit.toolkit.scapy', 'ip_traceflow'),
     }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
     ##########################################################################
@@ -434,7 +436,7 @@ class Scapy(EngineBase['ScapyPacket']):
 
         # trace flows
         if ext._flag_t:
-            self._traceflow(packet, count=ext._frnum)
+            self._traceflow(float(packet.time), packet, count=ext._frnum)
 
         # record frames
         if ext._flag_d:

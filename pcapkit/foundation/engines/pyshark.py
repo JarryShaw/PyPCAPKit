@@ -128,6 +128,8 @@ class PyShark(EngineBase['PySharkPacket']):
     #: PyShark packet and its frame number.
     __traceflow__ = {
         'tcp': ModuleDescriptor('pcapkit.toolkit.pyshark', 'tcp_traceflow'),
+        'udp': ModuleDescriptor('pcapkit.toolkit.pyshark', 'udp_traceflow'),
+        'ip': ModuleDescriptor('pcapkit.toolkit.pyshark', 'ip_traceflow'),
     }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
     #: First Python version `PyShark`_ does not work on, as a ``(major, minor)``
@@ -327,7 +329,7 @@ class PyShark(EngineBase['PySharkPacket']):
 
         # trace flows
         if ext._flag_t:
-            self._traceflow(packet, count=ext._frnum)
+            self._traceflow(packet2timestamp(packet), packet, count=ext._frnum)
 
         # record frames
         if ext._flag_d:

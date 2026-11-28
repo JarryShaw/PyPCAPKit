@@ -144,6 +144,8 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
     #: savefile's link type and its frame number.
     __traceflow__ = {
         'tcp': ModuleDescriptor('pcapkit.toolkit.pypcapfile', 'tcp_traceflow'),
+        'udp': ModuleDescriptor('pcapkit.toolkit.pypcapfile', 'udp_traceflow'),
+        'ip': ModuleDescriptor('pcapkit.toolkit.pypcapfile', 'ip_traceflow'),
     }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
     ##########################################################################
@@ -329,7 +331,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
 
         # trace flows
         if ext._flag_t:
-            self._traceflow(packet, data_link=self._dlink, count=ext._frnum)
+            self._traceflow(packet2timestamp(packet), packet, data_link=self._dlink, count=ext._frnum)
 
         # record frames
         if ext._flag_d:

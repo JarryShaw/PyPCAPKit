@@ -444,7 +444,7 @@ class PCAP_CT(EngineBase['RawFrame']):
 
         # trace flows
         if ext._flag_t:
-            self._traceflow(packet, timestamp, data_link=self._dlink, count=ext._frnum)
+            self._traceflow(timestamp, packet, timestamp, data_link=self._dlink, count=ext._frnum)
 
         # record frames
         if ext._flag_d:

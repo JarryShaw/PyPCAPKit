@@ -133,7 +133,7 @@ class OptionClassTests(_Case):
             'ReassemblyOptions': {'protocols': ('tcp',), 'strict': True, 'store': True, 'timeout': None},
             'TraceFlowOptions': {'protocols': ('tcp',), 'fout': './tmp', 'format': 'pcap',
                                  'byteorder': sys.byteorder, 'nanosecond': False, 'bidirectional': True,
-                                 'analyze': False},
+                                 'analyze': False, 'timeout': None},
             'StreamOptions': {'buffer_size': io.DEFAULT_BUFFER_SIZE, 'buffer_save': False,
                               'buffer_path': None, 'no_eof': False},
         }

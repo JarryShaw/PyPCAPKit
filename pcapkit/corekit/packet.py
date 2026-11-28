@@ -64,8 +64,9 @@ class DeferredPacket:
     :class:`pcapkit.foundation.reassembly.tcp.data.Datagram`,
     :class:`pcapkit.foundation.reassembly.dtls.data.Datagram`,
     :class:`pcapkit.foundation.reassembly.sctp.data.Datagram`,
-    :class:`pcapkit.foundation.reassembly.tls.data.Datagram` and
-    :class:`pcapkit.foundation.traceflow.tcp.data.Index`, which differ only in
+    :class:`pcapkit.foundation.reassembly.tls.data.Datagram`,
+    :class:`pcapkit.foundation.traceflow.tcp.data.Index` and
+    :class:`pcapkit.foundation.traceflow.udp.data.Index`, which differ only in
     the placeholder class each names in :attr:`__deferred__`
     (:issue:`1516`).
 

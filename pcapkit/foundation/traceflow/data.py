@@ -22,14 +22,16 @@ if TYPE_CHECKING:
 
     from pcapkit.foundation.reassembly.tcp.data import Datagram as TCP_Datagram
     from pcapkit.foundation.reassembly.tcp.reassembly import TCP as TCP_Reassembly
+    from pcapkit.foundation.traceflow.ip.data import Index as IP_Index
     from pcapkit.foundation.traceflow.tcp.data import Index as TCP_Index
+    from pcapkit.foundation.traceflow.udp.data import Index as UDP_Index
     from pcapkit.protocols.misc.pcap.frame.data import FrameInfo as Data_FrameInfo
 
 
 class Deferred:
-    """A postponed reassembly of a traced flow's application layer.
+    """A postponed reassembly of a traced TCP flow's application layer.
 
-    A traced flow's ``packet`` is the application-layer payload of the
+    A traced TCP flow's ``packet`` is the application-layer payload of the
     conversation, as reassembled datagrams -- one per direction and
     acknowledgement number, see :class:`~pcapkit.foundation.traceflow.tcp.traceflow.TCP`.
     Producing it means reassembling the
@@ -195,22 +197,36 @@ def _frame_record(mapping: 'Mapping[str, Any]', packet: 'bytes',
 class TraceFlowData(Info):
     """Data storage for flow tracing.
 
-    The built-in ``tcp`` field is :data:`None` when TCP flow tracing is disabled.
-    Every other enabled flow tracer adds a field of its own, under the name it is
+    Each built-in field is :data:`None` when its flow tracing is disabled. Every
+    other enabled flow tracer adds a field of its own, under the name it is
     registered by in :attr:`Extractor.__traceflow__
-    <pcapkit.foundation.extraction.Extractor.__traceflow__>`, iterated after
-    ``tcp`` in the order given.
+    <pcapkit.foundation.extraction.Extractor.__traceflow__>`, iterated after the
+    built-ins in the order given.
 
     .. versionchanged:: 1.7.0
 
        Takes a field for each enabled flow tracer beyond TCP's (:issue:`2843`).
 
+    .. versionchanged:: 1.10.0
+
+       Takes ``udp`` and ``ip`` fields (:issue:`2956`).
+
     """
 
     #: TCP traced flows.
     tcp: 'tuple[TCP_Index, ...]'
+    #: UDP traced flows.
+    #:
+    #: .. versionadded:: 1.10.0
+    udp: 'tuple[UDP_Index, ...]'
+    #: IP traced conversations.
+    #:
+    #: .. versionadded:: 1.10.0
+    ip: 'tuple[IP_Index, ...]'
 
     def __init__(self, tcp: 'Optional[tuple[TCP_Index, ...]]' = None,  # pylint: disable=super-init-not-called
+                 udp: 'Optional[tuple[UDP_Index, ...]]' = None,
+                 ip: 'Optional[tuple[IP_Index, ...]]' = None,
                  **kwargs: 'Optional[tuple[Any, ...]]') -> 'None':
-        self.__update__(tcp=tcp, **kwargs)
+        self.__update__(tcp=tcp, udp=udp, ip=ip, **kwargs)
         self.__post_init__()

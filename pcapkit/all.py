@@ -30,6 +30,8 @@ from pcapkit.toolkit.scapy import ipv6_reassembly as scapy_ipv6_reassembly  # is
 from pcapkit.toolkit.scapy import tcp_reassembly as scapy_tcp_reassembly  # isort: skip
 from pcapkit.toolkit.scapy import tls_reassembly as scapy_tls_reassembly  # isort: skip
 from pcapkit.toolkit.scapy import tcp_traceflow as scapy_tcp_traceflow  # isort: skip
+from pcapkit.toolkit.scapy import udp_traceflow as scapy_udp_traceflow  # isort: skip
+from pcapkit.toolkit.scapy import ip_traceflow as scapy_ip_traceflow  # isort: skip
 
 # tools for DPKT engine
 from pcapkit.toolkit.dpkt import ipv6_hdr_len as dpkt_ipv6_hdr_len  # isort: skip
@@ -40,10 +42,14 @@ from pcapkit.toolkit.dpkt import ipv6_reassembly as dpkt_ipv6_reassembly  # isor
 from pcapkit.toolkit.dpkt import tcp_reassembly as dpkt_tcp_reassembly  # isort: skip
 from pcapkit.toolkit.dpkt import tls_reassembly as dpkt_tls_reassembly  # isort: skip
 from pcapkit.toolkit.dpkt import tcp_traceflow as dpkt_tcp_traceflow  # isort: skip
+from pcapkit.toolkit.dpkt import udp_traceflow as dpkt_udp_traceflow  # isort: skip
+from pcapkit.toolkit.dpkt import ip_traceflow as dpkt_ip_traceflow  # isort: skip
 
 # tools for PyShark engine
 from pcapkit.toolkit.pyshark import packet2dict as pyshark_packet2dict  # isort: skip
 from pcapkit.toolkit.pyshark import tcp_traceflow as pyshark_tcp_traceflow  # isort: skip
+from pcapkit.toolkit.pyshark import udp_traceflow as pyshark_udp_traceflow  # isort: skip
+from pcapkit.toolkit.pyshark import ip_traceflow as pyshark_ip_traceflow  # isort: skip
 
 __all__ = [
     # pcapkit.const
@@ -81,6 +87,7 @@ __all__ = [
     # pcapkit.foundation
     'Extractor',                                            # Extraction
     'TraceFlowManager', 'TCP_TraceFlow',                    # Trace Flow
+    'UDP_TraceFlow', 'IP_TraceFlow',                        # Trace Flow
 
     # pcapkit.foundation.options
     'DumpOptions', 'ReassemblyOptions',                     # Extraction Options
@@ -164,18 +171,20 @@ __all__ = [
 
     # pcapkit.toolkit
     'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly', 'sctp_reassembly',
-    'tls_reassembly', 'tcp_traceflow',
+    'tls_reassembly', 'tcp_traceflow', 'udp_traceflow', 'ip_traceflow',
     'pcapng_ipv4_reassembly', 'pcapng_ipv6_reassembly', 'pcapng_tcp_reassembly', 'pcapng_dtls_reassembly',
-    'pcapng_sctp_reassembly', 'pcapng_tls_reassembly', 'pcapng_tcp_traceflow',
+    'pcapng_sctp_reassembly', 'pcapng_tls_reassembly', 'pcapng_tcp_traceflow', 'pcapng_udp_traceflow',
+    'pcapng_ip_traceflow',
     'pcapng_block2frame',                                   # default engine
     'dpkt_ipv6_hdr_len', 'dpkt_packet2chain', 'dpkt_packet2dict',
     'dpkt_ipv4_reassembly', 'dpkt_ipv6_reassembly', 'dpkt_tcp_reassembly', 'dpkt_tls_reassembly',
-    'dpkt_tcp_traceflow',
+    'dpkt_tcp_traceflow', 'dpkt_udp_traceflow', 'dpkt_ip_traceflow',
                                                             # DPKT engine
     'pyshark_packet2dict', 'pyshark_tcp_traceflow',         # PyShark engine
+    'pyshark_udp_traceflow', 'pyshark_ip_traceflow',
     'scapy_packet2chain', 'scapy_packet2dict',
     'scapy_ipv4_reassembly', 'scapy_ipv6_reassembly', 'scapy_tcp_reassembly', 'scapy_tls_reassembly',
-    'scapy_tcp_traceflow',
+    'scapy_tcp_traceflow', 'scapy_udp_traceflow', 'scapy_ip_traceflow',
                                                             # Scapy engine
 
     # pcapkit.utilities -- unlisted: its names stay reachable as attributes, but

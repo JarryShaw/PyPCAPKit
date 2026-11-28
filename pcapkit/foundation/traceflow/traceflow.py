@@ -12,11 +12,14 @@ which is an abstract base class for all flow tracing classes.
 """
 import abc
 import collections
+import decimal
+import math
+import numbers
 import os
 import sys
 import types
 import weakref
-from typing import TYPE_CHECKING, Generic, TypeVar, overload
+from typing import TYPE_CHECKING, Generic, TypeVar, cast, overload
 
 from dictdumper.dumper import Dumper
 
@@ -26,7 +29,9 @@ from pcapkit.dumpkit.common import make_dumper
 from pcapkit.protocols.misc.raw.protocol import Raw
 from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.utilities import config
-from pcapkit.utilities.exceptions import FileExists, RegistryError, UnsupportedCall, stacklevel
+from pcapkit.utilities.callbacks import run_callbacks
+from pcapkit.utilities.exceptions import (FieldValueError, FileExists, RegistryError,
+                                          UnsupportedCall, stacklevel)
 from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import FileWarning, FormatWarning, RegistryWarning, warn
 
@@ -54,6 +59,30 @@ if TYPE_CHECKING:
     from pcapkit.corekit.infoclass import Info
 
     CallbackFn = Callable[[_IT], None]
+
+
+#: decimal.Context: Context whose sums and differences are exact, so the idle timeout
+#: is compared with no rounding, however many digits a timestamp carries.
+_EXACT = decimal.Context(prec=decimal.MAX_PREC, Emax=decimal.MAX_EMAX, Emin=decimal.MIN_EMIN)
+
+
+def _exact(seconds: 'numbers.Real | float | decimal.Decimal') -> 'decimal.Decimal':
+    """Read a capture timestamp, or a timeout, as the decimal it was written as.
+
+    Args:
+        seconds: a number of seconds
+
+    Returns:
+        A :class:`~decimal.Decimal` as is; otherwise the decimal its shortest
+        :func:`repr` spells, which is the capture's own value for a timestamp of at
+        most microsecond resolution, rather than the binary fraction the
+        :obj:`float` approximates it by. So ``0.4 - 0.1`` is ``0.3``, as the
+        capture recorded it, not the larger ``0.30000000000000004``.
+
+    """
+    if isinstance(seconds, decimal.Decimal):
+        return seconds
+    return decimal.Decimal(repr(float(seconds)))
 
 
 def _close_files(files: 'collections.OrderedDict[int, Dumper]') -> 'None':
@@ -135,6 +164,8 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         nanosecond: output nanosecond-resolution file flag
         bidirectional: trace both halves of a conversation as one flow
         analyze: reassemble each flow's application layer
+        timeout: idle timeout in seconds, on the capture's clock; :data:`None`
+            keeps every flow until :meth:`finish`
 
     Note:
         This class is for internal use only. For customisation, please use
@@ -149,6 +180,10 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
 
         #: List of callback functions upon a finalised flow.
         __callback_fn__: 'list[CallbackFn]'
+
+        #: Every flow label this tracer has handed out, created with the first
+        #: flow and read by :meth:`_unique_label` to keep labels unique.
+        _labels: 'set[str]'
 
     # Internal data storage for cached properties.
     __cached__: 'dict[str, Any]'
@@ -216,6 +251,19 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         if self._buffer:
             return self.submit()
         return tuple(self._stream)
+
+    @property
+    def timeout(self) -> 'float':
+        """Idle timeout, in seconds, of the current flow tracing object.
+
+        A flow whose latest packet is more than this many seconds old **on the
+        capture's own clock** is finalised -- see :meth:`advance`. :data:`math.inf`,
+        for a tracer given no timeout, keeps every flow until :meth:`finish`.
+
+        .. versionadded:: 1.10.0
+
+        """
+        return self._timeout
 
     ##########################################################################
     # Methods.
@@ -369,6 +417,45 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         logger.debug('flow tracing output root %s, format %s via %s', fout, format, output.__name__)
         return dumper, ext
 
+    def make_bufid(self, packet: '_PT') -> '_DT':
+        """Derive the buffer ID a packet belongs to.
+
+        Arguments:
+            packet: a flow packet
+
+        Returns:
+            Buffer ID: the packet's two endpoints, as :meth:`_endpoints` reads
+            them, in one flat :obj:`tuple` -- ``(address, port, address, port)``
+            for TCP and UDP, ``(address, address)`` for IP.
+
+        Tracing bidirectionally means both halves of a conversation have to land
+        on the *same* key, so the two endpoints are ordered canonically -- the
+        lesser first -- rather than as (source, destination): the client's
+        ``A→B`` and the server's ``B→A`` both reduce to ``min(A, B), max(A, B)``.
+
+        The result stays a plain :obj:`tuple`, which is deliberate and not merely
+        convenient: it is a :obj:`dict` key, and an
+        :class:`~pcapkit.corekit.infoclass.Info` cannot be one -- inheriting
+        :class:`collections.abc.Mapping` sets ``__hash__`` to :data:`None`.
+
+        Note:
+            Both endpoints of a flow are of the same address family, so the
+            comparison never has to order an :class:`~ipaddress.IPv4Address`
+            against an :class:`~ipaddress.IPv6Address` -- which raises
+            :exc:`TypeError`.
+
+        .. versionchanged:: 1.10.0
+
+           Defined here for every flow tracer, reading the endpoints from
+           :meth:`_endpoints`, where :class:`~pcapkit.foundation.traceflow.tcp.traceflow.TCP`
+           defined it (:issue:`2956`).
+
+        """
+        near, far = self._endpoints(packet)
+        if self._bidir and far < near:
+            return cast('_DT', (*far, *near))
+        return cast('_DT', (*near, *far))
+
     @abc.abstractmethod
     def dump(self, packet: '_PT') -> 'None':
         """Dump frame to output files.
@@ -407,6 +494,41 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
             Traced TCP flow (:term:`trace.tcp.index`).
 
         """
+
+    def advance(self, timestamp: 'float') -> 'None':
+        """Advance the capture clock, finalising every flow it leaves idle.
+
+        Arguments:
+            timestamp: Capture timestamp of the current frame, in seconds since
+                the Unix epoch.
+
+        A flow is idle once more than :attr:`timeout` seconds separate
+        ``timestamp`` from its latest packet, and is finalised then, its callbacks
+        run, as :meth:`finish` finalises it at the end of the capture. The two are
+        compared exactly, as the decimals :func:`_exact` reads, so a flow exactly
+        :attr:`timeout` seconds idle is kept whatever its timestamps' binary
+        rounding. That is the
+        idle timeout by which IPFIX ends a flow, flowEndReason ``0x01`` of
+        Information Element 136. The
+        :class:`~pcapkit.foundation.extraction.Extractor` calls this with every
+        frame's timestamp before the frame is fed, and a flow packet calls it with
+        its own, so a tracer fed by hand times flows out too.
+
+        A flow tracer whose flows never record a packet's time, as one built on
+        :class:`TraceFlow` that does not call :meth:`_touch`, has nothing to time
+        out, and nothing is finalised.
+
+        .. versionadded:: 1.10.0
+
+        """
+        if math.isinf(self._timeout) or not self._seen:
+            return
+
+        # NOTE: exact, as a float difference can exceed the timeout it equals: 0.4 - 0.1 > 0.3.
+        deadline = _EXACT.subtract(_exact(timestamp), self._idle)
+        for bufid in [bufid for (bufid, seen) in self._seen.items() if seen < deadline]:
+            logger.debug('%s flow %s idle for over %.6fs', self.name, bufid, self._timeout)
+            self._finalise(bufid)
 
     def finish(self) -> 'None':
         """Finalise every flow still being traced.
@@ -464,7 +586,7 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
     def __init__(self, *, fout: 'str' = './tmp', format: 'str' = 'pcap',  # pylint: disable=redefined-builtin
                  byteorder: 'Literal["little", "big"]' = sys.byteorder,
                  nanosecond: 'bool' = False, bidirectional: 'bool' = True,
-                 analyze: 'bool' = False) -> 'None':
+                 analyze: 'bool' = False, timeout: 'Optional[float]' = None) -> 'None':
         """Initialise instance.
 
         Arguments:
@@ -480,8 +602,36 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
             analyze: whether to reassemble each flow's application layer, so that
                 its ``packet`` can be read. Off by default: it buffers every
                 traced payload, a cost tracing does not otherwise pay.
+            timeout: idle timeout in seconds, measured on the capture's own clock
+                rather than the host's (see :meth:`advance`); :data:`None` keeps
+                every flow until :meth:`finish`
+
+        Raises:
+            FieldValueError: If ``timeout`` is negative, NaN, or no real number of
+                seconds, as a :obj:`bool` or a :obj:`str` is not.
+
+        .. versionchanged:: 1.10.0
+
+           Takes ``timeout`` (:issue:`2956`).
 
         """
+        # NOTE: checked before make_fout() below creates the output root; a bool is no number of seconds.
+        given = cast('Any', timeout)
+        if given is not None and (isinstance(given, bool) or not isinstance(given, (numbers.Real, decimal.Decimal))
+                                  or _exact(given).is_nan() or given < 0):
+            raise FieldValueError(f'{type(self).__name__}: flow tracing timeout must be a non-negative '
+                                  f'number of seconds, got {timeout!r}')
+        #: float: Idle timeout in seconds, on the capture's clock. :data:`math.inf`
+        #: keeps every flow until :meth:`finish`.
+        self._timeout = math.inf if timeout is None else float(timeout)
+        #: decimal.Decimal: :attr:`_timeout` exactly as given, which :meth:`advance`
+        #: compares with.
+        self._idle = _exact(self._timeout if timeout is None else timeout)
+        #: dict[_DT, decimal.Decimal]: Capture timestamp of each open flow's latest
+        #: packet, by buffer ID, which :meth:`advance` reads; written by
+        #: :meth:`_touch`, and only while :attr:`timeout` is finite.
+        self._seen = {}  # type: dict[_DT, decimal.Decimal]
+
         #: str: Output root path.
         self._fproot = fout
 
@@ -525,8 +675,8 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         self._finalizer = weakref.finalize(self, _close_files, self._fopen)
 
         logger.debug('%s flow tracing initialised (root=%s, format=%s, byteorder=%s, '
-                     'nanosecond=%s, bidirectional=%s, analyze=%s)', self.name, fout,
-                     format, byteorder, nanosecond, bidirectional, analyze)
+                     'nanosecond=%s, bidirectional=%s, analyze=%s, timeout=%s)', self.name, fout,
+                     format, byteorder, nanosecond, bidirectional, analyze, self._timeout)
 
     def __call__(self, packet: '_PT') -> 'None':
         """Dump frame to output files.
@@ -599,6 +749,230 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         if held is not None:
             held.close()
 
+    def _endpoints(self, packet: '_PT') -> 'tuple[tuple[Any, ...], tuple[Any, ...]]':
+        """The endpoints of a flow packet: its sender's, then its receiver's.
+
+        Arguments:
+            packet: a flow packet
+
+        Returns:
+            ``(address, port)`` of the source, then of the destination, which is
+            how TCP and UDP key a flow. A tracer whose protocol has no ports, as
+            :class:`~pcapkit.foundation.traceflow.ip.traceflow.IP`, overrides it.
+
+        :meth:`make_bufid` keys a flow on them, :meth:`_make_label` names it after
+        them, and :meth:`_append` tells the directions apart by them.
+
+        .. versionadded:: 1.10.0
+
+        """
+        info = cast('Any', packet)
+        return (info.src, info.srcport), (info.dst, info.dstport)
+
+    def _make_label(self, packet: '_PT') -> 'str':
+        """Label a new flow after the packet that opens it.
+
+        Arguments:
+            packet: the flow packet opening the flow
+
+        Returns:
+            The fields of each endpoint :meth:`_endpoints` reads, joined by ``_``,
+            source first, then the packet's timestamp, the three joined by ``-``,
+            and made unique within the tracer by :meth:`_unique_label`. On an IPv6
+            flow every ``:`` is replaced by ``.``, since a Windows file name cannot
+            carry one, where it separates the drive letter.
+
+        So the label names the initiator first, and the reverse half of a
+        bidirectional conversation joins the flow rather than minting a label of
+        its own.
+
+        .. versionadded:: 1.10.0
+
+        """
+        info = cast('Any', packet)
+        near, far = self._endpoints(packet)
+        label = '-'.join(['_'.join(map(str, near)), '_'.join(map(str, far)), str(info.timestamp)])
+        if info.src.version != 4:
+            label = label.replace(':', '.')
+        return self._unique_label(label)
+
+    def _unique_label(self, label: 'str') -> 'str':
+        """Make a new flow's label unique within this tracer.
+
+        Arguments:
+            label: the label built from the packet that opens the flow
+
+        Returns:
+            ``label`` itself if no earlier flow carries it; otherwise ``label``
+            suffixed with the first of ``-1``, ``-2``, ... that is still unused.
+
+        The label names the flow's output file, which is opened -- and so
+        truncated -- when the flow starts. Two flows with one label would
+        therefore share one file, and the later would erase the earlier: the
+        same endpoints opening a second flow at the same capture timestamp, as a
+        flow superseded or timed out on its endpoints' next packet can. A label
+        that does not collide is returned unchanged.
+
+        .. versionchanged:: 1.10.0
+
+           Defined here for every flow tracer, where
+           :class:`~pcapkit.foundation.traceflow.tcp.traceflow.TCP` defined it
+           (:issue:`2956`).
+
+        """
+        used = self.__dict__.setdefault('_labels', set())  # type: set[str]
+        unique, count = label, 0
+        while unique in used:
+            count += 1
+            unique = f'{label}-{count}'
+        used.add(unique)
+        return unique
+
+    def _make_fpout(self, label: 'str', protocol: 'Any') -> 'Dumper':
+        """Make the dumper a new flow writes its output file through.
+
+        Arguments:
+            label: the flow's label, which names the file
+            protocol: data link type of the frames the file holds
+
+        Returns:
+            A dumper of the tracer's output format, writing the file
+            :meth:`_output_path` reports, or no file when the format writes none.
+
+        .. versionadded:: 1.10.0
+
+        """
+        return self._foutio(fname=f'{self._fproot}/{label}{self._fdpext or ""}', protocol=protocol,
+                            byteorder=self._endian, nanosecond=self._nnsecd)
+
+    def _output_path(self, label: 'str') -> 'Optional[str]':
+        """Path of a flow's output file, as an index entry reports it.
+
+        Arguments:
+            label: the flow's label
+
+        Returns:
+            The file :meth:`trace` writes the flow to, or :data:`None` when the
+            output format writes no file at all. An *empty* extension still
+            writes one, named after the label alone.
+
+        :meth:`submit` and :meth:`_finalise` both report through this, so an
+        open flow and a finalised one name the same file (:issue:`2237`).
+
+        .. versionchanged:: 1.10.0
+
+           Defined here for every flow tracer, where
+           :class:`~pcapkit.foundation.traceflow.tcp.traceflow.TCP` defined it
+           (:issue:`2956`).
+
+        """
+        if self._fdpext is None:
+            return None
+        return f'{self._fproot}/{label}{self._fdpext}'
+
+    def _append(self, buffer: '_BT', packet: '_PT') -> 'None':
+        """Record a packet's frame number in its flow, and in the direction it went.
+
+        Arguments:
+            buffer: the flow's buffer, holding ``index``, ``origin``, ``forward``
+                and ``reverse`` as each built-in flow tracer's does
+            packet: a flow packet
+
+        The frame joins ``index``, which keeps both directions in capture order,
+        and ``forward`` if its source endpoint is the ``origin`` that opened the
+        flow, ``reverse`` otherwise, so each half stays recoverable on its own.
+
+        .. versionadded:: 1.10.0
+
+        """
+        info, flow = cast('Any', packet), cast('Any', buffer)
+        flow.index.append(info.index)
+        if self._endpoints(packet)[0] == flow.origin:
+            flow.forward.append(info.index)
+        else:
+            flow.reverse.append(info.index)
+
+    def _touch(self, bufid: '_DT', timestamp: 'float') -> 'None':
+        """Note when an open flow last saw a packet, for :meth:`advance` to time it out.
+
+        Arguments:
+            bufid: buffer identifier of the flow
+            timestamp: capture timestamp of the packet
+
+        The latest timestamp is kept, so a capture whose timestamps step back
+        does not age a flow. Nothing is noted while :attr:`timeout` is infinite.
+
+        .. versionadded:: 1.10.0
+
+        """
+        if math.isinf(self._timeout):
+            return
+        exact, seen = _exact(timestamp), self._seen.get(bufid)
+        self._seen[bufid] = exact if seen is None else max(seen, exact)
+
+    def _make_index(self, buffer: '_BT') -> '_IT':
+        """Report a flow's buffer as its index entry.
+
+        Arguments:
+            buffer: a flow buffer
+
+        Returns:
+            The flow's index entry.
+
+        Raises:
+            NotImplementedError: Unless the flow tracer overrides it, as each
+                built-in does; only :meth:`_finalise` and the built-ins'
+                :meth:`submit` call it.
+
+        .. versionadded:: 1.10.0
+
+        """
+        raise NotImplementedError(f'{type(self).__name__} reports no index entry of its own')
+
+    def _finalise(self, bufid: '_DT') -> '_IT':
+        """Finalise a flow: report it, and stop tracing into it.
+
+        Arguments:
+            bufid: buffer identifier of the flow to finalise
+
+        Returns:
+            The flow's index entry, from :meth:`_make_index`.
+
+        Called once per flow, from where its tracer ends it: :meth:`finish` at
+        the end of the capture, :meth:`advance` once it is idle, or a rule of
+        the tracer's own, such as a TCP connection's reuse.
+
+        The flow's file is closed and its entry stored before the callbacks run,
+        so a callback that raises propagates and leaves the flow in the index.
+        One raising an :exc:`Exception` does not stop the callbacks after it: the
+        first such error is re-raised once all have run, and a later one logged,
+        by :func:`~pcapkit.utilities.callbacks.run_callbacks`, to the logger of
+        the module the tracer is defined in.
+
+        .. versionchanged:: 1.10.0
+
+           Defined here for every flow tracer, where
+           :class:`~pcapkit.foundation.traceflow.tcp.traceflow.TCP` defined it
+           (:issue:`2956`).
+
+        """
+        buf = cast('Any', self._buffer.pop(bufid))
+        self._seen.pop(bufid, None)
+        self.__cached__['submit'] = None
+        label = buf.label
+        # NOTE: closed before the callbacks run, so they find the file closed.
+        self._release(buf.fpout)
+
+        log = get_logger(type(self).__module__)
+        log.debug('%s flow %s finalised after %d frame(s) (%d forward, %d reverse)',
+                  self.name, label, len(buf.index), len(buf.forward), len(buf.reverse))
+        index = self._make_index(buf)
+        # NOTE: stored before the callbacks run, so one that raises cannot drop the flow
+        # from the index (#2827).
+        self._stream.append(index)
+        run_callbacks(self.__callback_fn__, index, logger=log, subject=f'{self.name} flow {label}')
+        return index
+
 
 class TraceFlow(TraceFlowBase[_DT, _BT, _IT, _PT], Generic[_DT, _BT, _IT, _PT]):
     """Base flow tracing class.
@@ -634,6 +1008,8 @@ class TraceFlow(TraceFlowBase[_DT, _BT, _IT, _PT], Generic[_DT, _BT, _IT, _PT]):
         nanosecond: output nanosecond-resolution file flag
         bidirectional: trace both halves of a conversation as one flow
         analyze: reassemble each flow's application layer
+        timeout: idle timeout in seconds, on the capture's clock; :data:`None`
+            keeps every flow until :meth:`finish`
 
     .. versionchanged:: 1.3.0
 
@@ -658,6 +1034,10 @@ class TraceFlow(TraceFlowBase[_DT, _BT, _IT, _PT], Generic[_DT, _BT, _IT, _PT]):
        where ``fout`` and ``format`` were required and took :data:`None` for
        ``'./tmp'`` and ``'pcap'``; ``analyse`` is renamed ``analyze``, with no
        alias (:issue:`2839`).
+
+    .. versionchanged:: 1.10.0
+
+       Takes ``timeout``, and a flow idle for longer is finalised (:issue:`2956`).
 
     """
 

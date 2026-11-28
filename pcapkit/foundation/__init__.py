@@ -30,7 +30,7 @@ __all__ = [
 
     'ip_datagram', 'tcp_datagram', 'dtls_handshake', 'sctp_message', 'tls_record',
 
-    'TCP_TraceFlow',
+    'TCP_TraceFlow', 'UDP_TraceFlow', 'IP_TraceFlow',
     'TraceFlowManager',
 
     'register_protocol',

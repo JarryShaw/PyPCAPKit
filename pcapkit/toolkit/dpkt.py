@@ -20,7 +20,9 @@ from pcapkit.corekit.const.capture import RESOLUTION, RESOLUTION_PLACES
 from pcapkit.foundation.reassembly.ip.data import Packet as IP_Packet
 from pcapkit.foundation.reassembly.tcp.data import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data import FrameRecord
+from pcapkit.foundation.traceflow.ip.data import Packet as TF_IP_Packet
 from pcapkit.foundation.traceflow.tcp.data import Packet as TF_TCP_Packet
+from pcapkit.foundation.traceflow.udp.data import Packet as TF_UDP_Packet
 from pcapkit.protocols.misc.pcap.frame.data import FrameInfo as Data_FrameInfo
 from pcapkit.toolkit.pcap import _tls_segment
 from pcapkit.utilities.exceptions import UnsupportedCall
@@ -34,13 +36,15 @@ if TYPE_CHECKING:
     from dpkt.ip import IP
     from dpkt.ip6 import IP6, IP6FragmentHeader
     from dpkt.tcp import TCP
+    from dpkt.udp import UDP
 
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 
 __all__ = [
     'RecordTimestamp', 'Timestamp', 'DecimalTimestamp', 'ipv6_hdr_len', 'attach_timestamp', 'packet2timestamp', 'attach_buffer', 'packet2bytes',
     'packet2frame', 'packet2chain', 'packet2dict',
-    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tls_reassembly', 'tcp_traceflow'
+    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tls_reassembly', 'tcp_traceflow',
+    'udp_traceflow', 'ip_traceflow',
 ]
 
 #: Attribute a frame's capture timestamp is stashed under.
@@ -934,3 +938,88 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
         )
         return data
     return None
+
+
+def udp_traceflow(packet: 'Packet', timestamp: 'float', *,
+                  data_link: 'Enum_LinkType', count: 'int' = -1) -> 'TF_UDP_Packet | None':
+    """Trace packet flow for UDP.
+
+    A packet can be traced if its network layer carries a UDP layer
+    (:class:`dpkt.udp.UDP`), behind any IPv6 extension headers |dpkt|_ decodes. UDP
+    in an IP-in-IP tunnel, or behind an AH or IPv6 extension header carried in IPv4, is
+    not read, as for :func:`tcp_traceflow`.
+
+    Args:
+        packet: DPKT packet.
+        timestamp: Timestamp of the packet, as for :func:`tcp_traceflow`.
+        data_link: Data link layer protocol: the global header's for PCAP, and
+            that of the interface the packet was captured on for PCAP-NG.
+        count: Packet index. If not provided, defaults to ``-1``.
+
+    Returns:
+        Data for UDP flow tracing (:term:`trace.udp.packet`) if the ``packet`` can be
+        traced; otherwise :data:`None`.
+
+    See Also:
+        :class:`pcapkit.foundation.traceflow.udp.traceflow.UDP`
+
+    .. versionadded:: 1.10.0
+
+    """
+    ip = _network(packet)
+    if ip is None:
+        return None
+
+    udp = getattr(ip, 'udp', None)  # type: Optional[UDP]
+    if udp is None and type(getattr(ip, 'data', None)).__name__ == 'UDP':
+        udp = cast('UDP', ip.data)
+    if udp is None:
+        return None
+    return TF_UDP_Packet(
+        protocol=data_link,                                         # data link type
+        index=count,                                                # frame number
+        frame=packet2frame(packet, timestamp, data_link=data_link),  # extracted packet
+        src=ipaddress.ip_address(ip.src),                           # source IP
+        dst=ipaddress.ip_address(ip.dst),                           # destination IP
+        srcport=udp.sport,                                          # UDP source port
+        dstport=udp.dport,                                          # UDP destination port
+        timestamp=_capture_time(timestamp),                         # timestamp
+        payload=bytes(udp.data),                                    # raw bytes type payload
+    )
+
+
+def ip_traceflow(packet: 'Packet', timestamp: 'float', *,
+                 data_link: 'Enum_LinkType', count: 'int' = -1) -> 'TF_IP_Packet | None':
+    """Trace packet flow for IP conversations.
+
+    A packet can be traced if it has a network layer (see :func:`_network`), the
+    outermost IPv4 or IPv6 layer, whose conversation it belongs to.
+
+    Args:
+        packet: DPKT packet.
+        timestamp: Timestamp of the packet, as for :func:`tcp_traceflow`.
+        data_link: Data link layer protocol: the global header's for PCAP, and
+            that of the interface the packet was captured on for PCAP-NG.
+        count: Packet index. If not provided, defaults to ``-1``.
+
+    Returns:
+        Data for IP flow tracing (:term:`trace.ip.packet`) if the ``packet`` can be
+        traced; otherwise :data:`None`.
+
+    See Also:
+        :class:`pcapkit.foundation.traceflow.ip.traceflow.IP`
+
+    .. versionadded:: 1.10.0
+
+    """
+    ip = _network(packet)
+    if ip is None:
+        return None
+    return TF_IP_Packet(
+        protocol=data_link,                                         # data link type
+        index=count,                                                # frame number
+        frame=packet2frame(packet, timestamp, data_link=data_link),  # extracted packet
+        src=ipaddress.ip_address(ip.src),                           # source IP
+        dst=ipaddress.ip_address(ip.dst),                           # destination IP
+        timestamp=_capture_time(timestamp),                         # timestamp
+    )

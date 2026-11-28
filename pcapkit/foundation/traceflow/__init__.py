@@ -20,8 +20,14 @@ from pcapkit.foundation.traceflow.traceflow import TraceFlow
 # TCP Flow Tracing
 from pcapkit.foundation.traceflow.tcp.traceflow import TCP as TCP_TraceFlow
 
+# UDP Flow Tracing
+from pcapkit.foundation.traceflow.udp.traceflow import UDP as UDP_TraceFlow
+
+# IP Flow Tracing
+from pcapkit.foundation.traceflow.ip.traceflow import IP as IP_TraceFlow
+
 __all__ = [
-    'TCP_TraceFlow',
+    'TCP_TraceFlow', 'UDP_TraceFlow', 'IP_TraceFlow',
     'TraceFlowManager',                     # TraceFlow Manager, defined below
 ]
 

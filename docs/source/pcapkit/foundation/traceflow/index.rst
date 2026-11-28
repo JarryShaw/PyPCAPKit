@@ -20,6 +20,8 @@ Flow Tracing
 
    traceflow
    tcp
+   udp
+   ip
 
 Every flow tracing class subclasses
 :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`, following the
@@ -31,6 +33,8 @@ flows of extracted packets:
        A{{TraceFlowMeta}} -.->|metaclass| B(TraceFlowBase)
 
        B --> TCP
+       B --> UDP
+       B --> IP
 
        B --> C(TraceFlow)
        C --> D([user customisation ...])
@@ -41,6 +45,8 @@ flows of extracted packets:
        click D "../../../ext.html#reassembly-and-flow-tracing"
 
        click TCP "tcp.html#pcapkit.foundation.traceflow.tcp.traceflow.TCP"
+       click UDP "udp.html#pcapkit.foundation.traceflow.udp.traceflow.UDP"
+       click IP "ip.html#pcapkit.foundation.traceflow.ip.traceflow.IP"
 
 Auxiliary Data
 --------------

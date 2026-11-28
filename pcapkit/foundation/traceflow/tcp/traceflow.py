@@ -15,7 +15,6 @@ from pcapkit.foundation.traceflow.data import Deferred
 from pcapkit.foundation.traceflow.tcp.data import _AT, Buffer, BufferID, Index, Packet
 from pcapkit.foundation.traceflow.traceflow import TraceFlowBase
 from pcapkit.protocols.transport.tcp.protocol import TCP as TCP_Protocol
-from pcapkit.utilities.callbacks import run_callbacks
 from pcapkit.utilities.logging import get_logger
 
 __all__ = ['TCP']
@@ -66,8 +65,10 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
           of that acknowledgement can follow in turn. A flow is therefore
           finalised only by proof that no more of it can come -- a new
           connection's SYN on the same endpoints, or the end of the capture
-          (:meth:`finish`). What the teardown does is get *recorded*, which is how
-          that SYN is told from the peer's SYN-ACK; see :meth:`_ended`.
+          (:meth:`finish`) -- or, given a ``timeout``, once it has been idle that
+          long (:meth:`~pcapkit.foundation.traceflow.traceflow.TraceFlow.advance`).
+          What the teardown does is get *recorded*, which is how that SYN is told
+          from the peer's SYN-ACK; see :meth:`_ended`.
 
           Finalising a flow is also when its callbacks run, so they run against
           the whole conversation rather than a truncated one.
@@ -145,9 +146,6 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         #: and cached so that :meth:`_make_segment` does not import per packet. Set
         #: only when ``analyze`` is on, which is the only time it is read.
         _reasm_packet: 'type[Any]'
-        #: Every flow label this tracer has handed out, created with the first
-        #: flow and read by :meth:`_unique_label` to keep labels unique.
-        _labels: 'set[str]'
 
     ##########################################################################
     # Defaults.
@@ -180,40 +178,6 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         if ends:
             self._finalise(bufid)
 
-    def make_bufid(self, packet: 'Packet[_AT]') -> 'BufferID':
-        """Derive the buffer ID a packet belongs to.
-
-        Arguments:
-            packet: a flow packet (:term:`trace.tcp.packet`)
-
-        Returns:
-            Buffer ID, i.e. ``(address, port, address, port)``.
-
-        Tracing bidirectionally means both halves of a conversation have to land
-        on the *same* key, so the two endpoints are ordered canonically -- the
-        lesser ``(address, port)`` pair first -- rather than as (source,
-        destination). Sorting is what makes the key direction-independent: the
-        client's ``A→B`` and the server's ``B→A`` both reduce to
-        ``min(A, B), max(A, B)``.
-
-        The result stays a plain :obj:`tuple` of the same shape, which is
-        deliberate and not merely convenient: it is a :obj:`dict` key, and an
-        :class:`~pcapkit.corekit.infoclass.Info` cannot be one -- inheriting
-        :class:`collections.abc.Mapping` sets ``__hash__`` to :data:`None`.
-
-        Note:
-            Both endpoints of a connection are of the same address family, so the
-            comparison never has to order an :class:`~ipaddress.IPv4Address`
-            against an :class:`~ipaddress.IPv6Address` -- which raises
-            :exc:`TypeError`.
-
-        """
-        near_addr, near_port = packet.src, packet.srcport
-        far_addr, far_port = packet.dst, packet.dstport
-        if self._bidir and (far_addr, far_port) < (near_addr, near_port):
-            return (far_addr, far_port, near_addr, near_port)
-        return (near_addr, near_port, far_addr, far_port)
-
     @overload
     def trace(self, packet: 'Packet[_AT]', *, output: 'Literal[True]' = ...) -> 'Dumper': ...
     @overload
@@ -233,25 +197,13 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
             flow label itself.
 
         Notes:
-            The flow label is formatted as following:
+            The flow label is formatted as following, as
+            :meth:`~pcapkit.foundation.traceflow.traceflow.TraceFlow._make_label`
+            builds it from the packet that **opened** the flow:
 
             .. code-block:: python
 
                f'{packet.src}_{packet.srcport}-{packet.dst}_{packet.dstport}-{packet.timestamp}'
-
-            On an IPv6 flow every ``:`` in it is replaced by ``.``, since a
-            Windows file name cannot carry one.
-
-            It is built from the packet that **opened** the flow, not from the
-            canonical buffer ID, so the label names the initiator first. The
-            reverse half of a bidirectional
-            conversation joins that flow rather than minting a label of its own.
-
-            A label is unique within the tracer. When a flow would repeat the
-            label of an earlier one -- the same endpoints opening a new flow at
-            the same capture timestamp -- it is suffixed with ``-1``, ``-2`` and
-            so on, so that each flow keeps its own output file; see
-            :meth:`_unique_label`.
 
         """
         bufid, ends = self._record(packet)
@@ -323,16 +275,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         if (cached := self.__cached__.get('submit')) is not None:
             return cached
 
-        ret = []  # type: list[Index]
-        for buf in self._buffer.values():
-            ret.append(Index(fpout=self._output_path(buf.label),
-                             index=tuple(buf.index),
-                             label=buf.label,
-                             forward=tuple(buf.forward),
-                             reverse=tuple(buf.reverse),
-                             packet=None if buf.reassembly is None else Deferred(buf.reassembly),))
-        ret.extend(self._stream)
-        ret_submit = tuple(ret)
+        ret_submit = (*map(self._make_index, self._buffer.values()), *self._stream)
 
         logger.debug('submitted %d TCP flow(s), %d still open',
                      len(ret_submit), len(self._buffer))
@@ -358,6 +301,8 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         """
         # clear cache
         self.__cached__['submit'] = None
+        # time out the flows this packet's timestamp leaves idle, its own included
+        self.advance(packet.timestamp)
 
         # Buffer Identifier -- canonical, hence direction-independent, when
         # tracing bidirectionally
@@ -386,16 +331,10 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
 
         # initialise buffer with BUFID
         if BUFID not in self._buffer:
-            label = f'{packet.src}_{packet.srcport}-{packet.dst}_{packet.dstport}-{packet.timestamp}'
-            if packet.src.version != 4:
-                # ``:`` cannot appear in a Windows file name, where it separates
-                # the drive letter, so an IPv6 label cannot carry it
-                label = label.replace(':', '.')
-            label = self._unique_label(label)
+            label = self._make_label(packet)
             logger.debug('new TCP flow %s', label)
             self._buffer[BUFID] = Buffer(
-                fpout=self._foutio(fname=f'{self._fproot}/{label}{self._fdpext or ""}', protocol=packet.protocol,
-                                   byteorder=self._endian, nanosecond=self._nnsecd),
+                fpout=self._make_fpout(label, packet.protocol),
                 index=[],
                 label=label,
                 origin=END,
@@ -408,13 +347,8 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
 
         # trace frame record
         buffer = self._buffer[BUFID]
-        buffer.index.append(packet.index)
-        # ... and again per direction, so the merged ordering above stays
-        # authoritative while each half remains recoverable on its own
-        if END == buffer.origin:
-            buffer.forward.append(packet.index)
-        else:
-            buffer.reverse.append(packet.index)
+        self._append(buffer, packet)
+        self._touch(BUFID, packet.timestamp)
         if FIN:
             buffer.fin.add(END)
         if RST:
@@ -441,32 +375,29 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         # SYN on the same endpoints, handled above, or the end of the capture.
         return BUFID, not self._bidir and FIN
 
-    def _unique_label(self, label: 'str') -> 'str':
-        """Make a new flow's label unique within this tracer.
+    def _make_index(self, buffer: 'Buffer[_AT]') -> 'Index':
+        """Report a flow's buffer as its index entry.
 
         Arguments:
-            label: the label built from the packet that opens the flow
+            buffer: a flow buffer (:term:`trace.tcp.buffer`)
 
         Returns:
-            ``label`` itself if no earlier flow carries it; otherwise ``label``
-            suffixed with the first of ``-1``, ``-2``, ... that is still unused.
+            The flow's :term:`index <trace.tcp.index>` entry, its reassembler, if
+            any, in a :class:`~pcapkit.foundation.traceflow.data.Deferred`
+            unflushed: reading ``packet`` is what asks it for its datagrams, and
+            their own ``packet`` is parsed later still.
 
-        The label names the flow's output file, which is opened -- and so
-        truncated -- when the flow starts. Two flows with one label would
-        therefore share one file, and the later would erase the earlier: the
-        same endpoints opening a second flow at the same capture timestamp, as a
-        unidirectional flow resumed after its FIN or a new connection reusing a
-        bidirectional flow's endpoints can. A label that does not collide is
-        returned unchanged.
+        .. versionadded:: 1.10.0
 
         """
-        used = self.__dict__.setdefault('_labels', set())  # type: set[str]
-        unique, count = label, 0
-        while unique in used:
-            count += 1
-            unique = f'{label}-{count}'
-        used.add(unique)
-        return unique
+        return Index(
+            fpout=self._output_path(buffer.label),
+            index=tuple(buffer.index),
+            label=buffer.label,
+            forward=tuple(buffer.forward),
+            reverse=tuple(buffer.reverse),
+            packet=None if buffer.reassembly is None else Deferred(buffer.reassembly),
+        )
 
     def _make_reassembly(self) -> 'Optional[TCP_Reassembly]':
         """Build the reassembler a new flow will feed, if analysis was asked for.
@@ -546,25 +477,6 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
             timestamp=packet.timestamp,          # capture timestamp
         )
 
-    def _output_path(self, label: 'str') -> 'Optional[str]':
-        """Path of a flow's output file, as an index entry reports it.
-
-        Arguments:
-            label: the flow's label
-
-        Returns:
-            The file :meth:`trace` writes the flow to, or :data:`None` when the
-            output format writes no file at all. An *empty* extension still
-            writes one, named after the label alone.
-
-        Both :meth:`submit` and :meth:`_finalise` report through this, so an
-        open flow and a finalised one name the same file (:issue:`2237`).
-
-        """
-        if self._fdpext is None:
-            return None
-        return f'{self._fproot}/{label}{self._fdpext}'
-
     @staticmethod
     def _ended(buffer: 'Buffer[_AT]') -> 'bool':
         """Whether a flow's connection has been seen to end.
@@ -584,48 +496,3 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
 
         """
         return buffer.reset or len(buffer.fin) >= 2
-
-    def _finalise(self, bufid: 'BufferID') -> 'Index':
-        """Finalise a flow: report it, and stop tracing into it.
-
-        Arguments:
-            bufid: buffer identifier of the flow to finalise
-
-        Returns:
-            The flow's :term:`index <trace.tcp.index>` entry.
-
-        Called once per flow, from where a flow can be proved over -- a new
-        connection superseding it, or :meth:`finish` at the end of the capture --
-        or, tracing unidirectionally, on that direction's FIN. Registering a
-        bidirectional flow here rather than at teardown is what keeps the
-        acknowledgement that completes a close inside the flow it belongs to.
-
-        The flow's file is closed and its entry stored before the callbacks run,
-        so a callback that raises propagates and leaves the flow in the index.
-        One raising an :exc:`Exception` does not stop the callbacks after it: the
-        first such error is re-raised once all have run, and a later one logged,
-        by :func:`~pcapkit.utilities.callbacks.run_callbacks`.
-
-        """
-        buf = self._buffer.pop(bufid)
-        label = buf.label
-        # NOTE: closed before the callbacks run, so they find the file closed.
-        self._release(buf.fpout)
-
-        logger.debug('TCP flow %s finalised after %d frame(s) (%d forward, %d reverse)',
-                     label, len(buf.index), len(buf.forward), len(buf.reverse))
-        index = Index(
-            fpout=self._output_path(label),
-            index=tuple(buf.index),
-            label=label,
-            forward=tuple(buf.forward),
-            reverse=tuple(buf.reverse),
-            # the reassembler goes in unflushed: reading ``packet`` is what asks it
-            # for its datagrams, and their own ``packet`` is parsed later still
-            packet=None if buf.reassembly is None else Deferred(buf.reassembly),
-        )
-        # NOTE: stored before the callbacks run, so one that raises cannot drop the flow
-        # from the index (#2827).
-        self._stream.append(index)
-        run_callbacks(self.__callback_fn__, index, logger=logger, subject=f'TCP flow {label}')
-        return index

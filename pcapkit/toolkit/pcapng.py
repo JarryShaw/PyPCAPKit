@@ -16,13 +16,16 @@ from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_Extensio
 from pcapkit.corekit.const.capture import RESOLUTION
 from pcapkit.foundation.reassembly.ip.data import Packet as IP_Packet
 from pcapkit.foundation.reassembly.tcp.data import Packet as TCP_Packet
+from pcapkit.foundation.traceflow.ip.data import Packet as TF_IP_Packet
 from pcapkit.foundation.traceflow.tcp.data import Packet as TF_TCP_Packet
+from pcapkit.foundation.traceflow.udp.data import Packet as TF_UDP_Packet
 from pcapkit.protocols.internet.ipv4.protocol import IPv4
 from pcapkit.protocols.internet.ipv6.protocol import IPv6
 from pcapkit.protocols.misc.pcap.frame.data import Frame as Data_Frame
 from pcapkit.protocols.misc.pcap.frame.data import FrameInfo as Data_FrameInfo
-from pcapkit.toolkit.pcap import (_dtls_fragments, _fragment, _sctp_fragments, _tls_segment,
-                                  tcp_segment)
+from pcapkit.protocols.transport.udp.protocol import UDP
+from pcapkit.toolkit.pcap import (_carrier, _dtls_fragments, _fragment, _sctp_fragments,
+                                  _tls_segment, tcp_segment)
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
@@ -30,13 +33,16 @@ if TYPE_CHECKING:
 
     from pcapkit.foundation.reassembly.dtls.data import Packet as DTLS_Packet
     from pcapkit.foundation.reassembly.sctp.data import Packet as SCTP_Packet
+    from pcapkit.protocols.internet.ipv4.data import IPv4 as Data_IPv4
+    from pcapkit.protocols.internet.ipv6.data import IPv6 as Data_IPv6
     from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
     from pcapkit.protocols.misc.pcapng.data import \
         InterfaceDescriptionBlock as Data_InterfaceDescriptionBlock
     from pcapkit.protocols.misc.pcapng.protocol import PCAPNG, Packet
 
 __all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly',
-           'sctp_reassembly', 'tls_reassembly', 'tcp_traceflow', 'block2frame']
+           'sctp_reassembly', 'tls_reassembly', 'tcp_traceflow', 'udp_traceflow', 'ip_traceflow',
+           'block2frame']
 
 
 def ipv4_reassembly(frame: 'PCAPNG') -> 'IP_Packet[IPv4Address] | None':
@@ -307,6 +313,83 @@ def tcp_traceflow(frame: 'PCAPNG', *, nanosecond: 'bool' = False) -> 'TF_TCP_Pac
         )
         return data
     return None
+
+
+def udp_traceflow(frame: 'PCAPNG', *, nanosecond: 'bool' = False) -> 'TF_UDP_Packet | None':
+    """Trace packet flow for UDP.
+
+    A frame can be traced if it contains a UDP layer
+    (:class:`~pcapkit.protocols.transport.udp.protocol.UDP`), as for
+    :func:`pcapkit.toolkit.pcap.udp_traceflow`.
+
+    Args:
+        frame: PCAP-NG frame.
+        nanosecond: Whether to use nanosecond precision.
+
+    Returns:
+        Data for UDP flow tracing (:term:`trace.udp.packet`) if the ``frame`` can be
+        traced; otherwise :data:`None`.
+
+    See Also:
+        :class:`pcapkit.foundation.traceflow.udp.traceflow.UDP`
+
+    .. versionadded:: 1.10.0
+
+    """
+    ip, udp = _carrier(frame, UDP)
+    if ip is None or udp is None:
+        return None
+    ip_info, udp_info = ip.info, udp.info
+    frame_info = cast('Packet', frame.info)
+    return TF_UDP_Packet(
+        protocol=frame.linktype,                      # data link type of the block's interface
+        index=frame_info.number,                      # frame number
+        frame=block2frame(frame_info, nanosecond=nanosecond,
+                          interface=frame.section_context.interfaces[frame_info.interface_id]),
+                                                      # extracted frame info
+        src=ip_info.src,                              # source IP
+        dst=ip_info.dst,                              # destination IP
+        srcport=udp_info.srcport.port,                # UDP source port
+        dstport=udp_info.dstport.port,                # UDP destination port
+        timestamp=float(frame_info.timestamp_epoch),  # frame timestamp
+        payload=bytes(udp.packet.payload),            # raw bytes type payload
+    )
+
+
+def ip_traceflow(frame: 'PCAPNG', *, nanosecond: 'bool' = False) -> 'TF_IP_Packet | None':
+    """Trace packet flow for IP conversations.
+
+    A frame can be traced if it contains an IPv4 or IPv6 layer, as for
+    :func:`pcapkit.toolkit.pcap.ip_traceflow`.
+
+    Args:
+        frame: PCAP-NG frame.
+        nanosecond: Whether to use nanosecond precision.
+
+    Returns:
+        Data for IP flow tracing (:term:`trace.ip.packet`) if the ``frame`` can be
+        traced; otherwise :data:`None`.
+
+    See Also:
+        :class:`pcapkit.foundation.traceflow.ip.traceflow.IP`
+
+    .. versionadded:: 1.10.0
+
+    """
+    if 'IP' not in frame:
+        return None
+    ip_info = cast('Data_IPv4 | Data_IPv6', frame['IP'].info)
+    frame_info = cast('Packet', frame.info)
+    return TF_IP_Packet(
+        protocol=frame.linktype,                      # data link type of the block's interface
+        index=frame_info.number,                      # frame number
+        frame=block2frame(frame_info, nanosecond=nanosecond,
+                          interface=frame.section_context.interfaces[frame_info.interface_id]),
+                                                      # extracted frame info
+        src=ip_info.src,                              # source IP
+        dst=ip_info.dst,                              # destination IP
+        timestamp=float(frame_info.timestamp_epoch),  # frame timestamp
+    )
 
 
 def block2frame(block: 'Packet', *, nanosecond: 'bool' = False,

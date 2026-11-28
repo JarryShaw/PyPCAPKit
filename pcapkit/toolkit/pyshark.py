@@ -10,8 +10,8 @@ cannot be used for it.
 .. note::
 
    `PyShark`_ reports dissected fields, not octets, so this module has no
-   reassembly adapter, and :func:`tcp_traceflow` reports an empty header and
-   payload.
+   reassembly adapter, :func:`tcp_traceflow` reports an empty header and
+   payload, and :func:`udp_traceflow` an empty payload.
 
 """
 import decimal
@@ -20,7 +20,9 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.foundation.engines.pyshark import PyShark
+from pcapkit.foundation.traceflow.ip.data import Packet as TF_IP_Packet
 from pcapkit.foundation.traceflow.tcp.data import Packet as TF_TCP_Packet
+from pcapkit.foundation.traceflow.udp.data import Packet as TF_UDP_Packet
 from pcapkit.utilities.exceptions import MissingKeyError, ProtocolError
 
 if TYPE_CHECKING:
@@ -28,8 +30,8 @@ if TYPE_CHECKING:
 
     from pyshark.packet.packet import Packet
 
-__all__ = ['packet2dict', 'packet2timestamp', 'tcp_traceflow', 'ENCAP_TYPE_TO_LINKTYPE',
-           'FILTER_NAME_TO_LINKTYPE']
+__all__ = ['packet2dict', 'packet2timestamp', 'tcp_traceflow', 'udp_traceflow', 'ip_traceflow',
+           'ENCAP_TYPE_TO_LINKTYPE', 'FILTER_NAME_TO_LINKTYPE']
 
 #: Message prefix shared by every message below, read off
 #: :attr:`PyShark.__engine_name__
@@ -484,27 +486,33 @@ def packet2timestamp(packet: 'Packet') -> 'float':
     return _parse_epoch(epoch)
 
 
-def _carrier(packet: 'Packet') -> 'tuple[Any, Any]':
-    """Fetch the TCP layer of a PyShark packet and the IP layer that carries it.
+def _carrier(packet: 'Packet', transport: 'str' = 'tcp') -> 'tuple[Any, Any]':
+    """Fetch the TCP or UDP layer of a PyShark packet and the IP layer that carries it.
 
     Args:
         packet: PyShark packet.
+        transport: ``'tcp'``, the default, or ``'udp'``, the layer to fetch.
 
     Returns:
-        The ``ip`` or ``ipv6`` layer nearest above the packet's first ``tcp``
-        layer, and that TCP layer; :data:`None` for either the packet lacks.
+        The ``ip`` or ``ipv6`` layer nearest above the packet's first
+        ``transport`` layer, and that layer; :data:`None` for either the packet
+        lacks.
 
     Note:
         The nearest is the innermost IP layer of an IP-in-IP tunnel
-        (:rfc:`2003`, :rfc:`2473`, :rfc:`4213`), whose addresses are the TCP
-        endpoints'. ``packet.ip`` is the first
+        (:rfc:`2003`, :rfc:`2473`, :rfc:`4213`), whose addresses are the TCP or
+        UDP endpoints'. ``packet.ip`` is the first
         ``ip`` layer instead, which is the tunnel's (:issue:`1581`).
+
+    .. versionchanged:: 1.10.0
+
+       Takes ``transport`` (:issue:`2956`).
 
     """
     ip = None  # type: Any
     for layer in packet.layers:
         name = layer.layer_name.lower()
-        if name == 'tcp':
+        if name == transport:
             return ip, layer
         if name in ('ip', 'ipv6'):
             ip = layer
@@ -562,6 +570,44 @@ def _has_addresses(ip: 'Any') -> 'bool':
     return 'src' in names and 'dst' in names
 
 
+def _linktype(packet: 'Packet') -> 'Enum_LinkType':
+    """Resolve the data link type of a PyShark packet, for a flow tracing record.
+
+    Args:
+        packet: PyShark packet.
+
+    Returns:
+        The link type ``frame.encap_type`` maps to in
+        :data:`~pcapkit.toolkit.pyshark.ENCAP_TYPE_TO_LINKTYPE`, or, for a frame
+        without that field, the one the root layer's name maps to in
+        :data:`~pcapkit.toolkit.pyshark.FILTER_NAME_TO_LINKTYPE`. The filter name
+        is only the fallback since one name serves several DLTs (:issue:`843`).
+
+    Raises:
+        MissingKeyError: If the link type cannot be resolved either way, rather
+            than guessing one (:issue:`775`).
+        ProtocolError: If the packet has no ``frame`` layer.
+
+    .. versionadded:: 1.10.0
+
+    """
+    # found by name: ``frame_info`` is ``pkt_comment`` on a commented packet
+    frame = _frame_layer(packet)
+    if frame is None:
+        raise ProtocolError(f'{_ENGINE}: packet {packet.number} has no frame layer')
+    encap_type = getattr(frame, 'encap_type', None)
+    if encap_type is None:
+        name = [layer for layer in packet.layers if layer is not frame][0].layer_name
+        try:
+            return FILTER_NAME_TO_LINKTYPE[name.lower()]
+        except KeyError:
+            raise MissingKeyError(name) from None
+    try:
+        return ENCAP_TYPE_TO_LINKTYPE[int(encap_type)]
+    except (KeyError, ValueError):
+        raise MissingKeyError('frame.encap_type=%s' % encap_type) from None
+
+
 def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | None':
     """Trace packet flow for TCP.
 
@@ -603,29 +649,8 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
     """
     ip, tcp = _carrier(packet)
     if ip is not None and tcp is not None and _has_fixed_header(tcp) and _has_addresses(ip):
-
-        # NOTE: keyed on ``frame.encap_type``, the filter name only as a fallback since
-        # one name serves several DLTs (#843); a miss raises rather than guess (#775).
-
-        # found by name: ``frame_info`` is ``pkt_comment`` on a commented packet
-        frame = _frame_layer(packet)
-        if frame is None:
-            raise ProtocolError(f'{_ENGINE}: packet {packet.number} has no frame layer')
-        encap_type = getattr(frame, 'encap_type', None)
-        if encap_type is None:
-            name = [layer for layer in packet.layers if layer is not frame][0].layer_name
-            try:
-                protocol = FILTER_NAME_TO_LINKTYPE[name.lower()]
-            except KeyError:
-                raise MissingKeyError(name) from None
-        else:
-            try:
-                protocol = ENCAP_TYPE_TO_LINKTYPE[int(encap_type)]
-            except (KeyError, ValueError):
-                raise MissingKeyError('frame.encap_type=%s' % encap_type) from None
-
         data = TF_TCP_Packet(  # type: ignore[type-var]
-            protocol=protocol,                                                   # data link type
+            protocol=_linktype(packet),                                          # data link type
             index=count,                                                         # frame number
             frame=packet2dict(packet),                                           # extracted packet
             syn=_parse_flag(tcp.flags_syn, 'tcp.flags_syn'),                     # TCP synchronise (SYN) flag
@@ -645,3 +670,91 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
         )
         return data
     return None
+
+
+def udp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_UDP_Packet | None':
+    """Trace packet flow for UDP.
+
+    A packet can be traced if it contains a UDP layer whose ports tshark reports,
+    keyed by the IP layer that carries it -- in an IP-in-IP tunnel, the innermost
+    (see :func:`_carrier`) -- if tshark reports both its addresses (see
+    :func:`_has_addresses`).
+
+    Args:
+        packet: PyShark packet.
+        count: Packet index, as for :func:`tcp_traceflow`.
+
+    Returns:
+        Data for UDP flow tracing (:term:`trace.udp.packet`) if the ``packet`` can be
+        traced; otherwise :data:`None`. Its payload is empty, since PyShark
+        reports fields, not octets.
+
+    Raises:
+        MissingKeyError: If the frame's link type cannot be resolved (see
+            :func:`_linktype`).
+        ProtocolError: If the packet has no ``frame`` layer, or
+            ``frame.time_epoch`` is not decimal text.
+
+    See Also:
+        :class:`pcapkit.foundation.traceflow.udp.traceflow.UDP`
+
+    .. versionadded:: 1.10.0
+
+    """
+    ip, udp = _carrier(packet, 'udp')
+    if ip is None or udp is None or not _has_addresses(ip):
+        return None
+    names = udp.field_names
+    if 'srcport' not in names or 'dstport' not in names:
+        return None
+    return TF_UDP_Packet(
+        protocol=_linktype(packet),                     # data link type
+        index=count,                                    # frame number
+        frame=packet2dict(packet),                      # extracted packet
+        src=ipaddress.ip_address(ip.src),               # source IP
+        dst=ipaddress.ip_address(ip.dst),               # destination IP
+        srcport=int(udp.srcport),                       # UDP source port
+        dstport=int(udp.dstport),                       # UDP destination port
+        timestamp=packet2timestamp(packet),             # timestamp
+        payload=b'',                                    # unavailable
+    )
+
+
+def ip_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_IP_Packet | None':
+    """Trace packet flow for IP conversations.
+
+    A packet can be traced if its first ``ip`` or ``ipv6`` layer, the outermost,
+    whose conversation it belongs to, has both addresses tshark reports (see
+    :func:`_has_addresses`).
+
+    Args:
+        packet: PyShark packet.
+        count: Packet index, as for :func:`tcp_traceflow`.
+
+    Returns:
+        Data for IP flow tracing (:term:`trace.ip.packet`) if the ``packet`` can be
+        traced; otherwise :data:`None`.
+
+    Raises:
+        MissingKeyError: If the frame's link type cannot be resolved (see
+            :func:`_linktype`).
+        ProtocolError: If the packet has no ``frame`` layer, or
+            ``frame.time_epoch`` is not decimal text.
+
+    See Also:
+        :class:`pcapkit.foundation.traceflow.ip.traceflow.IP`
+
+    .. versionadded:: 1.10.0
+
+    """
+    ip = next((layer for layer in packet.layers if layer.layer_name.lower() in ('ip', 'ipv6')), None)
+    if ip is None or not _has_addresses(ip):
+        return None
+    return TF_IP_Packet(
+        protocol=_linktype(packet),                     # data link type
+        index=count,                                    # frame number
+        frame=packet2dict(packet),                      # extracted packet
+        src=ipaddress.ip_address(ip.src),               # source IP
+        dst=ipaddress.ip_address(ip.dst),               # destination IP
+        timestamp=packet2timestamp(packet),             # timestamp
+    )

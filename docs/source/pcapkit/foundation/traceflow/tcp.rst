@@ -54,14 +54,13 @@ packets.
    .. rubric:: Methods
 
    .. automethod:: dump
-   .. automethod:: make_bufid
    .. automethod:: trace
    .. automethod:: finish
    .. automethod:: submit
 
    .. rubric:: Utilities
 
-   .. automethod:: _unique_label
+   .. automethod:: _make_index
    .. automethod:: _make_segment
    .. automethod:: _ended
 
@@ -142,7 +141,8 @@ Terminology
        finalises it -- a new connection's SYN on the same endpoints, or
        :meth:`TCP.finish <pcapkit.foundation.traceflow.tcp.traceflow.TCP.finish>` at the end
        of the capture -- and the recorded teardown is what tells that SYN from the
-       peer's SYN-ACK.
+       peer's SYN-ACK. Given a ``timeout``, a flow idle that long is finalised too, by
+       :meth:`TraceFlow.advance <pcapkit.foundation.traceflow.traceflow.TraceFlow.advance>`.
 
        .. mermaid::
 
@@ -157,8 +157,8 @@ Terminology
               T : the closing ACK and its duplicates still recorded
               [*] --> O : first packet on a BUFID,<br/>buffer created, label and origin from it
               O --> T : bidirectional only,<br/>FIN from both endpoints, or a RST
-              T --> F : a new connection's SYN on the same BUFID,<br/>or TCP.finish() at the end of the capture
-              O --> F : TCP.finish() at the end of the capture, either mode,<br/>or this direction's FIN, when unidirectional
+              T --> F : a new connection's SYN on the same BUFID,<br/>TCP.finish() at the end of the capture,<br/>or, given a timeout, that long idle
+              O --> F : TCP.finish() at the end of the capture, either mode,<br/>this direction's FIN, when unidirectional,<br/>or, given a timeout, that long idle
               F --> [*] : \_finalise pops the buffer, stores its Index,<br/>then calls each \_\_callback\_fn\_\_
 
        .. seealso:: :class:`pcapkit.foundation.traceflow.tcp.data.Buffer`

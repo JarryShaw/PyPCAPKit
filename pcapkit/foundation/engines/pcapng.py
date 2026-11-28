@@ -159,6 +159,8 @@ class PCAPNG(EngineBase[P_PCAPNG]):
     #: the packet block and whether its timestamp has nanosecond resolution.
     __traceflow__ = {
         'tcp': ModuleDescriptor('pcapkit.toolkit.pcapng', 'tcp_traceflow'),
+        'udp': ModuleDescriptor('pcapkit.toolkit.pcapng', 'udp_traceflow'),
+        'ip': ModuleDescriptor('pcapkit.toolkit.pcapng', 'ip_traceflow'),
     }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
     ##########################################################################
@@ -320,7 +322,8 @@ class PCAPNG(EngineBase[P_PCAPNG]):
 
         # trace flows
         if ext._flag_t:
-            self._traceflow(block, nanosecond=block.nanosecond)
+            self._traceflow(float(cast('Data_PCAPNG_Packet', block.info).timestamp_epoch), block,
+                            nanosecond=block.nanosecond)
 
         # record blocks
         if ext._flag_d:

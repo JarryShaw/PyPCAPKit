@@ -38,6 +38,8 @@ ALIASES = (
     'pcapkit.foundation.reassembly.ip.data',
     'pcapkit.foundation.reassembly.tcp.data',
     'pcapkit.foundation.traceflow.tcp.data',
+    'pcapkit.foundation.traceflow.udp.data',
+    'pcapkit.foundation.traceflow.ip.data',
 )
 
 

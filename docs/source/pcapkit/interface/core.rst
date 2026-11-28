@@ -12,6 +12,8 @@ constants, which wrap the classes in :mod:`pcapkit.foundation`.
 
 .. autofunction:: pcapkit.interface.core.trace
 
+.. autofunction:: pcapkit.interface.core._traceflow_name
+
 Constants Definition
 --------------------
 

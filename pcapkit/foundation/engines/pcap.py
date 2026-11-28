@@ -83,6 +83,8 @@ class PCAP(EngineBase[Frame]):
     #: capture's link type.
     __traceflow__ = {
         'tcp': ModuleDescriptor('pcapkit.toolkit.pcap', 'tcp_traceflow'),
+        'udp': ModuleDescriptor('pcapkit.toolkit.pcap', 'udp_traceflow'),
+        'ip': ModuleDescriptor('pcapkit.toolkit.pcap', 'ip_traceflow'),
     }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
     ##########################################################################
@@ -207,7 +209,7 @@ class PCAP(EngineBase[Frame]):
 
         # trace flows
         if ext._flag_t:
-            self._traceflow(frame, data_link=self._dlink)
+            self._traceflow(float(frame.info.time_epoch), frame, data_link=self._dlink)
 
         # record frames
         if ext._flag_d:

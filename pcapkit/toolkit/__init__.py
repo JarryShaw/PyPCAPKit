@@ -10,8 +10,9 @@ reassembly and flow tracing of :mod:`pcapkit.foundation`.
 
 """
 # tools for default engine
-from pcapkit.toolkit.pcap import (dtls_reassembly, ipv4_reassembly, ipv6_reassembly, sctp_reassembly,
-                                  tcp_reassembly, tcp_traceflow, tls_reassembly)
+from pcapkit.toolkit.pcap import (dtls_reassembly, ip_traceflow, ipv4_reassembly, ipv6_reassembly,
+                                  sctp_reassembly, tcp_reassembly, tcp_traceflow, tls_reassembly,
+                                  udp_traceflow)
 from pcapkit.toolkit.pcapng import ipv4_reassembly as pcapng_ipv4_reassembly
 from pcapkit.toolkit.pcapng import ipv6_reassembly as pcapng_ipv6_reassembly
 from pcapkit.toolkit.pcapng import tcp_reassembly as pcapng_tcp_reassembly
@@ -19,6 +20,8 @@ from pcapkit.toolkit.pcapng import dtls_reassembly as pcapng_dtls_reassembly
 from pcapkit.toolkit.pcapng import sctp_reassembly as pcapng_sctp_reassembly
 from pcapkit.toolkit.pcapng import tls_reassembly as pcapng_tls_reassembly
 from pcapkit.toolkit.pcapng import tcp_traceflow as pcapng_tcp_traceflow
+from pcapkit.toolkit.pcapng import udp_traceflow as pcapng_udp_traceflow
+from pcapkit.toolkit.pcapng import ip_traceflow as pcapng_ip_traceflow
 from pcapkit.toolkit.pcapng import block2frame as pcapng_block2frame
 
 # # tools for DPKT engine
@@ -65,9 +68,10 @@ from pcapkit.toolkit.pcapng import block2frame as pcapng_block2frame
 __all__ = [
     # default engine
     'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly', 'sctp_reassembly',
-    'tls_reassembly', 'tcp_traceflow',
+    'tls_reassembly', 'tcp_traceflow', 'udp_traceflow', 'ip_traceflow',
     'pcapng_ipv4_reassembly', 'pcapng_ipv6_reassembly', 'pcapng_tcp_reassembly', 'pcapng_dtls_reassembly',
-    'pcapng_sctp_reassembly', 'pcapng_tls_reassembly', 'pcapng_tcp_traceflow',
+    'pcapng_sctp_reassembly', 'pcapng_tls_reassembly', 'pcapng_tcp_traceflow', 'pcapng_udp_traceflow',
+    'pcapng_ip_traceflow',
     'pcapng_block2frame',
 
     # # DPKT engine
